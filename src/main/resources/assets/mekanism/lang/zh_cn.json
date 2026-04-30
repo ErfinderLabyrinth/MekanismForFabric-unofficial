@@ -2420,7 +2420,7 @@
   "gui.mekanism.upgrades.effect": "效率：%1$sx",
   "gui.mekanism.upgrades.no_selection": "未选择。",
   "gui.mekanism.upgrades.supported": "可用升级：",
-  "gui.mekanism.usage": "用法：%1$s/t",
+  "gui.mekanism.usage": "用量：%1$s/t",
   "gui.mekanism.using": "能耗：%1$s/t",
   "gui.mekanism.visuals": "视觉显示：%1$s",
   "gui.mekanism.visuals.too_big": "区域太大无法显示。",
