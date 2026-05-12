@@ -1,9 +1,6 @@
 package mekanism.client.gui.element.text;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.function.Consumer;
-import java.util.function.IntSupplier;
-import java.util.function.UnaryOperator;
 import mekanism.api.functions.CharPredicate;
 import mekanism.api.functions.CharUnaryOperator;
 import mekanism.client.SpecialColors;
@@ -19,6 +16,10 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.function.Consumer;
+import java.util.function.IntSupplier;
+import java.util.function.UnaryOperator;
 
 /**
  * GuiElement wrapper of TextFieldWidget for more control

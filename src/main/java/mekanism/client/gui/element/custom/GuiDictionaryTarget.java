@@ -1,16 +1,10 @@
 package mekanism.client.gui.element.custom;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.google.common.collect.Streams;
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
+import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.chemical.pigment.PigmentStack;
@@ -29,10 +23,15 @@ import mekanism.common.block.interfaces.IHasTileEntity;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.tags.TagUtils;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -44,14 +43,12 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITagManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class GuiDictionaryTarget extends GuiElement implements IJEIGhostTarget {
 
@@ -127,31 +124,29 @@ public class GuiDictionaryTarget extends GuiElement implements IJEIGhostTarget {
                 tags.put(DictionaryTagType.ITEM, TagCache.getItemTags(stack));
                 if (item instanceof BlockItem blockItem) {
                     Block block = blockItem.getBlock();
-                    tags.put(DictionaryTagType.BLOCK, TagCache.getTagsAsStrings(TagUtils.tagsStream(ForgeRegistries.BLOCKS, block)));
+                    tags.put(DictionaryTagType.BLOCK, TagCache.getTagsAsStrings(TagUtils.tagEntries(BuiltInRegistries.BLOCK, block)));
                     if (block instanceof IHasTileEntity || block.defaultBlockState().hasBlockEntity()) {
                         tags.put(DictionaryTagType.BLOCK_ENTITY_TYPE, TagCache.getTileEntityTypeTags(block));
                     }
                 }
                 //Entity type tags
                 if (item instanceof SpawnEggItem spawnEggItem) {
-                    tags.put(DictionaryTagType.ENTITY_TYPE, TagCache.getTagsAsStrings(spawnEggItem.getType(stack.getTag()).getTags()));
+                    tags.put(DictionaryTagType.ENTITY_TYPE, TagCache.getTagsAsStrings(TagUtils.tagEntries(BuiltInRegistries.ENTITY_TYPE, spawnEggItem.getType(stack.getTag()))));
                 }
                 //Enchantment tags
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
                 if (!enchantments.isEmpty()) {
-                    ITagManager<Enchantment> manager = TagUtils.manager(ForgeRegistries.ENCHANTMENTS);
                     tags.put(DictionaryTagType.ENCHANTMENT, TagCache.getTagsAsStrings(enchantments.keySet().stream()
-                          .flatMap(enchantment -> TagUtils.tagsStream(manager, enchantment))
+                          .flatMap(enchantment -> TagUtils.tagEntries(BuiltInRegistries.ENCHANTMENT, enchantment))
                           .distinct()
                     ));
                 }
                 //Get any potion tags
                 Potion potion = PotionUtils.getPotion(itemStack);
                 if (potion != Potions.EMPTY) {
-                    tags.put(DictionaryTagType.POTION, TagCache.getTagsAsStrings(TagUtils.tagsStream(ForgeRegistries.POTIONS, potion)));
-                    ITagManager<MobEffect> effectManager = TagUtils.manager(ForgeRegistries.MOB_EFFECTS);
+                    tags.put(DictionaryTagType.POTION, TagCache.getTagsAsStrings(TagUtils.tagEntries(BuiltInRegistries.POTION, potion)));
                     tags.put(DictionaryTagType.MOB_EFFECT, TagCache.getTagsAsStrings(potion.getEffects().stream()
-                          .flatMap(effect -> TagUtils.tagsStream(effectManager, effect.getEffect()))
+                          .flatMap(effect -> TagUtils.tagEntries(BuiltInRegistries.MOB_EFFECT, effect.getEffect()))
                           .distinct()
                     ));
                 }
@@ -161,27 +156,25 @@ public class GuiDictionaryTarget extends GuiElement implements IJEIGhostTarget {
                       .collect(Collectors.toSet());
                 if (!attributes.isEmpty()) {
                     //Only add them though if it has any attributes at all
-                    ITagManager<Attribute> attributeManager = TagUtils.manager(ForgeRegistries.ATTRIBUTES);
                     tags.put(DictionaryTagType.ATTRIBUTE, TagCache.getTagsAsStrings(attributes.stream()
-                          .flatMap(attribute -> TagUtils.tagsStream(attributeManager, attribute))
+                          .flatMap(attribute -> TagUtils.tagEntries(BuiltInRegistries.ATTRIBUTE, attribute))
                           .distinct()
                     ));
                 }
                 //Get tags of any contained fluids
-                FluidUtil.getFluidHandler(stack).ifPresent(fluidHandler -> {
-                    ITagManager<Fluid> fluidManager = TagUtils.manager(ForgeRegistries.FLUIDS);
-                    tags.put(DictionaryTagType.FLUID, TagCache.getTagsAsStrings(IntStream.range(0, fluidHandler.getTanks())
-                          .mapToObj(fluidHandler::getFluidInTank)
-                          .filter(fluidInTank -> !fluidInTank.isEmpty())
-                          .flatMap(fluidInTank -> TagUtils.tagsStream(fluidManager, fluidInTank.getFluid()))
-                          .distinct()
+                Storage<FluidVariant> fluidStorage = ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM);
+                if (fluidStorage != null) {
+                    tags.put(DictionaryTagType.FLUID, TagCache.getTagsAsStrings(Streams.stream(fluidStorage.nonEmptyIterator())
+                            .filter(fluidInTank -> !fluidInTank.isResourceBlank() && fluidInTank.getAmount() != 0)
+                            .flatMap(fluidInTank -> TagUtils.tagEntries(BuiltInRegistries.FLUID, fluidInTank.getResource().getFluid()))
+                            .distinct()
                     ));
-                });
+                }
                 //Get tags of any contained chemicals
-                addChemicalTags(DictionaryTagType.GAS, stack, Capabilities.GAS_HANDLER);
-                addChemicalTags(DictionaryTagType.INFUSE_TYPE, stack, Capabilities.INFUSION_HANDLER);
-                addChemicalTags(DictionaryTagType.PIGMENT, stack, Capabilities.PIGMENT_HANDLER);
-                addChemicalTags(DictionaryTagType.SLURRY, stack, Capabilities.SLURRY_HANDLER);
+                addChemicalTags(DictionaryTagType.GAS, stack, Capabilities.GAS_HANDLER_ITEM);
+                addChemicalTags(DictionaryTagType.INFUSE_TYPE, stack, Capabilities.INFUSION_HANDLER_ITEM);
+                addChemicalTags(DictionaryTagType.PIGMENT, stack, Capabilities.PIGMENT_HANDLER_ITEM);
+                addChemicalTags(DictionaryTagType.SLURRY, stack, Capabilities.SLURRY_HANDLER_ITEM);
                 //TODO: Support other types of things?
             }
         } else if (newTarget instanceof FluidStack fluidStack) {
@@ -189,7 +182,7 @@ public class GuiDictionaryTarget extends GuiElement implements IJEIGhostTarget {
                 target = null;
             } else {
                 target = fluidStack.copy();
-                tags.put(DictionaryTagType.FLUID, TagCache.getTagsAsStrings(TagUtils.tagsStream(ForgeRegistries.FLUIDS, ((FluidStack) target).getFluid())));
+                tags.put(DictionaryTagType.FLUID, TagCache.getTagsAsStrings(TagUtils.tagEntries(BuiltInRegistries.FLUID, ((FluidStack) target).getFluid())));
             }
         } else if (newTarget instanceof ChemicalStack<?> chemicalStack) {
             if (chemicalStack.isEmpty()) {
@@ -213,20 +206,19 @@ public class GuiDictionaryTarget extends GuiElement implements IJEIGhostTarget {
         }
         //Update the list being viewed
         tagSetter.accept(tags.keySet());
-        playClickSound(SoundEvents.UI_BUTTON_CLICK);
+        playClickSound(SoundEvents.UI_BUTTON_CLICK::value);
     }
 
-    private <STACK extends ChemicalStack<?>, HANDLER extends IChemicalHandler<?, STACK>> void addChemicalTags(DictionaryTagType tagType, ItemStack stack,
-          Capability<HANDLER> capability) {
-        stack.getCapability(capability).ifPresent(handler ->
-              tags.put(tagType, TagCache.getTagsAsStrings(IntStream.range(0, handler.getTanks())
-                          .mapToObj(handler::getChemicalInTank)
-                          .filter(chemicalInTank -> !chemicalInTank.isEmpty())
-                          .flatMap(chemicalInTank -> chemicalInTank.getType().getTags())
-                          .distinct()
+    private <STACK extends ChemicalStack<?>, TANK extends IChemicalTank<?, STACK>, HANDLER extends IChemicalHandler<?, STACK, TANK>> void addChemicalTags(DictionaryTagType tagType, ItemStack stack, ItemApiLookup<? extends IChemicalHandler<?,?,TANK>, ContainerItemContext> itemApiLookup) {
+        IChemicalHandler<?,?,TANK> chemicalHandler = ContainerItemContext.withConstant(stack).find(itemApiLookup);
+        if (chemicalHandler != null) {
+            tags.put(tagType, TagCache.getTagsAsStrings(chemicalHandler.getTanks().stream()
+                            .filter(chemicalInTank -> !chemicalInTank.isEmpty())
+                            .flatMap(chemicalInTank -> chemicalInTank.getType().getTags())
+                            .distinct()
                     )
-              )
-        );
+            );
+        }
     }
 
     @Override

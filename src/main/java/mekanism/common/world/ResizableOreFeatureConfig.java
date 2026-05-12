@@ -2,9 +2,6 @@ package mekanism.common.world;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.List;
-import java.util.function.IntSupplier;
-import mekanism.api.functions.FloatSupplier;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.config.WorldConfig.OreVeinConfig;
 import mekanism.common.resource.ore.OreType.OreVeinType;
@@ -12,8 +9,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration.TargetBlockState;
 
-public record ResizableOreFeatureConfig(List<TargetBlockState> targetStates, OreVeinType oreVeinType, IntSupplier size,
-                                        FloatSupplier discardChanceOnAirExposure) implements FeatureConfiguration {
+import java.util.List;
+
+public record ResizableOreFeatureConfig(List<TargetBlockState> targetStates, OreVeinType oreVeinType, int size,
+                                        float discardChanceOnAirExposure) implements FeatureConfiguration {
 
     public static final Codec<ResizableOreFeatureConfig> CODEC = RecordCodecBuilder.create(builder -> builder.group(
           Codec.list(OreConfiguration.TargetBlockState.CODEC).fieldOf("targets").forGetter(config -> config.targetStates),

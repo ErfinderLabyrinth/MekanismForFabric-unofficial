@@ -2,7 +2,6 @@ package mekanism.api.robit;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Optional;
 import mekanism.api.IMekanismAccess;
 import mekanism.api.MekanismAPI;
 import net.minecraft.core.Holder;
@@ -11,6 +10,8 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
+
+import java.util.Optional;
 
 /**
  * Helper class for dealing with {@link RobitSkin Robit Skin} (de)serialization.

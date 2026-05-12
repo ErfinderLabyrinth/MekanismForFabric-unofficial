@@ -11,6 +11,7 @@ import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.tile.TileEntityCardboardBox;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -30,9 +31,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,7 +79,7 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
         //Check if the player is allowed to use the cardboard box in the given position
         if (world.mayInteract(player, pos)) {
             //If they are then check if they can "break" the cardboard block that is in that spot
-            if (!MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(world, pos, state, player))) {
+            if (!PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(world, player, pos, state, null)) {
                 //If they can then we need to see if they are allowed to "place" the unboxed block in the given position
                 //TODO: Once forge fixes https://github.com/MinecraftForge/MinecraftForge/issues/7609 use block snapshots
                 // and fire a place event to see if the player is able to "place" the cardboard box
@@ -91,9 +89,8 @@ public class BlockCardboardBox extends BlockMekanism implements IStateStorage, I
         return false;
     }
 
-    @NotNull
     @Override
-    public ItemStack getCloneItemStack(@NotNull BlockState state, HitResult target, @NotNull BlockGetter world, @NotNull BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState blockState) {
         ItemStack itemStack = new ItemStack(this);
         TileEntityCardboardBox tile = WorldUtils.getTileEntity(TileEntityCardboardBox.class, world, pos);
         if (tile == null) {

@@ -8,6 +8,8 @@ import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.nbt.CompoundTag;
 
 /**
@@ -15,7 +17,7 @@ import net.minecraft.nbt.CompoundTag;
  * one chemical tank of a {@link MergedChemicalTank} can have a chemical in it at any time.
  */
 @NothingNullByDefault
-public abstract class ChemicalTankWrapper<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> implements IChemicalTank<CHEMICAL, STACK> {
+public abstract class ChemicalTankWrapper<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends SnapshotParticipant<STACK> implements IChemicalTank<CHEMICAL, STACK> {
 
     private final IChemicalTank<CHEMICAL, STACK> internal;
     private final BooleanSupplier insertCheck;
@@ -51,14 +53,13 @@ public abstract class ChemicalTankWrapper<CHEMICAL extends Chemical<CHEMICAL>, S
     }
 
     @Override
-    public STACK insert(STACK stack, Action action, AutomationType automationType) {
-        //Only allow inserting if we pass the check
-        return insertCheck.getAsBoolean() ? internal.insert(stack, action, automationType) : stack;
+    public long insert(CHEMICAL resource, long amount, TransactionContext transaction) {
+        return insertCheck.getAsBoolean() ? internal.insert(resource, amount, transaction) : 0;
     }
 
     @Override
-    public STACK extract(long amount, Action action, AutomationType automationType) {
-        return internal.extract(amount, action, automationType);
+    public long extract(CHEMICAL resource, long amount, TransactionContext transaction) {
+        return internal.extract(resource, amount, transaction);
     }
 
     @Override
@@ -77,18 +78,18 @@ public abstract class ChemicalTankWrapper<CHEMICAL extends Chemical<CHEMICAL>, S
     }
 
     @Override
-    public long setStackSize(long amount, Action action) {
-        return internal.setStackSize(amount, action);
+    public long setStackSize(long amount) {
+        return internal.setStackSize(amount);
     }
 
     @Override
-    public long growStack(long amount, Action action) {
-        return internal.growStack(amount, action);
+    public long growStack(long amount) {
+        return internal.growStack(amount);
     }
 
     @Override
-    public long shrinkStack(long amount, Action action) {
-        return internal.shrinkStack(amount, action);
+    public long shrinkStack(long amount) {
+        return internal.shrinkStack(amount);
     }
 
     @Override
@@ -139,5 +140,30 @@ public abstract class ChemicalTankWrapper<CHEMICAL extends Chemical<CHEMICAL>, S
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         internal.deserializeNBT(nbt);
+    }
+
+    @Override
+    protected STACK createSnapshot() {
+        return null;
+    }
+
+    @Override
+    protected void readSnapshot(STACK snapshot) {
+
+    }
+
+    @Override
+    public boolean isResourceBlank() {
+        return internal.isResourceBlank();
+    }
+
+    @Override
+    public CHEMICAL getResource() {
+        return internal.getResource();
+    }
+
+    @Override
+    public long getAmount() {
+        return internal.getAmount();
     }
 }

@@ -7,16 +7,10 @@ import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.CommonWorldTickHandler;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
@@ -35,11 +29,7 @@ import mekanism.common.inventory.container.slot.SlotOverlay;
 import mekanism.common.inventory.container.sync.SyncableBoolean;
 import mekanism.common.inventory.container.sync.SyncableInt;
 import mekanism.common.inventory.container.sync.SyncableItemStack;
-import mekanism.common.inventory.slot.BasicInventorySlot;
-import mekanism.common.inventory.slot.EnergyInventorySlot;
-import mekanism.common.inventory.slot.FormulaicCraftingSlot;
-import mekanism.common.inventory.slot.InputInventorySlot;
-import mekanism.common.inventory.slot.OutputInventorySlot;
+import mekanism.common.inventory.slot.*;
 import mekanism.common.item.ItemCraftingFormula;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.lib.transmitter.TransmissionType;
@@ -55,18 +45,25 @@ import mekanism.common.tile.prefab.TileEntityConfigurableMachine;
 import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UpgradeUtils;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMachine implements IHasMode {
 
@@ -150,7 +147,7 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
                     if (!indices.isEmpty()) {
                         if (stockControl) {
                             HashedItem stockItem = stockControlMap[index];
-                            return stockItem == null || ItemHandlerHelper.canItemStacksStack(stockItem.getInternalStack(), stack);
+                            return stockItem == null || ItemEntity.areMergable(stockItem.getInternalStack(), stack);
                         }
                         return true;
                     }
@@ -184,8 +181,8 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
     }
 
     @Override
-    public void onLoad() {
-        super.onLoad();
+    public void setLevel(@NotNull Level world) {
+        super.setLevel(world);
         if (!isRemote()) {
             checkFormula();
             recalculateRecipe();
@@ -222,7 +219,7 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
             nextMode();
         }
 
-        FloatingLong clientEnergyUsed = FloatingLong.ZERO;
+        long clientEnergyUsed = 0;
         if (autoMode && formula != null && ((getControlType() == RedstoneControl.PULSE && pulseOperations > 0) || MekanismUtils.canFunction(this))) {
             boolean canOperate = true;
             if (!isRecipe) {
@@ -238,10 +235,13 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
                         }
                     }
                 } else {
-                    FloatingLong energyPerTick = energyContainer.getEnergyPerTick();
-                    if (energyContainer.extract(energyPerTick, Action.SIMULATE, AutomationType.INTERNAL).equals(energyPerTick)) {
-                        clientEnergyUsed = energyContainer.extract(energyPerTick, Action.EXECUTE, AutomationType.INTERNAL);
-                        operatingTicks++;
+                    long energyPerTick = energyContainer.getEnergyPerTick();
+                    try(Transaction t = Transaction.openOuter()) {
+                        if (energyContainer.extract(energyPerTick, t) == energyPerTick) {
+                            t.commit();
+                            clientEnergyUsed = energyPerTick;
+                            operatingTicks++;
+                        }
                     }
                 }
             } else {
@@ -250,7 +250,7 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
         } else {
             operatingTicks = 0;
         }
-        usedEnergy = !clientEnergyUsed.isZero();
+        usedEnergy = clientEnergyUsed != 0;
     }
 
     private void checkFormula() {
@@ -332,9 +332,16 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
     private boolean doSingleCraft() {
         recalculateRecipe();
         ItemStack output = lastOutputStack;
-        if (!output.isEmpty() && tryMoveToOutput(output, Action.SIMULATE) &&
-            (lastRemainingItems.isEmpty() || lastRemainingItems.stream().allMatch(it -> it.isEmpty() || tryMoveToOutput(it, Action.SIMULATE)))) {
-            tryMoveToOutput(output, Action.EXECUTE);
+        boolean canMoveToOutput;
+        try(Transaction t=Transaction.openOuter()) {
+            canMoveToOutput = tryMoveToOutput(output, t);
+        }
+        if (!output.isEmpty() && canMoveToOutput &&
+            (lastRemainingItems.isEmpty() || lastRemainingItems.stream().allMatch(it -> it.isEmpty() || trySimulateMoveToOutput(it)))) {
+            try(Transaction t=Transaction.openOuter()) {
+                tryMoveToOutput(output, t);
+                t.commit();
+            }
             //TODO: Fix this as I believe if things overlap there is a chance it won't work properly.
             // For example if there are multiple stacks of dirt in remaining and we have room for one stack, but given we only check one stack at a time...)
             // Basically simulating fitting the last remaining items doesn't do enough validation about intermediary state
@@ -343,13 +350,16 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
                     //TODO: Check if it matters that we are not actually updating the list of remaining items?
                     // The better solution would be to not allow continuing until we moved output AND all remaining items
                     // instead of trying to move all at once??
-                    tryMoveToOutput(remainingItem, Action.EXECUTE);
+                    try(Transaction t=Transaction.openOuter()) {
+                        tryMoveToOutput(remainingItem, t);
+                        t.commit();
+                    }
                 }
             }
 
             for (IInventorySlot craftingSlot : craftingGridSlots) {
                 if (!craftingSlot.isEmpty()) {
-                    MekanismUtils.logMismatchedStackSize(craftingSlot.shrinkStack(1, Action.EXECUTE), 1);
+                    MekanismUtils.logMismatchedStackSize(craftingSlot.shrinkStack(1), 1);
                 }
             }
             if (formula != null) {
@@ -359,6 +369,12 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
             return true;
         }
         return false;
+    }
+
+    private boolean trySimulateMoveToOutput(ItemStack itemStack) {
+        try(Transaction t=Transaction.openOuter()) {
+            return tryMoveToOutput(itemStack, t);
+        }
     }
 
     public boolean craftSingle() {
@@ -392,7 +408,7 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
                         ItemStack stockStack = stockSlot.getStack();
                         if (formula.isIngredientInPos(level, stockStack, i)) {
                             recipeSlot.setStack(stockStack.copyWithCount(1));
-                            MekanismUtils.logMismatchedStackSize(stockSlot.shrinkStack(1, Action.EXECUTE), 1);
+                            MekanismUtils.logMismatchedStackSize(stockSlot.shrinkStack(1), 1);
                             markForSave();
                             found = true;
                             break;
@@ -613,15 +629,19 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
     }
 
     private ItemStack tryMoveToInput(ItemStack stack) {
-        return InventoryUtils.insertItem(inputSlots, stack, Action.EXECUTE, AutomationType.INTERNAL);
+        try(Transaction t=Transaction.openOuter()) {
+            ItemStack result = InventoryUtils.insertItem(inputSlots, stack, t);
+            t.commit();
+            return result;
+        }
     }
 
-    private boolean tryMoveToOutput(ItemStack stack, Action action) {
+    private boolean tryMoveToOutput(ItemStack stack, TransactionContext t) {
         //Try to insert the item (simulating as needed), and overwrite our local reference to point to the remainder
         // We can then continue on to the next slot if we did not fit it all and try to insert it.
         // The logic is relatively simple due to only having one stack we are trying to insert, so we don't have to worry
         // about the fact the slot doesn't actually get updated if we simulated, and then is invalid for the next simulation
-        stack = InventoryUtils.insertItem(outputSlots, stack, action, AutomationType.INTERNAL);
+        stack = InventoryUtils.insertItem(outputSlots, stack, t);
         return stack.isEmpty();
     }
 

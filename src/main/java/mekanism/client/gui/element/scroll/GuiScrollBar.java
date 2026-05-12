@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.scroll;
 
-import java.util.function.IntSupplier;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElementHolder;
@@ -9,6 +8,8 @@ import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.IntSupplier;
 
 public class GuiScrollBar extends GuiScrollableElement {
 

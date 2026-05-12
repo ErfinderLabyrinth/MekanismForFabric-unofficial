@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.button;
 
-import java.util.function.Supplier;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.MekanismRenderer;
@@ -8,6 +7,8 @@ import mekanism.common.MekanismLang;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Supplier;
 
 public class ColorButton extends MekanismButton {
 

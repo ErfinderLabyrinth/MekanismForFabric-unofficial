@@ -1,40 +1,42 @@
 package mekanism.common.item.gear;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.LongSupplier;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.providers.IGasProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.client.render.RenderPropertiesProvider;
+import mekanism.client.render.armor.ISpecialGear;
+import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.config.value.CachedLongValue;
 import mekanism.common.item.interfaces.IItemHUDProvider;
 import mekanism.common.item.interfaces.IJetpackItem;
 import mekanism.common.item.interfaces.IModeItem;
 import mekanism.common.registries.MekanismGases;
 import mekanism.common.util.ItemDataUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStack.TooltipPart;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IModeItem, IJetpackItem {
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.LongSupplier;
+
+public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IModeItem, IJetpackItem, ISpecialGearGetter {
 
     private static final JetpackMaterial JETPACK_MATERIAL = new JetpackMaterial();
 
@@ -43,22 +45,22 @@ public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IMode
     }
 
     public ItemJetpack(ArmorMaterial material, Properties properties) {
-        super(material, ArmorItem.Type.CHESTPLATE, properties.setNoRepair());
+        super(material, ArmorItem.Type.CHESTPLATE, properties);
     }
 
     @Override
-    public void initializeClient(@NotNull Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(RenderPropertiesProvider.jetpack());
+    public ISpecialGear getSpecialGear() {
+        return RenderPropertiesProvider.jetpack();
     }
 
     @Override
-    protected CachedLongValue getMaxGas() {
-        return MekanismConfig.gear.jetpackMaxGas;
+    protected LongSupplier getMaxGas() {
+        return () -> MekanismConfig.gear.jetpackMaxGas;
     }
 
     @Override
     protected LongSupplier getFillRate() {
-        return MekanismConfig.gear.jetpackFillRate;
+        return () -> MekanismConfig.gear.jetpackFillRate;
     }
 
     @Override
@@ -83,8 +85,8 @@ public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IMode
     }
 
     @Override
-    public void useJetpackFuel(ItemStack stack) {
-        useGas(stack, 1);
+    public void useJetpackFuel(ContainerItemContext context) {
+        useGas(context, 1);
     }
 
     public void setMode(ItemStack stack, JetpackMode mode) {
@@ -97,11 +99,12 @@ public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IMode
             ItemJetpack jetpack = (ItemJetpack) stack.getItem();
             list.add(MekanismLang.JETPACK_MODE.translateColored(EnumColor.DARK_GRAY, jetpack.getJetpackMode(stack)));
             GasStack stored = GasStack.EMPTY;
-            Optional<IGasHandler> capability = stack.getCapability(Capabilities.GAS_HANDLER).resolve();
-            if (capability.isPresent()) {
-                IGasHandler gasHandlerItem = capability.get();
-                if (gasHandlerItem.getTanks() > 0) {
-                    stored = gasHandlerItem.getChemicalInTank(0);
+            IGasHandler gasHandlerItem = ContainerItemContext.withConstant(stack).find(Capabilities.GAS_HANDLER_ITEM);
+            if (gasHandlerItem != null) {
+                Iterator<StorageView<Gas>> iterator = gasHandlerItem.iterator();
+                if (iterator.hasNext()) {
+                    StorageView<Gas> view = iterator.next();
+                    stored = view.getResource().getStack(view.getAmount());
                 }
             }
             list.add(MekanismLang.JETPACK_STORED.translateColored(EnumColor.DARK_GRAY, EnumColor.ORANGE, stored.getAmount()));
@@ -123,13 +126,13 @@ public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IMode
         return slotType == getEquipmentSlot();
     }
 
-    @Override
-    public int getDefaultTooltipHideFlags(@NotNull ItemStack stack) {
-        if (this instanceof ItemArmoredJetpack) {
-            return super.getDefaultTooltipHideFlags(stack);
-        }
-        return super.getDefaultTooltipHideFlags(stack) | TooltipPart.MODIFIERS.getMask();
-    }
+//    @Override
+//    public int getDefaultTooltipHideFlags(@NotNull ItemStack stack) {
+//        if (this instanceof ItemArmoredJetpack) {
+//            return super.getDefaultTooltipHideFlags(stack);
+//        }
+//        return super.getDefaultTooltipHideFlags(stack) | TooltipPart.MODIFIERS.getMask();
+//    }
 
     @NothingNullByDefault
     protected static class JetpackMaterial extends BaseSpecialArmorMaterial {

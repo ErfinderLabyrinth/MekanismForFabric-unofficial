@@ -1,56 +1,74 @@
 package mekanism.common.lib.inventory;
 
+import com.google.common.collect.Iterators;
+import mekanism.api.BigItemStack;
+import mekanism.common.Mekanism;
+import mekanism.common.content.transporter.TransporterManager;
+import mekanism.common.tile.TileEntityLogisticalSorter;
+import mekanism.common.util.InventoryUtils;
+import mekanism.common.util.StackUtils;
+import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import mekanism.common.Mekanism;
-import mekanism.common.content.transporter.TransporterManager;
-import mekanism.common.tile.TileEntityLogisticalSorter;
-import mekanism.common.util.CapabilityUtils;
-import mekanism.common.util.InventoryUtils;
-import mekanism.common.util.StackUtils;
-import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
-import org.jetbrains.annotations.NotNull;
 
+
+//TODO FIX THIS (TRANSLATE TO TRANSFER API)
 public abstract class TransitRequest {
 
-    private final TransitResponse EMPTY = new TransitResponse(ItemStack.EMPTY, null);
 
-    public static SimpleTransitRequest simple(ItemStack stack) {
+    private final TransitResponse EMPTY = new TransitResponse(BigItemStack.EMPTY, null);
+
+    public static SimpleTransitRequest simple(BigItemStack stack) {
         return new SimpleTransitRequest(stack);
     }
 
-    public static TransitRequest anyItem(BlockEntity tile, Direction side, int amount) {
-        return definedItem(tile, side, amount, Finder.ANY);
+    public static TransitRequest anyItem(Level level, BlockPos pos, Direction side, int amount) {
+        return definedItem(level, pos, side, amount, Finder.ANY);
     }
 
-    public static TransitRequest definedItem(BlockEntity tile, Direction side, int amount, Finder finder) {
-        return definedItem(tile, side, 1, amount, finder);
+    public static TransitRequest definedItem(Level level, BlockPos pos, Direction side, int amount, Finder finder) {
+        return definedItem(level, pos, side, 1, amount, finder);
     }
 
-    public static TransitRequest definedItem(BlockEntity tile, Direction side, int min, int max, Finder finder) {
-        TileTransitRequest ret = new TileTransitRequest(tile, side);
-        IItemHandler inventory = InventoryUtils.assertItemHandler("TransitRequest", tile, side);
+    public static TransitRequest definedItem(Level level, BlockPos pos, Direction side, int min, int max, Finder finder) {
+        TileTransitRequest ret = new TileTransitRequest(level, pos, side);
+        Storage<ItemVariant> inventory = InventoryUtils.assertItemHandler("TransitRequest", level, pos, side);
         if (inventory == null) {
             return ret;
         }
         // count backwards- we start from the bottom of the inventory and go back for consistency
-        for (int i = inventory.getSlots() - 1; i >= 0; i--) {
-            ItemStack stack = inventory.extractItem(i, max, true);
+        //List<StorageView<ItemVariant>> slots = new ArrayList<>();
+        //inventory.forEach(view -> slots.add(0, view));
+        for (StorageView<ItemVariant> view:inventory) {
+//            ItemStack stack = inventory.extractItem(i, max, true);
+//            StorageView<ItemVariant> view = slots.get(i);
+//            ItemStack stack = slots.get(i).
+//
+//            try(Transaction t = Transaction.openOuter()) {
+//                ItemStack ret = view.extract(slot, toUse, t);
+//            }
 
-            if (!stack.isEmpty() && finder.modifies(stack)) {
+            ItemStack stack = view.getResource().toStack((int)Math.min(view.getAmount(), Integer.MAX_VALUE));
+            if (!view.isResourceBlank() && view.getAmount() != 0 && finder.modifies(stack)) {
                 HashedItem hashed = HashedItem.raw(stack);
-                int toUse = Math.min(stack.getCount(), max - ret.getCount(hashed));
+                int toUse = (int)Math.min(stack.getCount(), max - ret.getCount(new BigItemStack(view.getResource(), view.getAmount())));
                 if (toUse == 0) {
                     continue; // continue if we don't need any more of this item type
                 }
-                ret.addItem(StackUtils.size(stack, toUse), i);
+                ret.addItem(StackUtils.size(new BigItemStack(view.getResource(), view.getAmount()), toUse), view);
             }
         }
         // remove items that we don't have enough of
@@ -61,17 +79,17 @@ public abstract class TransitRequest {
     public abstract Collection<? extends ItemData> getItemData();
 
     @NotNull
-    public TransitResponse addToInventory(BlockEntity tile, Direction side, int min, boolean force) {
-        if (force && tile instanceof TileEntityLogisticalSorter sorter) {
+    public TransitResponse addToInventory(Level tileLevel, BlockPos tilePos, Direction side, int min, boolean force) {
+        if (force && WorldUtils.getTileEntity(tileLevel, tilePos) instanceof TileEntityLogisticalSorter sorter) {
             return sorter.sendHome(this);
         }
         if (isEmpty()) {
             return getEmptyResponse();
         }
-        Optional<IItemHandler> capability = CapabilityUtils.getCapability(tile, ForgeCapabilities.ITEM_HANDLER, side.getOpposite()).resolve();
-        if (capability.isPresent()) {
-            IItemHandler inventory = capability.get();
-            int slots = inventory.getSlots();
+        Storage<ItemVariant> inventory = ItemStorage.SIDED.find(tileLevel, tilePos, side.getOpposite());
+//        Optional<IItemHandler> capability = CapabilityUtils.getCapability(tile, ForgeCapabilities.ITEM_HANDLER, side.getOpposite()).resolve();
+        if (inventory != null) {
+            int slots = Iterators.size(inventory.iterator());
             if (slots == 0) {
                 //If the inventory has no slots just exit early with the result that we can't send any items
                 return getEmptyResponse();
@@ -90,15 +108,20 @@ public abstract class TransitRequest {
                 // otherwise, continue on to actually sending items to the inventory
             }
             for (ItemData data : getItemData()) {
-                ItemStack origInsert = StackUtils.size(data.getStack(), data.getTotalCount());
-                ItemStack toInsert = origInsert.copy();
-                for (int i = 0; i < slots; i++) {
-                    // Do insert, this will handle validating the item is valid for the inventory
-                    toInsert = inventory.insertItem(i, toInsert, false);
-                    // If empty, end
-                    if (toInsert.isEmpty()) {
-                        return createResponse(origInsert, data);
-                    }
+                BigItemStack origInsert = data.getItemType().copyWithCount(data.getTotalCount());
+                BigItemStack toInsert = origInsert.copy();
+//                for (int i = 0; i < slots; i++) {
+//                    // Do insert, this will handle validating the item is valid for the inventory
+//                    toInsert = inventory.insertItem(i, toInsert, false);
+//                    // If empty, end
+//                    if (toInsert.isEmpty()) {
+//                        return createResponse(origInsert, data);
+//                    }
+//                }
+                try (Transaction t = Transaction.openOuter()) {
+                    long result = inventory.insert(toInsert.getResource(), toInsert.getAmount(), t);
+                    t.commit();
+                    toInsert = toInsert.copyWithCount(result);
                 }
                 if (TransporterManager.didEmit(origInsert, toInsert)) {
                     return createResponse(TransporterManager.getToUse(origInsert, toInsert), data);
@@ -113,13 +136,13 @@ public abstract class TransitRequest {
     }
 
     @NotNull
-    public TransitResponse createResponse(ItemStack inserted, ItemData data) {
+    public TransitResponse createResponse(BigItemStack inserted, ItemData data) {
         return new TransitResponse(inserted, data);
     }
 
     public TransitResponse createSimpleResponse() {
         ItemData data = getItemData().stream().findFirst().orElse(null);
-        return data == null ? getEmptyResponse() : createResponse(data.itemType.createStack(data.totalCount), data);
+        return data == null ? getEmptyResponse() : createResponse(data.itemType.copyWithCount(data.totalCount), data);
     }
 
     @NotNull
@@ -129,23 +152,23 @@ public abstract class TransitRequest {
 
     public static class TransitResponse {
 
-        private final ItemStack inserted;
+        private final BigItemStack inserted;
         private final ItemData slotData;
 
-        public TransitResponse(@NotNull ItemStack inserted, ItemData slotData) {
+        public TransitResponse(@NotNull BigItemStack inserted, ItemData slotData) {
             this.inserted = inserted;
             this.slotData = slotData;
         }
 
-        public int getSendingAmount() {
-            return inserted.getCount();
+        public long getSendingAmount() {
+            return inserted.amount();
         }
 
         public ItemData getSlotData() {
             return slotData;
         }
 
-        public ItemStack getStack() {
+        public BigItemStack getStack() {
             return inserted;
         }
 
@@ -153,18 +176,26 @@ public abstract class TransitRequest {
             return inserted.isEmpty() || slotData.getTotalCount() == 0;
         }
 
-        public ItemStack getRejected() {
+        @Deprecated(forRemoval = true)
+        public ItemStack getRejectedOld() {
             if (isEmpty()) {
                 return ItemStack.EMPTY;
             }
-            return slotData.getItemType().createStack(slotData.getTotalCount() - getSendingAmount());
+            return slotData.getItemType().createStack((int)slotData.getTotalCount() - (int)getSendingAmount());
         }
 
-        public ItemStack use(int amount) {
+        public BigItemStack getRejected() {
+            if (isEmpty()) {
+                return BigItemStack.EMPTY;
+            }
+            return slotData.getItemType().copyWithCount(slotData.getTotalCount() - getSendingAmount());
+        }
+
+        public BigItemStack use(long amount) {
             return slotData.use(amount);
         }
 
-        public ItemStack useAll() {
+        public BigItemStack useAll() {
             return use(getSendingAmount());
         }
 
@@ -176,16 +207,16 @@ public abstract class TransitRequest {
                 return false;
             }
             TransitResponse other = (TransitResponse) o;
-            return (inserted == other.inserted || ItemStack.matches(inserted, other.inserted)) && slotData.equals(other.slotData);
+            return (inserted == other.inserted || BigItemStack.matches(inserted, other.inserted)) && slotData.equals(other.slotData);
         }
 
         @Override
         public int hashCode() {
             int code = 1;
-            code = 31 * code + inserted.getItem().hashCode();
-            code = 31 * code + inserted.getCount();
-            if (inserted.hasTag()) {
-                code = 31 * code + inserted.getTag().hashCode();
+            code = 31 * code + inserted.item().hashCode();
+            code = 31 * code + Long.hashCode(inserted.getAmount());
+            if (inserted.item().hasNbt()) {
+                code = 31 * code + inserted.item().getNbt().hashCode();
             }
             code = 31 * code + slotData.hashCode();
             return code;
@@ -194,28 +225,33 @@ public abstract class TransitRequest {
 
     public static class ItemData {
 
-        private final HashedItem itemType;
-        protected int totalCount;
+        private final BigItemStack itemType;
+        protected long totalCount;
 
-        public ItemData(HashedItem itemType) {
+        public ItemData(BigItemStack itemType) {
             this.itemType = itemType;
         }
 
-        public HashedItem getItemType() {
+        public BigItemStack getItemType() {
             return itemType;
         }
 
-        public int getTotalCount() {
+        public long getTotalCount() {
             return totalCount;
         }
 
+        /**
+         *
+         * @deprecated ItemStack doesn't support long amount values
+         */
+        @Deprecated(forRemoval = true)
         public ItemStack getStack() {
-            return getItemType().createStack(getTotalCount());
+            return getItemType().createStack((int)getTotalCount());
         }
 
-        public ItemStack use(int amount) {
+        public BigItemStack use(long amount) {
             Mekanism.logger.error("Can't 'use' with this type of TransitResponse: {}", getClass().getName());
-            return ItemStack.EMPTY;
+            return BigItemStack.EMPTY;
         }
 
         @Override
@@ -239,7 +275,7 @@ public abstract class TransitRequest {
 
         private final List<ItemData> slotData;
 
-        protected SimpleTransitRequest(ItemStack stack) {
+        protected SimpleTransitRequest(BigItemStack stack) {
             slotData = Collections.singletonList(new SimpleItemData(stack));
         }
 
@@ -250,11 +286,11 @@ public abstract class TransitRequest {
 
         public static class SimpleItemData extends ItemData {
 
-            public SimpleItemData(ItemStack stack) {
+            public SimpleItemData(BigItemStack stack) {
                 //TODO: Can this use raw to avoid a copy? My intuition says yes as I don't think the item data stays around when the stack can mutate
                 // but this definitely needs more thought
-                super(HashedItem.create(stack));
-                totalCount = stack.getCount();
+                super(stack);
+                totalCount = stack.amount();
             }
         }
     }

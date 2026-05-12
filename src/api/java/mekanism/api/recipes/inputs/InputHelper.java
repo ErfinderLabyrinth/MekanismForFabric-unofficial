@@ -1,7 +1,6 @@
 package mekanism.api.recipes.inputs;
 
-import java.util.Objects;
-import mekanism.api.Action;
+import mekanism.api.FluidStack;
 import mekanism.api.MekanismAPI;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
@@ -13,8 +12,9 @@ import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
 import mekanism.api.recipes.ingredients.InputIngredient;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 @NothingNullByDefault
 public class InputHelper {
@@ -56,7 +56,7 @@ public class InputHelper {
                 }
                 if (!recipeInput.isEmpty()) {
                     int amount = recipeInput.getCount() * operations;
-                    logMismatchedStackSize(slot.shrinkStack(amount, Action.EXECUTE), amount);
+                    logMismatchedStackSize(slot.shrinkStack(amount), amount);
                 }
             }
 
@@ -148,8 +148,8 @@ public class InputHelper {
                 }
                 FluidStack inputFluid = getInput();
                 if (!inputFluid.isEmpty()) {
-                    int amount = recipeInput.getAmount() * operations;
-                    logMismatchedStackSize(tank.shrinkStack(amount, Action.EXECUTE), amount);
+                    long amount = recipeInput.amount() * operations;
+                    logMismatchedStackSize(tank.shrinkStack(amount), amount);
                 }
             }
 
@@ -162,7 +162,7 @@ public class InputHelper {
                     // where we may want to allow not having the input be required for recipe matching
                     if (!recipeInput.isEmpty()) {
                         //TODO: Simulate the drain?
-                        int operations = getInput().getAmount() / (recipeInput.getAmount() * usageMultiplier);
+                        int operations = (int) (getInput().amount() / (recipeInput.amount() * usageMultiplier));
                         if (operations > 0) {
                             tracker.updateOperations(operations);
                             return;
@@ -218,7 +218,7 @@ public class InputHelper {
             STACK inputGas = getInput();
             if (!inputGas.isEmpty()) {
                 long amount = recipeInput.getAmount() * operations;
-                logMismatchedStackSize(tank.shrinkStack(amount, Action.EXECUTE), amount);
+                logMismatchedStackSize(tank.shrinkStack(amount), amount);
             }
         }
 

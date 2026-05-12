@@ -1,6 +1,5 @@
 package mekanism.common.item.block;
 
-import java.util.List;
 import mekanism.api.NBTConstants;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.text.EnumColor;
@@ -10,6 +9,7 @@ import mekanism.common.block.BlockCardboardBox;
 import mekanism.common.block.BlockCardboardBox.BlockData;
 import mekanism.common.block.states.BlockStateHelper;
 import mekanism.common.config.MekanismConfig;
+import mekanism.common.mixinhelper.FirstUsableItem;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.tile.TileEntityCardboardBox;
 import mekanism.common.util.ItemDataUtils;
@@ -31,12 +31,12 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> {
+import java.util.List;
+
+public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> implements FirstUsableItem {
 
     public ItemBlockCardboardBox(BlockCardboardBox block) {
         super(block, new Item.Properties().stacksTo(16));
@@ -60,13 +60,7 @@ public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> 
     private static boolean canReplace(Level world, Player player, BlockPos pos, Direction sideClicked, BlockState state, ItemStack stack) {
         //Check if the player is allowed to use the cardboard box in the given position
         if (world.mayInteract(player, pos) && player.mayUseItemAt(pos.relative(sideClicked), sideClicked, stack)) {
-            //If they are then check if they can "break" the block that is in that spot
-            if (!MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(world, pos, state, player))) {
-                //If they can then we need to see if they are allowed to "place" the cardboard box in the given position
-                //TODO: Once forge fixes https://github.com/MinecraftForge/MinecraftForge/issues/7609 use block snapshots
-                // and fire a place event to see if the player is able to "place" the cardboard box
-                return true;
-            }
+            return true;
         }
         return false;
     }
@@ -84,7 +78,7 @@ public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> 
             BlockState state = world.getBlockState(pos);
             if (!state.isAir() && state.getDestroySpeed(world, pos) != -1) {
                 if (state.is(MekanismTags.Blocks.CARDBOARD_BLACKLIST) ||
-                    MekanismConfig.general.cardboardModBlacklist.get().contains(RegistryUtils.getNamespace(state.getBlock())) ||
+                    MekanismConfig.general.cardboardModBlacklist.contains(RegistryUtils.getNamespace(state.getBlock())) ||
                     !canReplace(world, player, pos, context.getClickedFace(), state, stack)) {
                     return InteractionResult.FAIL;
                 }
@@ -150,9 +144,9 @@ public class ItemBlockCardboardBox extends ItemBlockMekanism<BlockCardboardBox> 
         return null;
     }
 
-    @Override
-    public int getMaxStackSize(ItemStack stack) {
-        BlockData blockData = getBlockData(null, stack);
-        return blockData == null ? super.getMaxStackSize(stack) : 1;
-    }
+//    @Override
+//    public int getMaxStackSize(ItemStack stack) {
+//        BlockData blockData = getBlockData(null, stack);
+//        return blockData == null ? super.getMaxStackSize(stack) : 1;
+//    }
 }

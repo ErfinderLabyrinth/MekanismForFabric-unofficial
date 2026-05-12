@@ -1,8 +1,5 @@
 package mekanism.common.tile.qio;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.inventory.IInventorySlot;
@@ -22,13 +19,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TileEntityQIODriveArray extends TileEntityQIOComponent implements IQIODriveHolder {
 
-    public static final ModelProperty<byte[]> DRIVE_STATUS_PROPERTY = new ModelProperty<>();
+//    public static final ModelProperty<byte[]> DRIVE_STATUS_PROPERTY = new ModelProperty<>();
     public static final int DRIVE_SLOTS = 12;
 
     private List<IInventorySlot> driveSlots;
@@ -101,11 +100,11 @@ public class TileEntityQIODriveArray extends TileEntityQIOComponent implements I
         super.saveAdditional(nbtTags);
     }
 
-    @NotNull
-    @Override
-    public ModelData getModelData() {
-        return ModelData.builder().with(DRIVE_STATUS_PROPERTY, driveStatus).build();
-    }
+//    @NotNull
+//    @Override
+//    public ModelData getModelData() {
+//        return ModelData.builder().with(DRIVE_STATUS_PROPERTY, driveStatus).build();
+//    }
 
     @NotNull
     @Override
@@ -116,8 +115,8 @@ public class TileEntityQIODriveArray extends TileEntityQIOComponent implements I
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void load(@NotNull CompoundTag tag) {
+        super.load(tag);
         byte[] status = tag.getByteArray(NBTConstants.DRIVES);
         if (!Arrays.equals(status, driveStatus)) {
             driveStatus = status;

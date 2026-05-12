@@ -1,9 +1,6 @@
 package mekanism.common.item;
 
-import java.util.List;
 import mekanism.api.security.ISecurityUtils;
-import mekanism.common.capabilities.ItemCapabilityWrapper.ItemCapability;
-import mekanism.common.capabilities.security.item.ItemStackOwnerObject;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.interfaces.IGuiItem;
 import mekanism.common.lib.frequency.FrequencyType;
@@ -12,7 +9,6 @@ import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import mekanism.common.registries.MekanismContainerTypes;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.SecurityUtils;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -23,10 +19,12 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class ItemPortableTeleporter extends ItemEnergized implements IFrequencyItem, IGuiItem {
 
     public ItemPortableTeleporter(Properties properties) {
-        super(MekanismConfig.gear.portableTeleporterChargeRate, MekanismConfig.gear.portableTeleporterMaxEnergy, properties.rarity(Rarity.RARE));
+        super(() -> MekanismConfig.gear.portableTeleporterChargeRate, () -> MekanismConfig.gear.portableTeleporterMaxEnergy, properties.rarity(Rarity.RARE));
     }
 
     @Override
@@ -52,9 +50,9 @@ public class ItemPortableTeleporter extends ItemEnergized implements IFrequencyI
         return MekanismContainerTypes.PORTABLE_TELEPORTER;
     }
 
-    @Override
-    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {
-        capabilities.add(new ItemStackOwnerObject());
-        super.gatherCapabilities(capabilities, stack, nbt);
-    }
+//    @Override
+//    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {
+//        //capabilities.add(new ItemStackOwnerObject());
+//        //super.gatherCapabilities(capabilities, stack, nbt);
+//    }
 }

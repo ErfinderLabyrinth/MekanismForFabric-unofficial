@@ -1,7 +1,5 @@
 package mekanism.common.block;
 
-import java.util.function.Consumer;
-import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.common.Mekanism;
 import mekanism.common.block.interfaces.IHasTileEntity;
 import mekanism.common.block.states.BlockStateHelper;
@@ -36,12 +34,10 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,10 +65,13 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
         registerDefaultState(BlockStateHelper.getDefaultState(stateDefinition.any()));
     }
 
-    @Override
-    public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
-        consumer.accept(RenderPropertiesProvider.boundingParticles());
-    }
+//TODO
+//    @Override
+//    public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
+//        consumer.accept(RenderPropertiesProvider.boundingParticles());
+//    }
+
+
 
     @Override
     protected void createBlockStateDefinition(@NotNull StateDefinition.Builder<Block, BlockState> builder) {
@@ -119,38 +118,33 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
     }
 
     /**
-     * {@inheritDoc} Delegate to main {@link Block#getCloneItemStack(BlockState, HitResult, BlockGetter, BlockPos, Player)}.
+     * {@inheritDoc} Delegate to main {@link Block#getCloneItemStack(BlockGetter, BlockPos, BlockState)}.
      */
     @NotNull
     @Override
-    public ItemStack getCloneItemStack(@NotNull BlockState state, HitResult target, @NotNull BlockGetter world, @NotNull BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(@NotNull BlockGetter world, @NotNull BlockPos pos, @NotNull BlockState state) {
         BlockPos mainPos = getMainBlockPos(world, pos);
         if (mainPos == null) {
             return ItemStack.EMPTY;
         }
         BlockState mainState = world.getBlockState(mainPos);
-        return mainState.getBlock().getCloneItemStack(mainState, target, world, mainPos, player);
+        return mainState.getBlock().getCloneItemStack(world, mainPos, mainState);
     }
 
     @Override
-    public boolean onDestroyedByPlayer(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Player player, boolean willHarvest,
-          FluidState fluidState) {
-        if (willHarvest) {
-            return true;
-        }
+    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity te, ItemStack stack) {
         BlockPos mainPos = getMainBlockPos(world, pos);
         if (mainPos != null) {
             BlockState mainState = world.getBlockState(mainPos);
-            if (!mainState.isAir()) {
-                //Set the main block to air, which will invalidate the rest of the bounding blocks
-                mainState.onDestroyedByPlayer(world, mainPos, player, false, mainState.getFluidState());
-            }
+            mainState.getBlock().playerDestroy(world, player, mainPos, mainState, WorldUtils.getTileEntity(world, mainPos), stack);
+        } else {
+            super.playerDestroy(world, player, pos, state, te, stack);
         }
-        return super.onDestroyedByPlayer(state, world, pos, player, false, fluidState);
+        world.removeBlock(pos, false);
     }
 
     @Override
-    public void onBlockExploded(BlockState state, Level world, BlockPos pos, Explosion explosion) {
+    public void wasExploded(Level world, BlockPos pos, Explosion explosion) {
         BlockPos mainPos = getMainBlockPos(world, pos);
         if (mainPos != null) {
             BlockState mainState = world.getBlockState(mainPos);
@@ -161,16 +155,16 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
                           .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(mainPos))
                           .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
                           .withOptionalParameter(LootContextParams.BLOCK_ENTITY, mainState.hasBlockEntity() ? WorldUtils.getTileEntity(serverLevel, mainPos) : null)
-                          .withOptionalParameter(LootContextParams.THIS_ENTITY, explosion.getExploder());
+                          .withOptionalParameter(LootContextParams.THIS_ENTITY, explosion.getDirectSourceEntity());
                     if (explosion.blockInteraction == Explosion.BlockInteraction.DESTROY_WITH_DECAY) {
                         lootContextBuilder.withParameter(LootContextParams.EXPLOSION_RADIUS, explosion.radius);
                     }
                     mainState.getDrops(lootContextBuilder).forEach(stack -> Block.popResource(serverLevel, mainPos, stack));
                 }
-                mainState.onBlockExploded(world, mainPos, explosion);
+                mainState.getBlock().wasExploded(world, mainPos, explosion);
             }
         }
-        super.onBlockExploded(state, world, pos, explosion);
+        super.wasExploded(world, pos, explosion);
     }
 
     @Override
@@ -185,19 +179,6 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
             }
         }
         super.spawnAfterBreak(state, level, pos, stack, dropExperience);
-    }
-
-    @Override
-    public void playerDestroy(@NotNull Level world, @NotNull Player player, @NotNull BlockPos pos, @NotNull BlockState state, BlockEntity te,
-          @NotNull ItemStack stack) {
-        BlockPos mainPos = getMainBlockPos(world, pos);
-        if (mainPos != null) {
-            BlockState mainState = world.getBlockState(mainPos);
-            mainState.getBlock().playerDestroy(world, player, mainPos, mainState, WorldUtils.getTileEntity(world, mainPos), stack);
-        } else {
-            super.playerDestroy(world, player, pos, state, te, stack);
-        }
-        world.removeBlock(pos, false);
     }
 
     @Override
@@ -245,14 +226,15 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
         return world.getBlockState(mainPos).getDestroyProgress(player, world, mainPos);
     }
 
-    @Override
-    public float getExplosionResistance(BlockState state, BlockGetter world, BlockPos pos, Explosion explosion) {
-        BlockPos mainPos = getMainBlockPos(world, pos);
-        if (mainPos == null) {
-            return super.getExplosionResistance(state, world, pos, explosion);
-        }
-        return world.getBlockState(mainPos).getExplosionResistance(world, mainPos, explosion);
-    }
+//TODO
+//    @Override
+//    public float getExplosionResistance() {
+//        BlockPos mainPos = getMainBlockPos(world, pos);
+//        if (mainPos == null) {
+//            return super.getExplosionResistance();
+//        }
+//        return world.getBlockState(mainPos).getExplosionResistance(world, mainPos, explosion);
+//    }
 
     @NotNull
     @Override

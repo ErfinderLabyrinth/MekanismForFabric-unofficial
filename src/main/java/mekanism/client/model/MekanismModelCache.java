@@ -1,10 +1,5 @@
 package mekanism.client.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.client.render.armor.MekaSuitArmor.ModuleOBJModelData;
 import mekanism.client.render.transmitter.RenderTransmitterBase;
@@ -12,11 +7,14 @@ import mekanism.common.Mekanism;
 import mekanism.common.registries.MekanismRobitSkins.SkinLookup;
 import mekanism.common.tile.qio.TileEntityQIODriveArray.DriveStatus;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ModelEvent.BakingCompleted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public class MekanismModelCache extends BaseModelCache {
 
@@ -53,10 +51,10 @@ public class MekanismModelCache extends BaseModelCache {
     }
 
     @Override
-    public void onBake(BakingCompleted evt) {
-        super.onBake(evt);
+    public void onBake(ModelManager modelManager, ModelBakery modelBakery, Map<ResourceLocation, BakedModel> bakedRegistry) {
+        super.onBake(modelManager, modelBakery, bakedRegistry);
         callbacks.forEach(Runnable::run);
-        BASE_ROBIT = getBakedModel(evt, new ModelResourceLocation(Mekanism.rl("robit"), "inventory"));
+        BASE_ROBIT = getBakedModel(modelManager, bakedRegistry, new ModelResourceLocation(Mekanism.rl("robit"), "inventory"));
         //Clear old robit skin caches
         //Note: We don't clear the cached models as the old JSONModelDatas should be able to properly handle reloading,
         // and we only clear the skin cache in case the skin no longer has a custom model (even though this is highly unlikely)

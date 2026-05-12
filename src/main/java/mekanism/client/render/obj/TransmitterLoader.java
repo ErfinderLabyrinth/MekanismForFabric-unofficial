@@ -3,13 +3,14 @@ package mekanism.client.render.obj;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import dev.felnull.specialmodelloader.api.SpecialModelLoaderAPI;
 import mekanism.api.JsonConstants;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.client.model.obj.ObjLoader;
-import net.minecraftforge.client.model.obj.ObjModel;
+import net.fabricmc.fabric.api.client.model.ModelProviderException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.UnbakedModel;
 import org.jetbrains.annotations.NotNull;
 
-public class TransmitterLoader implements IGeometryLoader<TransmitterModel> {
+public class TransmitterLoader {
 
     public static final TransmitterLoader INSTANCE = new TransmitterLoader();
 
@@ -17,13 +18,21 @@ public class TransmitterLoader implements IGeometryLoader<TransmitterModel> {
     }
 
     @NotNull
-    @Override
     public TransmitterModel read(@NotNull JsonObject modelContents, @NotNull JsonDeserializationContext deserializationContext) throws JsonParseException {
         //Wrap the Obj loader to read our file
-        ObjModel model = ObjLoader.INSTANCE.read(modelContents, deserializationContext);
-        ObjModel glass = null;
+        UnbakedModel model = null;
+        try {
+            model = SpecialModelLoaderAPI.getInstance().getObjLoader().loadModel(Minecraft.getInstance().getResourceManager(), modelContents);
+        } catch (ModelProviderException e) {
+            throw new RuntimeException(e);
+        }
+        UnbakedModel glass = null;
         if (modelContents.has(JsonConstants.GLASS)) {
-            glass = ObjLoader.INSTANCE.read(modelContents.getAsJsonObject(JsonConstants.GLASS), deserializationContext);
+            try {
+                glass = SpecialModelLoaderAPI.getInstance().getObjLoader().loadModel(Minecraft.getInstance().getResourceManager(), modelContents.getAsJsonObject(JsonConstants.GLASS));
+            } catch (ModelProviderException e) {
+                throw new RuntimeException(e);
+            }
         }
         return new TransmitterModel(model, glass);
     }

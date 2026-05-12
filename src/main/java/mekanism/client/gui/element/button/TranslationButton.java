@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.button;
 
-import java.util.function.Supplier;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.ILangEntry;
 import mekanism.client.gui.IGuiWrapper;
@@ -8,6 +7,8 @@ import mekanism.client.render.MekanismRenderer;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Supplier;
 
 public class TranslationButton extends MekanismButton {
 

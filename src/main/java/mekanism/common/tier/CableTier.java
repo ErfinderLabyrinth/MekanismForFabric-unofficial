@@ -2,9 +2,9 @@ package mekanism.common.tier;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.math.FloatingLong;
+import mekanism.api.math.FloatingLongSupplier;
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedFloatingLongValue;
 import mekanism.common.util.EnumUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ public enum CableTier implements ITier {
     private final FloatingLong baseCapacity;
     private final BaseTier baseTier;
     @Nullable
-    private CachedFloatingLongValue capacityReference;
+    private FloatingLongSupplier capacityReference;
 
     CableTier(BaseTier tier, FloatingLong capacity) {
         baseCapacity = capacity;
@@ -40,7 +40,7 @@ public enum CableTier implements ITier {
     }
 
     public FloatingLong getCableCapacity() {
-        return capacityReference == null ? getBaseCapacity() : capacityReference.getOrDefault();
+        return capacityReference == null ? getBaseCapacity() : capacityReference.get();
     }
 
     public FloatingLong getBaseCapacity() {
@@ -50,7 +50,7 @@ public enum CableTier implements ITier {
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the CableTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedFloatingLongValue capacityReference) {
+    public void setConfigReference(FloatingLongSupplier capacityReference) {
         this.capacityReference = capacityReference;
     }
 }

@@ -1,6 +1,5 @@
 package mekanism.common.capabilities.heat;
 
-import java.util.function.DoubleSupplier;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -9,6 +8,8 @@ import mekanism.api.heat.IHeatCapacitor;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.DoubleSupplier;
 
 @NothingNullByDefault
 public class BasicHeatCapacitor implements IHeatCapacitor {

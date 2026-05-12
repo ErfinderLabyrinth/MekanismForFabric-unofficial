@@ -1,8 +1,5 @@
 package mekanism.common.capabilities.energy;
 
-import java.util.Objects;
-import java.util.function.Predicate;
-import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
@@ -11,52 +8,56 @@ import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@NothingNullByDefault
-public class BasicEnergyContainer implements IEnergyContainer {
+import java.util.Objects;
+import java.util.function.Predicate;
 
+@NothingNullByDefault
+public class BasicEnergyContainer extends SnapshotParticipant<Long> implements IEnergyContainer {
     public static final Predicate<@NotNull AutomationType> alwaysTrue = ConstantPredicates.alwaysTrue();
     public static final Predicate<@NotNull AutomationType> alwaysFalse = ConstantPredicates.alwaysFalse();
     public static final Predicate<@NotNull AutomationType> internalOnly = automationType -> automationType == AutomationType.INTERNAL;
     public static final Predicate<@NotNull AutomationType> manualOnly = automationType -> automationType == AutomationType.MANUAL;
     public static final Predicate<@NotNull AutomationType> notExternal = automationType -> automationType != AutomationType.EXTERNAL;
 
-    public static BasicEnergyContainer create(FloatingLong maxEnergy, @Nullable IContentsListener listener) {
-        Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
+    public static BasicEnergyContainer create(long maxEnergy, @Nullable IContentsListener listener) {
+        //Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
         return new BasicEnergyContainer(maxEnergy, alwaysTrue, alwaysTrue, listener);
     }
 
-    public static BasicEnergyContainer input(FloatingLong maxEnergy, @Nullable IContentsListener listener) {
-        Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
+    public static BasicEnergyContainer input(long maxEnergy, @Nullable IContentsListener listener) {
+        //Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
         return new BasicEnergyContainer(maxEnergy, notExternal, alwaysTrue, listener);
     }
 
-    public static BasicEnergyContainer output(FloatingLong maxEnergy, @Nullable IContentsListener listener) {
-        Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
+    public static BasicEnergyContainer output(long maxEnergy, @Nullable IContentsListener listener) {
+        //Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
         return new BasicEnergyContainer(maxEnergy, alwaysTrue, internalOnly, listener);
     }
 
-    public static BasicEnergyContainer create(FloatingLong maxEnergy, Predicate<@NotNull AutomationType> canExtract, Predicate<@NotNull AutomationType> canInsert,
+    public static BasicEnergyContainer create(long maxEnergy, Predicate<@NotNull AutomationType> canExtract, Predicate<@NotNull AutomationType> canInsert,
           @Nullable IContentsListener listener) {
-        Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
+        //Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
         Objects.requireNonNull(canExtract, "Extraction validity check cannot be null");
         Objects.requireNonNull(canInsert, "Insertion validity check cannot be null");
         return new BasicEnergyContainer(maxEnergy, canExtract, canInsert, listener);
     }
 
-    private FloatingLong stored = FloatingLong.ZERO;
+    private long stored = 0;
     protected final Predicate<@NotNull AutomationType> canExtract;
     protected final Predicate<@NotNull AutomationType> canInsert;
-    private final FloatingLong maxEnergy;
+    private final long maxEnergy;
     @Nullable
     private final IContentsListener listener;
 
-    protected BasicEnergyContainer(FloatingLong maxEnergy, Predicate<@NotNull AutomationType> canExtract, Predicate<@NotNull AutomationType> canInsert,
+    protected BasicEnergyContainer(long maxEnergy, Predicate<@NotNull AutomationType> canExtract, Predicate<@NotNull AutomationType> canInsert,
           @Nullable IContentsListener listener) {
-        this.maxEnergy = maxEnergy.copyAsConst();
+        this.maxEnergy = maxEnergy;
         this.canExtract = canExtract;
         this.canInsert = canInsert;
         this.listener = listener;
@@ -70,15 +71,22 @@ public class BasicEnergyContainer implements IEnergyContainer {
     }
 
     @Override
-    public FloatingLong getEnergy() {
+    public long getEnergy() {
         return stored;
     }
 
     @Override
-    public void setEnergy(FloatingLong energy) {
-        if (!stored.equals(energy)) {
-            stored = energy.copy();
-            onContentsChanged();
+    public void setEnergy(long energy, TransactionContext t) {
+        if (stored != energy) {
+            updateSnapshots(t);
+            stored = energy;
+        }
+    }
+
+    @Override
+    public void setEnergy(long energy) {
+        if (stored != energy) {
+            stored = energy;
         }
     }
 
@@ -92,41 +100,41 @@ public class BasicEnergyContainer implements IEnergyContainer {
      * @implNote By default, this returns {@link FloatingLong#MAX_VALUE} to not actually limit the container's rate. By default, this is also ignored for direct setting
      * of the stack/stack size
      */
-    protected FloatingLong getRate(@Nullable AutomationType automationType) {
+    protected long getRate(@Nullable AutomationType automationType) {
         //TODO: Decide if we want to split this into a rate for inserting and a rate for extracting.
-        return FloatingLong.MAX_VALUE;
+        return Long.MAX_VALUE;
     }
 
     @Override
-    public FloatingLong insert(FloatingLong amount, Action action, AutomationType automationType) {
-        if (amount.isZero() || !canInsert.test(automationType)) {
-            return amount;
+    public long insert(long amount, TransactionContext t) {
+        if (amount == 0 || !canInsert.test(null)) {
+            return 0;
         }
-        FloatingLong needed = getRate(automationType).min(getNeeded());
-        if (needed.isZero()) {
+        long needed = Long.min(getRate(null), getNeeded());
+        if (needed == 0) {
             //Fail if we are a full container or our rate is zero
-            return amount;
+            return 0;
         }
-        FloatingLong toAdd = amount.min(needed);
-        if (!toAdd.isZero() && action.execute()) {
+        long toAdd = Long.min(amount, needed);
+        if (toAdd != 0) {
+            updateSnapshots(t);
             //If we want to actually insert the energy, then update the current energy
             // Note: this also will mark that the contents changed
-            stored = stored.plusEqual(toAdd);
-            onContentsChanged();
+            stored += toAdd;
         }
-        return amount.subtract(toAdd);
+        return toAdd;
     }
 
     @Override
-    public FloatingLong extract(FloatingLong amount, Action action, AutomationType automationType) {
-        if (isEmpty() || amount.isZero() || !canExtract.test(automationType)) {
-            return FloatingLong.ZERO;
+    public long extract(long amount, TransactionContext t) {
+        if (isEmpty() || amount == 0 || !canExtract.test(null)) {
+            return 0;
         }
-        FloatingLong ret = getRate(automationType).min(getEnergy()).min(amount).copy();
-        if (!ret.isZero() && action.execute()) {
+        long ret = Long.min(Long.min(getRate(null), getEnergy()), amount);
+        if (ret != 0) {
+            updateSnapshots(t);
             //Note: this also will mark that the contents changed
-            stored = stored.minusEqual(ret);
-            onContentsChanged();
+            stored -= ret;
         }
         return ret;
     }
@@ -138,11 +146,11 @@ public class BasicEnergyContainer implements IEnergyContainer {
      */
     @Override
     public boolean isEmpty() {
-        return stored.isZero();
+        return stored == 0;
     }
 
     @Override
-    public FloatingLong getMaxEnergy() {
+    public long getMaxEnergy() {
         return maxEnergy;
     }
 
@@ -155,13 +163,28 @@ public class BasicEnergyContainer implements IEnergyContainer {
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
         if (!isEmpty()) {
-            nbt.putString(NBTConstants.STORED, stored.toString());
+            nbt.putLong(NBTConstants.STORED, stored);
         }
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        NBTUtils.setFloatingLongIfPresent(nbt, NBTConstants.STORED, this::setEnergy);
+        NBTUtils.setLongIfPresent(nbt, NBTConstants.STORED, this::setEnergy);
+    }
+
+    @Override
+    protected Long createSnapshot() {
+        return stored;
+    }
+
+    @Override
+    protected void readSnapshot(Long snapshot) {
+        stored = snapshot;
+    }
+
+    @Override
+    protected void onFinalCommit() {
+        listener.onContentsChanged();
     }
 }

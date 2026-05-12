@@ -2,125 +2,30 @@ package mekanism.common.registries;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import java.util.EnumSet;
-import java.util.function.Supplier;
 import mekanism.api.Upgrade;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.MekanismLang;
 import mekanism.common.block.BlockPersonalStorage;
-import mekanism.common.block.attribute.Attribute;
-import mekanism.common.block.attribute.AttributeCustomSelectionBox;
-import mekanism.common.block.attribute.AttributeMultiblock;
-import mekanism.common.block.attribute.AttributeParticleFX;
-import mekanism.common.block.attribute.AttributeStateActive;
-import mekanism.common.block.attribute.AttributeStateBoilerValveMode;
-import mekanism.common.block.attribute.AttributeStateFacing;
+import mekanism.common.block.attribute.*;
 import mekanism.common.block.attribute.AttributeStateFacing.FacePlacementType;
-import mekanism.common.block.attribute.AttributeStateOpen;
-import mekanism.common.block.attribute.AttributeTier;
-import mekanism.common.block.attribute.AttributeUpgradeSupport;
-import mekanism.common.block.attribute.AttributeUpgradeable;
-import mekanism.common.block.attribute.Attributes;
-import mekanism.common.block.attribute.Attributes.AttributeComparator;
-import mekanism.common.block.attribute.Attributes.AttributeCustomResistance;
-import mekanism.common.block.attribute.Attributes.AttributeMobSpawn;
-import mekanism.common.block.attribute.Attributes.AttributeRedstone;
-import mekanism.common.block.attribute.Attributes.AttributeRedstoneEmitter;
-import mekanism.common.block.attribute.Attributes.AttributeSecurity;
+import mekanism.common.block.attribute.Attributes.*;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.content.blocktype.BlockShapes;
-import mekanism.common.content.blocktype.BlockType;
+import mekanism.common.content.blocktype.*;
 import mekanism.common.content.blocktype.BlockType.BlockTypeBuilder;
-import mekanism.common.content.blocktype.BlockTypeTile;
 import mekanism.common.content.blocktype.BlockTypeTile.BlockTileBuilder;
-import mekanism.common.content.blocktype.Factory;
 import mekanism.common.content.blocktype.Factory.FactoryBuilder;
-import mekanism.common.content.blocktype.FactoryType;
-import mekanism.common.content.blocktype.Machine;
 import mekanism.common.content.blocktype.Machine.FactoryMachine;
 import mekanism.common.content.blocktype.Machine.MachineBuilder;
 import mekanism.common.lib.math.Pos3D;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
-import mekanism.common.tier.BinTier;
-import mekanism.common.tier.ChemicalTankTier;
-import mekanism.common.tier.EnergyCubeTier;
-import mekanism.common.tier.FactoryTier;
-import mekanism.common.tier.FluidTankTier;
-import mekanism.common.tier.InductionCellTier;
-import mekanism.common.tier.InductionProviderTier;
-import mekanism.common.tile.TileEntityBin;
-import mekanism.common.tile.TileEntityChargepad;
-import mekanism.common.tile.TileEntityChemicalTank;
-import mekanism.common.tile.TileEntityEnergyCube;
-import mekanism.common.tile.TileEntityFluidTank;
-import mekanism.common.tile.TileEntityIndustrialAlarm;
-import mekanism.common.tile.TileEntityLogisticalSorter;
-import mekanism.common.tile.TileEntityModificationStation;
-import mekanism.common.tile.TileEntityPersonalBarrel;
-import mekanism.common.tile.TileEntityPersonalChest;
-import mekanism.common.tile.TileEntityPressureDisperser;
-import mekanism.common.tile.TileEntityQuantumEntangloporter;
-import mekanism.common.tile.TileEntityRadioactiveWasteBarrel;
-import mekanism.common.tile.TileEntitySecurityDesk;
-import mekanism.common.tile.TileEntityTeleporter;
+import mekanism.common.tier.*;
+import mekanism.common.tile.*;
 import mekanism.common.tile.laser.TileEntityLaser;
 import mekanism.common.tile.laser.TileEntityLaserAmplifier;
 import mekanism.common.tile.laser.TileEntityLaserTractorBeam;
-import mekanism.common.tile.machine.TileEntityAntiprotonicNucleosynthesizer;
-import mekanism.common.tile.machine.TileEntityChemicalCrystallizer;
-import mekanism.common.tile.machine.TileEntityChemicalDissolutionChamber;
-import mekanism.common.tile.machine.TileEntityChemicalInfuser;
-import mekanism.common.tile.machine.TileEntityChemicalInjectionChamber;
-import mekanism.common.tile.machine.TileEntityChemicalOxidizer;
-import mekanism.common.tile.machine.TileEntityChemicalWasher;
-import mekanism.common.tile.machine.TileEntityCombiner;
-import mekanism.common.tile.machine.TileEntityCrusher;
-import mekanism.common.tile.machine.TileEntityDigitalMiner;
-import mekanism.common.tile.machine.TileEntityDimensionalStabilizer;
-import mekanism.common.tile.machine.TileEntityElectricPump;
-import mekanism.common.tile.machine.TileEntityElectrolyticSeparator;
-import mekanism.common.tile.machine.TileEntityEnergizedSmelter;
-import mekanism.common.tile.machine.TileEntityEnrichmentChamber;
-import mekanism.common.tile.machine.TileEntityFluidicPlenisher;
-import mekanism.common.tile.machine.TileEntityFormulaicAssemblicator;
-import mekanism.common.tile.machine.TileEntityFuelwoodHeater;
-import mekanism.common.tile.machine.TileEntityIsotopicCentrifuge;
-import mekanism.common.tile.machine.TileEntityMetallurgicInfuser;
-import mekanism.common.tile.machine.TileEntityNutritionalLiquifier;
-import mekanism.common.tile.machine.TileEntityOredictionificator;
-import mekanism.common.tile.machine.TileEntityOsmiumCompressor;
-import mekanism.common.tile.machine.TileEntityPaintingMachine;
-import mekanism.common.tile.machine.TileEntityPigmentExtractor;
-import mekanism.common.tile.machine.TileEntityPigmentMixer;
-import mekanism.common.tile.machine.TileEntityPrecisionSawmill;
-import mekanism.common.tile.machine.TileEntityPressurizedReactionChamber;
-import mekanism.common.tile.machine.TileEntityPurificationChamber;
-import mekanism.common.tile.machine.TileEntityResistiveHeater;
-import mekanism.common.tile.machine.TileEntityRotaryCondensentrator;
-import mekanism.common.tile.machine.TileEntitySeismicVibrator;
-import mekanism.common.tile.machine.TileEntitySolarNeutronActivator;
-import mekanism.common.tile.multiblock.TileEntityBoilerCasing;
-import mekanism.common.tile.multiblock.TileEntityBoilerValve;
-import mekanism.common.tile.multiblock.TileEntityDynamicTank;
-import mekanism.common.tile.multiblock.TileEntityDynamicValve;
-import mekanism.common.tile.multiblock.TileEntityInductionCasing;
-import mekanism.common.tile.multiblock.TileEntityInductionCell;
-import mekanism.common.tile.multiblock.TileEntityInductionPort;
-import mekanism.common.tile.multiblock.TileEntityInductionProvider;
-import mekanism.common.tile.multiblock.TileEntitySPSCasing;
-import mekanism.common.tile.multiblock.TileEntitySPSPort;
-import mekanism.common.tile.multiblock.TileEntityStructuralGlass;
-import mekanism.common.tile.multiblock.TileEntitySuperchargedCoil;
-import mekanism.common.tile.multiblock.TileEntitySuperheatingElement;
-import mekanism.common.tile.multiblock.TileEntityThermalEvaporationBlock;
-import mekanism.common.tile.multiblock.TileEntityThermalEvaporationController;
-import mekanism.common.tile.multiblock.TileEntityThermalEvaporationValve;
-import mekanism.common.tile.qio.TileEntityQIODashboard;
-import mekanism.common.tile.qio.TileEntityQIODriveArray;
-import mekanism.common.tile.qio.TileEntityQIOExporter;
-import mekanism.common.tile.qio.TileEntityQIOImporter;
-import mekanism.common.tile.qio.TileEntityQIORedstoneAdapter;
+import mekanism.common.tile.machine.*;
+import mekanism.common.tile.multiblock.*;
+import mekanism.common.tile.qio.*;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.core.BlockPos;
@@ -128,12 +33,15 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
+import java.util.EnumSet;
+import java.util.function.Supplier;
+
 public class MekanismBlockTypes {
 
     private MekanismBlockTypes() {
     }
 
-    private static final FloatingLong RESISTIVE_HEATER_BASE_USAGE = FloatingLong.createConst(100);
+    private static final long RESISTIVE_HEATER_BASE_USAGE = 100;
 
     private static final Table<FactoryTier, FactoryType, Factory<?>> FACTORIES = HashBasedTable.create();
 
@@ -142,7 +50,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.ENRICHMENT_CHAMBER, MekanismLang.DESCRIPTION_ENRICHMENT_CHAMBER, FactoryType.ENRICHING)
           .withGui(() -> MekanismContainerTypes.ENRICHMENT_CHAMBER)
           .withSound(MekanismSounds.ENRICHMENT_CHAMBER)
-          .withEnergyConfig(MekanismConfig.usage.enrichmentChamber, MekanismConfig.storage.enrichmentChamber)
+          .withEnergyConfig(() -> MekanismConfig.usage.enrichmentChamber, () -> MekanismConfig.storage.enrichmentChamber)
           .withComputerSupport("enrichmentChamber")
           .build();
     // Crusher
@@ -150,7 +58,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.CRUSHER, MekanismLang.DESCRIPTION_CRUSHER, FactoryType.CRUSHING)
           .withGui(() -> MekanismContainerTypes.CRUSHER)
           .withSound(MekanismSounds.CRUSHER)
-          .withEnergyConfig(MekanismConfig.usage.crusher, MekanismConfig.storage.crusher)
+          .withEnergyConfig(() -> MekanismConfig.usage.crusher, () -> MekanismConfig.storage.crusher)
           .withComputerSupport("crusher")
           .build();
     // Energized Smelter
@@ -158,7 +66,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.ENERGIZED_SMELTER, MekanismLang.DESCRIPTION_ENERGIZED_SMELTER, FactoryType.SMELTING)
           .withGui(() -> MekanismContainerTypes.ENERGIZED_SMELTER)
           .withSound(MekanismSounds.ENERGIZED_SMELTER)
-          .withEnergyConfig(MekanismConfig.usage.energizedSmelter, MekanismConfig.storage.energizedSmelter)
+          .withEnergyConfig(() -> MekanismConfig.usage.energizedSmelter, () -> MekanismConfig.storage.energizedSmelter)
           .withComputerSupport("energizedSmelter")
           .build();
     // Precision Sawmill
@@ -166,7 +74,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.PRECISION_SAWMILL, MekanismLang.DESCRIPTION_PRECISION_SAWMILL, FactoryType.SAWING)
           .withGui(() -> MekanismContainerTypes.PRECISION_SAWMILL)
           .withSound(MekanismSounds.PRECISION_SAWMILL)
-          .withEnergyConfig(MekanismConfig.usage.precisionSawmill, MekanismConfig.storage.precisionSawmill)
+          .withEnergyConfig(() -> MekanismConfig.usage.precisionSawmill, () -> MekanismConfig.storage.precisionSawmill)
           .withComputerSupport("precisionSawmill")
           .build();
     // Osmium Compressor
@@ -174,7 +82,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.OSMIUM_COMPRESSOR, MekanismLang.DESCRIPTION_OSMIUM_COMPRESSOR, FactoryType.COMPRESSING)
           .withGui(() -> MekanismContainerTypes.OSMIUM_COMPRESSOR)
           .withSound(MekanismSounds.OSMIUM_COMPRESSOR)
-          .withEnergyConfig(MekanismConfig.usage.osmiumCompressor, MekanismConfig.storage.osmiumCompressor)
+          .withEnergyConfig(() -> MekanismConfig.usage.osmiumCompressor, () -> MekanismConfig.storage.osmiumCompressor)
           .withComputerSupport("osmiumCompressor")
           .build();
     // Combiner
@@ -182,7 +90,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.COMBINER, MekanismLang.DESCRIPTION_COMBINER, FactoryType.COMBINING)
           .withGui(() -> MekanismContainerTypes.COMBINER)
           .withSound(MekanismSounds.COMBINER)
-          .withEnergyConfig(MekanismConfig.usage.combiner, MekanismConfig.storage.combiner)
+          .withEnergyConfig(() -> MekanismConfig.usage.combiner, () -> MekanismConfig.storage.combiner)
           .withComputerSupport("combiner")
           .build();
     // Metallurgic Infuser
@@ -190,7 +98,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.METALLURGIC_INFUSER, MekanismLang.DESCRIPTION_METALLURGIC_INFUSER, FactoryType.INFUSING)
           .withGui(() -> MekanismContainerTypes.METALLURGIC_INFUSER)
           .withSound(MekanismSounds.METALLURGIC_INFUSER)
-          .withEnergyConfig(MekanismConfig.usage.metallurgicInfuser, MekanismConfig.storage.metallurgicInfuser)
+          .withEnergyConfig(() -> MekanismConfig.usage.metallurgicInfuser, () -> MekanismConfig.storage.metallurgicInfuser)
           .withCustomShape(BlockShapes.METALLURGIC_INFUSER)
           .withComputerSupport("metallurgicInfuser")
           .build();
@@ -199,7 +107,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.PURIFICATION_CHAMBER, MekanismLang.DESCRIPTION_PURIFICATION_CHAMBER, FactoryType.PURIFYING)
           .withGui(() -> MekanismContainerTypes.PURIFICATION_CHAMBER)
           .withSound(MekanismSounds.PURIFICATION_CHAMBER)
-          .withEnergyConfig(MekanismConfig.usage.purificationChamber, MekanismConfig.storage.purificationChamber)
+          .withEnergyConfig(() -> MekanismConfig.usage.purificationChamber, () -> MekanismConfig.storage.purificationChamber)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.MUFFLING, Upgrade.GAS))
           .withComputerSupport("purificationChamber")
           .build();
@@ -208,7 +116,7 @@ public class MekanismBlockTypes {
           .createFactoryMachine(() -> MekanismTileEntityTypes.CHEMICAL_INJECTION_CHAMBER, MekanismLang.DESCRIPTION_CHEMICAL_INJECTION_CHAMBER, FactoryType.INJECTING)
           .withGui(() -> MekanismContainerTypes.CHEMICAL_INJECTION_CHAMBER)
           .withSound(MekanismSounds.CHEMICAL_INJECTION_CHAMBER)
-          .withEnergyConfig(MekanismConfig.usage.chemicalInjectionChamber, MekanismConfig.storage.chemicalInjectionChamber)
+          .withEnergyConfig(() -> MekanismConfig.usage.chemicalInjectionChamber, () -> MekanismConfig.storage.chemicalInjectionChamber)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.MUFFLING, Upgrade.GAS))
           .withComputerSupport("chemicalInjectionChamber")
           .build();
@@ -217,7 +125,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.PRESSURIZED_REACTION_CHAMBER, MekanismLang.DESCRIPTION_PRESSURIZED_REACTION_CHAMBER)
           .withGui(() -> MekanismContainerTypes.PRESSURIZED_REACTION_CHAMBER)
           .withSound(MekanismSounds.PRESSURIZED_REACTION_CHAMBER)
-          .withEnergyConfig(MekanismConfig.usage.pressurizedReactionBase, MekanismConfig.storage.pressurizedReactionBase)
+          .withEnergyConfig(() -> MekanismConfig.usage.pressurizedReactionBase, () -> MekanismConfig.storage.pressurizedReactionBase)
           .withCustomShape(BlockShapes.PRESSURIZED_REACTION_CHAMBER)
           .withComputerSupport("pressurizedReactionChamber")
           .build();
@@ -226,7 +134,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.CHEMICAL_CRYSTALLIZER, MekanismLang.DESCRIPTION_CHEMICAL_CRYSTALLIZER)
           .withGui(() -> MekanismContainerTypes.CHEMICAL_CRYSTALLIZER)
           .withSound(MekanismSounds.CHEMICAL_CRYSTALLIZER)
-          .withEnergyConfig(MekanismConfig.usage.chemicalCrystallizer, MekanismConfig.storage.chemicalCrystallizer)
+          .withEnergyConfig(() -> MekanismConfig.usage.chemicalCrystallizer, () -> MekanismConfig.storage.chemicalCrystallizer)
           .withCustomShape(BlockShapes.CHEMICAL_CRYSTALLIZER)
           .withComputerSupport("chemicalCrystallizer")
           .build();
@@ -235,7 +143,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.CHEMICAL_DISSOLUTION_CHAMBER, MekanismLang.DESCRIPTION_CHEMICAL_DISSOLUTION_CHAMBER)
           .withGui(() -> MekanismContainerTypes.CHEMICAL_DISSOLUTION_CHAMBER)
           .withSound(MekanismSounds.CHEMICAL_DISSOLUTION_CHAMBER)
-          .withEnergyConfig(MekanismConfig.usage.chemicalDissolutionChamber, MekanismConfig.storage.chemicalDissolutionChamber)
+          .withEnergyConfig(() -> MekanismConfig.usage.chemicalDissolutionChamber, () -> MekanismConfig.storage.chemicalDissolutionChamber)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.MUFFLING, Upgrade.GAS))
           .withCustomShape(BlockShapes.CHEMICAL_DISSOLUTION_CHAMBER)
           .withComputerSupport("chemicalDissolutionChamber")
@@ -245,7 +153,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.CHEMICAL_INFUSER, MekanismLang.DESCRIPTION_CHEMICAL_INFUSER)
           .withGui(() -> MekanismContainerTypes.CHEMICAL_INFUSER)
           .withSound(MekanismSounds.CHEMICAL_INFUSER)
-          .withEnergyConfig(MekanismConfig.usage.chemicalInfuser, MekanismConfig.storage.chemicalInfuser)
+          .withEnergyConfig(() -> MekanismConfig.usage.chemicalInfuser, () -> MekanismConfig.storage.chemicalInfuser)
           .withCustomShape(BlockShapes.CHEMICAL_INFUSER)
           .withComputerSupport("chemicalInfuser")
           .build();
@@ -254,7 +162,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.CHEMICAL_OXIDIZER, MekanismLang.DESCRIPTION_CHEMICAL_OXIDIZER)
           .withGui(() -> MekanismContainerTypes.CHEMICAL_OXIDIZER)
           .withSound(MekanismSounds.CHEMICAL_OXIDIZER)
-          .withEnergyConfig(MekanismConfig.usage.oxidationChamber, MekanismConfig.storage.oxidationChamber)
+          .withEnergyConfig(() -> MekanismConfig.usage.oxidationChamber, () -> MekanismConfig.storage.oxidationChamber)
           .withCustomShape(BlockShapes.CHEMICAL_OXIDIZER)
           .withComputerSupport("chemicalOxidizer")
           .build();
@@ -263,7 +171,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.CHEMICAL_WASHER, MekanismLang.DESCRIPTION_CHEMICAL_WASHER)
           .withGui(() -> MekanismContainerTypes.CHEMICAL_WASHER)
           .withSound(MekanismSounds.CHEMICAL_WASHER)
-          .withEnergyConfig(MekanismConfig.usage.chemicalWasher, MekanismConfig.storage.chemicalWasher)
+          .withEnergyConfig(() -> MekanismConfig.usage.chemicalWasher, () -> MekanismConfig.storage.chemicalWasher)
           .withCustomShape(BlockShapes.CHEMICAL_WASHER)
           .withComputerSupport("chemicalWasher")
           .build();
@@ -272,7 +180,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.ROTARY_CONDENSENTRATOR, MekanismLang.DESCRIPTION_ROTARY_CONDENSENTRATOR)
           .withGui(() -> MekanismContainerTypes.ROTARY_CONDENSENTRATOR)
           .withSound(MekanismSounds.ROTARY_CONDENSENTRATOR)
-          .withEnergyConfig(MekanismConfig.usage.rotaryCondensentrator, MekanismConfig.storage.rotaryCondensentrator)
+          .withEnergyConfig(() -> MekanismConfig.usage.rotaryCondensentrator, () -> MekanismConfig.storage.rotaryCondensentrator)
           .withCustomShape(BlockShapes.ROTARY_CONDENSENTRATOR)
           .withComputerSupport("rotaryCondensentrator")
           .build();
@@ -281,7 +189,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.ELECTROLYTIC_SEPARATOR, MekanismLang.DESCRIPTION_ELECTROLYTIC_SEPARATOR)
           .withGui(() -> MekanismContainerTypes.ELECTROLYTIC_SEPARATOR)
           .withSound(MekanismSounds.ELECTROLYTIC_SEPARATOR)
-          .withEnergyConfig(() -> MekanismConfig.general.FROM_H2.get().multiply(2), MekanismConfig.storage.electrolyticSeparator)
+          .withEnergyConfig(() -> MekanismConfig.general.FROM_H2 * 2, () -> MekanismConfig.storage.electrolyticSeparator)
           .withCustomShape(BlockShapes.ELECTROLYTIC_SEPARATOR)
           .withComputerSupport("electrolyticSeparator")
           .build();
@@ -289,7 +197,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntityDigitalMiner> DIGITAL_MINER = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.DIGITAL_MINER, MekanismLang.DESCRIPTION_DIGITAL_MINER)
           .withGui(() -> MekanismContainerTypes.DIGITAL_MINER)
-          .withEnergyConfig(MekanismConfig.usage.digitalMiner, MekanismConfig.storage.digitalMiner)
+          .withEnergyConfig(() -> MekanismConfig.usage.digitalMiner, () -> MekanismConfig.storage.digitalMiner)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.ANCHOR, Upgrade.STONE_GENERATOR))
           .withCustomShape(BlockShapes.DIGITAL_MINER)
           .with(AttributeCustomSelectionBox.JSON)
@@ -311,7 +219,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntityFormulaicAssemblicator> FORMULAIC_ASSEMBLICATOR = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.FORMULAIC_ASSEMBLICATOR, MekanismLang.DESCRIPTION_FORMULAIC_ASSEMBLICATOR)
           .withGui(() -> MekanismContainerTypes.FORMULAIC_ASSEMBLICATOR)
-          .withEnergyConfig(MekanismConfig.usage.formulaicAssemblicator, MekanismConfig.storage.formulaicAssemblicator)
+          .withEnergyConfig(() -> MekanismConfig.usage.formulaicAssemblicator, () -> MekanismConfig.storage.formulaicAssemblicator)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY))
           .withComputerSupport("formulaicAssemblicator")
           .build();
@@ -319,7 +227,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntityElectricPump> ELECTRIC_PUMP = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.ELECTRIC_PUMP, MekanismLang.DESCRIPTION_ELECTRIC_PUMP)
           .withGui(() -> MekanismContainerTypes.ELECTRIC_PUMP)
-          .withEnergyConfig(MekanismConfig.usage.electricPump, MekanismConfig.storage.electricPump)
+          .withEnergyConfig(() -> MekanismConfig.usage.electricPump, () -> MekanismConfig.storage.electricPump)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.FILTER))
           .withCustomShape(BlockShapes.ELECTRIC_PUMP)
           .withComputerSupport("electricPump")
@@ -329,7 +237,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntityFluidicPlenisher> FLUIDIC_PLENISHER = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.FLUIDIC_PLENISHER, MekanismLang.DESCRIPTION_FLUIDIC_PLENISHER)
           .withGui(() -> MekanismContainerTypes.FLUIDIC_PLENISHER)
-          .withEnergyConfig(MekanismConfig.usage.fluidicPlenisher, MekanismConfig.storage.fluidicPlenisher)
+          .withEnergyConfig(() -> MekanismConfig.usage.fluidicPlenisher, () -> MekanismConfig.storage.fluidicPlenisher)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY))
           .withCustomShape(BlockShapes.FLUIDIC_PLENISHER)
           .withComputerSupport("fluidicPlenisher")
@@ -350,7 +258,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntityTeleporter> TELEPORTER = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.TELEPORTER, MekanismLang.DESCRIPTION_TELEPORTER)
           .withGui(() -> MekanismContainerTypes.TELEPORTER)
-          .withEnergyConfig(MekanismConfig.storage.teleporter)
+          .withEnergyConfig(() -> MekanismConfig.storage.teleporter)
           .withSupportedUpgrades(EnumSet.of(Upgrade.ANCHOR))
           .without(AttributeStateActive.class, AttributeStateFacing.class, AttributeParticleFX.class)
           .withLight(3)
@@ -359,7 +267,7 @@ public class MekanismBlockTypes {
     // Chargepad
     public static final BlockTypeTile<TileEntityChargepad> CHARGEPAD = BlockTileBuilder
           .createBlock(() -> MekanismTileEntityTypes.CHARGEPAD, MekanismLang.DESCRIPTION_CHARGEPAD)
-          .withEnergyConfig(MekanismConfig.usage.chargePad, MekanismConfig.storage.chargePad)
+          .withEnergyConfig(() -> MekanismConfig.usage.chargePad, () -> MekanismConfig.storage.chargePad)
           .withSound(MekanismSounds.CHARGEPAD)
           .with(Attributes.ACTIVE_LIGHT, new AttributeStateFacing())
           .withCustomShape(BlockShapes.CHARGEPAD)
@@ -368,7 +276,7 @@ public class MekanismBlockTypes {
     // Laser
     public static final BlockTypeTile<TileEntityLaser> LASER = BlockTileBuilder
           .createBlock(() -> MekanismTileEntityTypes.LASER, MekanismLang.DESCRIPTION_LASER)
-          .withEnergyConfig(MekanismConfig.usage.laser, MekanismConfig.storage.laser)
+          .withEnergyConfig(() -> MekanismConfig.usage.laser, () -> MekanismConfig.storage.laser)
           .withSound(MekanismSounds.LASER)
           .with(Attributes.ACTIVE, new AttributeStateFacing(BlockStateProperties.FACING, FacePlacementType.SELECTED_FACE), Attributes.SECURITY)
           .withCustomShape(BlockShapes.LASER)
@@ -377,7 +285,7 @@ public class MekanismBlockTypes {
     // Laser Amplifier
     public static final BlockTypeTile<TileEntityLaserAmplifier> LASER_AMPLIFIER = BlockTileBuilder.createBlock(() -> MekanismTileEntityTypes.LASER_AMPLIFIER, MekanismLang.DESCRIPTION_LASER_AMPLIFIER)
           .withGui(() -> MekanismContainerTypes.LASER_AMPLIFIER)
-          .withEnergyConfig(MekanismConfig.storage.laserAmplifier)
+          .withEnergyConfig(() -> MekanismConfig.storage.laserAmplifier)
           .with(new AttributeStateFacing(BlockStateProperties.FACING, FacePlacementType.SELECTED_FACE),
                 new AttributeRedstoneEmitter<>((tile, side) -> tile.getRedstoneLevel()), Attributes.REDSTONE, Attributes.COMPARATOR, Attributes.SECURITY)
           .withCustomShape(BlockShapes.LASER_AMPLIFIER)
@@ -387,7 +295,7 @@ public class MekanismBlockTypes {
     public static final BlockTypeTile<TileEntityLaserTractorBeam> LASER_TRACTOR_BEAM = BlockTileBuilder
           .createBlock(() -> MekanismTileEntityTypes.LASER_TRACTOR_BEAM, MekanismLang.DESCRIPTION_LASER_TRACTOR_BEAM)
           .withGui(() -> MekanismContainerTypes.LASER_TRACTOR_BEAM)
-          .withEnergyConfig(MekanismConfig.storage.laserTractorBeam)
+          .withEnergyConfig(() -> MekanismConfig.storage.laserTractorBeam)
           .with(new AttributeStateFacing(BlockStateProperties.FACING, FacePlacementType.SELECTED_FACE), Attributes.COMPARATOR, Attributes.SECURITY, Attributes.INVENTORY)
           .withCustomShape(BlockShapes.LASER_AMPLIFIER)
           .withComputerSupport("laserTractorBeam")
@@ -407,7 +315,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntitySeismicVibrator> SEISMIC_VIBRATOR = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.SEISMIC_VIBRATOR, MekanismLang.DESCRIPTION_SEISMIC_VIBRATOR)
           .withGui(() -> MekanismContainerTypes.SEISMIC_VIBRATOR)
-          .withEnergyConfig(MekanismConfig.usage.seismicVibrator, MekanismConfig.storage.seismicVibrator)
+          .withEnergyConfig(() -> MekanismConfig.usage.seismicVibrator, () -> MekanismConfig.storage.seismicVibrator)
           .without(AttributeComparator.class, AttributeParticleFX.class, AttributeUpgradeSupport.class)
           .withCustomShape(BlockShapes.SEISMIC_VIBRATOR)
           .with(AttributeCustomSelectionBox.JAVA)
@@ -479,7 +387,7 @@ public class MekanismBlockTypes {
     public static final BlockTypeTile<TileEntityModificationStation> MODIFICATION_STATION = BlockTileBuilder
           .createBlock(() -> MekanismTileEntityTypes.MODIFICATION_STATION, MekanismLang.DESCRIPTION_MODIFICATION_STATION)
           .withGui(() -> MekanismContainerTypes.MODIFICATION_STATION)
-          .withEnergyConfig(MekanismConfig.usage.modificationStation, MekanismConfig.storage.modificationStation)
+          .withEnergyConfig(() -> MekanismConfig.usage.modificationStation, () -> MekanismConfig.storage.modificationStation)
           .with(Attributes.INVENTORY, new AttributeStateFacing(false), Attributes.REDSTONE, Attributes.SECURITY)
           .withCustomShape(BlockShapes.MODIFICATION_STATION)
           .with(AttributeCustomSelectionBox.JSON)
@@ -495,7 +403,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntityIsotopicCentrifuge> ISOTOPIC_CENTRIFUGE = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.ISOTOPIC_CENTRIFUGE, MekanismLang.DESCRIPTION_ISOTOPIC_CENTRIFUGE)
           .withGui(() -> MekanismContainerTypes.ISOTOPIC_CENTRIFUGE)
-          .withEnergyConfig(MekanismConfig.usage.isotopicCentrifuge, MekanismConfig.storage.isotopicCentrifuge)
+          .withEnergyConfig(() -> MekanismConfig.usage.isotopicCentrifuge, () -> MekanismConfig.storage.isotopicCentrifuge)
           .withSound(MekanismSounds.ISOTOPIC_CENTRIFUGE)
           .withCustomShape(BlockShapes.ISOTOPIC_CENTRIFUGE)
           .withBounding((pos, state, builder) -> builder.add(pos.above()))
@@ -505,7 +413,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntityNutritionalLiquifier> NUTRITIONAL_LIQUIFIER = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.NUTRITIONAL_LIQUIFIER, MekanismLang.DESCRIPTION_NUTRITIONAL_LIQUIFIER)
           .withGui(() -> MekanismContainerTypes.NUTRITIONAL_LIQUIFIER)
-          .withEnergyConfig(MekanismConfig.usage.nutritionalLiquifier, MekanismConfig.storage.nutritionalLiquifier)
+          .withEnergyConfig(() -> MekanismConfig.usage.nutritionalLiquifier, () -> MekanismConfig.storage.nutritionalLiquifier)
           .withSound(MekanismSounds.NUTRITIONAL_LIQUIFIER)
           .withComputerSupport("nutritionalLiquifier")
           .build();
@@ -513,7 +421,7 @@ public class MekanismBlockTypes {
     public static final Machine<TileEntityAntiprotonicNucleosynthesizer> ANTIPROTONIC_NUCLEOSYNTHESIZER = MachineBuilder
           .createMachine(() -> MekanismTileEntityTypes.ANTIPROTONIC_NUCLEOSYNTHESIZER, MekanismLang.DESCRIPTION_ANTIPROTONIC_NUCLEOSYNTHESIZER)
           .withGui(() -> MekanismContainerTypes.ANTIPROTONIC_NUCLEOSYNTHESIZER)
-          .withEnergyConfig(MekanismConfig.usage.antiprotonicNucleosynthesizer, MekanismConfig.storage.antiprotonicNucleosynthesizer)
+          .withEnergyConfig(() -> MekanismConfig.usage.antiprotonicNucleosynthesizer, () -> MekanismConfig.storage.antiprotonicNucleosynthesizer)
           .withSound(MekanismSounds.ANTIPROTONIC_NUCLEOSYNTHESIZER)
           .withSupportedUpgrades(EnumSet.of(Upgrade.MUFFLING))
           .withCustomShape(BlockShapes.ANTIPROTONIC_NUCLEOSYNTHESIZER)
@@ -524,7 +432,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.PIGMENT_EXTRACTOR, MekanismLang.DESCRIPTION_PIGMENT_EXTRACTOR)
           .withGui(() -> MekanismContainerTypes.PIGMENT_EXTRACTOR)
           .withSound(MekanismSounds.PIGMENT_EXTRACTOR)
-          .withEnergyConfig(MekanismConfig.usage.pigmentExtractor, MekanismConfig.storage.pigmentExtractor)
+          .withEnergyConfig(() -> MekanismConfig.usage.pigmentExtractor, () -> MekanismConfig.storage.pigmentExtractor)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.MUFFLING))
           .withComputerSupport("pigmentExtractor")
           .build();
@@ -533,7 +441,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.PIGMENT_MIXER, MekanismLang.DESCRIPTION_PIGMENT_MIXER)
           .withGui(() -> MekanismContainerTypes.PIGMENT_MIXER)
           .withSound(MekanismSounds.PIGMENT_MIXER)
-          .withEnergyConfig(MekanismConfig.usage.pigmentMixer, MekanismConfig.storage.pigmentMixer)
+          .withEnergyConfig(() -> MekanismConfig.usage.pigmentMixer, () -> MekanismConfig.storage.pigmentMixer)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.MUFFLING))
           .withCustomShape(BlockShapes.PIGMENT_MIXER)
           .with(AttributeCustomSelectionBox.JAVA)
@@ -545,7 +453,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.PAINTING_MACHINE, MekanismLang.DESCRIPTION_PAINTING_MACHINE)
           .withGui(() -> MekanismContainerTypes.PAINTING_MACHINE)
           .withSound(MekanismSounds.PAINTING_MACHINE)
-          .withEnergyConfig(MekanismConfig.usage.paintingMachine, MekanismConfig.storage.paintingMachine)
+          .withEnergyConfig(() -> MekanismConfig.usage.paintingMachine, () -> MekanismConfig.storage.paintingMachine)
           .withSupportedUpgrades(EnumSet.of(Upgrade.SPEED, Upgrade.ENERGY, Upgrade.MUFFLING))
           .withComputerSupport("paintingMachine")
           .build();
@@ -554,7 +462,7 @@ public class MekanismBlockTypes {
           .createMachine(() -> MekanismTileEntityTypes.DIMENSIONAL_STABILIZER, MekanismLang.DESCRIPTION_DIMENSIONAL_STABILIZER)
           .withGui(() -> MekanismContainerTypes.DIMENSIONAL_STABILIZER)
           .without(AttributeStateFacing.class, AttributeParticleFX.class)
-          .withEnergyConfig(MekanismConfig.usage.dimensionalStabilizer, MekanismConfig.storage.dimensionalStabilizer)
+          .withEnergyConfig(() -> MekanismConfig.usage.dimensionalStabilizer, () -> MekanismConfig.storage.dimensionalStabilizer)
           .withSupportedUpgrades(EnumSet.of(Upgrade.ENERGY))
           .withComputerSupport("dimensionalStabilizer")
           .build();
@@ -720,7 +628,7 @@ public class MekanismBlockTypes {
           .createBlock(() -> MekanismTileEntityTypes.SPS_PORT, MekanismLang.DESCRIPTION_SPS_PORT)
           .withGui(() -> MekanismContainerTypes.SPS, MekanismLang.SPS)
           .withSound(MekanismSounds.SPS)
-          .withEnergyConfig(MekanismConfig.storage.spsPort)
+          .withEnergyConfig(() -> MekanismConfig.storage.spsPort)
           .with(Attributes.ACTIVE, Attributes.COMPARATOR)
           .externalMultiblock()
           .withComputerSupport("spsPort")

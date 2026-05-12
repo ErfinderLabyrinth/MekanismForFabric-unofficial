@@ -1,9 +1,5 @@
 package mekanism.common.base;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.Arrays;
-import java.util.Set;
 import mekanism.api.text.EnumColor;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
@@ -15,6 +11,11 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Arrays;
+import java.util.Set;
 
 public final class HolidayManager {
 
@@ -40,7 +41,7 @@ public final class HolidayManager {
     }
 
     public static void notify(Player player) {
-        if (MekanismConfig.client.holidays.get()) {
+        if (MekanismConfig.client.holidays) {
             for (Holiday holiday : holidays) {
                 if (holiday.isToday() && !holiday.hasNotified()) {
                     holiday.notify(player);
@@ -51,7 +52,7 @@ public final class HolidayManager {
 
     public static SoundEventRegistryObject<SoundEvent> filterSound(SoundEventRegistryObject<SoundEvent> sound) {
         //Only filter sounds when on the client
-        if (MekanismConfig.client.isLoaded() && MekanismConfig.client.holidays.get()) {
+        if (MekanismConfig.client.isLoaded() && MekanismConfig.client.holidays) {
             for (Holiday holiday : holidays) {
                 if (holiday.isToday()) {
                     return holiday.filterSound(sound);

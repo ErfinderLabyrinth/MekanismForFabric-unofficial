@@ -1,19 +1,20 @@
 package mekanism.api.inventory;
 
 import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
+import mekanism.api.NBTSerializable;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
-public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContentsListener {
+public interface IInventorySlot extends NBTSerializable<CompoundTag>, IContentsListener, SingleSlotStorage<ItemVariant> {
 
     /**
      * Returns the {@link ItemStack} in this {@link IInventorySlot}.
@@ -46,6 +47,8 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
      */
     void setStack(ItemStack stack);
 
+    void updateSnapshots(TransactionContext t);
+
     /**
      * <p>
      * Inserts an {@link ItemStack} into this {@link IInventorySlot} and return the remainder. The {@link ItemStack} <em>should not</em> be modified in this function!
@@ -65,35 +68,37 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
      * {@link #onContentsChanged()}. It is also recommended to override this if your internal {@link ItemStack} is mutable so that a copy does not have to be made every
      * run
      */
-    default ItemStack insertItem(ItemStack stack, Action action, AutomationType automationType) {
-        if (stack.isEmpty() || !isItemValid(stack)) {
+
+
+    default long insert(ItemVariant resource, long amount, TransactionContext transaction) {
+        updateSnapshots(transaction);
+        ItemStack stack = resource.toStack((int)Math.max(Integer.MAX_VALUE, amount));
+        if (resource.isBlank() || amount == 0 || !isItemValid(stack)) {
             //"Fail quick" if the given stack is empty, or we can never insert the item or currently are unable to insert it
-            return stack;
+            return 0;
         }
         int needed = getLimit(stack) - getCount();
         if (needed <= 0) {
             //Fail if we are a full slot
-            return stack;
+            return 0;
         }
         boolean sameType = false;
-        if (isEmpty() || (sameType = ItemHandlerHelper.canItemStacksStack(getStack(), stack))) {
+        if (isEmpty() || (sameType = ItemEntity.areMergable(getStack(), stack))) {
             int toAdd = Math.min(stack.getCount(), needed);
-            if (action.execute()) {
-                //If we want to actually insert the item, then update the current item
-                if (sameType) {
-                    // Note: this also will mark that the contents changed
-                    //We can just grow our stack by the amount we want to increase it
-                    growStack(toAdd, action);
-                } else {
-                    //If we are not the same type then we have to copy the stack and set it
-                    // Note: this also will mark that the contents changed
-                    setStack(stack.copyWithCount(toAdd));
-                }
+            //If we want to actually insert the item, then update the current item
+            if (sameType) {
+                // Note: this also will mark that the contents changed
+                //We can just grow our stack by the amount we want to increase it
+                growStack(toAdd);
+            } else {
+                //If we are not the same type then we have to copy the stack and set it
+                // Note: this also will mark that the contents changed
+                setStack(stack.copyWithCount(toAdd));
             }
-            return stack.copyWithCount(stack.getCount() - toAdd);
+            return toAdd;
         }
         //If we didn't accept this item, then just return the given stack
-        return stack;
+        return 0;
     }
 
     /**
@@ -114,10 +119,13 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
      * sure to call {@link #onContentsChanged()}. It is also recommended to override this if your internal {@link ItemStack} is mutable so that a copy does not have to be
      * made every run
      */
-    default ItemStack extractItem(int amount, Action action, AutomationType automationType) {
+
+
+    default long extract(ItemVariant resource, long amount, TransactionContext transaction) {
+        updateSnapshots(transaction);
         if (isEmpty() || amount < 1) {
             //"Fail quick" if we don't can never extract from this slot, have an item stored, or the amount being requested is less than one
-            return ItemStack.EMPTY;
+            return 0;
         }
         ItemStack current = getStack();
         //Ensure that if this slot allows going past the max stack size of an item, that when extracting we don't act as if we have more than
@@ -129,13 +137,10 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
         }
         //Note: While we technically could just return the stack itself if we are removing all that we have, it would require a lot more checks
         // especially for supporting the fact of limiting by the max stack size.
-        ItemStack toReturn = current.copyWithCount(amount);
-        if (action.execute()) {
-            //If shrink gets the size to zero it will update the empty state so that isEmpty() returns true.
-            // Note: this also will mark that the contents changed
-            shrinkStack(amount, action);
-        }
-        return toReturn;
+        //If shrink gets the size to zero it will update the empty state so that isEmpty() returns true.
+        // Note: this also will mark that the contents changed
+        shrinkStack((int)amount);
+        return amount;
     }
 
     /**
@@ -192,13 +197,11 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
      * @implNote It is recommended to override this if your internal {@link ItemStack} is mutable so that a copy does not have to be made every run. If the internal stack
      * does get updated make sure to call {@link #onContentsChanged()}
      */
-    default int setStackSize(int amount, Action action) {
+    default int setStackSize(int amount) {
         if (isEmpty()) {
             return 0;
         } else if (amount <= 0) {
-            if (action.execute()) {
-                setEmpty();
-            }
+            setEmpty();
             return 0;
         }
         ItemStack stack = getStack();
@@ -206,7 +209,7 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
         if (amount > maxStackSize) {
             amount = maxStackSize;
         }
-        if (stack.getCount() == amount || action.simulate()) {
+        if (stack.getCount() == amount) {
             //If our size is not changing, or we are only simulating the change, don't do anything
             return amount;
         }
@@ -228,13 +231,13 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
      * @apiNote Negative values for amount are valid, and will instead cause the stack to shrink.
      * @implNote If the internal stack does get updated make sure to call {@link #onContentsChanged()}
      */
-    default int growStack(int amount, Action action) {
+    default int growStack(int amount) {
         int current = getCount();
         if (amount > 0) {
             //Cap adding amount at how much we need, so that we don't risk integer overflow
             amount = Math.min(amount, getLimit(getStack()));
         }
-        int newSize = setStackSize(current + amount, action);
+        int newSize = setStackSize(current + amount);
         return newSize - current;
     }
 
@@ -252,8 +255,8 @@ public interface IInventorySlot extends INBTSerializable<CompoundTag>, IContents
      * @apiNote Negative values for amount are valid, and will instead cause the stack to grow.
      * @implNote If the internal stack does get updated make sure to call {@link #onContentsChanged()}
      */
-    default int shrinkStack(int amount, Action action) {
-        return -growStack(-amount, action);
+    default int shrinkStack(int amount) {
+        return -growStack(-amount);
     }
 
     /**

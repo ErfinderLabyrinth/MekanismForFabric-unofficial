@@ -15,4 +15,8 @@ public class MekanismIntProviderTypes {
 
     public static final IntProviderTypeRegistryObject<ConfigurableConstantInt> CONFIGURABLE_CONSTANT = INT_PROVIDER_TYPES.register("configurable_constant", ConfigurableConstantInt.CODEC);
     public static final IntProviderTypeRegistryObject<ConfigurableUniformInt> CONFIGURABLE_UNIFORM = INT_PROVIDER_TYPES.register("configurable_uniform", ConfigurableUniformInt.CODEC);
+
+    public static void register() {
+
+    }
 }

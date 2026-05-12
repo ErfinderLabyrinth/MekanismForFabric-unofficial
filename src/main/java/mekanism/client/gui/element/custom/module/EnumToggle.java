@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.custom.module;
 
-import java.util.List;
 import mekanism.api.gear.config.ModuleEnumData;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.common.content.gear.ModuleConfigItem;
@@ -10,6 +9,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+
+import java.util.List;
 
 class EnumToggle<TYPE extends Enum<TYPE> & IHasTextComponent> extends MiniElement {
 

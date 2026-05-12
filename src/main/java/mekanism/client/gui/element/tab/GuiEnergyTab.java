@@ -1,14 +1,6 @@
 package mekanism.client.gui.element.tab;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BooleanSupplier;
-import java.util.function.UnaryOperator;
 import mekanism.api.IIncrementalEnum;
-import mekanism.api.math.FloatingLong;
-import mekanism.api.math.FloatingLongSupplier;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiTexturedElement;
 import mekanism.common.MekanismLang;
@@ -24,6 +16,14 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.LongSupplier;
+import java.util.function.UnaryOperator;
+
 public class GuiEnergyTab extends GuiTexturedElement {
 
     private static final Map<EnergyUnit, ResourceLocation> ICONS = new EnumMap<>(EnergyUnit.class);
@@ -34,8 +34,8 @@ public class GuiEnergyTab extends GuiTexturedElement {
         infoHandler = handler;
     }
 
-    public GuiEnergyTab(IGuiWrapper gui, MachineEnergyContainer<?> energyContainer, FloatingLongSupplier lastEnergyUsed) {
-        this(gui, () -> List.of(MekanismLang.USING.translate(EnergyDisplay.of(lastEnergyUsed.get())),
+    public GuiEnergyTab(IGuiWrapper gui, MachineEnergyContainer<?> energyContainer, LongSupplier lastEnergyUsed) {
+        this(gui, () -> List.of(MekanismLang.USING.translate(EnergyDisplay.of(lastEnergyUsed.getAsLong())),
               MekanismLang.NEEDED.translate(EnergyDisplay.of(energyContainer.getNeeded()))));
     }
 
@@ -45,7 +45,7 @@ public class GuiEnergyTab extends GuiTexturedElement {
             //Note: This isn't the most accurate using calculation as deactivation doesn't sync instantly
             // to the client, but it is close enough given a lot more things would have to be kept track of otherwise
             // which would lead to higher memory usage
-            FloatingLong using = isActive.getAsBoolean() ? energyContainer.getEnergyPerTick() : FloatingLong.ZERO;
+            long using = isActive.getAsBoolean() ? energyContainer.getEnergyPerTick() : 0;
             return List.of(MekanismLang.USING.translate(EnergyDisplay.of(using)),
                   MekanismLang.NEEDED.translate(EnergyDisplay.of(energyContainer.getNeeded())));
         });
@@ -89,8 +89,8 @@ public class GuiEnergyTab extends GuiTexturedElement {
         EnergyUnit current = EnergyUnit.getConfigured();
         EnergyUnit updated = converter.apply(current);
         if (current != updated) {//May be equal if all other energy types are disabled
-            MekanismConfig.common.energyUnit.set(updated);
-            MekanismConfig.common.save();
+            MekanismConfig.common.energyUnit = updated;
+//            MekanismConfig.common.save();
         }
     }
 }

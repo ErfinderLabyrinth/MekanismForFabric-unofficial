@@ -1,37 +1,45 @@
 package mekanism.common.lib.transmitter.acceptor;
 
-import java.util.Objects;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.content.network.transmitter.Transmitter;
 import mekanism.common.lib.transmitter.acceptor.AcceptorCache.AcceptorInfo;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
-import mekanism.common.util.CapabilityUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullConsumer;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+//TODO remove and replace?
 @NothingNullByDefault
 public class AcceptorCache<ACCEPTOR> extends AbstractAcceptorCache<ACCEPTOR, AcceptorInfo<ACCEPTOR>> {
-
-    public AcceptorCache(Transmitter<ACCEPTOR, ?, ?> transmitter, TileEntityTransmitter transmitterTile) {
+    BlockApiLookup<ACCEPTOR, Direction> lookup;
+    public AcceptorCache(Transmitter<ACCEPTOR, ?, ?> transmitter, TileEntityTransmitter transmitterTile, BlockApiLookup<ACCEPTOR, Direction> lookup) {
         super(transmitter, transmitterTile);
+        this.lookup = lookup;
     }
 
-    protected void updateCachedAcceptorAndListen(Direction side, BlockEntity acceptorTile, LazyOptional<ACCEPTOR> acceptor) {
-        updateCachedAcceptorAndListen(side, acceptorTile, acceptor, acceptor, true);
+    protected void updateCachedAcceptorAndListen(Direction side, Level acceptorLevel, BlockPos acceptorPos, Optional<ACCEPTOR> acceptor) {
+        updateCachedAcceptorAndListen(side, acceptorLevel, acceptorPos, acceptor, acceptor, true);
     }
 
-    protected void updateCachedAcceptorAndListen(Direction side, BlockEntity acceptorTile, LazyOptional<ACCEPTOR> acceptor, LazyOptional<?> sourceAcceptor,
+    //@Deprecated(forRemoval = true)
+    protected void updateCachedAcceptorAndListen(Direction side, Level acceptorLevel, BlockPos acceptorPos, Optional<ACCEPTOR> acceptor, Optional<?> sourceAcceptor,
           boolean sourceIsSame) {
         boolean dirtyAcceptor = false;
         if (cachedAcceptors.containsKey(side)) {
             AcceptorInfo<ACCEPTOR> acceptorInfo = cachedAcceptors.get(side);
-            if (acceptorTile != acceptorInfo.getTile()) {
+            if (acceptorLevel != acceptorInfo.getLevel() || !acceptorPos.equals(acceptorInfo.getPos())) {
                 //The tile changed, fully invalidate it
-                cachedAcceptors.put(side, new AcceptorInfo<>(acceptorTile, sourceAcceptor, acceptor));
+                cachedAcceptors.put(side, new AcceptorInfo<>(acceptorLevel, acceptorPos, sourceAcceptor, acceptor));
                 dirtyAcceptor = true;
             } else if (sourceAcceptor != acceptorInfo.sourceAcceptor) {
                 //The source acceptor is different, make sure we update it and the actual acceptor
@@ -41,20 +49,20 @@ public class AcceptorCache<ACCEPTOR> extends AbstractAcceptorCache<ACCEPTOR, Acc
                 dirtyAcceptor = true;
             }
         } else {
-            cachedAcceptors.put(side, new AcceptorInfo<>(acceptorTile, sourceAcceptor, acceptor));
+            cachedAcceptors.put(side, new AcceptorInfo<>(acceptorLevel, acceptorPos, sourceAcceptor, acceptor));
             dirtyAcceptor = true;
         }
         if (dirtyAcceptor) {
             transmitter.markDirtyAcceptor(side);
             //If the capability is present, and we want to add the listener, add a listener so that once it gets invalidated
             // we recheck that side assuming that the world and position is still loaded and our tile has not been removed
-            NonNullConsumer<LazyOptional<ACCEPTOR>> refreshListener = getRefreshListener(side);
+            Consumer<Optional<ACCEPTOR>> refreshListener = getRefreshListener(side);
             if (sourceIsSame) {
                 //Add it to the actual acceptor as it is the same as the source, and we can do so without any unchecked warnings
-                acceptor.addListener(refreshListener);
+                //acceptor.addListener(refreshListener);
             } else {
                 //Otherwise, use unchecked generics to add the listener to the source acceptor
-                CapabilityUtils.addListener(sourceAcceptor, refreshListener);
+                //CapabilityUtils.addListener(sourceAcceptor, refreshListener);
             }
         }
     }
@@ -63,23 +71,23 @@ public class AcceptorCache<ACCEPTOR> extends AbstractAcceptorCache<ACCEPTOR, Acc
      * @implNote Grabs the acceptors from cache
      */
     @Override
-    public LazyOptional<ACCEPTOR> getConnectedAcceptor(Direction side) {
+    public Optional<ACCEPTOR> getConnectedAcceptor(Direction side) {
         if (cachedAcceptors.containsKey(side)) {
             AcceptorInfo<ACCEPTOR> acceptorInfo = cachedAcceptors.get(side);
-            if (!acceptorInfo.getTile().isRemoved()) {
+            if (isAcceptorAndListen(acceptorInfo.getLevel(), acceptorInfo.getPos(), side, lookup)) {
                 return acceptorInfo.acceptor;
             }
             //TODO: If the tile has been removed should we force an invalidation/recheck?
         }
-        return LazyOptional.empty();
+        return Optional.empty();
     }
 
     @Nullable
     public BlockEntity getConnectedAcceptorTile(Direction side) {
         if (cachedAcceptors.containsKey(side)) {
-            BlockEntity tile = cachedAcceptors.get(side).getTile();
-            if (!tile.isRemoved()) {
-                return tile;
+            AcceptorInfo<ACCEPTOR> acceptorInfo = cachedAcceptors.get(side);
+            if (isAcceptorAndListen(acceptorInfo.getLevel(), acceptorInfo.getPos(), side, lookup)) {
+                return acceptorInfo.getLevel().getBlockEntity(acceptorInfo.getPos());
             }
         }
         return null;
@@ -88,11 +96,21 @@ public class AcceptorCache<ACCEPTOR> extends AbstractAcceptorCache<ACCEPTOR, Acc
     /**
      * @apiNote Only call this from the server side
      */
-    public boolean isAcceptorAndListen(@Nullable BlockEntity tile, Direction side, Capability<ACCEPTOR> capability) {
-        LazyOptional<ACCEPTOR> acceptor = CapabilityUtils.getCapability(tile, capability, side.getOpposite());
-        if (acceptor.isPresent()) {
+    public boolean isItemAcceptorAndListen(@Nullable Level level, BlockPos pos, Direction side) {
+        Storage<ItemVariant> acceptor = ItemStorage.SIDED.find(level, pos, side);
+        if (acceptor != null) {
             //Update the cached acceptor and if it changed, add a listener to it to listen for invalidation
-            updateCachedAcceptorAndListen(side, tile, acceptor);
+            updateCachedAcceptorAndListen(side, level, pos, Optional.of((ACCEPTOR) acceptor));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isAcceptorAndListen(@Nullable Level level, BlockPos pos, Direction side, BlockApiLookup<ACCEPTOR, Direction> lookup) {
+        ACCEPTOR acceptor = lookup.find(level, pos, side);
+        if (acceptor != null) {
+            //Update the cached acceptor and if it changed, add a listener to it to listen for invalidation
+            updateCachedAcceptorAndListen(side, level, pos, Optional.of(acceptor));
             return true;
         }
         return false;
@@ -100,16 +118,16 @@ public class AcceptorCache<ACCEPTOR> extends AbstractAcceptorCache<ACCEPTOR, Acc
 
     public static class AcceptorInfo<ACCEPTOR> extends AbstractAcceptorInfo {
 
-        private LazyOptional<?> sourceAcceptor;
-        private LazyOptional<ACCEPTOR> acceptor;
+        private Optional<?> sourceAcceptor;
+        private Optional<ACCEPTOR> acceptor;
 
-        private AcceptorInfo(BlockEntity tile, LazyOptional<?> sourceAcceptor, LazyOptional<ACCEPTOR> acceptor) {
-            super(tile);
+        private AcceptorInfo(Level level, BlockPos pos, Optional<?> sourceAcceptor, Optional<ACCEPTOR> acceptor) {
+            super(level, pos);
             this.acceptor = acceptor;
             this.sourceAcceptor = sourceAcceptor;
         }
 
-        private void updateAcceptor(LazyOptional<?> sourceAcceptor, LazyOptional<ACCEPTOR> acceptor) {
+        private void updateAcceptor(Optional<?> sourceAcceptor, Optional<ACCEPTOR> acceptor) {
             this.sourceAcceptor = sourceAcceptor;
             this.acceptor = acceptor;
         }
@@ -119,12 +137,12 @@ public class AcceptorCache<ACCEPTOR> extends AbstractAcceptorCache<ACCEPTOR, Acc
             if (o == this) {
                 return true;
             }
-            return o instanceof AcceptorInfo<?> other && getTile().equals(other.getTile()) && sourceAcceptor.equals(other.sourceAcceptor) && acceptor.equals(other.acceptor);
+            return o instanceof AcceptorInfo<?> other && getLevel().equals(other.getLevel()) && getPos().equals(other.getPos()) && sourceAcceptor.equals(other.sourceAcceptor) && acceptor.equals(other.acceptor);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(getTile(), sourceAcceptor, acceptor);
+            return Objects.hash(getLevel(), getPos(), sourceAcceptor, acceptor);
         }
     }
 }

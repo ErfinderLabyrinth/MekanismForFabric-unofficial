@@ -1,14 +1,16 @@
 package mekanism.common.item.interfaces;
 
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.NBTConstants;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.recipe.upgrade.ItemRecipeData;
 import mekanism.common.tile.interfaces.ISustainedInventory;
 import mekanism.common.util.ItemDataUtils;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Collections;
+import java.util.List;
 
 public interface IItemSustainedInventory extends ISustainedInventory, IDroppableContents {
 
@@ -43,7 +45,7 @@ public interface IItemSustainedInventory extends ISustainedInventory, IDroppable
     }
 
     @Override
-    default List<IInventorySlot> getDroppedSlots(ItemStack stack) {
+    default List<IInventorySlot> getDroppedSlots(ItemStack stack, MinecraftServer server) {
         ListTag inventory = getSustainedInventory(stack);
         return inventory == null ? Collections.emptyList() : ItemRecipeData.readContents(inventory);
     }

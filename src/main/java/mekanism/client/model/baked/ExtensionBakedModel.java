@@ -3,31 +3,31 @@ package mekanism.client.model.baked;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.BiPredicate;
-import java.util.function.Supplier;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadUtils;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.BakedModelWrapper;
-import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
+
 @NothingNullByDefault
-public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
+public class ExtensionBakedModel<T> implements BakedModel {
+    BakedModel original;
 
     private final LoadingCache<QuadsKey<T>, List<BakedQuad>> cache = CacheBuilder.newBuilder().build(new CacheLoader<>() {
         @Override
@@ -43,11 +43,11 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
     private final Map<List<BakedModel>, List<BakedModel>> cachedRenderPasses = new Object2ObjectOpenHashMap<>();
 
     public ExtensionBakedModel(BakedModel original) {
-        super(original);
+        this.original = original;
     }
 
     @Nullable
-    protected QuadsKey<T> createKey(QuadsKey<T> key, ModelData data) {
+    protected QuadsKey<T> createKey(QuadsKey<T> key, Object data) {
         return key;
     }
 
@@ -61,23 +61,68 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
 
     @NotNull
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData data, @Nullable RenderType renderType) {
-        List<BakedQuad> quads = super.getQuads(state, side, rand, data, renderType);
-        QuadsKey<T> key = createKey(new QuadsKey<>(state, side, rand, renderType, quads), data);
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
+        List<BakedQuad> quads = original.getQuads(state, side, rand);
+        QuadsKey<T> key = createKey(new QuadsKey<>(state, side, rand, null, quads), null);
         if (key == null) {
             return quads;
         }
         return cache.getUnchecked(key);
     }
 
-    @Override
+    @NotNull
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, Object data) {
+        List<BakedQuad> quads = original.getQuads(state, side, rand);
+        QuadsKey<T> key = createKey(new QuadsKey<>(state, side, rand, null, quads), data);
+        if (key == null) {
+            return quads;
+        }
+        return cache.getUnchecked(key);
+    }
+
+    /*@Override
     public List<BakedModel> getRenderPasses(ItemStack stack, boolean fabulous) {
         //Cache the remappings so then the inner wrapped ones can cache their quads
         return cachedRenderPasses.computeIfAbsent(super.getRenderPasses(stack, fabulous), original -> original.stream().<BakedModel>map(this::wrapModel).toList());
-    }
+    }*/
 
     protected ExtensionBakedModel<T> wrapModel(BakedModel model) {
         return new ExtensionBakedModel<>(model);
+    }
+
+    @Override
+    public boolean useAmbientOcclusion() {
+        return original.useAmbientOcclusion();
+    }
+
+    @Override
+    public boolean isGui3d() {
+        return original.isGui3d();
+    }
+
+    @Override
+    public boolean usesBlockLight() {
+        return original.usesBlockLight();
+    }
+
+    @Override
+    public boolean isCustomRenderer() {
+        return original.isCustomRenderer();
+    }
+
+    @Override
+    public TextureAtlasSprite getParticleIcon() {
+        return original.getParticleIcon();
+    }
+
+    @Override
+    public ItemTransforms getTransforms() {
+        return original.getTransforms();
+    }
+
+    @Override
+    public ItemOverrides getOverrides() {
+        return original.getOverrides();
     }
 
     public static class LightedBakedModel extends TransformedBakedModel<Void> {
@@ -102,22 +147,26 @@ public class ExtensionBakedModel<T> extends BakedModelWrapper<BakedModel> {
         }
 
         @Override
-        @Deprecated
         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
             return QuadUtils.transformBakedQuads(super.getQuads(state, side, rand), transform);
         }
 
         @Override
-        public BakedModel applyTransform(ItemDisplayContext displayContext, PoseStack mat, boolean applyLeftHandTransform) {
-            // have the original model apply any perspective transforms onto the MatrixStack
-            super.applyTransform(displayContext, mat, applyLeftHandTransform);
-            // return this model, as we want to draw the item variant quads ourselves
-            return this;
+        public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, Object object) {
+            return QuadUtils.transformBakedQuads(super.getQuads(state, side, rand, object), transform);
         }
+
+//        @Override
+//        public BakedModel applyTransform(ItemDisplayContext displayContext, PoseStack mat, boolean applyLeftHandTransform) {
+//            // have the original model apply any perspective transforms onto the MatrixStack
+//            original.applyTransform(displayContext, mat, applyLeftHandTransform);
+//            // return this model, as we want to draw the item variant quads ourselves
+//            return this;
+//        }
 
         @Nullable
         @Override
-        protected QuadsKey<T> createKey(QuadsKey<T> key, ModelData data) {
+        protected QuadsKey<T> createKey(QuadsKey<T> key, Object data) {
             return key.transform(transform);
         }
 

@@ -1,8 +1,5 @@
 package mekanism.common.lib.radial.data;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import mekanism.api.IDisableableEnum;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.math.MathUtils;
@@ -10,6 +7,10 @@ import mekanism.api.radial.ClassBasedRadialData;
 import mekanism.api.radial.mode.IRadialMode;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 @NothingNullByDefault
 public class DisableableEnumRadialData<MODE extends Enum<MODE> & IDisableableEnum<MODE> & IRadialMode> extends ClassBasedRadialData<MODE> {

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "mekanism",
+  "version": "${mod_version}",
+  "name": "MekanismForFabric",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/Benjamin/MekanismForFabric"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/mekanismforfabric/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "mekanism.client.MekanismClient"
+    ],
+    "main": [
+      "mekanism.common.Mekanism"
+    ],
+    "fabric-model-loading": [
+      "mekanism.client.model.MekanismModelLoadingPlugin"
+    ],
+    "fabric-datagen": [
+      "mekanism.common.MekanismDataGenerator"
+    ]
+  },
+  "mixins": [
+    "mekanismforfabric.client.mixins.json",
+    "mekanismforfabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "accessWidener": "mekanism.accesswidener"
+}

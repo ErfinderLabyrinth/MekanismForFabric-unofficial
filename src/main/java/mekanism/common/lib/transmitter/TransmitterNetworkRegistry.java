@@ -8,12 +8,6 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import mekanism.api.Chunk3D;
 import mekanism.api.Coord4D;
 import mekanism.api.MekanismAPI;
@@ -25,15 +19,14 @@ import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.ServerTickEvent;
-import net.minecraftforge.event.level.ChunkTicketLevelUpdatedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public class TransmitterNetworkRegistry {
 
@@ -69,7 +62,7 @@ public class TransmitterNetworkRegistry {
     public static void initiate() {
         if (!loaderRegistered) {
             loaderRegistered = true;
-            MinecraftForge.EVENT_BUS.register(INSTANCE);
+//            MinecraftForge.EVENT_BUS.register(INSTANCE);
         }
     }
 
@@ -131,23 +124,17 @@ public class TransmitterNetworkRegistry {
         networksToChange.remove(network);
     }
 
-    @SubscribeEvent
-    public void onTick(ServerTickEvent event) {
-        if (event.phase == Phase.END && event.side.isServer()) {
-            handleChangedChunks();
-            removeInvalidTransmitters();
-            assignOrphans();
-            commitChanges();
-            for (DynamicNetwork<?, ?, ?> net : networks) {
-                net.onUpdate();
-            }
+    public void onTick(MinecraftServer server) {
+        handleChangedChunks();
+        removeInvalidTransmitters();
+        assignOrphans();
+        commitChanges();
+        for (DynamicNetwork<?, ?, ?> net : networks) {
+            net.onUpdate();
         }
     }
 
-    @SubscribeEvent
-    public void onTicketLevelChange(ChunkTicketLevelUpdatedEvent event) {
-        int newTicketLevel = event.getNewTicketLevel();
-        int oldTicketLevel = event.getOldTicketLevel();
+    public void onTicketLevelChange(ServerLevel level, long chunkPos, int oldTicketLevel, int newTicketLevel) {
         boolean loaded;
         if (oldTicketLevel > ChunkMap.MAX_VIEW_DISTANCE && newTicketLevel <= ChunkMap.MAX_VIEW_DISTANCE) {
             //Went from "unloaded" to loaded
@@ -159,7 +146,7 @@ public class TransmitterNetworkRegistry {
             //Load type stayed the same, just exit
             return;
         }
-        Chunk3D chunk = new Chunk3D(event.getLevel().dimension(), event.getChunkPos());
+        Chunk3D chunk = new Chunk3D(level.dimension(), chunkPos);
         if (transmitters.containsKey(chunk)) {
             //Only track it if we have any transmitters in that chunk
             if (changedTicketChunks.getOrDefault(chunk, loaded) != loaded) {

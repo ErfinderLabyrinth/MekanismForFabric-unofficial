@@ -2,7 +2,8 @@ package mekanism.common.tier;
 
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedIntValue;
+
+import java.util.function.IntSupplier;
 
 public enum FluidTankTier implements ITier {
     BASIC(BaseTier.BASIC, 32_000, 1_000),
@@ -14,8 +15,8 @@ public enum FluidTankTier implements ITier {
     private final int baseStorage;
     private final int baseOutput;
     private final BaseTier baseTier;
-    private CachedIntValue storageReference;
-    private CachedIntValue outputReference;
+    private IntSupplier storageReference;
+    private IntSupplier outputReference;
 
     FluidTankTier(BaseTier tier, int s, int o) {
         baseStorage = s;
@@ -29,11 +30,11 @@ public enum FluidTankTier implements ITier {
     }
 
     public int getStorage() {
-        return storageReference == null ? getBaseStorage() : storageReference.getOrDefault();
+        return storageReference == null ? getBaseStorage() : storageReference.getAsInt();
     }
 
     public int getOutput() {
-        return outputReference == null ? getBaseOutput() : outputReference.getOrDefault();
+        return outputReference == null ? getBaseOutput() : outputReference.getAsInt();
     }
 
     public int getBaseStorage() {
@@ -47,7 +48,7 @@ public enum FluidTankTier implements ITier {
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the FluidTankTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedIntValue storageReference, CachedIntValue outputReference) {
+    public void setConfigReference(IntSupplier storageReference, IntSupplier outputReference) {
         this.storageReference = storageReference;
         this.outputReference = outputReference;
     }

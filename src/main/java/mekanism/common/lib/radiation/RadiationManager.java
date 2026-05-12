@@ -4,25 +4,12 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
-import java.util.function.IntSupplier;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import mekanism.api.Chunk3D;
 import mekanism.api.Coord4D;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
-import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.gas.attribute.GasAttributes.Radiation;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.math.MathUtils;
@@ -33,18 +20,19 @@ import mekanism.api.radiation.capability.IRadiationShielding;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.ITooltipHelper;
 import mekanism.common.Mekanism;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.integration.curios.CuriosIntegration;
 import mekanism.common.lib.MekanismSavedData;
 import mekanism.common.lib.collection.HashList;
+import mekanism.common.lib.radiation.capability.DefaultRadiationEntity;
 import mekanism.common.network.to_client.PacketRadiationData;
 import mekanism.common.registries.MekanismDamageTypes;
 import mekanism.common.registries.MekanismParticleTypes;
 import mekanism.common.registries.MekanismSounds;
-import mekanism.common.util.CapabilityUtils;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -64,13 +52,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.IntSupplier;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * The RadiationManager handles radiation across all in-game dimensions. Radiation exposure levels are provided in _sieverts, defining a rate of accumulation of
@@ -106,7 +94,7 @@ public class RadiationManager implements IRadiationManager {
     }
 
     private static final String DATA_HANDLER_NAME = "radiation_manager";
-    private static final IntSupplier MAX_RANGE = () -> MekanismConfig.general.radiationChunkCheckRadius.get() * 16;
+    private static final IntSupplier MAX_RANGE = () -> MekanismConfig.general.radiationChunkCheckRadius * 16;
     private static final Random RAND = new Random();
 
     public static final double BASELINE = 0.000_000_100; // 100 nSv/h
@@ -135,7 +123,7 @@ public class RadiationManager implements IRadiationManager {
     @Override
     public boolean isRadiationEnabled() {
         //Get the default value for cases when we may call this early such as via chemical attributes
-        return MekanismConfig.general.radiationEnabled.getOrDefault();
+        return MekanismConfig.general.radiationEnabled;
     }
 
     private void markDirty() {
@@ -166,7 +154,7 @@ public class RadiationManager implements IRadiationManager {
      * @param source    {@code true} for if it is a {@link IRadiationSource} or an {@link IRadiationEntity} decaying
      */
     public int getDecayTime(double magnitude, boolean source) {
-        double decayRate = source ? MekanismConfig.general.radiationSourceDecayRate.get() : MekanismConfig.general.radiationTargetDecayRate.get();
+        double decayRate = source ? MekanismConfig.general.radiationSourceDecayRate : MekanismConfig.general.radiationTargetDecayRate;
         int seconds = 0;
         double localMagnitude = magnitude;
         while (localMagnitude > RadiationManager.MIN_MAGNITUDE) {
@@ -182,22 +170,22 @@ public class RadiationManager implements IRadiationManager {
     }
 
     @Override
-    public void removeRadiationSources(Chunk3D chunk) {
+    public void removeRadiationSources(Chunk3D chunk, MinecraftServer server) {
         Map<Coord4D, RadiationSource> chunkSources = radiationTable.row(chunk);
         if (!chunkSources.isEmpty()) {
             chunkSources.clear();
             markDirty();
-            updateClientRadiationForAll(chunk.dimension);
+            updateClientRadiationForAll(chunk.dimension, server);
         }
     }
 
     @Override
-    public void removeRadiationSource(Coord4D coord) {
+    public void removeRadiationSource(Coord4D coord, MinecraftServer server) {
         Chunk3D chunk = new Chunk3D(coord);
         if (radiationTable.contains(chunk, coord)) {
             radiationTable.remove(chunk, coord);
             markDirty();
-            updateClientRadiationForAll(coord.dimension);
+            updateClientRadiationForAll(coord.dimension, server);
         }
     }
 
@@ -213,7 +201,7 @@ public class RadiationManager implements IRadiationManager {
     public LevelAndMaxMagnitude getRadiationLevelAndMaxMagnitude(Coord4D coord) {
         double level = BASELINE;
         double maxMagnitude = BASELINE;
-        for (Chunk3D chunk : new Chunk3D(coord).expand(MekanismConfig.general.radiationChunkCheckRadius.get())) {
+        for (Chunk3D chunk : new Chunk3D(coord).expand(MekanismConfig.general.radiationChunkCheckRadius)) {
             for (Map.Entry<Coord4D, RadiationSource> entry : radiationTable.row(chunk).entrySet()) {
                 // we only compute exposure when within the MAX_RANGE bounds
                 if (entry.getKey().distanceTo(coord) <= MAX_RANGE.getAsInt()) {
@@ -227,7 +215,7 @@ public class RadiationManager implements IRadiationManager {
     }
 
     @Override
-    public void radiate(Coord4D coord, double magnitude) {
+    public void radiate(Coord4D coord, double magnitude, MinecraftServer server) {
         if (!isRadiationEnabled()) {
             return;
         }
@@ -240,7 +228,7 @@ public class RadiationManager implements IRadiationManager {
         }
         markDirty();
         //Update radiation levels immediately
-        updateClientRadiationForAll(coord.dimension);
+        updateClientRadiationForAll(coord.dimension, server);
     }
 
     @Override
@@ -249,36 +237,43 @@ public class RadiationManager implements IRadiationManager {
             return;
         }
         if (!(entity instanceof Player player) || MekanismUtils.isPlayingMode(player)) {
-            entity.getCapability(Capabilities.RADIATION_ENTITY).ifPresent(c -> c.radiate(magnitude * (1 - Math.min(1, getRadiationResistance(entity)))));
+            DefaultRadiationEntity c = entity.getAttachedOrCreate(DefaultRadiationEntity.ATTACHMENT_TYPE);
+            c.radiate(magnitude * (1 - Math.min(1, getRadiationResistance(entity))));
         }
     }
 
+//    @Override
+//    public void dumpRadiation(Coord4D coord, IGasHandler gasHandler, boolean clearRadioactive, MinecraftServer server) {
+//        for (StorageView<Gas> gasTank : gasHandler) {
+//            if (dumpRadiation(coord, gasTank.getResource().getStack(gasTank.getAmount()), server) && clearRadioactive) {
+//                try(Transaction t=Transaction.openOuter()) {
+//                    gasTank.extract(gasTank.getResource(), gasTank.getAmount(), t);
+//                    t.commit();
+//                }
+//            }
+//        }
+//    }
+
     @Override
-    public void dumpRadiation(Coord4D coord, IGasHandler gasHandler, boolean clearRadioactive) {
-        for (int tank = 0, gasTanks = gasHandler.getTanks(); tank < gasTanks; tank++) {
-            if (dumpRadiation(coord, gasHandler.getChemicalInTank(tank)) && clearRadioactive) {
-                gasHandler.setChemicalInTank(tank, GasStack.EMPTY);
+    public void dumpRadiation(Coord4D coord, Storage<Gas> gasTanks, boolean clearRadioactive, MinecraftServer server) {
+        for (StorageView<Gas> gasTank : gasTanks) {
+            if (dumpRadiation(coord, gasTank.getResource().getStack(gasTank.getAmount()), server) && clearRadioactive) {
+                try(Transaction t=Transaction.openOuter()) {
+                    gasTank.extract(gasTank.getResource(), gasTank.getAmount(), t);
+                    t.commit();
+                }
             }
         }
     }
 
     @Override
-    public void dumpRadiation(Coord4D coord, List<IGasTank> gasTanks, boolean clearRadioactive) {
-        for (IGasTank gasTank : gasTanks) {
-            if (dumpRadiation(coord, gasTank.getStack()) && clearRadioactive) {
-                gasTank.setEmpty();
-            }
-        }
-    }
-
-    @Override
-    public boolean dumpRadiation(Coord4D coord, GasStack stack) {
+    public boolean dumpRadiation(Coord4D coord, GasStack stack, MinecraftServer server) {
         //Note: We only attempt to dump and mark that we did if radiation is enabled in order to allow persisting radioactive
         // substances when radiation is disabled
         if (isRadiationEnabled() && !stack.isEmpty()) {
             double radioactivity = stack.mapAttributeToDouble(Radiation.class, (stored, attribute) -> stored.getAmount() * attribute.getRadioactivity());
             if (radioactivity > 0) {
-                radiate(coord, radioactivity);
+                radiate(coord, radioactivity, server);
                 return true;
             }
         }
@@ -290,11 +285,11 @@ public class RadiationManager implements IRadiationManager {
         markDirty();
     }
 
-    public void clearSources() {
+    public void clearSources(MinecraftServer server) {
         if (!radiationTable.isEmpty()) {
             radiationTable.clear();
             markDirty();
-            updateClientRadiationForAll(ConstantPredicates.alwaysTrue());
+            updateClientRadiationForAll(ConstantPredicates.alwaysTrue(), server);
         }
     }
 
@@ -306,35 +301,34 @@ public class RadiationManager implements IRadiationManager {
         double resistance = 0;
         for (EquipmentSlot type : EnumUtils.ARMOR_SLOTS) {
             ItemStack stack = entity.getItemBySlot(type);
-            Optional<IRadiationShielding> shielding = CapabilityUtils.getCapability(stack, Capabilities.RADIATION_SHIELDING, null).resolve();
-            if (shielding.isPresent()) {
-                resistance += shielding.get().getRadiationShielding();
+            if (stack.getItem() instanceof IRadiationShielding shielding) {
+                resistance += shielding.getRadiationShielding(stack);
             }
         }
         if (resistance < 1 && Mekanism.hooks.CuriosLoaded) {
-            Optional<? extends IItemHandler> handlerOptional = CuriosIntegration.getCuriosInventory(entity);
-            if (handlerOptional.isPresent()) {
-                IItemHandler handler = handlerOptional.get();
-                int slots = handler.getSlots();
-                for (int i = 0; i < slots; i++) {
-                    ItemStack item = handler.getStackInSlot(i);
-                    Optional<IRadiationShielding> shielding = CapabilityUtils.getCapability(item, Capabilities.RADIATION_SHIELDING, null).resolve();
-                    if (shielding.isPresent()) {
-                        resistance += shielding.get().getRadiationShielding();
-                        if (resistance >= 1) return 1;
-                    }
-                }
-            }
+            //TODO curios support
+//            Optional<? extends IItemHandler> handlerOptional = CuriosIntegration.getCuriosInventory(entity);
+//            if (handlerOptional.isPresent()) {
+//                IItemHandler handler = handlerOptional.get();
+//                int slots = handler.getSlots();
+//                for (int i = 0; i < slots; i++) {
+//                    ItemStack item = handler.getStackInSlot(i);
+//                    Optional<IRadiationShielding> shielding = CapabilityUtils.getCapability(item, Capabilities.RADIATION_SHIELDING, null).resolve();
+//                    if (shielding.isPresent()) {
+//                        resistance += shielding.get().getRadiationShielding();
+//                        if (resistance >= 1) return 1;
+//                    }
+//                }
+//            }
         }
         return resistance;
     }
 
-    private void updateClientRadiationForAll(ResourceKey<Level> dimension) {
-        updateClientRadiationForAll(player -> player.level().dimension() == dimension);
+    private void updateClientRadiationForAll(ResourceKey<Level> dimension, MinecraftServer server) {
+        updateClientRadiationForAll(player -> player.level().dimension() == dimension, server);
     }
 
-    private void updateClientRadiationForAll(Predicate<ServerPlayer> clearForPlayer) {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+    private void updateClientRadiationForAll(Predicate<ServerPlayer> clearForPlayer, MinecraftServer server) {
         if (server != null) {
             //Validate it is not null in case we somehow are being called from the client or at some other unexpected time
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -380,9 +374,9 @@ public class RadiationManager implements IRadiationManager {
         }
         // perhaps also play Geiger counter sound effect, even when not using item (similar to fallout)
         RandomSource randomSource = player.level().getRandom();
-        if (clientRadiationScale != RadiationScale.NONE && MekanismConfig.client.radiationParticleCount.get() != 0 && randomSource.nextInt(2) == 0) {
-            int count = randomSource.nextInt(clientRadiationScale.ordinal() * MekanismConfig.client.radiationParticleCount.get());
-            int radius = MekanismConfig.client.radiationParticleRadius.get();
+        if (clientRadiationScale != RadiationScale.NONE && MekanismConfig.client.radiationParticleCount != 0 && randomSource.nextInt(2) == 0) {
+            int count = randomSource.nextInt(clientRadiationScale.ordinal() * MekanismConfig.client.radiationParticleCount);
+            int radius = MekanismConfig.client.radiationParticleRadius;
             for (int i = 0; i < count; i++) {
                 double x = player.getX() + randomSource.nextDouble() * radius * 2 - radius;
                 double y = player.getY() + randomSource.nextDouble() * radius * 2 - radius;
@@ -401,7 +395,7 @@ public class RadiationManager implements IRadiationManager {
         if (!isRadiationEnabled()) {
             return;
         }
-        LazyOptional<IRadiationEntity> radiationCap = entity.getCapability(Capabilities.RADIATION_ENTITY);
+        IRadiationEntity radiationCap = entity.getAttachedOrCreate(DefaultRadiationEntity.ATTACHMENT_TYPE);
         // each tick, there is a 1/20 chance we will apply radiation to each player
         // this helps distribute the CPU load across ticks, and makes exposure slightly inconsistent
         if (entity.level().getRandom().nextInt(20) == 0) {
@@ -410,13 +404,15 @@ public class RadiationManager implements IRadiationManager {
                 // apply radiation to the player
                 radiate(entity, magnitude / 3_600D); // convert to Sv/s
             }
-            radiationCap.ifPresent(IRadiationEntity::decay);
+            if(radiationCap != null) {
+                radiationCap.decay();
+            }
         }
         // update the radiation capability (decay, sync, effects)
-        radiationCap.ifPresent(c -> {
-            c.update(entity);
+        if(radiationCap != null) {
+            radiationCap.update(entity);
             if (entity instanceof ServerPlayer player) {
-                double radiation = c.getRadiation();
+                double radiation = radiationCap.getRadiation();
                 PreviousRadiationData previousRadiationData = playerExposureMap.get(player.getUUID());
                 PreviousRadiationData relevantData = PreviousRadiationData.compareTo(previousRadiationData, radiation);
                 if (relevantData != null) {
@@ -424,7 +420,7 @@ public class RadiationManager implements IRadiationManager {
                     Mekanism.packetHandler().sendTo(PacketRadiationData.createPlayer(radiation), player);
                 }
             }
-        });
+        }
     }
 
     public void tickServerWorld(Level world) {
@@ -433,7 +429,7 @@ public class RadiationManager implements IRadiationManager {
             return;
         }
         if (!loaded) {
-            createOrLoad();
+            createOrLoad(world.getServer());
         }
 
         // update meltdowns
@@ -446,7 +442,7 @@ public class RadiationManager implements IRadiationManager {
         }
     }
 
-    public void tickServer() {
+    public void tickServer(MinecraftServer server) {
         // terminate early if we're disabled
         if (!isRadiationEnabled()) {
             return;
@@ -460,7 +456,7 @@ public class RadiationManager implements IRadiationManager {
                 //Mark dirty regardless if we have any sources as magnitude changes or radiation sources change
                 markDirty();
                 //Update radiation levels for any players where it has changed
-                updateClientRadiationForAll(ConstantPredicates.alwaysTrue());
+                updateClientRadiationForAll(ConstantPredicates.alwaysTrue(), server);
             }
         }
     }
@@ -468,10 +464,10 @@ public class RadiationManager implements IRadiationManager {
     /**
      * Note: This should only be called from the server side
      */
-    public void createOrLoad() {
+    public void createOrLoad(MinecraftServer server) {
         if (dataHandler == null) {
             //Always associate the world with the over world as the radiation manager keeps track of which dimension has which radiation
-            dataHandler = MekanismSavedData.createSavedData(RadiationDataHandler::new, DATA_HANDLER_NAME);
+            dataHandler = MekanismSavedData.createSavedData(RadiationDataHandler::new, DATA_HANDLER_NAME, server);
             dataHandler.setManagerAndSync(this);
             dataHandler.clearCached();
         }
@@ -498,11 +494,10 @@ public class RadiationManager implements IRadiationManager {
         playerExposureMap.remove(uuid);
     }
 
-    @SubscribeEvent
-    public void onLivingTick(LivingTickEvent event) {
-        Level world = event.getEntity().level();
-        if (!world.isClientSide() && !(event.getEntity() instanceof Player)) {
-            updateEntityRadiation(event.getEntity());
+    public void onLivingTick(LivingEntity entity) {
+        Level world = entity.level();
+        if (!world.isClientSide() && !(entity instanceof Player)) {
+            updateEntityRadiation(entity);
         }
     }
 

@@ -2,16 +2,6 @@ package mekanism.common.content.network;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import mekanism.api.Coord4D;
 import mekanism.api.RelativeSide;
 import mekanism.api.text.EnumColor;
@@ -26,18 +16,20 @@ import mekanism.common.lib.inventory.TransitRequest.TransitResponse;
 import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class InventoryNetwork extends DynamicNetwork<IItemHandler, InventoryNetwork, LogisticalTransporterBase> {
+import java.util.*;
+
+public class InventoryNetwork extends DynamicNetwork<Storage<ItemVariant>, InventoryNetwork, LogisticalTransporterBase> {
 
     private final Map<BlockPos, LogisticalTransporterBase> positionedTransmitters = new Object2ObjectOpenHashMap<>();
 
@@ -53,7 +45,7 @@ public class InventoryNetwork extends DynamicNetwork<IItemHandler, InventoryNetw
     public List<AcceptorData> calculateAcceptors(TransitRequest request, TransporterStack stack, Long2ObjectMap<ChunkAccess> chunkMap,
           Map<Coord4D, Set<TransporterStack>> additionalFlowingStacks) {
         List<AcceptorData> toReturn = new ArrayList<>();
-        for (Map.Entry<BlockPos, Map<Direction, LazyOptional<IItemHandler>>> entry : acceptorCache.getAcceptorEntrySet()) {
+        for (Map.Entry<BlockPos, Map<Direction, Optional<Storage<ItemVariant>>>> entry : acceptorCache.getAcceptorEntrySet()) {
             BlockPos pos = entry.getKey();
             if (!pos.equals(stack.homeLocation)) {
                 BlockEntity acceptor = WorldUtils.getTileEntity(getWorld(), chunkMap, pos);
@@ -62,8 +54,8 @@ public class InventoryNetwork extends DynamicNetwork<IItemHandler, InventoryNetw
                 }
                 Map<TransitResponse, AcceptorData> dataMap = new HashMap<>();
                 Coord4D position = new Coord4D(pos, getWorld());
-                for (Map.Entry<Direction, LazyOptional<IItemHandler>> acceptorEntry : entry.getValue().entrySet()) {
-                    Optional<IItemHandler> handler = acceptorEntry.getValue().resolve();
+                for (Map.Entry<Direction, Optional<Storage<ItemVariant>>> acceptorEntry : entry.getValue().entrySet()) {
+                    Optional<Storage<ItemVariant>> handler = acceptorEntry.getValue();
                     if (handler.isPresent()) {
                         Direction side = acceptorEntry.getKey();
                         //TODO: Figure out how we want to best handle the color check, as without doing it here we don't

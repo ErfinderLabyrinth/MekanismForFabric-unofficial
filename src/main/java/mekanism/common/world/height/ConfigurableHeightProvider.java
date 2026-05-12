@@ -48,14 +48,14 @@ public class ConfigurableHeightProvider extends HeightProvider {
             }
             return min;
         }
-        return switch (range.shape().get()) {
+        return switch (range.shape()) {
             case TRAPEZOID -> sampleTrapezoid(random, min, max);
             case UNIFORM -> Mth.randomBetweenInclusive(random, min, max);
         };
     }
 
     private int sampleTrapezoid(@NotNull RandomSource random, int min, int max) {
-        int plateau = range.plateau().getAsInt();
+        int plateau = range.plateau();
         int range = max - min;
         if (plateau >= range) {
             return Mth.randomBetweenInclusive(random, min, max);
@@ -72,9 +72,9 @@ public class ConfigurableHeightProvider extends HeightProvider {
 
     @Override
     public String toString() {
-        switch (range.shape().get()) {
+        switch (range.shape()) {
             case TRAPEZOID -> {
-                int plateau = range.plateau().getAsInt();
+                int plateau = range.plateau();
                 if (plateau == 0) {
                     return oreVeinType.name() + " triangle [" + range.minInclusive() + "-" + range.maxInclusive() + "]";
                 }

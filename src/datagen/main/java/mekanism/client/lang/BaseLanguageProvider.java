@@ -14,93 +14,91 @@ import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.attribute.AttributeGui;
 import mekanism.common.registration.impl.FluidRegistryObject;
 import mekanism.common.util.RegistryUtils;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.data.LanguageProvider;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class BaseLanguageProvider extends LanguageProvider {
+public abstract class BaseLanguageProvider extends FabricLanguageProvider {
 
     private final ConvertibleLanguageProvider[] altProviders;
     protected final String modName;
     protected final String basicModName;
-    private final String modid;
 
-    protected BaseLanguageProvider(PackOutput output, String modid) {
-        this(output, modid, Mekanism.MOD_NAME);
+    protected BaseLanguageProvider(FabricDataOutput dataGenerator) {
+        this(dataGenerator, Mekanism.MOD_NAME);
     }
 
-    protected BaseLanguageProvider(PackOutput output, String modid, IModModule module) {
-        this(output, modid, Mekanism.MOD_NAME + ": " + module.getName());
+    protected BaseLanguageProvider(FabricDataOutput dataGenerator, IModModule module) {
+        this(dataGenerator, Mekanism.MOD_NAME + ": " + module.getName());
     }
 
-    private BaseLanguageProvider(PackOutput output, String modid, String modName) {
-        super(output, modid, "en_us");
-        this.modid = modid;
+    private BaseLanguageProvider(FabricDataOutput dataGenerator, String modName) {
+        super(dataGenerator, "en_us");
         this.modName = modName;
         this.basicModName = modName.replaceAll(":", "");
         altProviders = new ConvertibleLanguageProvider[]{
-              new UpsideDownLanguageProvider(output, modid),
-              new NonAmericanLanguageProvider(output, modid, "en_au"),
-              new NonAmericanLanguageProvider(output, modid, "en_gb")
+              new UpsideDownLanguageProvider(dataGenerator),
+              new NonAmericanLanguageProvider(dataGenerator, "en_au"),
+              new NonAmericanLanguageProvider(dataGenerator, "en_gb")
         };
     }
 
     @NotNull
     @Override
     public String getName() {
-        return super.getName() + ": " + modid;
+        return super.getName() + ": " + modName;
     }
 
-    protected void addPackData(IHasTranslationKey name, IHasTranslationKey packDescription) {
-        add(name, modName);
-        add(packDescription, "Resources used for " + modName);
+    protected void addPackData(TranslationBuilder builder, IHasTranslationKey name, IHasTranslationKey packDescription) {
+        add(builder, name, modName);
+        add(builder, packDescription, "Resources used for " + modName);
     }
 
-    protected void add(IHasTranslationKey key, String value) {
+    protected void add(TranslationBuilder builder, IHasTranslationKey key, String value) {
         if (key instanceof IBlockProvider blockProvider) {
             Block block = blockProvider.getBlock();
             if (Attribute.matches(block, AttributeGui.class, attribute -> !attribute.hasCustomName())) {
-                add(Util.makeDescriptionId("container", RegistryUtils.getName(block)), value);
+                add(builder, Util.makeDescriptionId("container", RegistryUtils.getName(block)), value);
             }
         }
-        add(key.getTranslationKey(), value);
+        add(builder, key.getTranslationKey(), value);
     }
 
-    protected void add(IBlockProvider blockProvider, String value, String containerName) {
+    protected void add(TranslationBuilder builder, IBlockProvider blockProvider, String value, String containerName) {
         Block block = blockProvider.getBlock();
         if (Attribute.matches(block, AttributeGui.class, attribute -> !attribute.hasCustomName())) {
-            add(Util.makeDescriptionId("container", RegistryUtils.getName(block)), containerName);
-            add(blockProvider.getTranslationKey(), value);
+            add(builder, Util.makeDescriptionId("container", RegistryUtils.getName(block)), containerName);
+            add(builder, blockProvider.getTranslationKey(), value);
         } else {
             throw new IllegalArgumentException("Block " + blockProvider.getRegistryName() + " does not have a container name set.");
         }
     }
 
-    protected void add(IModuleDataProvider<?> moduleDataProvider, String name, String description) {
+    protected void add(TranslationBuilder builder, IModuleDataProvider<?> moduleDataProvider, String name, String description) {
         ModuleData<?> moduleData = moduleDataProvider.getModuleData();
-        add(moduleData.getTranslationKey(), name);
-        add(moduleData.getDescriptionTranslationKey(), description);
+        add(builder, moduleData.getTranslationKey(), name);
+        add(builder, moduleData.getDescriptionTranslationKey(), description);
     }
 
-    protected void addFluid(FluidRegistryObject<?, ?, ?, ?, ?> fluidRO, String name) {
-        add(fluidRO.getBlock(), name);
-        add(fluidRO.getBucket(), name + " Bucket");
+    protected void addFluid(TranslationBuilder builder, FluidRegistryObject<?, ?, ?, ?> fluidRO, String name) {
+        add(builder, fluidRO.getBlock().getDescriptionId(), name);
+        add(builder, fluidRO.getBucket().getDescriptionId(), name + " Bucket");
     }
 
-    protected void add(MekanismAdvancement advancement, String title, String description) {
-        add(advancement.title(), title);
-        add(advancement.description(), description);
+    protected void add(TranslationBuilder builder, MekanismAdvancement advancement, String title, String description) {
+        add(builder, advancement.title(), title);
+        add(builder, advancement.description(), description);
     }
 
-    @Override
-    public void add(@NotNull String key, @NotNull String value) {
+    public void add(TranslationBuilder builder, @NotNull String key, @NotNull String value) {
         if (value.contains("%s")) {
             throw new IllegalArgumentException("Values containing substitutions should use explicit numbered indices: " + key + " - " + value);
         }
-        super.add(key, value);
+        builder.add(key, value);
         if (altProviders.length > 0) {
             List<Component> splitEnglish = FormatSplitter.split(value);
             for (ConvertibleLanguageProvider provider : altProviders) {

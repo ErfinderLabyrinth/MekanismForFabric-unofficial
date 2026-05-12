@@ -20,7 +20,7 @@ public class GuiDumpButton<TILE extends BlockEntity & IHasDumpButton> extends Gu
     public GuiDumpButton(IGuiWrapper gui, TILE tile, int x, int y) {
         super(MekanismUtils.getResource(ResourceType.GUI, "dump.png"), gui, x, y, 21, 10);
         this.tile = tile;
-        this.clickSound = SoundEvents.UI_BUTTON_CLICK;
+        this.clickSound = SoundEvents.UI_BUTTON_CLICK::value;
     }
 
     @Override

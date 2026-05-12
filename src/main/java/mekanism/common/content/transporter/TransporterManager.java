@@ -2,9 +2,7 @@ package mekanism.common.content.transporter;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
+import mekanism.api.BigItemStack;
 import mekanism.api.Coord4D;
 import mekanism.common.content.transporter.TransporterStack.Path;
 import mekanism.common.lib.inventory.TransitRequest;
@@ -12,10 +10,17 @@ import mekanism.common.lib.inventory.TransitRequest.ItemData;
 import mekanism.common.lib.inventory.TransitRequest.TransitResponse;
 import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.StackUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.items.IItemHandler;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class TransporterManager {
 
@@ -38,12 +43,12 @@ public class TransporterManager {
         }
     }
 
-    public static boolean didEmit(ItemStack stack, ItemStack returned) {
-        return returned.isEmpty() || returned.getCount() < stack.getCount();
+    public static boolean didEmit(BigItemStack stack, BigItemStack returned) {
+        return returned.isEmpty() || returned.amount() < stack.amount();
     }
 
-    public static ItemStack getToUse(ItemStack stack, ItemStack returned) {
-        return returned.isEmpty() ? stack : StackUtils.size(stack, stack.getCount() - returned.getCount());
+    public static BigItemStack getToUse(BigItemStack stack, BigItemStack returned) {
+        return returned.isEmpty() ? stack : StackUtils.size(stack, stack.amount() - returned.amount());
     }
 
     /**
@@ -58,36 +63,36 @@ public class TransporterManager {
      *
      * @return The amount that is left over from trying to insert into the destination.
      */
-    private static int simulateInsert(IItemHandler handler, InventoryInfo inventoryInfo, ItemStack stack, int count, boolean inFlight) {
-        int maxStackSize = stack.getMaxStackSize();
+    private static long simulateInsert(Storage<ItemVariant> handler, InventoryInfo inventoryInfo, BigItemStack stack, long count, boolean inFlight) {
+        long maxStackSize = stack.getCapacity();
         for (int slot = 0; slot < inventoryInfo.slots; slot++) {
             if (count == 0) {
                 // Nothing more to insert
                 break;
             }
-            int max = inventoryInfo.getSlotLimit(handler, slot);
+            long max = inventoryInfo.getSlotLimit(slot);
             //If no items are allowed in the slot, pass it up before checking anything about the items
             if (max == 0) {
                 continue;
             }
 
             // Make sure that the item is valid for the handler
-            if (!handler.isItemValid(slot, stack)) {
-                continue;
-            }
+//            if (!handler.isItemValid(slot, stack)) {
+//                continue;
+//            }
 
             // Simulate the insert; note that we can't depend solely on the "normal" simulate, since it would only tell us about
             // _this_ stack, not the cumulative set of stacks. Use our best guess about stacking/maxes to figure out
             // how the inventory would look after the insertion
 
             // Number of items in the destination
-            int destCount = inventoryInfo.stackSizes[slot];
+            long destCount = inventoryInfo.stackSizes.get(slot);
 
-            int mergedCount = count + destCount;
-            int toAccept = count;
+            long mergedCount = count + destCount;
+            long toAccept = count;
             boolean needsSimulation = false;
             if (destCount > 0) {
-                if (destCount >= max || !InventoryUtils.areItemsStackable(inventoryInfo.inventory[slot], stack)) {
+                if (destCount >= max || !InventoryUtils.areItemsStackable(inventoryInfo.inventory.get(slot).createStack(), stack.createStack())) {
                     //If the destination is currently full, or it isn't empty and not stackable, move along
                     continue;
                 } else if (max > maxStackSize && mergedCount > maxStackSize) {
@@ -110,14 +115,14 @@ public class TransporterManager {
                     // our stack a single time to resize it. We do however make sure to update
                     // the toAccept value again if it is needed.
                     if (count <= maxStackSize) {
-                        if (stack.getCount() <= maxStackSize) {
+                        if (stack.amount() <= maxStackSize) {
                             stack = stack.copyWithCount(maxStackSize + 1);
                         }
                         //Update our amount that we expect to accept from simulation to represent the amount we actually
                         // are trying to insert this way if we can't accept it all then we know that the slot actually
                         // has a lower limit than it returned for getSlotLimit
-                        toAccept = stack.getCount();
-                    } else if (stack.getCount() <= maxStackSize) {
+                        toAccept = stack.amount();
+                    } else if (stack.amount() <= maxStackSize) {
                         //Note: If we have more we are trying to insert than the max stack size, just take the number we are trying to insert
                         // so that we have an accurate amount for checking the real slot stack size
                         stack = stack.copyWithCount(count);
@@ -136,8 +141,11 @@ public class TransporterManager {
                 needsSimulation = true;
             }
             if (needsSimulation) {
-                ItemStack simulatedRemainder = handler.insertItem(slot, stack, true);
-                int accepted = stack.getCount() - simulatedRemainder.getCount();
+                long simulatedRemainder;
+                try(Transaction t = Transaction.openOuter()) {
+                    simulatedRemainder = stack.amount() - handler.insert(stack.getResource(), stack.amount(), t);
+                }
+                long accepted = stack.amount() - simulatedRemainder;
                 if (accepted == 0) {
                     // Insert will fail; bail
                     continue;
@@ -146,7 +154,7 @@ public class TransporterManager {
                     // so we mark the amount we accepted plus the amount already in the slot as the slot's
                     // actual limit
                     //Note: We are use the actual stack size in a slot as we may have adjusted the "stored" amount
-                    max = inventoryInfo.actualStackSizes[slot] + accepted;
+                    max = inventoryInfo.actualStackSizes.get(slot) + accepted;
                 }
                 if (destCount == 0) {
                     //If we actually are going to insert it, because there are currently no items
@@ -155,16 +163,16 @@ public class TransporterManager {
                     // items of different types to the same slot just because they are not there yet. We don't
                     // need to make a copy of this stack as it is not modified during any of the operations, and
                     // we only make use of it for type data
-                    inventoryInfo.inventory[slot] = stack;
+                    inventoryInfo.inventory.set(slot, stack.copy());
                 }
             }
             if (mergedCount > max) {
                 // Not all the items will fit; put max in and save leftovers
-                inventoryInfo.stackSizes[slot] = max;
+                inventoryInfo.stackSizes.set(slot, max);
                 count = mergedCount - max;
             } else {
                 // All items will fit; set the destination count as the new combined amount
-                inventoryInfo.stackSizes[slot] = mergedCount;
+                inventoryInfo.stackSizes.set(slot, mergedCount);
                 return 0;
             }
         }
@@ -183,7 +191,7 @@ public class TransporterManager {
      *
      * @return {@link TransitResponse} of expected items to use
      */
-    public static TransitResponse getPredictedInsert(Coord4D position, Direction side, IItemHandler handler, TransitRequest request,
+    public static TransitResponse getPredictedInsert(Coord4D position, Direction side, Storage<ItemVariant> handler, TransitRequest request,
           Map<Coord4D, Set<TransporterStack>> additionalFlowingStacks) {
         InventoryInfo inventoryInfo = new InventoryInfo(handler);
         //Before we see if this item can fit in the destination, we must first check the stacks that are
@@ -200,7 +208,7 @@ public class TransporterManager {
         return getPredictedInsert(inventoryInfo, handler, request);
     }
 
-    private static boolean predictFlowing(Coord4D position, Direction side, IItemHandler handler, InventoryInfo inventoryInfo,
+    private static boolean predictFlowing(Coord4D position, Direction side, Storage<ItemVariant> handler, InventoryInfo inventoryInfo,
           Map<Coord4D, Set<TransporterStack>> flowingStacks) {
         Set<TransporterStack> transporterStacks = flowingStacks.get(position);
         if (transporterStacks != null) {
@@ -213,9 +221,9 @@ public class TransporterManager {
                     // set to the same side config are "different" because of the side proxies) then
                     // we want to make sure we try to insert the in-flight stacks anyway so that if
                     // the slot is the same we fill it.
-                    int numLeftOver = simulateInsert(handler, inventoryInfo, stack.itemStack, stack.itemStack.getCount(), true);
+                    long numLeftOver = simulateInsert(handler, inventoryInfo, stack.itemStack, stack.itemStack.amount(), true);
                     if (numLeftOver > 0) {
-                        if (numLeftOver == stack.itemStack.getCount()) {
+                        if (numLeftOver == stack.itemStack.amount()) {
                             //If none of the stack could be inserted, check if we are attempting to insert it
                             // into the same side as the side we are predicting that we can insert into.
                             if (side != stack.getSideOfDest()) {
@@ -243,15 +251,15 @@ public class TransporterManager {
      *
      * @return {@link TransitResponse} of expected items to use
      */
-    private static TransitResponse getPredictedInsert(InventoryInfo inventoryInfo, IItemHandler handler, TransitRequest request) {
+    private static TransitResponse getPredictedInsert(InventoryInfo inventoryInfo, Storage<ItemVariant> handler, TransitRequest request) {
         //For each of the items in the request, simulate the insert. We try each stack in the
         // request; it might be possible to not send the first item, but the second could work, etc.
         for (ItemData data : request.getItemData()) {
             //Create a sending ItemStack with the hashed item type and total item count within the request
-            ItemStack stack = data.getStack();
-            int numToSend = data.getTotalCount();
+            BigItemStack stack = data.getItemType();
+            long numToSend = data.getTotalCount();
             //Directly pass the stack AND the actual amount we want, so that it does not need to copy the stack if there is no room
-            int numLeftOver = simulateInsert(handler, inventoryInfo, stack, numToSend, false);
+            long numLeftOver = simulateInsert(handler, inventoryInfo, stack, numToSend, false);
             //If leftovers is unchanged from the simulation, there's no room at all; move on to the next stack
             if (numLeftOver == numToSend) {
                 continue;
@@ -271,7 +279,7 @@ public class TransporterManager {
      *
      * @return {@link TransitResponse} of expected items to use
      */
-    public static TransitResponse getPredictedInsert(IItemHandler handler, TransitRequest request) {
+    public static TransitResponse getPredictedInsert(Storage<ItemVariant> handler, TransitRequest request) {
         return getPredictedInsert(new InventoryInfo(handler), handler, request);
     }
 
@@ -282,32 +290,33 @@ public class TransporterManager {
      */
     private static class InventoryInfo {
 
-        private final ItemStack[] inventory;
-        private final int[] stackSizes;
-        private final int[] actualStackSizes;
-        private final int[] slotLimits;
-        private final int slots;
+        private final List<BigItemStack> inventory;
+        private final List<Long> stackSizes;
+        private final List<Long> actualStackSizes;
+        private final List<Long> slotLimits;
+        private int slots = 0;
 
-        public InventoryInfo(IItemHandler handler) {
-            slots = handler.getSlots();
-            inventory = new ItemStack[slots];
-            stackSizes = new int[slots];
-            actualStackSizes = new int[slots];
+        public InventoryInfo(Storage<ItemVariant> handler) {
+            inventory = new ArrayList<>();
+            //inventory = new ItemStack[slots];
+            stackSizes = new ArrayList<>();
+            actualStackSizes = new ArrayList<>();
             //Slot limits are lazily initialized
-            slotLimits = new int[slots];
-            Arrays.fill(slotLimits, -1);
-            for (int i = 0; i < slots; i++) {
-                ItemStack stack = handler.getStackInSlot(i);
-                inventory[i] = stack;
-                actualStackSizes[i] = stackSizes[i] = stack.getCount();
+            slotLimits = new ArrayList<>();
+            //Arrays.fill(slotLimits, -1);
+            for (StorageView<ItemVariant> view:handler) {
+                BigItemStack stack = new BigItemStack(view.getResource(), view.getAmount());
+                inventory.add(stack);
+                actualStackSizes.add(stack.amount());
+                stackSizes.add(stack.amount());
+                slotLimits.add(stack.getCapacity());
+                slots++;
             }
         }
 
-        public int getSlotLimit(IItemHandler handler, int slot) {
-            int limit = slotLimits[slot];
-            if (limit == -1) {
-                return slotLimits[slot] = handler.getSlotLimit(slot);
-            }
+        @Deprecated(forRemoval = true)
+        public long getSlotLimit(int slot) {
+            long limit = slotLimits.get(slot);
             return limit;
         }
     }

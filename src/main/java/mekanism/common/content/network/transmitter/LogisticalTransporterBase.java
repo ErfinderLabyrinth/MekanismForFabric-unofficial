@@ -4,11 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.IntConsumer;
+import mekanism.api.BigItemStack;
 import mekanism.api.NBTConstants;
 import mekanism.api.text.EnumColor;
 import mekanism.common.Mekanism;
@@ -27,19 +23,26 @@ import mekanism.common.tile.TileEntityLogisticalSorter;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.util.TransporterUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler, InventoryNetwork, LogisticalTransporterBase> {
+import java.util.Collection;
+import java.util.Collections;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.IntConsumer;
+
+public abstract class LogisticalTransporterBase extends Transmitter<Storage<ItemVariant>, InventoryNetwork, LogisticalTransporterBase> {
 
     protected final Int2ObjectMap<TransporterStack> transit = new Int2ObjectOpenHashMap<>();
     protected final Int2ObjectMap<TransporterStack> needsSync = new Int2ObjectOpenHashMap<>();
@@ -54,9 +57,14 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
     }
 
     @Override
-    public AcceptorCache<IItemHandler> getAcceptorCache() {
+    protected BlockApiLookup<Storage<ItemVariant>, Direction> getAcceptorCacheLookup() {
+        return ItemStorage.SIDED;
+    }
+
+    @Override
+    public AcceptorCache<Storage<ItemVariant>> getAcceptorCache() {
         //Cast it here to make things a bit easier, as we know createAcceptorCache by default returns an object of type AcceptorCache
-        return (AcceptorCache<IItemHandler>) super.getAcceptorCache();
+        return (AcceptorCache<Storage<ItemVariant>>) super.getAcceptorCache();
     }
 
     @Override
@@ -100,8 +108,8 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
     }
 
     @Override
-    public boolean isValidAcceptor(BlockEntity tile, Direction side) {
-        return super.isValidAcceptor(tile, side) && getAcceptorCache().isAcceptorAndListen(tile, side, ForgeCapabilities.ITEM_HANDLER);
+    public boolean isValidAcceptor(Level level, BlockPos pos, Direction side) {
+        return super.isValidAcceptor(level, pos, side) && getAcceptorCache().isItemAcceptorAndListen(level, pos, side);
     }
 
     public void onUpdateClient() {
@@ -121,22 +129,19 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
                 delay = 3;
                 //Attempt to pull
                 for (Direction side : getConnections(ConnectionType.PULL)) {
-                    BlockEntity tile = WorldUtils.getTileEntity(getTileWorld(), getTilePos().relative(side));
-                    if (tile != null) {
-                        TransitRequest request = TransitRequest.anyItem(tile, side.getOpposite(), tier.getPullAmount());
-                        //There's a stack available to insert into the network...
-                        if (!request.isEmpty()) {
-                            TransitResponse response = insert(tile, request, getColor(), true, 0);
-                            if (response.isEmpty()) {
-                                //Insert failed; increment the backoff and calculate delay. Note that we cap retries
-                                // at a max of 40 ticks (2 seconds), which would be 4 consecutive retries
-                                delayCount++;
-                                delay = Math.min(40, (int) Math.exp(delayCount));
-                            } else {
-                                //If the insert succeeded, remove the inserted count and try again for another 10 ticks
-                                response.useAll();
-                                delay = 10;
-                            }
+                    TransitRequest request = TransitRequest.anyItem(getTileWorld(), getTilePos().relative(side), side.getOpposite(), tier.getPullAmount());
+                    //There's a stack available to insert into the network...
+                    if (!request.isEmpty()) {
+                        TransitResponse response = insert(getTileWorld(), getTilePos().relative(side), request, getColor(), true, 0);
+                        if (response.isEmpty()) {
+                            //Insert failed; increment the backoff and calculate delay. Note that we cap retries
+                            // at a max of 40 ticks (2 seconds), which would be 4 consecutive retries
+                            delayCount++;
+                            delay = Math.min(40, (int) Math.exp(delayCount));
+                        } else {
+                            //If the insert succeeded, remove the inserted count and try again for another 10 ticks
+                            response.useAll();
+                            delay = 10;
                         }
                     }
                 }
@@ -179,26 +184,25 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
                                     }
                                     prevSet = next;
                                 } else if (stack.getPathType() != Path.NONE) {
-                                    BlockEntity tile = WorldUtils.getTileEntity(getTileWorld(), next);
-                                    if (tile != null) {
-                                        TransitResponse response = TransitRequest.simple(stack.itemStack).addToInventory(tile, stack.getSide(this), 0,
-                                              stack.getPathType() == Path.HOME);
-                                        if (!response.isEmpty()) {
-                                            //We were able to add at least part of the stack to the inventory
-                                            ItemStack rejected = response.getRejected();
-                                            if (rejected.isEmpty()) {
-                                                //Nothing was rejected (it was all accepted); remove the stack from the prediction
-                                                // tracker and schedule this stack for deletion. Continue the loop thereafter
-                                                TransporterManager.remove(getTileWorld(), stack);
-                                                deletes.add(stackId);
-                                                continue;
-                                            }
-                                            //Some portion of the stack got rejected; save the remainder and
-                                            // let the recalculate below sort out what to do next
-                                            stack.itemStack = rejected;
-                                        }//else the entire stack got rejected (Note: we don't need to update the stack to point to itself)
-                                        prevSet = next;
-                                    }
+//                                    BlockEntity tile = WorldUtils.getTileEntity(getTileWorld(), next);
+//                                    if (tile != null) {
+                                    TransitResponse response = TransitRequest.simple(stack.itemStack).addToInventory(getTileWorld(), next, stack.getSide(this), 0,
+                                          stack.getPathType() == Path.HOME);
+                                    if (!response.isEmpty()) {
+                                        //We were able to add at least part of the stack to the inventory
+                                        BigItemStack rejected = response.getRejected();
+                                        if (rejected.isEmpty()) {
+                                            //Nothing was rejected (it was all accepted); remove the stack from the prediction
+                                            // tracker and schedule this stack for deletion. Continue the loop thereafter
+                                            TransporterManager.remove(getTileWorld(), stack);
+                                            deletes.add(stackId);
+                                            continue;
+                                        }
+                                        //Some portion of the stack got rejected; save the remainder and
+                                        // let the recalculate below sort out what to do next
+                                        stack.itemStack = rejected;
+                                    }//else the entire stack got rejected (Note: we don't need to update the stack to point to itself)
+                                    prevSet = next;
                                 }
                             }
                         }
@@ -313,7 +317,7 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
         readFromNBT(nbtTags);
     }
 
-    protected void readFromNBT(CompoundTag nbtTags) {
+    public void readFromNBT(CompoundTag nbtTags) {
         if (nbtTags.contains(NBTConstants.ITEMS, Tag.TAG_LIST)) {
             ListTag tagList = nbtTags.getList(NBTConstants.ITEMS, Tag.TAG_COMPOUND);
             for (int i = 0; i < tagList.size(); i++) {
@@ -378,21 +382,20 @@ public abstract class LogisticalTransporterBase extends Transmitter<IItemHandler
         return true;
     }
 
-    public TransitResponse insert(BlockEntity outputter, TransitRequest request, @Nullable EnumColor color, boolean doEmit, int min) {
-        return insert(outputter, request, color, doEmit, stack -> stack.recalculatePath(request, this, min, doEmit));
+    public TransitResponse insert(Level outputLevel, BlockPos outputPos, TransitRequest request, @Nullable EnumColor color, boolean doEmit, int min) {
+        return insert(outputLevel, outputPos, request, color, doEmit, stack -> stack.recalculatePath(request, this, min, doEmit));
     }
 
     public TransitResponse insertRR(TileEntityLogisticalSorter outputter, TransitRequest request, @Nullable EnumColor color, boolean doEmit, int min) {
-        return insert(outputter, request, color, doEmit, stack -> stack.recalculateRRPath(request, outputter, this, min, doEmit));
+        return insert(outputter.getLevel(), outputter.getBlockPos(), request, color, doEmit, stack -> stack.recalculateRRPath(request, outputter, this, min, doEmit));
     }
 
-    private TransitResponse insert(BlockEntity outputter, TransitRequest request, @Nullable EnumColor color, boolean doEmit,
+    private TransitResponse insert(Level outputLevel, BlockPos outputPos, TransitRequest request, @Nullable EnumColor color, boolean doEmit,
           Function<TransporterStack, TransitResponse> pathCalculator) {
-        BlockPos outputterPos = outputter.getBlockPos();
-        Direction from = WorldUtils.sideDifference(getTilePos(), outputterPos);
+        Direction from = WorldUtils.sideDifference(getTilePos(), outputPos);
         if (from != null && canReceiveFrom(from.getOpposite())) {
-            TransporterStack stack = createInsertStack(outputterPos, color);
-            if (stack.canInsertToTransporterNN(this, from, outputter)) {
+            TransporterStack stack = createInsertStack(outputPos, color);
+            if (stack.canInsertToTransporterNN(this, from, outputLevel, outputPos)) {
                 return updateTransit(doEmit, stack, pathCalculator.apply(stack));
             }
         }

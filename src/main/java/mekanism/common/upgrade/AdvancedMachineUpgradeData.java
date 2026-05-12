@@ -1,6 +1,5 @@
 package mekanism.common.upgrade;
 
-import java.util.List;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.inventory.IInventorySlot;
@@ -10,6 +9,8 @@ import mekanism.common.inventory.slot.OutputInventorySlot;
 import mekanism.common.inventory.slot.chemical.GasInventorySlot;
 import mekanism.common.tile.component.ITileComponent;
 import mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl;
+
+import java.util.List;
 
 public class AdvancedMachineUpgradeData extends MachineUpgradeData {
 

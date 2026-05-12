@@ -1,16 +1,16 @@
 package mekanism.common.util;
 
-import java.util.function.BiConsumer;
+import mekanism.api.functions.TriConsumer;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.lib.distribution.FloatingLongSplitInfo;
-import mekanism.common.lib.distribution.IntegerSplitInfo;
 import mekanism.common.lib.distribution.LongSplitInfo;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
+
+import java.util.function.BiConsumer;
 
 public class EmitUtils {
 
@@ -62,9 +62,9 @@ public class EmitUtils {
      *
      * @return The amount that actually got sent.
      */
-    public static <HANDLER, EXTRA, TARGET extends Target<HANDLER, Integer, EXTRA>> int sendToAcceptors(TARGET availableTargets, int amountToSplit, EXTRA toSend) {
-        return sendToAcceptors(availableTargets, new IntegerSplitInfo(amountToSplit, availableTargets.getHandlerCount()), toSend);
-    }
+//    public static <HANDLER, EXTRA, TARGET extends Target<HANDLER, Integer, EXTRA>> int sendToAcceptors(TARGET availableTargets, int amountToSplit, EXTRA toSend) {
+//        return sendToAcceptors(availableTargets, new IntegerSplitInfo(amountToSplit, availableTargets.getHandlerCount()), toSend);
+//    }
 
     /**
      * @param <HANDLER>        The handler of our target.
@@ -98,15 +98,17 @@ public class EmitUtils {
      * @param sides  - sides to search
      * @param action - action to complete
      */
-    public static void forEachSide(Level world, BlockPos center, Iterable<Direction> sides, BiConsumer<BlockEntity, Direction> action) {
+    public static void forEachSide(Level world, BlockPos center, Iterable<Direction> sides, TriConsumer<Level, BlockPos, Direction> action) {
+        forEachSidePos(center, sides, ((blockPos, direction) -> {
+            action.accept(world, blockPos, direction);
+        }));
+    }
+
+    public static void forEachSidePos(BlockPos center, Iterable<Direction> sides, BiConsumer<BlockPos, Direction> action) {
         if (sides != null) {
             //Loop provided sides
             for (Direction side : sides) {
-                //Get tile and provide if not null and the block is loaded, prevents ghost chunk loading
-                BlockEntity tile = WorldUtils.getTileEntity(world, center.relative(side));
-                if (tile != null) {
-                    action.accept(tile, side);
-                }
+                action.accept(center.mutable().move(side), side);
             }
         }
     }

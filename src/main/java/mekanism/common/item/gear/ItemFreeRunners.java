@@ -1,7 +1,5 @@
 package mekanism.common.item.gear;
 
-import java.util.List;
-import java.util.function.Consumer;
 import mekanism.api.IIncrementalEnum;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -10,35 +8,35 @@ import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.ILangEntry;
 import mekanism.client.render.RenderPropertiesProvider;
+import mekanism.client.render.armor.ISpecialGear;
+import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
-import mekanism.common.capabilities.ItemCapabilityWrapper.ItemCapability;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.energy.item.RateLimitEnergyHandler;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.interfaces.IItemHUDProvider;
 import mekanism.common.item.interfaces.IModeItem;
+import mekanism.common.mixinhelper.WalkableOnPowderSnow;
 import mekanism.common.registration.impl.CreativeTabDeferredRegister.ICustomCreativeTabContents;
+import mekanism.common.storage.item.EnergyItemStorage;
+import mekanism.common.storage.item.ItemStorageHandler;
 import mekanism.common.util.ItemDataUtils;
 import mekanism.common.util.StorageUtils;
-import net.minecraft.nbt.CompoundTag;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStack.TooltipPart;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
-public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvider, IModeItem, ICustomCreativeTabContents {
+import java.util.List;
+
+public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvider, IModeItem, ICustomCreativeTabContents, ISpecialGearGetter, ItemStorageHandler, WalkableOnPowderSnow {
 
     private static final FreeRunnerMaterial FREE_RUNNER_MATERIAL = new FreeRunnerMaterial();
 
@@ -47,12 +45,12 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
     }
 
     public ItemFreeRunners(ArmorMaterial material, Properties properties) {
-        super(material, ArmorItem.Type.BOOTS, properties.rarity(Rarity.RARE).setNoRepair());
+        super(material, ArmorItem.Type.BOOTS, properties.rarity(Rarity.RARE));
     }
 
     @Override
-    public void initializeClient(@NotNull Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(RenderPropertiesProvider.freeRunners());
+    public ISpecialGear getSpecialGear() {
+        return RenderPropertiesProvider.freeRunners();
     }
 
     @Override
@@ -83,7 +81,7 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        return MekanismConfig.client.energyColor.get();
+        return MekanismConfig.client.energyColor;
     }
 
     @Override
@@ -91,11 +89,17 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
         return super.areCapabilityConfigsLoaded() && MekanismConfig.gear.isLoaded();
     }
 
+//    @Override
+//    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {
+//        super.gatherCapabilities(capabilities, stack, nbt);
+//        capabilities.add(RateLimitEnergyHandler.create(() -> MekanismConfig.gear.freeRunnerChargeRate, () -> MekanismConfig.gear.freeRunnerMaxEnergy,
+//              BasicEnergyContainer.manualOnly, BasicEnergyContainer.alwaysTrue));
+//    }
+
     @Override
-    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {
-        super.gatherCapabilities(capabilities, stack, nbt);
-        capabilities.add(RateLimitEnergyHandler.create(MekanismConfig.gear.freeRunnerChargeRate, MekanismConfig.gear.freeRunnerMaxEnergy,
-              BasicEnergyContainer.manualOnly, BasicEnergyContainer.alwaysTrue));
+    public EnergyStorage getEnergyStorage(ContainerItemContext context) {
+        return new EnergyItemStorage(context, () -> RateLimitEnergyHandler.create(() -> MekanismConfig.gear.freeRunnerChargeRate, () -> MekanismConfig.gear.freeRunnerMaxEnergy,
+                BasicEnergyContainer.manualOnly, BasicEnergyContainer.alwaysTrue));
     }
 
     public FreeRunnerMode getMode(ItemStack itemStack) {
@@ -129,13 +133,13 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
         return slotType == getEquipmentSlot();
     }
 
-    @Override
-    public int getDefaultTooltipHideFlags(@NotNull ItemStack stack) {
-        if (this instanceof ItemArmoredFreeRunners) {
-            return super.getDefaultTooltipHideFlags(stack);
-        }
-        return super.getDefaultTooltipHideFlags(stack) | TooltipPart.MODIFIERS.getMask();
-    }
+//    @Override
+//    public int getDefaultTooltipHideFlags(@NotNull ItemStack stack) {
+//        if (this instanceof ItemArmoredFreeRunners) {
+//            return super.getDefaultTooltipHideFlags(stack);
+//        }
+//        return super.getDefaultTooltipHideFlags(stack) | TooltipPart.MODIFIERS.getMask();
+//    }
 
     @NothingNullByDefault
     public enum FreeRunnerMode implements IIncrementalEnum<FreeRunnerMode>, IHasTextComponent {

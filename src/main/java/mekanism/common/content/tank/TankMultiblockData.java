@@ -1,8 +1,7 @@
 package mekanism.common.content.tank;
 
 import com.mojang.datafixers.util.Either;
-import java.util.ArrayList;
-import java.util.List;
+import mekanism.api.FluidStack;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.chemical.ChemicalStack;
@@ -24,7 +23,14 @@ import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.integration.computer.annotation.SyntheticComputerMethod;
 import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
 import mekanism.common.inventory.container.slot.ContainerSlotType;
-import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
+import mekanism.common.inventory.container.sync.ISyncableData;
+import mekanism.common.inventory.container.sync.SyncableEnum;
+import mekanism.common.inventory.container.sync.SyncableFluidStack;
+import mekanism.common.inventory.container.sync.chemical.SyncableGasStack;
+import mekanism.common.inventory.container.sync.chemical.SyncableInfusionStack;
+import mekanism.common.inventory.container.sync.chemical.SyncablePigmentStack;
+import mekanism.common.inventory.container.sync.chemical.SyncableSlurryStack;
+import mekanism.common.inventory.container.sync.dynamic.IContainerSyncable;
 import mekanism.common.inventory.slot.HybridInventorySlot;
 import mekanism.common.lib.multiblock.IValveHandler;
 import mekanism.common.lib.multiblock.MultiblockData;
@@ -34,13 +40,15 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
 
-public class TankMultiblockData extends MultiblockData implements IValveHandler {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
-    @ContainerSync
+public class TankMultiblockData extends MultiblockData implements IValveHandler, IContainerSyncable {
+
     public final MergedTank mergedTank;
-    @ContainerSync
+
     @SyntheticComputerMethod(getter = "getContainerEditMode")
     public ContainerEditMode editMode = ContainerEditMode.BOTH;
 
@@ -142,8 +150,8 @@ public class TankMultiblockData extends MultiblockData implements IValveHandler 
     public void setVolume(int volume) {
         if (getVolume() != volume) {
             super.setVolume(volume);
-            tankCapacity = volume * MekanismConfig.general.dynamicTankFluidPerTank.get();
-            chemicalTankCapacity = volume * MekanismConfig.general.dynamicTankChemicalPerTank.get();
+            tankCapacity = volume * MekanismConfig.general.dynamicTankFluidPerTank;
+            chemicalTankCapacity = volume * MekanismConfig.general.dynamicTankChemicalPerTank;
         }
     }
 
@@ -155,7 +163,7 @@ public class TankMultiblockData extends MultiblockData implements IValveHandler 
 
     private long getStoredAmount() {
         return switch (mergedTank.getCurrentType()) {
-            case FLUID -> getFluidTank().getFluidAmount();
+            case FLUID -> getFluidTank().getAmount();
             case GAS -> getGasTank().getStored();
             case INFUSION -> getInfusionTank().getStored();
             case PIGMENT -> getPigmentTank().getStored();
@@ -223,6 +231,20 @@ public class TankMultiblockData extends MultiblockData implements IValveHandler 
     double getFilledPercentage() {
         long capacity = mergedTank.getCurrentType() == CurrentType.FLUID ? getTankCapacity() : getChemicalTankCapacity();
         return getStoredAmount() / (double) capacity;
+    }
+
+    @Override
+    public void addSyncables(Consumer<ISyncableData> acceptor, String tag) {
+        if (!"default".equals(tag)) return;
+
+        // mergedTank
+        acceptor.accept(SyncableFluidStack.create(mergedTank.getFluidTank()));
+        acceptor.accept(SyncableGasStack.create(mergedTank.getGasTank()));
+        acceptor.accept(SyncableInfusionStack.create(mergedTank.getInfusionTank()));
+        acceptor.accept(SyncablePigmentStack.create(mergedTank.getPigmentTank()));
+        acceptor.accept(SyncableSlurryStack.create(mergedTank.getSlurryTank()));
+        // editMode
+        acceptor.accept(SyncableEnum.create(ordinal -> ContainerEditMode.values()[ordinal], ContainerEditMode.BOTH, () -> editMode, newValue -> editMode = newValue));
     }
     //End computer related methods
 }

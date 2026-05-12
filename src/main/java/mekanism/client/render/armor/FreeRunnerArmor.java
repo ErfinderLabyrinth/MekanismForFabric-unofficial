@@ -3,17 +3,20 @@ package mekanism.client.render.armor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.model.ModelArmoredFreeRunners;
 import mekanism.client.model.ModelFreeRunners;
+import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListener {
-
+public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
+    public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "free_runner_armor");
     public static final FreeRunnerArmor FREE_RUNNERS = new FreeRunnerArmor(false);
     public static final FreeRunnerArmor ARMORED_FREE_RUNNERS = new FreeRunnerArmor(true);
 
@@ -67,5 +70,10 @@ public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListe
         matrix.translate(left ? -0.1375 : 0.1375, -0.75, -0.0625);
         model.renderLeg(matrix, renderer, light, overlayLight, hasEffect, left);
         matrix.popPose();
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 }

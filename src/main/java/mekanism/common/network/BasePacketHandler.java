@@ -1,48 +1,47 @@
 package mekanism.common.network;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.IntFunction;
 import mekanism.api.functions.TriConsumer;
 import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.lib.Version;
 import mekanism.common.lib.math.Range3D;
 import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.entity.FakePlayer;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public abstract class BasePacketHandler {
 
-    protected static SimpleChannel createChannel(ResourceLocation name, Version version) {
-        String protocolVersion = version.toString();
-        return NetworkRegistry.ChannelBuilder.named(name)
-              .clientAcceptedVersions(protocolVersion::equals)
-              .serverAcceptedVersions(protocolVersion::equals)
-              .networkProtocolVersion(() -> protocolVersion)
-              .simpleChannel();
-    }
+//    protected static SimpleChannel createChannel(ResourceLocation name, Version version, EnvType environment) {
+//        String protocolVersion = version.toString();
+//        return NetworkRegistry.ChannelBuilder.named(name)
+//              .clientAcceptedVersions(protocolVersion::equals)
+//              .serverAcceptedVersions(protocolVersion::equals)
+//              .networkProtocolVersion(() -> protocolVersion)
+//              .simpleChannel();
+//
+//        if (environment == EnvType.SERVER) {
+//            ServerPlayNetworking.
+//        }
+//    }
 
     /**
      * Helper for reading strings to make sure we don't accidentally call {@link FriendlyByteBuf#readUtf()} on the server
@@ -110,28 +109,43 @@ public abstract class BasePacketHandler {
 
     public static void log(String logFormat, Object... params) {
         //TODO: Add more logging for packets using this
-        if (MekanismConfig.general.logPackets.get()) {
+        if (MekanismConfig.general.logPackets) {
             Mekanism.logger.info(logFormat, params);
         }
     }
 
     private int index = 0;
 
-    protected abstract SimpleChannel getChannel();
+//    protected abstract SimpleChannel getChannel();
 
     public abstract void initialize();
 
-    protected <MSG extends IMekanismPacket> void registerClientToServer(Class<MSG> type, Function<FriendlyByteBuf, MSG> decoder) {
-        registerMessage(type, decoder, NetworkDirection.PLAY_TO_SERVER);
+    protected <MSG extends IMekanismPacket> void registerClientToServer(PacketType<MSG> type) {
+        ServerPlayNetworking.registerGlobalReceiver(type, (packet, player, responseSender) -> {if(packet != null) packet.handle(player, responseSender);});
     }
 
-    protected <MSG extends IMekanismPacket> void registerServerToClient(Class<MSG> type, Function<FriendlyByteBuf, MSG> decoder) {
-        registerMessage(type, decoder, NetworkDirection.PLAY_TO_CLIENT);
+    protected <MSG extends IMekanismPacket> void registerServerToClient(PacketType<MSG> type) {
+        ClientPlayNetworking.registerGlobalReceiver(type, (packet, player, responseSender) -> {if(packet != null) packet.handle(player, responseSender);});
     }
 
-    private <MSG extends IMekanismPacket> void registerMessage(Class<MSG> type, Function<FriendlyByteBuf, MSG> decoder, NetworkDirection networkDirection) {
-        getChannel().registerMessage(index++, type, IMekanismPacket::encode, decoder, IMekanismPacket::handle, Optional.of(networkDirection));
-    }
+//    private <MSG extends IMekanismPacket> void registerMessage(PacketType<MSG> type, ServerPlayNetworking.PlayPacketHandler<MSG> handler, NetworkDirection networkDirection) {
+//        if (networkDirection == NetworkDirection.CLIENT_TO_SERVER) {
+//            ServerPlayNetworking.registerGlobalReceiver(type, handler);
+//        }
+//        //getChannel().registerMessage(index++, type, IMekanismPacket::encode, decoder, IMekanismPacket::handle, Optional.of(networkDirection));
+//    }
+
+//    private <MSG extends IMekanismPacket> void registerMessage(ResourceLocation rl, Function<FriendlyByteBuf, MSG> decoder, NetworkDirection networkDirection) {
+//        if (networkDirection == NetworkDirection.CLIENT_TO_SERVER) {
+//            ServerPlayNetworking.registerGlobalReceiver(rl, (server, player, handler, buf,  responseSender) -> {
+//                MSG packet = decoder.apply(buf);
+//                if (packet != null) {
+//                    packet.handle(server, player, responseSender);
+//                }
+//            });
+//        }
+//        //getChannel().registerMessage(index++, type, IMekanismPacket::encode, decoder, IMekanismPacket::handle, Optional.of(networkDirection));
+//    }
 
     /**
      * Send this message to the specified player.
@@ -139,10 +153,11 @@ public abstract class BasePacketHandler {
      * @param message - the message to send
      * @param player  - the player to send it to
      */
-    public <MSG> void sendTo(MSG message, ServerPlayer player) {
+    public <MSG extends IMekanismPacket> void sendTo(MSG message, ServerPlayer player) {
         //Validate it is not a fake player, even though none of our code should call this with a fake player
         if (!(player instanceof FakePlayer)) {
-            getChannel().send(PacketDistributor.PLAYER.with(() -> player), message);
+            ServerPlayNetworking.send(player, message);
+//            getChannel().send(PacketDistributor.PLAYER.with(() -> player), message);
         }
     }
 
@@ -151,8 +166,10 @@ public abstract class BasePacketHandler {
      *
      * @param message - message to send
      */
-    public <MSG> void sendToAll(MSG message) {
-        getChannel().send(PacketDistributor.ALL.noArg(), message);
+    public <MSG extends IMekanismPacket> void sendToAll(MSG message, MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            sendTo(message, player);
+        }
     }
 
     /**
@@ -162,12 +179,12 @@ public abstract class BasePacketHandler {
      *
      * @apiNote This is useful for reload listeners
      */
-    public <MSG> void sendToAllIfLoaded(MSG message) {
-        if (ServerLifecycleHooks.getCurrentServer() != null) {
-            //If the server has loaded, send to all players
-            sendToAll(message);
-        }
-    }
+//    public <MSG extends IMekanismPacket> void sendToAllIfLoaded(MSG message) {
+//        if (ServerLifecycleHooks.getCurrentServer() != null) {
+//            //If the server has loaded, send to all players
+//            sendToAll(message);
+//        }
+//    }
 
     /**
      * Send this message to everyone within the supplied dimension.
@@ -175,8 +192,13 @@ public abstract class BasePacketHandler {
      * @param message   - the message to send
      * @param dimension - the dimension to target
      */
-    public <MSG> void sendToDimension(MSG message, ResourceKey<Level> dimension) {
-        getChannel().send(PacketDistributor.DIMENSION.with(() -> dimension), message);
+    public <MSG extends IMekanismPacket> void sendToDimension(MSG message, ResourceKey<Level> dimension, MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (server.getLevel(dimension) == player.level()) {
+                sendTo(message, player);
+            }
+        }
+        //getChannel().send(PacketDistributor.DIMENSION.with(() -> dimension), message);
     }
 
     /**
@@ -184,39 +206,46 @@ public abstract class BasePacketHandler {
      *
      * @param message - the message to send
      */
-    public <MSG> void sendToServer(MSG message) {
-        getChannel().sendToServer(message);
+    public <MSG extends IMekanismPacket> void sendToServer(MSG message) {
+        ClientPlayNetworking.send(message);
     }
 
-    public <MSG> void sendToAllTracking(MSG message, Entity entity) {
-        getChannel().send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), message);
-    }
-
-    public <MSG> void sendToAllTrackingAndSelf(MSG message, Entity entity) {
-        getChannel().send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), message);
-    }
-
-    public <MSG> void sendToAllTracking(MSG message, BlockEntity tile) {
-        sendToAllTracking(message, tile.getLevel(), tile.getBlockPos());
-    }
-
-    public <MSG> void sendToAllTracking(MSG message, Level world, BlockPos pos) {
-        if (world instanceof ServerLevel level) {
-            //If we have a ServerWorld just directly figure out the ChunkPos to not require looking up the chunk
-            // This provides a decent performance boost over using the packet distributor
-            level.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false).forEach(p -> sendTo(message, p));
-        } else {
-            //Otherwise, fallback to entities tracking the chunk if some mod did something odd and our world is not a ServerWorld
-            getChannel().send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunk(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()))), message);
+    public <MSG extends IMekanismPacket> void sendToAllTracking(MSG message, Entity entity) {
+        for (ServerPlayer player : PlayerLookup.tracking(entity)) {
+            sendTo(message, player);
         }
     }
 
-    public <MSG> void sendToReceivers(MSG message, DynamicBufferedNetwork<?, ?, ?, ?> network) {
+    public <MSG extends IMekanismPacket> void sendToAllTrackingAndSelf(MSG message, Entity entity) {
+        for (ServerPlayer player : PlayerLookup.tracking(entity)) {
+            sendTo(message, player);
+        }
+        if (entity instanceof ServerPlayer player) {
+            sendTo(message, player);
+        }
+    }
+
+    public <MSG extends IMekanismPacket> void sendToAllTracking(MSG message, BlockEntity tile) {
+        for (ServerPlayer player : PlayerLookup.tracking(tile)) {
+            sendTo(message, player);
+        }
+    }
+
+    public <MSG extends IMekanismPacket> void sendToAllTracking(MSG message, Level world, BlockPos pos) {
+        if (!(world instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
+        for (ServerPlayer player : PlayerLookup.tracking(serverLevel, pos)) {
+            sendTo(message, player);
+        }
+    }
+
+    public <MSG extends IMekanismPacket> void sendToReceivers(MSG message, DynamicBufferedNetwork<?, ?, ?, ?> network, MinecraftServer server) {
         //TODO: Figure out why we have a try catch and remove the need for it
         try {
             //TODO: Create a method in DynamicNetwork to get all players that are "tracking" the network
             // Also evaluate moving various network packet things over to using this at that point
-            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
             if (server != null) {
                 Range3D range = network.getPacketRange();
                 PlayerList playerList = server.getPlayerList();

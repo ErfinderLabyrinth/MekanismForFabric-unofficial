@@ -1,35 +1,31 @@
 package mekanism.common.recipe.upgrade.chemical;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
-import mekanism.api.Action;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.ChemicalTankBuilder;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.IChemicalTank;
+import mekanism.api.chemical.*;
 import mekanism.common.block.interfaces.IHasTileEntity;
+import mekanism.common.inventory.SimpleSingleStackStorage;
 import mekanism.common.recipe.upgrade.RecipeUpgradeData;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.tile.base.TileEntityMekanism;
-import mekanism.common.util.ItemDataUtils;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @NothingNullByDefault
 public abstract class ChemicalRecipeData<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>,
-      HANDLER extends IChemicalHandler<CHEMICAL, STACK>> implements RecipeUpgradeData<ChemicalRecipeData<CHEMICAL, STACK, TANK, HANDLER>> {
+      HANDLER extends IChemicalHandler<CHEMICAL, STACK, TANK>> implements RecipeUpgradeData<ChemicalRecipeData<CHEMICAL, STACK, TANK, HANDLER>> {
 
     protected final List<TANK> tanks;
 
@@ -62,23 +58,27 @@ public abstract class ChemicalRecipeData<CHEMICAL extends Chemical<CHEMICAL>, ST
 
     protected abstract HANDLER getOutputHandler(List<TANK> tanks);
 
-    protected abstract Capability<HANDLER> getCapability();
+    protected abstract ItemApiLookup<HANDLER, ContainerItemContext> getItemLookup();
 
-    protected abstract Predicate<@NotNull CHEMICAL> cloneValidator(HANDLER handler, int tank);
+//    protected abstract Predicate<@NotNull CHEMICAL> cloneValidator(HANDLER handler, int tank);
 
-    protected abstract HANDLER getHandlerFromTile(TileEntityMekanism tile);
+    protected abstract Storage<CHEMICAL> getHandlerFromTile(TileEntityMekanism tile);
 
     @Override
-    public boolean applyToStack(ItemStack stack) {
+    public ItemStack applyToStack(ItemStack stack) {
         if (this.tanks.isEmpty()) {
-            return true;
+            return stack;
         }
-        HANDLER handler;
-        Optional<HANDLER> capability = stack.getCapability(getCapability()).resolve();
-        if (capability.isPresent()) {
-            handler = capability.get();
+        Storage<CHEMICAL> handler;
+
+        SimpleSingleStackStorage storage = new SimpleSingleStackStorage(stack);
+        HANDLER itemHandler = ContainerItemContext.ofSingleSlot(storage).find(getItemLookup());
+
+        TileEntityMekanism tile = null;
+        if (itemHandler != null) {
+            handler = itemHandler;
         } else if (stack.getItem() instanceof BlockItem blockItem) {
-            TileEntityMekanism tile = null;
+            tile = null;
             Block block = blockItem.getBlock();
             if (block instanceof IHasTileEntity<?> hasTileEntity) {
                 BlockEntity tileEntity = hasTileEntity.createDummyBlockEntity();
@@ -88,39 +88,43 @@ public abstract class ChemicalRecipeData<CHEMICAL extends Chemical<CHEMICAL>, ST
             }
             if (tile == null || !tile.handles(getSubstanceType())) {
                 //Something went wrong
-                return false;
+                return null;
             }
             handler = getHandlerFromTile(tile);
         } else {
-            return false;
+            return null;
         }
-        int tankCount = handler.getTanks();
-        if (tankCount == 0) {
-            //We don't actually have any tanks in the output
-            return true;
-        }
-        List<TANK> tanks = new ArrayList<>();
-        for (int tank = 0; tank < tankCount; tank++) {
-            //TODO: Do we need to also clone the attribute validator
-            tanks.add(getTankBuilder().create(handler.getTankCapacity(tank), cloneValidator(handler, tank), null));
-        }
-        //TODO: Improve the logic used so that it tries to batch similar types of chemicals together first
-        // and maybe make it try multiple slot combinations
-        HANDLER outputHandler = getOutputHandler(tanks);
-        boolean hasData = false;
+//        List<TANK> tanks = new ArrayList<>();
+//        for (StorageView<CHEMICAL> storageView:handler) {
+//            //TODO: Do we need to also clone the attribute validator
+//            tanks.add(getTankBuilder().create(storageView.getCapacity(), cloneValidator(handler, tank), null));
+//        }
+//        //TODO: Improve the logic used so that it tries to batch similar types of chemicals together first
+//        // and maybe make it try multiple slot combinations
+//        HANDLER outputHandler = getOutputHandler(tanks);
         for (TANK tank : this.tanks) {
             if (!tank.isEmpty()) {
-                if (!outputHandler.insertChemical(tank.getStack(), Action.EXECUTE).isEmpty()) {
-                    //If we have a remainder something failed so bail
-                    return false;
+                try(Transaction t=Transaction.openOuter()) {
+                    if (handler.insert(tank.getResource(), tank.getAmount(), t) != tank.getAmount()) {
+                        //If we have a remainder something failed so bail
+                        return null;
+                    }
+                    t.commit();
                 }
-                hasData = true;
+                //hasData = true;
             }
         }
-        if (hasData) {
-            //We managed to transfer it all into valid slots, so save it to the stack
-            ItemDataUtils.writeContainers(stack, getSubstanceType().getContainerTag(), tanks);
+
+        if (tile != null) {
+            ItemStack stack1 = storage.getStack();
+            tile.saveToItem(stack1);
+            return stack1;
         }
-        return true;
+
+//        if (hasData) {
+//            //We managed to transfer it all into valid slots, so save it to the stack
+//            ItemDataUtils.writeContainers(stack, getSubstanceType().getContainerTag(), tanks);
+//        }
+        return storage.getStack();
     }
 }

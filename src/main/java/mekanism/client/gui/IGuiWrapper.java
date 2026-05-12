@@ -1,8 +1,5 @@
 package mekanism.client.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BooleanSupplier;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.window.GuiWindow;
 import mekanism.common.Mekanism;
@@ -18,6 +15,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public interface IGuiWrapper {
 
@@ -40,29 +41,29 @@ public interface IGuiWrapper {
     }
 
     default int getLeft() {
-        if (this instanceof AbstractContainerScreen<?> screen) {
-            return screen.getGuiLeft();
-        }
+//        if (this instanceof AbstractContainerScreen<?> screen) {
+//            return screen.getGuiLeft();
+//        }
         return 0;
     }
 
     default int getTop() {
-        if (this instanceof AbstractContainerScreen<?> screen) {
-            return screen.getGuiTop();
-        }
+//        if (this instanceof AbstractContainerScreen<?> screen) {
+//            return screen.getTop();
+//        }
         return 0;
     }
 
     default int getWidth() {
         if (this instanceof AbstractContainerScreen<?> screen) {
-            return screen.getXSize();
+            return screen.width;
         }
         return 0;
     }
 
     default int getHeight() {
         if (this instanceof AbstractContainerScreen<?> screen) {
-            return screen.getYSize();
+            return screen.height;
         }
         return 0;
     }
@@ -110,7 +111,7 @@ public interface IGuiWrapper {
         } else {
             List<Component> tooltip = new ArrayList<>(Screen.getTooltipFromItem(Minecraft.getInstance(), stack));
             tooltip.addAll(toAppend);
-            guiGraphics.renderTooltip(getFont(), tooltip, stack.getTooltipImage(), stack, xAxis, yAxis);
+            guiGraphics.renderTooltip(getFont(), tooltip, stack.getTooltipImage(), xAxis, yAxis);
         }
     }
 

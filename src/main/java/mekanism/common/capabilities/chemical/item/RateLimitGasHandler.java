@@ -1,12 +1,5 @@
 package mekanism.common.capabilities.chemical.item;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.LongSupplier;
-import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -17,6 +10,14 @@ import mekanism.api.chemical.gas.IGasTank;
 import mekanism.common.capabilities.chemical.variable.RateLimitChemicalTank.RateLimitGasTank;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 
 @NothingNullByDefault
 public class RateLimitGasHandler extends ItemStackMekanismGasHandler {
@@ -49,5 +50,10 @@ public class RateLimitGasHandler extends ItemStackMekanismGasHandler {
     @Override
     protected List<IGasTank> getInitialTanks() {
         return Collections.singletonList(tank);
+    }
+
+    @Override
+    public void onContentsChanged() {
+
     }
 }

@@ -3,13 +3,6 @@ package mekanism.common.content.gear.mekatool;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Consumer;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.gear.ICustomModule;
@@ -46,6 +39,10 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+
 @ParametersAreNotNullByDefault
 public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit> {
 
@@ -61,14 +58,14 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
 
     @Override
     public void init(IModule<ModuleVeinMiningUnit> module, ModuleConfigItemCreator configItemCreator) {
-        extendedMode = configItemCreator.createDisableableConfigItem("extended_mode", MekanismLang.MODULE_EXTENDED_MODE, false, MekanismConfig.gear.mekaToolExtendedMining);
+        extendedMode = configItemCreator.createDisableableConfigItem("extended_mode", MekanismLang.MODULE_EXTENDED_MODE, false, () -> MekanismConfig.gear.mekaToolExtendedMining);
         excavationRange = configItemCreator.createConfigItem("excavation_range", MekanismLang.MODULE_EXCAVATION_RANGE,
               new ModuleEnumData<>(ExcavationRange.LOW, module.getInstalledCount() + 1));
     }
 
     @Override
     public void addRadialModes(IModule<ModuleVeinMiningUnit> module, @NotNull ItemStack stack, Consumer<NestedRadialMode> adder) {
-        if (MekanismConfig.gear.mekaToolExtendedMining.get()) {
+        if (MekanismConfig.gear.mekaToolExtendedMining) {
             adder.accept(NESTED_RADIAL_MODE);
         }
     }
@@ -76,7 +73,7 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
     @Nullable
     @Override
     public <MODE extends IRadialMode> MODE getMode(IModule<ModuleVeinMiningUnit> module, ItemStack stack, RadialData<MODE> radialData) {
-        if (radialData == RADIAL_DATA && MekanismConfig.gear.mekaToolExtendedMining.get()) {
+        if (radialData == RADIAL_DATA && MekanismConfig.gear.mekaToolExtendedMining) {
             return (MODE) RADIAL_MODES.get(isExtended());
         }
         return null;
@@ -84,7 +81,7 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
 
     @Override
     public <MODE extends IRadialMode> boolean setMode(IModule<ModuleVeinMiningUnit> module, Player player, ItemStack stack, RadialData<MODE> radialData, MODE mode) {
-        if (radialData == RADIAL_DATA && MekanismConfig.gear.mekaToolExtendedMining.get()) {
+        if (radialData == RADIAL_DATA && MekanismConfig.gear.mekaToolExtendedMining) {
             boolean extended = mode == RADIAL_MODES.trueMode();
             if (isExtended() != extended) {
                 extendedMode.set(extended);
@@ -130,7 +127,7 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
     public static Object2IntMap<BlockPos> findPositions(Level world, Map<BlockPos, BlockState> initial, int extendedRange, Reference2BooleanMap<Block> oreTracker) {
         Object2IntMap<BlockPos> found = new Object2IntLinkedOpenHashMap<>();
 
-        int maxVein = MekanismConfig.gear.disassemblerMiningCount.get();
+        int maxVein = MekanismConfig.gear.disassemblerMiningCount;
         int maxCount = initial.size() + maxVein * oreTracker.size();
 
         Map<BlockPos, BlockState> frontier = new LinkedHashMap<>(initial);
@@ -173,7 +170,7 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
     @Override
     public void addHUDStrings(IModule<ModuleVeinMiningUnit> module, Player player, Consumer<Component> hudStringAdder) {
         //Only add hud string for extended vein mining if enabled in config
-        if (module.isEnabled() && MekanismConfig.gear.mekaToolExtendedMining.get()) {
+        if (module.isEnabled() && MekanismConfig.gear.mekaToolExtendedMining) {
             hudStringAdder.accept(MekanismLang.MODULE_EXTENDED_ENABLED.translateColored(EnumColor.DARK_GRAY,
                   isExtended() ? EnumColor.BRIGHT_GREEN : EnumColor.DARK_RED,
                   isExtended() ? MekanismLang.MODULE_ENABLED_LOWER : MekanismLang.MODULE_DISABLED_LOWER));

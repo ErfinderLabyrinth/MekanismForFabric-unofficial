@@ -1,6 +1,5 @@
 package mekanism.common.recipe.bin;
 
-import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.inventory.slot.BinInventorySlot;
 import mekanism.common.item.block.ItemBlockBin;
@@ -77,7 +76,7 @@ public class BinExtractRecipe extends BinRecipe {
                 ItemStack bottomStack = slot.getBottomStack();
                 if (!bottomStack.isEmpty()) {
                     //Only attempt to do anything if there are items to try and remove
-                    MekanismUtils.logMismatchedStackSize(slot.shrinkStack(bottomStack.getCount(), Action.EXECUTE), bottomStack.getCount());
+                    MekanismUtils.logMismatchedStackSize(slot.shrinkStack(bottomStack.getCount()), bottomStack.getCount());
                     remaining.set(i, binStack);
                 }
                 break;

@@ -1,7 +1,5 @@
 package mekanism.client.jei.machine;
 
-import java.util.HashSet;
-import java.util.Set;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.merged.BoxedChemicalStack;
 import mekanism.api.chemical.slurry.Slurry;
@@ -39,13 +37,16 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class ChemicalCrystallizerRecipeCategory extends BaseRecipeCategory<ChemicalCrystallizerRecipe> {
 
@@ -95,13 +96,13 @@ public class ChemicalCrystallizerRecipeCategory extends BaseRecipeCategory<Chemi
             initChemical(builder, MekanismJEI.TYPE_PIGMENT, ingredient);
         } else if (input instanceof SlurryStackIngredient ingredient) {
             initChemical(builder, MekanismJEI.TYPE_SLURRY, ingredient);
-            Set<ITag<Item>> tags = new HashSet<>();
+            Set<HolderSet.Named<Item>> tags = new HashSet<>();
             for (SlurryStack slurryStack : ingredient.getRepresentations()) {
                 Slurry slurry = slurryStack.getType();
                 if (!MekanismTags.Slurries.DIRTY_LOOKUP.contains(slurry)) {
                     TagKey<Item> oreTag = slurry.getOreTag();
                     if (oreTag != null) {
-                        tags.add(TagUtils.tag(ForgeRegistries.ITEMS, oreTag));
+                        tags.add(TagUtils.tag(BuiltInRegistries.ITEM, oreTag).get());
                     }
                 }
             }

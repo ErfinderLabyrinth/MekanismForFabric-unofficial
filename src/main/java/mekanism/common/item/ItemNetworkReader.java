@@ -1,14 +1,8 @@
 package mekanism.common.item;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.Optional;
-import java.util.Set;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.MekanismAPI;
-import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.heat.IHeatHandler;
-import mekanism.api.math.FloatingLong;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.ILangEntry;
 import mekanism.api.text.TextComponentUtil;
@@ -19,12 +13,12 @@ import mekanism.common.content.network.transmitter.Transmitter;
 import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
-import mekanism.common.util.CapabilityUtils;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.StorageUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -35,11 +29,14 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.Set;
 
 public class ItemNetworkReader extends ItemEnergized {
 
     public ItemNetworkReader(Properties properties) {
-        super(MekanismConfig.gear.networkReaderChargeRate, MekanismConfig.gear.networkReaderMaxEnergy, properties.rarity(Rarity.UNCOMMON));
+        super(() -> MekanismConfig.gear.networkReaderChargeRate, () -> MekanismConfig.gear.networkReaderMaxEnergy, properties.rarity(Rarity.UNCOMMON));
     }
 
     private void displayBorder(Player player, Object toDisplay, boolean brackets) {
@@ -61,20 +58,21 @@ public class ItemNetworkReader extends ItemEnergized {
             BlockEntity tile = WorldUtils.getTileEntity(world, pos);
             if (tile != null) {
                 if (!player.isCreative()) {
-                    FloatingLong energyPerUse = MekanismConfig.gear.networkReaderEnergyUsage.get();
-                    IEnergyContainer energyContainer = StorageUtils.getEnergyContainer(context.getItemInHand(), 0);
-                    if (energyContainer == null || energyContainer.extract(energyPerUse, Action.SIMULATE, AutomationType.MANUAL).smallerThan(energyPerUse)) {
-                        return InteractionResult.FAIL;
+                    long energyPerUse = MekanismConfig.gear.networkReaderEnergyUsage;
+                    EnergyStorage energyContainer = ContainerItemContext.forPlayerInteraction(player, context.getHand()).find(EnergyStorage.ITEM);
+                    try(Transaction t=Transaction.openOuter()) {
+                        if (energyContainer == null || energyContainer.extract(energyPerUse, t) < energyPerUse) {
+                            return InteractionResult.FAIL;
+                        }
+                        t.commit();
                     }
-                    energyContainer.extract(energyPerUse, Action.EXECUTE, AutomationType.MANUAL);
                 }
                 Direction opposite = context.getClickedFace().getOpposite();
                 if (tile instanceof TileEntityTransmitter transmitterTile) {
                     displayTransmitterInfo(player, transmitterTile.getTransmitter(), tile, opposite);
                 } else {
-                    Optional<IHeatHandler> heatHandler = CapabilityUtils.getCapability(tile, Capabilities.HEAT_HANDLER, opposite).resolve();
-                    if (heatHandler.isPresent()) {
-                        IHeatHandler transfer = heatHandler.get();
+                    IHeatHandler transfer = Capabilities.HEAT_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+                    if (transfer != null) {
                         displayBorder(player, MekanismLang.MEKANISM, true);
                         sendTemperature(player, transfer);
                         displayEndBorder(player);
@@ -104,7 +102,10 @@ public class ItemNetworkReader extends ItemEnergized {
             sendMessageIfNonNull(player, MekanismLang.NETWORK_READER_BUFFER, transmitterNetwork.getStoredInfo());
             sendMessageIfNonNull(player, MekanismLang.NETWORK_READER_THROUGHPUT, transmitterNetwork.getFlowInfo());
             sendMessageIfNonNull(player, MekanismLang.NETWORK_READER_CAPACITY, transmitterNetwork.getNetworkReaderCapacity());
-            CapabilityUtils.getCapability(tile, Capabilities.HEAT_HANDLER, opposite).ifPresent(heatHandler -> sendTemperature(player, heatHandler));
+            IHeatHandler heatHandler = Capabilities.HEAT_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+            if (heatHandler != null) {
+                sendTemperature(player, heatHandler);
+            }
         } else {
             player.sendSystemMessage(MekanismLang.NO_NETWORK.translate());
         }

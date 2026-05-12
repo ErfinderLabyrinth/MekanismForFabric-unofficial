@@ -2,14 +2,8 @@ package mekanism.common.inventory.container;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.ShortUnaryOperator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
 import mekanism.api.Action;
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
@@ -17,34 +11,10 @@ import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.Mekanism;
-import mekanism.common.inventory.container.slot.ArmorSlot;
-import mekanism.common.inventory.container.slot.HotBarSlot;
-import mekanism.common.inventory.container.slot.IHasExtraData;
-import mekanism.common.inventory.container.slot.IInsertableSlot;
-import mekanism.common.inventory.container.slot.InventoryContainerSlot;
-import mekanism.common.inventory.container.slot.MainInventorySlot;
-import mekanism.common.inventory.container.slot.OffhandSlot;
-import mekanism.common.inventory.container.sync.ISyncableData;
+import mekanism.common.inventory.container.slot.*;
+import mekanism.common.inventory.container.sync.*;
 import mekanism.common.inventory.container.sync.ISyncableData.DirtyType;
-import mekanism.common.inventory.container.sync.SyncableBlockPos;
-import mekanism.common.inventory.container.sync.SyncableBoolean;
-import mekanism.common.inventory.container.sync.SyncableByte;
-import mekanism.common.inventory.container.sync.SyncableDouble;
-import mekanism.common.inventory.container.sync.SyncableEnum;
-import mekanism.common.inventory.container.sync.SyncableFloat;
-import mekanism.common.inventory.container.sync.SyncableFloatingLong;
-import mekanism.common.inventory.container.sync.SyncableFluidStack;
-import mekanism.common.inventory.container.sync.SyncableFrequency;
-import mekanism.common.inventory.container.sync.SyncableInt;
-import mekanism.common.inventory.container.sync.SyncableItemStack;
-import mekanism.common.inventory.container.sync.SyncableLong;
-import mekanism.common.inventory.container.sync.SyncableRegistryEntry;
-import mekanism.common.inventory.container.sync.SyncableShort;
-import mekanism.common.inventory.container.sync.chemical.SyncableChemicalStack;
-import mekanism.common.inventory.container.sync.chemical.SyncableGasStack;
-import mekanism.common.inventory.container.sync.chemical.SyncableInfusionStack;
-import mekanism.common.inventory.container.sync.chemical.SyncablePigmentStack;
-import mekanism.common.inventory.container.sync.chemical.SyncableSlurryStack;
+import mekanism.common.inventory.container.sync.chemical.*;
 import mekanism.common.inventory.container.sync.list.SyncableList;
 import mekanism.common.lib.frequency.Frequency;
 import mekanism.common.network.to_client.container.PacketUpdateContainer;
@@ -53,6 +23,9 @@ import mekanism.common.network.to_server.PacketWindowSelect;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.RegistryUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -62,9 +35,10 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public abstract class MekanismContainer extends AbstractContainerMenu implements ISecurityContainer {
 
@@ -343,7 +317,11 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
      */
     public static <SLOT extends Slot & IInsertableSlot> ItemStack insertItem(List<SLOT> slots, @NotNull ItemStack stack, boolean ignoreEmpty,
           @Nullable SelectedWindowData selectedWindow) {
-        return insertItem(slots, stack, ignoreEmpty, selectedWindow, Action.EXECUTE);
+        try(Transaction t=Transaction.openOuter()) {
+            ItemStack result = insertItem(slots, stack, ignoreEmpty, selectedWindow, t);
+            t.commit();
+            return result;
+        }
     }
 
     /**
@@ -356,8 +334,8 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
      */
     @NotNull
     public static <SLOT extends Slot & IInsertableSlot> ItemStack insertItem(List<SLOT> slots, @NotNull ItemStack stack, boolean ignoreEmpty,
-          @Nullable SelectedWindowData selectedWindow, Action action) {
-        return insertItem(slots, stack, ignoreEmpty, false, selectedWindow, action);
+          @Nullable SelectedWindowData selectedWindow, TransactionContext t) {
+        return insertItem(slots, stack, ignoreEmpty, false, selectedWindow, t);
     }
 
     /**
@@ -371,9 +349,9 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
      */
     @NotNull
     public static <SLOT extends Slot & IInsertableSlot> ItemStack insertItemCheckAll(List<SLOT> slots, @NotNull ItemStack stack,
-          @Nullable SelectedWindowData selectedWindow, Action action) {
+          @Nullable SelectedWindowData selectedWindow, Transaction t) {
         //Ignore empty is ignored when check all is true
-        return insertItem(slots, stack, false, true, selectedWindow, action);
+        return insertItem(slots, stack, false, true, selectedWindow, t);
     }
 
     /**
@@ -390,7 +368,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
      */
     @NotNull
     public static <SLOT extends Slot & IInsertableSlot> ItemStack insertItem(List<SLOT> slots, @NotNull ItemStack stack, boolean ignoreEmpty, boolean checkAll,
-          @Nullable SelectedWindowData selectedWindow, Action action) {
+                                                                             @Nullable SelectedWindowData selectedWindow, TransactionContext t) {
         if (stack.isEmpty()) {
             //Skip doing anything if the stack is already empty.
             // Makes it easier to chain calls, rather than having to check if the stack is empty after our previous call
@@ -404,7 +382,8 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
                 // or if the slot doesn't "exist" for the current window configuration
                 continue;
             }
-            stack = slot.insertItem(stack, action);
+            long amountInserted = slot.insert(ItemVariant.of(stack), stack.getCount(), t);
+            stack = stack.copyWithCount(stack.getCount() - (int)amountInserted);
             if (stack.isEmpty()) {
                 break;
             }

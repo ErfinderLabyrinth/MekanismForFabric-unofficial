@@ -2,11 +2,6 @@ package mekanism.client.render.transmitter;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.EnumColor;
 import mekanism.client.model.ModelTransporterBox;
@@ -46,6 +41,8 @@ import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
+
 @NothingNullByDefault
 public class RenderLogisticalTransporter extends RenderTransmitterBase<TileEntityLogisticalTransporterBase> {
 
@@ -77,7 +74,7 @@ public class RenderLogisticalTransporter extends RenderTransmitterBase<TileEntit
           ProfilerFiller profiler) {
         LogisticalTransporterBase transporter = tile.getTransmitter();
         BlockPos pos = tile.getBlockPos();
-        if (!MekanismConfig.client.opaqueTransmitters.get()) {
+        if (!MekanismConfig.client.opaqueTransmitters) {
             Collection<TransporterStack> inTransit = transporter.getTransit();
             if (!inTransit.isEmpty()) {
                 matrix.pushPose();
@@ -90,7 +87,7 @@ public class RenderLogisticalTransporter extends RenderTransmitterBase<TileEntit
                     matrix.pushPose();
                     matrix.translate(stackPos[0], stackPos[1], stackPos[2]);
                     matrix.scale(0.75F, 0.75F, 0.75F);
-                    itemRenderer.renderAsStack(matrix, renderer, stack.itemStack, light);
+                    itemRenderer.renderAsStack(matrix, renderer, stack.itemStack.createStack(), light);
                     matrix.popPose();
                     if (stack.color != null) {
                         modelBox.render(matrix, renderer, LightTexture.FULL_BRIGHT, overlayLight, stackPos[0], stackPos[1], stackPos[2], stack.color);
@@ -168,7 +165,7 @@ public class RenderLogisticalTransporter extends RenderTransmitterBase<TileEntit
         private TransportInformation(TransporterStack transporterStack) {
             this.progress = transporterStack.progress;
             this.color = transporterStack.color;
-            this.item = HashedItem.create(transporterStack.itemStack);
+            this.item = HashedItem.create(transporterStack.itemStack.createStack());
         }
 
         @Override

@@ -1,29 +1,12 @@
 package mekanism.common.entity;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
-import mekanism.api.Coord4D;
-import mekanism.api.DataHandlerUtils;
-import mekanism.api.MekanismAPI;
-import mekanism.api.NBTConstants;
+import mekanism.api.*;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IMekanismStrictEnergyHandler;
 import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.inventory.IMekanismInventory;
-import mekanism.api.math.FloatingLong;
 import mekanism.api.recipes.ItemStackToItemStackRecipe;
 import mekanism.api.recipes.cache.CachedRecipe;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
@@ -34,22 +17,22 @@ import mekanism.api.recipes.outputs.IOutputHandler;
 import mekanism.api.recipes.outputs.OutputHelper;
 import mekanism.api.robit.IRobit;
 import mekanism.api.robit.RobitSkin;
+import mekanism.api.security.IItemOwnerObjectGetter;
+import mekanism.api.security.ISecurityObject;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.security.SecurityMode;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.advancements.MekanismCriteriaTriggers;
 import mekanism.common.capabilities.Capabilities;
-import mekanism.common.capabilities.CapabilityCache;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
-import mekanism.common.capabilities.resolver.ICapabilityResolver;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.entity.ai.RobitAIFollow;
 import mekanism.common.entity.ai.RobitAIPickup;
+import mekanism.common.inventory.SimpleSingleStackStorage;
 import mekanism.common.inventory.container.MekanismContainer;
-import mekanism.common.inventory.container.sync.SyncableFloatingLong;
 import mekanism.common.inventory.container.sync.SyncableInt;
+import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.inventory.slot.BasicInventorySlot;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.inventory.slot.InputInventorySlot;
@@ -62,12 +45,7 @@ import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.recipe.lookup.ISingleRecipeLookupHandler.ItemRecipeLookupHandler;
 import mekanism.common.recipe.lookup.cache.InputRecipeCache.SingleItem;
 import mekanism.common.recipe.lookup.monitor.RecipeCacheLookupMonitor;
-import mekanism.common.registries.MekanismContainerTypes;
-import mekanism.common.registries.MekanismDamageTypes;
-import mekanism.common.registries.MekanismDataSerializers;
-import mekanism.common.registries.MekanismEntityTypes;
-import mekanism.common.registries.MekanismItems;
-import mekanism.common.registries.MekanismRobitSkins;
+import mekanism.common.registries.*;
 import mekanism.common.registries.MekanismRobitSkins.SkinLookup;
 import mekanism.common.tile.TileEntityChargepad;
 import mekanism.common.tile.interfaces.ISustainedInventory;
@@ -76,6 +54,11 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.SecurityUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -97,7 +80,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -114,20 +96,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.portal.PortalInfo;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.data.ModelProperty;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.ITeleporter;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 
 //TODO: When Galacticraft gets ported make it so the robit can "breath" without a mask
 public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInventory, ISustainedInventory, IMekanismStrictEnergyHandler,
@@ -137,7 +113,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
         return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 1.0D).add(Attributes.MOVEMENT_SPEED, 0.3F);
     }
 
-    public static final ModelProperty<ResourceLocation> SKIN_TEXTURE_PROPERTY = new ModelProperty<>();
+//    public static final ModelProperty<ResourceLocation> SKIN_TEXTURE_PROPERTY = new ModelProperty<>();
 
     private static <T> EntityDataAccessor<T> define(EntityDataSerializer<T> dataSerializer) {
         return SynchedEntityData.defineId(EntityRobit.class, dataSerializer);
@@ -158,13 +134,12 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
           RecipeError.INPUT_DOESNT_PRODUCE_OUTPUT
     );
 
-    public static final FloatingLong MAX_ENERGY = FloatingLong.createConst(100_000);
-    private static final FloatingLong DISTANCE_MULTIPLIER = FloatingLong.createConst(1.5);
+    public static final long MAX_ENERGY = 100_000;
+    private static final double DISTANCE_MULTIPLIER = 1.5;
     //TODO: Note the robit smelts at double normal speed, we may want to make this configurable
     //TODO: Allow for upgrades in the robit?
     private static final int ticksRequired = 100;
 
-    private final CapabilityCache capabilityCache = new CapabilityCache();
     public Coord4D homeLocation;
     private int lastTextureUpdate;
     private int textureIndex;
@@ -193,20 +168,20 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
     private final EnergyInventorySlot energySlot;
     private final InputInventorySlot smeltingInputSlot;
     private final OutputInventorySlot smeltingOutputSlot;
-    private final List<IEnergyContainer> energyContainers;
+    private final EnergyStorage energyContainers;
     private final BasicEnergyContainer energyContainer;
 
     public EntityRobit(EntityType<EntityRobit> type, Level world) {
         super(type, world);
         getNavigation().setCanFloat(false);
         setCustomNameVisible(true);
-        addCapabilityResolver(BasicCapabilityResolver.security(this));
         recipeCacheLookupMonitor = new RecipeCacheLookupMonitor<>(this);
         // Choose a random offset to check for all errors. We do this to ensure that not every tile tries to recheck errors for every
         // recipe the same tick and thus create uneven spikes of CPU usage
         int checkOffset = level().random.nextInt(TileEntityRecipeMachine.RECIPE_CHECK_FREQUENCY);
         recheckAllRecipeErrors = () -> !playersUsing.isEmpty() && level().getGameTime() % TileEntityRecipeMachine.RECIPE_CHECK_FREQUENCY == checkOffset;
-        energyContainers = Collections.singletonList(energyContainer = BasicEnergyContainer.input(MAX_ENERGY, this));
+        energyContainer = BasicEnergyContainer.input(MAX_ENERGY, this);
+        energyContainers = energyContainer;
 
         inventorySlots = new ArrayList<>();
         inventoryContainerSlots = new ArrayList<>();
@@ -272,19 +247,19 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
         entityData.define(SKIN, MekanismRobitSkins.BASE);
     }
 
-    private FloatingLong getRoundedTravelEnergy() {
-        return DISTANCE_MULTIPLIER.multiply(Math.sqrt(distanceToSqr(xo, yo, zo)));
+    private long getRoundedTravelEnergy() {
+        return (long) (DISTANCE_MULTIPLIER * Math.sqrt(distanceToSqr(xo, yo, zo)));
     }
 
     @Override
-    public void onRemovedFromWorld() {
+    public void remove(RemovalReason removalReason) {
         if (level() != null && !level().isClientSide && getFollowing() && getOwner() != null) {
             //If this robit is currently following its owner and is being removed from the world (due to chunk unloading)
             // register a ticket that loads the chunk for a second, so that it has time to have its following check run again
             // (as it runs every 10 ticks, half a second), and then teleport to the owner.
             ((ServerLevel) level()).getChunkSource().addRegionTicket(ROBIT_CHUNK_UNLOAD, new ChunkPos(blockPosition()), 2, getId());
         }
-        super.onRemovedFromWorld();
+        super.remove(removalReason);
     }
 
     @Override
@@ -293,7 +268,10 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
             if (getFollowing()) {
                 Player owner = getOwner();
                 if (owner != null && distanceToSqr(owner) > 4 && !getNavigation().isDone() && !energyContainer.isEmpty()) {
-                    energyContainer.extract(getRoundedTravelEnergy(), Action.EXECUTE, AutomationType.INTERNAL);
+                    try (Transaction t = Transaction.openOuter()) {
+                        energyContainer.extract(getRoundedTravelEnergy(), t);
+                        t.commit();
+                    }
                 }
             }
         }
@@ -310,7 +288,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
             }
 
             if (tickCount % 20 == 0) {
-                Level serverWorld = ServerLifecycleHooks.getCurrentServer().getLevel(homeLocation.dimension);
+                Level serverWorld = getServer().getLevel(homeLocation.dimension);
                 BlockPos homePos = homeLocation.getPos();
                 if (WorldUtils.isBlockLoaded(serverWorld, homePos) && WorldUtils.getTileEntity(TileEntityChargepad.class, serverWorld, homePos) == null) {
                     drop();
@@ -346,10 +324,10 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
                         }
                         ItemStack itemStack = slot.getStack();
                         int maxSize = slot.getLimit(itemStack);
-                        if (ItemHandlerHelper.canItemStacksStack(itemStack, item.getItem()) && itemStack.getCount() < maxSize) {
+                        if (ItemEntity.areMergable(itemStack, item.getItem()) && itemStack.getCount() < maxSize) {
                             int needed = maxSize - itemStack.getCount();
                             int toAdd = Math.min(needed, item.getItem().getCount());
-                            MekanismUtils.logMismatchedStackSize(slot.growStack(toAdd, Action.EXECUTE), toAdd);
+                            MekanismUtils.logMismatchedStackSize(slot.growStack(toAdd), toAdd);
                             item.getItem().shrink(toAdd);
                             take(item, toAdd);
                             if (item.getItem().isEmpty()) {
@@ -376,22 +354,23 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
             ServerLevel newWorld = ((ServerLevel) this.level()).getServer().getLevel(homeLocation.dimension);
             if (newWorld != null) {
                 Vec3 destination = new Vec3(homeLocation.getX() + 0.5, homeLocation.getY() + 0.3, homeLocation.getZ() + 0.5);
-                changeDimension(newWorld, new ITeleporter() {
-                    @Override
-                    public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
-                        return repositionEntity.apply(false);
-                    }
-
-                    @Override
-                    public PortalInfo getPortalInfo(Entity entity, ServerLevel destWorld, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
-                        return new PortalInfo(destination, Vec3.ZERO, entity.getYRot(), entity.getXRot());
-                    }
-
-                    @Override
-                    public boolean playTeleportSound(ServerPlayer player, ServerLevel sourceWorld, ServerLevel destWorld) {
-                        return false;
-                    }
-                });
+                changeDimension(newWorld);
+                //, new ITeleporter() {
+                //                    @Override
+                //                    public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+                //                        return repositionEntity.apply(false);
+                //                    }
+                //
+                //                    @Override
+                //                    public PortalInfo getPortalInfo(Entity entity, ServerLevel destWorld, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
+                //                        return new PortalInfo(destination, Vec3.ZERO, entity.getYRot(), entity.getXRot());
+                //                    }
+                //
+                //                    @Override
+                //                    public boolean playTeleportSound(ServerPlayer player, ServerLevel sourceWorld, ServerLevel destWorld) {
+                //                        return false;
+                //                    }
+                //                }
             }
         }
     }
@@ -417,11 +396,13 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
             }
             return InteractionResult.PASS;
         } else if (!level().isClientSide) {
-            MenuProvider provider = MekanismContainerTypes.MAIN_ROBIT.getProvider(MekanismLang.ROBIT, this);
+            MenuProvider provider = MekanismContainerTypes.MAIN_ROBIT.getProvider(MekanismLang.ROBIT, this, buffer -> {
+                buffer.writeVarInt(getId());
+            });
             if (provider != null) {
                 gameEvent(GameEvent.ENTITY_INTERACT, player);
                 //Validate the provider isn't null, it shouldn't be but just in case
-                NetworkHooks.openScreen((ServerPlayer) player, provider, buf -> buf.writeVarInt(getId()));
+                player.openMenu(provider);
             }
         }
         return InteractionResult.sidedSuccess(level().isClientSide);
@@ -429,20 +410,26 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
 
     private ItemStack getItemVariant() {
         ItemStack stack = MekanismItems.ROBIT.getItemStack();
-        Optional<IStrictEnergyHandler> capability = stack.getCapability(Capabilities.STRICT_ENERGY).resolve();
-        if (capability.isPresent()) {
-            IStrictEnergyHandler energyHandlerItem = capability.get();
+        SimpleSingleStackStorage storage = new SimpleSingleStackStorage(stack);
+        ContainerItemContext context = ContainerItemContext.ofSingleSlot(storage);
+        IStrictEnergyHandler energyHandlerItem = context.find(Capabilities.STRICT_ENERGY_ITEM);
+        if (energyHandlerItem != null) {
             if (energyHandlerItem.getEnergyContainerCount() > 0) {
-                energyHandlerItem.setEnergy(0, energyContainer.getEnergy());
+                try (Transaction t = Transaction.openOuter()) {
+                    energyHandlerItem.setEnergy(0, energyContainer.getEnergy(), t);
+                    t.commit();
+                }
             }
         }
+        stack = storage.getStack();
+
         ItemRobit item = (ItemRobit) stack.getItem();
         item.setSustainedInventory(getSustainedInventory(), stack);
         item.setName(stack, getName());
-        stack.getCapability(Capabilities.SECURITY_OBJECT).ifPresent(security -> {
+        if (stack.getItem() instanceof IItemOwnerObjectGetter ownerObjectGetter && ownerObjectGetter.getOwnerObject(stack) instanceof ISecurityObject security) {
             security.setOwnerUUID(getOwnerUUID());
             security.setSecurityMode(getSecurityMode());
-        });
+        }
         item.setSkin(stack, getSkin());
         return stack;
     }
@@ -477,8 +464,8 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
         if (homeLocation != null) {
             homeLocation.write(nbtTags);
         }
-        nbtTags.put(NBTConstants.ITEMS, DataHandlerUtils.writeContainers(getInventorySlots(null)));
-        nbtTags.put(NBTConstants.ENERGY_CONTAINERS, DataHandlerUtils.writeContainers(getEnergyContainers(null)));
+        nbtTags.put(NBTConstants.ITEMS, DataHandlerUtils.writeContainers(inventorySlots, NBTSerializable::serializeNBT));
+        nbtTags.put(NBTConstants.ENERGY_CONTAINER, energyContainer.serializeNBT());
         nbtTags.putInt(NBTConstants.PROGRESS, getOperatingTicks());
         NBTUtils.writeResourceKey(nbtTags, NBTConstants.SKIN, getSkin());
     }
@@ -491,8 +478,8 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
         setFollowing(nbtTags.getBoolean(NBTConstants.FOLLOW));
         setDropPickup(nbtTags.getBoolean(NBTConstants.PICKUP_DROPS));
         homeLocation = Coord4D.read(nbtTags);
-        DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags.getList(NBTConstants.ITEMS, Tag.TAG_COMPOUND));
-        DataHandlerUtils.readContainers(getEnergyContainers(null), nbtTags.getList(NBTConstants.ENERGY_CONTAINERS, Tag.TAG_COMPOUND));
+        DataHandlerUtils.readContainers(inventorySlots, nbtTags.getList(NBTConstants.ITEMS, Tag.TAG_COMPOUND));
+        energyContainer.deserializeNBT(nbtTags.getCompound(NBTConstants.ENERGY_CONTAINER));
         progress = nbtTags.getInt(NBTConstants.PROGRESS);
         NBTUtils.setResourceKeyIfPresentElse(nbtTags, NBTConstants.SKIN, MekanismAPI.ROBIT_SKIN_REGISTRY_NAME, skin -> setSkin(skin, null),
               () -> setSkin(MekanismRobitSkins.BASE, null));
@@ -505,7 +492,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
 
     @Override
     protected void actuallyHurt(@NotNull DamageSource damageSource, float amount) {
-        amount = ForgeHooks.onLivingHurt(this, damageSource, amount);
+//        amount = ForgeHooks.onLivingHurt(this, damageSource, amount);
         if (amount <= 0) {
             return;
         }
@@ -515,7 +502,10 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
             //Half the "potential" damage the Robit can take from falling
             amount /= 2;
         }
-        energyContainer.extract(FloatingLong.create(1_000 * amount), Action.EXECUTE, AutomationType.INTERNAL);
+        try (Transaction t = Transaction.openOuter()) {
+            energyContainer.extract((long) (1_000 * amount), t);
+            t.commit();
+        }
         getCombatTracker().recordDamage(damageSource, amount);
     }
 
@@ -581,7 +571,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
     @Override
     public void setOwnerUUID(UUID uuid) {
         entityData.set(OWNER_UUID, uuid);
-        entityData.set(OWNER_NAME, MekanismUtils.getLastKnownUsername(uuid));
+        entityData.set(OWNER_NAME, MekanismUtils.getLastKnownUsername(uuid, getServer()));
     }
 
     public boolean getFollowing() {
@@ -603,25 +593,23 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
     @Override
     public void setSustainedInventory(ListTag nbtTags) {
         if (nbtTags != null && !nbtTags.isEmpty()) {
-            DataHandlerUtils.readContainers(getInventorySlots(null), nbtTags);
+            DataHandlerUtils.readContainers(inventorySlots, nbtTags);
         }
     }
 
     @Override
     public ListTag getSustainedInventory() {
-        return DataHandlerUtils.writeContainers(getInventorySlots(null));
+        return DataHandlerUtils.writeContainers(inventorySlots);
     }
 
-    @NotNull
     @Override
-    public List<IInventorySlot> getInventorySlots(@Nullable Direction side) {
-        return hasInventory() ? inventorySlots : Collections.emptyList();
+    public Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
+        return hasInventory() ? new CombinedStorage<>(inventorySlots) : Storage.empty();
     }
 
-    @NotNull
     @Override
-    public List<IEnergyContainer> getEnergyContainers(@Nullable Direction side) {
-        return canHandleEnergy() ? energyContainers : Collections.emptyList();
+    public EnergyStorage getEnergyContainer(@Nullable Direction side) {
+        return canHandleEnergy() ? energyContainers : EnergyStorage.EMPTY;
     }
 
     @Override
@@ -660,7 +648,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
     }
 
     @Override
-    public ItemStack getPickedResult(HitResult target) {
+    public @Nullable ItemStack getPickResult() {
         return getItemVariant();
     }
 
@@ -679,7 +667,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
                       trackedErrors[i] = errors.contains(TRACKED_ERROR_TYPES.get(i));
                   }
               })
-              .setEnergyRequirements(MekanismConfig.usage.energizedSmelter, energyContainer)
+              .setEnergyRequirements(() -> MekanismConfig.usage.energizedSmelter, energyContainer)
               .setRequiredTicks(() -> ticksRequired)
               .setOnFinish(this::onContentsChanged)
               .setOperatingTicksChanged(operatingTicks -> progress = operatingTicks);
@@ -697,7 +685,12 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
     public void addContainerTrackers(MekanismContainer container) {
         MenuType<?> containerType = container.getType();
         if (containerType == MekanismContainerTypes.MAIN_ROBIT.get()) {
-            container.track(SyncableFloatingLong.create(energyContainer::getEnergy, energyContainer::setEnergy));
+            container.track(SyncableLong.create(energyContainer::getEnergy, energy -> {
+                try(Transaction t = Transaction.openOuter()) {
+                    energyContainer.setEnergy(energy, t);
+                    t.commit();
+                }
+            }));
         } else if (containerType == MekanismContainerTypes.SMELTING_ROBIT.get()) {
             container.track(SyncableInt.create(() -> progress, value -> progress = value));
             container.trackArray(trackedErrors);
@@ -752,10 +745,10 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
     /**
      * @apiNote Only call on the client.
      */
-    public ModelData getModelData() {
-        //TODO: Eventually we might want to evaluate caching this model data object
-        return ModelData.builder().with(SKIN_TEXTURE_PROPERTY, getModelTexture()).build();
-    }
+//    public ModelData getModelData() {
+//        //TODO: Eventually we might want to evaluate caching this model data object
+//        return ModelData.builder().with(SKIN_TEXTURE_PROPERTY, getModelTexture()).build();
+//    }
 
     /**
      * @apiNote Only call on the client.
@@ -803,34 +796,5 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
             }
         }
         return textures.get(textureIndex);
-    }
-
-    protected final void addCapabilityResolver(ICapabilityResolver resolver) {
-        capabilityCache.addCapabilityResolver(resolver);
-    }
-
-    @NotNull
-    @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side) {
-        if (capabilityCache != null) {
-            //Validate the cache is not null. In theory this should never happen unless some mod is trying to access capabilities
-            // before our entity is done constructing, but there are cases such as the size event where based on when they are
-            // fired if it is based on the entity's caps then the first call will happen before the enitity has finished
-            // constructing. See https://github.com/mekanism/Mekanism/issues/7490
-            if (capabilityCache.isCapabilityDisabled(capability, side)) {
-                return LazyOptional.empty();
-            } else if (capabilityCache.canResolve(capability)) {
-                return capabilityCache.getCapabilityUnchecked(capability, side);
-            }
-        }
-        //Call to LivingEntity's Implementation of getCapability if we could not find a capability ourselves
-        return super.getCapability(capability, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        //When the capabilities on our tile get invalidated, make sure to also invalidate all our cached ones
-        capabilityCache.invalidateAll();
     }
 }

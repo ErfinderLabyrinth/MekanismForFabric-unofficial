@@ -1,7 +1,5 @@
 package mekanism.client.gui;
 
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
@@ -14,6 +12,7 @@ import mekanism.client.gui.element.tab.GuiBoilerTab.BoilerTab;
 import mekanism.client.gui.element.tab.GuiHeatTab;
 import mekanism.client.jei.MekanismJEIRecipeType;
 import mekanism.common.MekanismLang;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.boiler.BoilerMultiblockData;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
@@ -26,6 +25,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collections;
+import java.util.List;
 
 public class GuiThermoelectricBoiler extends GuiMekanismTile<TileEntityBoilerCasing, MekanismTileContainer<TileEntityBoilerCasing>> {
 
@@ -68,16 +70,16 @@ public class GuiThermoelectricBoiler extends GuiMekanismTile<TileEntityBoilerCas
             public double getLevel() {
                 BoilerMultiblockData multiblock = tile.getMultiblock();
                 return Math.min(1, multiblock.lastMaxBoil * HeatUtils.getWaterThermalEnthalpy() /
-                                   (multiblock.superheatingElements * MekanismConfig.general.superheatingHeatTransfer.get()));
+                                   (multiblock.superheatingElements * MekanismConfig.general.superheatingHeatTransfer));
             }
         }, 164, 13));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().superheatedCoolantTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 6, 13)
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().superheatedCoolantTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 6, 13)
               .setLabel(MekanismLang.BOILER_HEATED_COOLANT_TANK.translateColored(EnumColor.ORANGE)));
-        addRenderableWidget(new GuiFluidGauge(() -> tile.getMultiblock().waterTank, () -> tile.getMultiblock().getFluidTanks(null), GaugeType.STANDARD, this, 26, 13)
+        addRenderableWidget(new GuiFluidGauge(() -> tile.getMultiblock().waterTank, () -> new ListHolder<>(tile.getMultiblock().getFluidTanks()), GaugeType.STANDARD, this, 26, 13)
               .setLabel(MekanismLang.BOILER_WATER_TANK.translateColored(EnumColor.INDIGO)));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().steamTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 172, 13)
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().steamTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 172, 13)
               .setLabel(MekanismLang.BOILER_STEAM_TANK.translateColored(EnumColor.GRAY)));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().cooledCoolantTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 192, 13)
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().cooledCoolantTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 192, 13)
               .setLabel(MekanismLang.BOILER_COOLANT_TANK.translateColored(EnumColor.AQUA)));
         addRenderableWidget(new GuiHeatTab(this, () -> {
             Component environment = MekanismUtils.getTemperatureDisplay(tile.getMultiblock().lastEnvironmentLoss, TemperatureUnit.KELVIN, false);

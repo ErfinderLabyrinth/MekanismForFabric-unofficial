@@ -1,17 +1,20 @@
 package mekanism.common.registration.impl;
 
-import java.util.function.Supplier;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.attribute.ChemicalAttribute;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasBuilder;
 import mekanism.common.base.IChemicalConstant;
 import mekanism.common.registration.WrappedDeferredRegister;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.function.Supplier;
 
 public class GasDeferredRegister extends WrappedDeferredRegister<Gas> {
-
+    String modid;
     public GasDeferredRegister(String modid) {
-        super(modid, MekanismAPI.GAS_REGISTRY_NAME);
+        super(MekanismAPI.GAS_REGISTRY_NAME);
+        this.modid = modid;
     }
 
     public GasRegistryObject<Gas> register(IChemicalConstant constants, ChemicalAttribute... attributes) {
@@ -28,7 +31,7 @@ public class GasDeferredRegister extends WrappedDeferredRegister<Gas> {
         });
     }
 
-    public <GAS extends Gas> GasRegistryObject<GAS> register(String name, Supplier<? extends GAS> sup) {
-        return register(name, sup, GasRegistryObject::new);
+    public <GAS extends Gas> GasRegistryObject<GAS> register(String name, Supplier<GAS> sup) {
+        return register(new ResourceLocation(modid, name), sup, GasRegistryObject::new);
     }
 }

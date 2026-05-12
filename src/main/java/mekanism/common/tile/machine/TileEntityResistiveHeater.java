@@ -1,13 +1,10 @@
 package mekanism.common.tile.machine;
 
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import mekanism.api.IConfigCardAccess;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
 import mekanism.api.heat.HeatAPI.HeatTransfer;
-import mekanism.api.math.FloatingLong;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.capabilities.energy.ResistiveHeaterEnergyContainer;
 import mekanism.common.capabilities.heat.BasicHeatCapacitor;
@@ -18,7 +15,6 @@ import mekanism.common.capabilities.holder.heat.HeatCapacitorHelper;
 import mekanism.common.capabilities.holder.heat.IHeatCapacitorHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerHeatCapacitorWrapper;
@@ -28,24 +24,25 @@ import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
 import mekanism.common.integration.computer.computercraft.ComputerConstants;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableDouble;
-import mekanism.common.inventory.container.sync.SyncableFloatingLong;
+import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
-public class TileEntityResistiveHeater extends TileEntityMekanism {
+public class TileEntityResistiveHeater extends TileEntityMekanism implements IConfigCardAccess {
 
     private float soundScale = 1;
     private double lastEnvironmentLoss;
     private double lastTransferLoss;
-    private FloatingLong clientEnergyUsed = FloatingLong.ZERO;
+    private long clientEnergyUsed = 0;
 
     private ResistiveHeaterEnergyContainer energyContainer;
     @WrappingComputerMethod(wrapper = ComputerHeatCapacitorWrapper.class, methodNames = "getTemperature", docPlaceholder = "heater")
@@ -55,7 +52,6 @@ public class TileEntityResistiveHeater extends TileEntityMekanism {
 
     public TileEntityResistiveHeater(BlockPos pos, BlockState state) {
         super(MekanismBlocks.RESISTIVE_HEATER, pos, state);
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIG_CARD, this));
     }
 
     @NotNull
@@ -86,20 +82,22 @@ public class TileEntityResistiveHeater extends TileEntityMekanism {
     protected void onUpdateServer() {
         super.onUpdateServer();
         energySlot.fillContainerOrConvert();
-        FloatingLong toUse = FloatingLong.ZERO;
+        long toUse = 0;
         if (MekanismUtils.canFunction(this)) {
-            toUse = energyContainer.extract(energyContainer.getEnergyPerTick(), Action.SIMULATE, AutomationType.INTERNAL);
-            if (!toUse.isZero()) {
-                heatCapacitor.handleHeat(toUse.multiply(MekanismConfig.general.resistiveHeaterEfficiency.get()).doubleValue());
-                energyContainer.extract(toUse, Action.EXECUTE, AutomationType.INTERNAL);
+            try(Transaction t=Transaction.openOuter()) {
+                toUse = energyContainer.extract(energyContainer.getEnergyPerTick(), t);
+                if (toUse != 0) {
+                    heatCapacitor.handleHeat(toUse * MekanismConfig.general.resistiveHeaterEfficiency);
+                    t.commit();
+                }
             }
         }
-        setActive(!toUse.isZero());
+        setActive(toUse != 0);
         clientEnergyUsed = toUse;
         HeatTransfer transfer = simulate();
         lastEnvironmentLoss = transfer.environmentTransfer();
         lastTransferLoss = transfer.adjacentTransfer();
-        float newSoundScale = toUse.divide(100_000).floatValue();
+        float newSoundScale = (float)toUse / 100;
         if (Math.abs(newSoundScale - soundScale) > 0.01) {
             soundScale = newSoundScale;
             sendUpdatePacket();
@@ -108,7 +106,7 @@ public class TileEntityResistiveHeater extends TileEntityMekanism {
 
     @NotNull
     @ComputerMethod
-    public FloatingLong getEnergyUsed() {
+    public long getEnergyUsed() {
         return clientEnergyUsed;
     }
 
@@ -122,7 +120,7 @@ public class TileEntityResistiveHeater extends TileEntityMekanism {
         return lastEnvironmentLoss;
     }
 
-    public void setEnergyUsageFromPacket(FloatingLong floatingLong) {
+    public void setEnergyUsageFromPacket(long floatingLong) {
         energyContainer.updateEnergyUsage(floatingLong);
         markForSave();
     }
@@ -139,14 +137,14 @@ public class TileEntityResistiveHeater extends TileEntityMekanism {
     @Override
     public CompoundTag getConfigurationData(Player player) {
         CompoundTag data = super.getConfigurationData(player);
-        data.putString(NBTConstants.ENERGY_USAGE, energyContainer.getEnergyPerTick().toString());
+        data.putLong(NBTConstants.ENERGY_USAGE, energyContainer.getEnergyPerTick());
         return data;
     }
 
     @Override
     public void setConfigurationData(Player player, CompoundTag data) {
         super.setConfigurationData(player, data);
-        NBTUtils.setFloatingLongIfPresent(data, NBTConstants.ENERGY_USAGE, energyContainer::updateEnergyUsage);
+        NBTUtils.setLongIfPresent(data, NBTConstants.ENERGY_USAGE, energyContainer::updateEnergyUsage);
     }
 
     @Override
@@ -154,7 +152,7 @@ public class TileEntityResistiveHeater extends TileEntityMekanism {
         super.addContainerTrackers(container);
         container.track(SyncableDouble.create(this::getLastTransferLoss, value -> lastTransferLoss = value));
         container.track(SyncableDouble.create(this::getLastEnvironmentLoss, value -> lastEnvironmentLoss = value));
-        container.track(SyncableFloatingLong.create(this::getEnergyUsed, value -> clientEnergyUsed = value));
+        container.track(SyncableLong.create(this::getEnergyUsed, value -> clientEnergyUsed = value));
     }
 
     @NotNull
@@ -166,19 +164,19 @@ public class TileEntityResistiveHeater extends TileEntityMekanism {
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void load(@NotNull CompoundTag tag) {
+        super.load(tag);
         NBTUtils.setFloatIfPresent(tag, NBTConstants.SOUND_SCALE, value -> soundScale = value);
     }
 
     //Methods relating to IComputerTile
     @ComputerMethod(methodDescription = ComputerConstants.DESCRIPTION_GET_ENERGY_USAGE)
-    FloatingLong getEnergyUsage() {
+    long getEnergyUsage() {
         return energyContainer.getEnergyPerTick();
     }
 
     @ComputerMethod(requiresPublicSecurity = true)
-    void setEnergyUsage(FloatingLong usage) throws ComputerException {
+    void setEnergyUsage(long usage) throws ComputerException {
         validateSecurityIsPublic();
         setEnergyUsageFromPacket(usage);
     }

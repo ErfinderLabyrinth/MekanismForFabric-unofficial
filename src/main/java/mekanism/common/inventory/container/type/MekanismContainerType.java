@@ -4,6 +4,8 @@ import mekanism.common.inventory.container.entity.IEntityContainer;
 import mekanism.common.inventory.container.type.MekanismContainerType.IMekanismContainerFactory;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,8 +14,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.network.IContainerFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,8 +39,8 @@ public class MekanismContainerType<T, CONTAINER extends AbstractContainerMenu> e
         return new MekanismContainerType<>(type, constructor, (id, inv, buf) -> constructor.create(id, inv, getEntityFromBuf(buf, type), true));
     }
 
-    protected MekanismContainerType(Class<T> type, IMekanismContainerFactory<T, CONTAINER> mekanismConstructor, IContainerFactory<CONTAINER> constructor) {
-        super(type, mekanismConstructor, constructor);
+    protected MekanismContainerType(Class<T> type, IMekanismContainerFactory<T, CONTAINER> mekanismConstructor, ExtendedFactory<CONTAINER> factory) {
+        super(type, mekanismConstructor, factory);
     }
 
     @Nullable
@@ -64,7 +64,7 @@ public class MekanismContainerType<T, CONTAINER extends AbstractContainerMenu> e
     private static <TILE extends BlockEntity> TILE getTileFromBuf(FriendlyByteBuf buf, Class<TILE> type) {
         if (buf == null) {
             throw new IllegalArgumentException("Null packet buffer");
-        } else if (!FMLEnvironment.dist.isClient()) {
+        } else if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
             throw new UnsupportedOperationException("This method is only supported on the client.");
         }
         BlockPos pos = buf.readBlockPos();
@@ -80,7 +80,7 @@ public class MekanismContainerType<T, CONTAINER extends AbstractContainerMenu> e
     private static <ENTITY extends Entity> ENTITY getEntityFromBuf(FriendlyByteBuf buf, Class<ENTITY> type) {
         if (buf == null) {
             throw new IllegalArgumentException("Null packet buffer");
-        } else if (!FMLEnvironment.dist.isClient()) {
+        } else if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
             throw new UnsupportedOperationException("This method is only supported on the client.");
         }
         if (Minecraft.getInstance().level == null) {

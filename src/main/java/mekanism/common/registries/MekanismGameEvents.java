@@ -31,4 +31,8 @@ public class MekanismGameEvents {
             frequencyForEvent.put(SEISMIC_VIBRATION.get(), 10);
         }
     }
+
+    public static void register() {
+
+    }
 }

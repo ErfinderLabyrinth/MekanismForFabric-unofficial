@@ -33,12 +33,12 @@ public class ModuleHydrostaticRepulsorUnit extends EnchantmentBasedModule<Module
     @Override
     public void tickServer(IModule<ModuleHydrostaticRepulsorUnit> module, Player player) {
         if (isSwimBoost(module, player)) {
-            module.useEnergy(player, MekanismConfig.gear.mekaSuitEnergyUsageHydrostaticRepulsion.get());
+            module.useEnergy(player, MekanismConfig.gear.mekaSuitEnergyUsageHydrostaticRepulsion);
         }
     }
 
     public boolean isSwimBoost(IModule<ModuleHydrostaticRepulsorUnit> module, Player player) {
-        return swimBoost.get() && module.getInstalledCount() >= BOOST_STACKS && !player.getMaxHeightFluidType().isAir() &&
+        return swimBoost.get() && module.getInstalledCount() >= BOOST_STACKS && !player.fluidHeight.isEmpty() && //TODO is this the correct replacement?
                module.hasEnoughEnergy(MekanismConfig.gear.mekaSuitEnergyUsageHydrostaticRepulsion);
     }
 }

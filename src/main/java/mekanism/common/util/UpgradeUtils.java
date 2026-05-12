@@ -1,7 +1,5 @@
 package mekanism.common.util;
 
-import java.util.ArrayList;
-import java.util.List;
 import mekanism.api.Upgrade;
 import mekanism.api.Upgrade.IUpgradeInfoHandler;
 import mekanism.common.MekanismLang;
@@ -9,8 +7,12 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.registries.MekanismItems;
 import mekanism.common.tile.interfaces.IUpgradeTile;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UpgradeUtils {
 
@@ -19,6 +21,18 @@ public class UpgradeUtils {
 
     public static ItemStack getStack(Upgrade upgrade) {
         return getStack(upgrade, 1);
+    }
+
+    public static Item getItem(Upgrade upgrade) {
+        return switch (upgrade) {
+            case SPEED -> MekanismItems.SPEED_UPGRADE.asItem();
+            case ENERGY -> MekanismItems.ENERGY_UPGRADE.asItem();
+            case FILTER -> MekanismItems.FILTER_UPGRADE.asItem();
+            case MUFFLING -> MekanismItems.MUFFLING_UPGRADE.asItem();
+            case GAS -> MekanismItems.GAS_UPGRADE.asItem();
+            case ANCHOR -> MekanismItems.ANCHOR_UPGRADE.asItem();
+            case STONE_GENERATOR -> MekanismItems.STONE_GENERATOR_UPGRADE.asItem();
+        };
     }
 
     public static ItemStack getStack(Upgrade upgrade, int count) {
@@ -48,7 +62,7 @@ public class UpgradeUtils {
     public static List<Component> getMultScaledInfo(IUpgradeTile tile, Upgrade upgrade) {
         List<Component> ret = new ArrayList<>();
         if (tile.supportsUpgrades() && upgrade.getMax() > 1) {
-            double effect = Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), (float) tile.getComponent().getUpgrades(upgrade) / (float) upgrade.getMax());
+            double effect = Math.pow(MekanismConfig.general.maxUpgradeMultiplier, (float) tile.getComponent().getUpgrades(upgrade) / (float) upgrade.getMax());
             ret.add(MekanismLang.UPGRADES_EFFECT.translate(Math.round(effect * 100) / 100F));
         }
         return ret;

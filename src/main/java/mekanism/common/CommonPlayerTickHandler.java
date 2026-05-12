@@ -1,16 +1,9 @@
 package mekanism.common;
 
-import java.util.Map;
-import java.util.Optional;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.functions.FloatSupplier;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
-import mekanism.api.math.FloatingLong;
-import mekanism.api.math.FloatingLongSupplier;
 import mekanism.common.base.KeySync;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.gear.IBlastingItem;
@@ -19,11 +12,8 @@ import mekanism.common.content.gear.mekasuit.ModuleHydraulicPropulsionUnit;
 import mekanism.common.content.gear.mekasuit.ModuleHydrostaticRepulsorUnit;
 import mekanism.common.content.gear.mekasuit.ModuleLocomotiveBoostingUnit;
 import mekanism.common.entity.EntityFlame;
-import mekanism.common.item.gear.ItemFlamethrower;
-import mekanism.common.item.gear.ItemFreeRunners;
-import mekanism.common.item.gear.ItemMekaSuitArmor;
-import mekanism.common.item.gear.ItemScubaMask;
-import mekanism.common.item.gear.ItemScubaTank;
+import mekanism.common.inventory.SimpleSingleStackStorage;
+import mekanism.common.item.gear.*;
 import mekanism.common.item.interfaces.IJetpackItem;
 import mekanism.common.item.interfaces.IJetpackItem.JetpackMode;
 import mekanism.common.lib.radiation.RadiationManager;
@@ -32,10 +22,14 @@ import mekanism.common.registries.MekanismModules;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.StorageUtils;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalFluidTags;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,15 +37,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.PlayerTickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 
 public class CommonPlayerTickHandler {
 
@@ -94,14 +86,7 @@ public class CommonPlayerTickHandler {
         return 0;
     }
 
-    @SubscribeEvent
-    public void onTick(PlayerTickEvent event) {
-        if (event.phase == Phase.END && event.side.isServer()) {
-            tickEnd(event.player);
-        }
-    }
-
-    private void tickEnd(Player player) {
+    public void tickEnd(Player player) {
         Mekanism.playerState.updateStepAssist(player);
         Mekanism.playerState.updateSwimBoost(player);
         if (player instanceof ServerPlayer serverPlayer) {
@@ -117,27 +102,31 @@ public class CommonPlayerTickHandler {
                     player.level().addFreshEntity(flame);
                 }
                 if (MekanismUtils.isPlayingMode(player)) {
-                    ((ItemFlamethrower) currentItem.getItem()).useGas(currentItem, 1);
+                    ((ItemFlamethrower) currentItem.getItem()).useGas(ContainerItemContext.ofPlayerHand(player, InteractionHand.MAIN_HAND), 1);
                 }
             }
         }
 
-        ItemStack jetpack = IJetpackItem.getActiveJetpack(player);
-        if (!jetpack.isEmpty()) {
-            ItemStack primaryJetpack = IJetpackItem.getPrimaryJetpack(player);
-            if (!primaryJetpack.isEmpty()) {
-                JetpackMode primaryMode = ((IJetpackItem) primaryJetpack.getItem()).getJetpackMode(primaryJetpack);
-                JetpackMode mode = IJetpackItem.getPlayerJetpackMode(player, primaryMode, () -> Mekanism.keyMap.has(player.getUUID(), KeySync.ASCEND));
-                if (mode != JetpackMode.DISABLED) {
-                    if (IJetpackItem.handleJetpackMotion(player, mode, () -> Mekanism.keyMap.has(player.getUUID(), KeySync.ASCEND))) {
-                        player.resetFallDistance();
-                        if (player instanceof ServerPlayer serverPlayer) {
-                            serverPlayer.connection.aboveGroundTickCount = 0;
+        ContainerItemContext jetpackContext = IJetpackItem.getActiveJetpack(player);
+        if(!jetpackContext.getItemVariant().isBlank()) {
+            ItemStack jetpack = jetpackContext.getItemVariant().toStack((int)jetpackContext.getAmount());
+            if (!jetpack.isEmpty()) {
+                ContainerItemContext primaryJetpackContext = IJetpackItem.getPrimaryJetpack(player);
+                ItemStack primaryJetpack = primaryJetpackContext.getItemVariant().toStack((int)primaryJetpackContext.getAmount());
+                if (!primaryJetpack.isEmpty()) {
+                    JetpackMode primaryMode = ((IJetpackItem) primaryJetpack.getItem()).getJetpackMode(primaryJetpack);
+                    JetpackMode mode = IJetpackItem.getPlayerJetpackMode(player, primaryMode, () -> Mekanism.keyMap.has(player.getUUID(), KeySync.ASCEND));
+                    if (mode != JetpackMode.DISABLED) {
+                        if (IJetpackItem.handleJetpackMotion(player, mode, () -> Mekanism.keyMap.has(player.getUUID(), KeySync.ASCEND))) {
+                            player.resetFallDistance();
+                            if (player instanceof ServerPlayer serverPlayer) {
+                                serverPlayer.connection.aboveGroundTickCount = 0;
+                            }
                         }
-                    }
-                    ((IJetpackItem) jetpack.getItem()).useJetpackFuel(jetpack);
-                    if (player.level().getGameTime() % 10 == 0) {
-                        player.gameEvent(MekanismGameEvents.JETPACK_BURN.get());
+                        ((IJetpackItem) jetpack.getItem()).useJetpackFuel(jetpackContext);
+                        if (player.level().getGameTime() % 10 == 0) {
+                            player.gameEvent(MekanismGameEvents.JETPACK_BURN.get());
+                        }
                     }
                 }
             }
@@ -147,8 +136,10 @@ public class CommonPlayerTickHandler {
         if (isScubaMaskOn(player, chest)) {
             ItemScubaTank tank = (ItemScubaTank) chest.getItem();
             final int max = player.getMaxAirSupply();
-            tank.useGas(chest, 1);
-            GasStack received = tank.useGas(chest, max - player.getAirSupply());
+            SimpleSingleStackStorage storage = new SimpleSingleStackStorage(chest);
+            tank.useGas(ContainerItemContext.ofSingleSlot(storage), 1);
+            GasStack received = tank.useGas(ContainerItemContext.ofSingleSlot(storage), max - player.getAirSupply());
+            player.setItemSlot(EquipmentSlot.CHEST, storage.getStack());
             if (!received.isEmpty()) {
                 player.setAirSupply(player.getAirSupply() + (int) received.getAmount());
             }
@@ -178,10 +169,8 @@ public class CommonPlayerTickHandler {
         return isGravitationalModulationReady(player) && player.getAbilities().flying;
     }
 
-    @SubscribeEvent
-    public void onEntityAttacked(LivingAttackEvent event) {
-        LivingEntity entity = event.getEntity();
-        if (event.getAmount() <= 0 || !entity.isAlive()) {
+    public boolean onEntityAttacked(LivingEntity entity, DamageSource source, float amount) {
+        if (amount <= 0 || !entity.isAlive()) {
             //If some mod does weird things and causes the damage value to be negative or zero then exit
             // as our logic assumes there is actually damage happening and can crash if someone tries to
             // use a negative number as the damage value. We also check to make sure that we don't do
@@ -189,39 +178,37 @@ public class CommonPlayerTickHandler {
             // for things like fall damage if the entity dies before hitting the ground, and then energy
             // would be depleted regardless if keep inventory is on even if no damage was stopped as the
             // entity can't take damage while dead
-            return;
+            return false;
         }
         //Gas Mask checks
-        if (event.getSource().is(MekanismTags.DamageTypes.IS_PREVENTABLE_MAGIC)) {
+        if (source.is(MekanismTags.DamageTypes.IS_PREVENTABLE_MAGIC)) {
             ItemStack headStack = entity.getItemBySlot(EquipmentSlot.HEAD);
             if (!headStack.isEmpty() && headStack.getItem() instanceof ItemScubaMask) {
                 ItemStack chestStack = entity.getItemBySlot(EquipmentSlot.CHEST);
                 if (!chestStack.isEmpty() && chestStack.getItem() instanceof ItemScubaTank tank && tank.getFlowing(chestStack) && ChemicalUtil.hasGas(chestStack)) {
-                    event.setCanceled(true);
-                    return;
+                    return true;
                 }
             }
         }
         //Note: We have this here in addition to listening to LivingHurt, so as if we can fully block the damage
         // then we don't play the hurt effect/sound, as cancelling LivingHurtEvent still causes that to happen
-        if (event.getSource().is(DamageTypeTags.IS_FALL)) {
+        if (source.is(DamageTypeTags.IS_FALL)) {
             //Free runner checks
             FallEnergyInfo info = getFallAbsorptionEnergyInfo(entity);
-            if (info != null && tryAbsorbAll(event, info.container, info.damageRatio, info.energyCost)) {
-                return;
+            if (info != null && tryAbsorbAll(amount, info.container, info.damageRatio, info.energyCost)) {
+                return true;
             }
         }
         if (entity instanceof Player player) {
-            if (ItemMekaSuitArmor.tryAbsorbAll(player, event.getSource(), event.getAmount())) {
-                event.setCanceled(true);
+            if (ItemMekaSuitArmor.tryAbsorbAll(player, source, amount)) {
+                return true;
             }
         }
+        return false;
     }
 
-    @SubscribeEvent
-    public void onLivingHurt(LivingHurtEvent event) {
-        LivingEntity entity = event.getEntity();
-        if (event.getAmount() <= 0 || !entity.isAlive()) {
+    public boolean onLivingHurt(LivingEntity entity, DamageSource source, float amount, Consumer<Float> setFloat) {
+        if (amount <= 0 || !entity.isAlive()) {
             //If some mod does weird things and causes the damage value to be negative or zero then exit
             // as our logic assumes there is actually damage happening and can crash if someone tries to
             // use a negative number as the damage value. We also check to make sure that we don't do
@@ -231,81 +218,83 @@ public class CommonPlayerTickHandler {
             // entity can't take damage while dead. While living hurt is not fired, we catch this case
             // just in case anyway because it is a simple boolean check and there is no guarantee that
             // other mods may not be firing the event manually even when the entity is dead
-            return;
+            return false;
         }
-        if (event.getSource().is(DamageTypeTags.IS_FALL)) {
+        if (source.is(DamageTypeTags.IS_FALL)) {
             FallEnergyInfo info = getFallAbsorptionEnergyInfo(entity);
-            if (info != null && handleDamage(event, info.container, info.damageRatio, info.energyCost)) {
-                return;
+            if (info != null && handleDamage(amount, setFloat, info.container, info.damageRatio, info.energyCost)) {
+                return true;
             }
         }
         if (entity instanceof Player player) {
-            float ratioAbsorbed = ItemMekaSuitArmor.getDamageAbsorbed(player, event.getSource(), event.getAmount());
+            float ratioAbsorbed = ItemMekaSuitArmor.getDamageAbsorbed(player, source, amount);
             if (ratioAbsorbed > 0) {
-                float damageRemaining = event.getAmount() * Math.max(0, 1 - ratioAbsorbed);
+                float damageRemaining = amount * Math.max(0, 1 - ratioAbsorbed);
                 if (damageRemaining <= 0) {
-                    event.setCanceled(true);
+                    return true;
                 } else {
-                    event.setAmount(damageRemaining);
+                    setFloat.accept(damageRemaining);
                 }
-            }
-        }
-    }
-
-    private boolean tryAbsorbAll(LivingAttackEvent event, @Nullable IEnergyContainer energyContainer, FloatSupplier absorptionRatio, FloatingLongSupplier energyCost) {
-        if (energyContainer != null && absorptionRatio.getAsFloat() == 1) {
-            FloatingLong energyRequirement = energyCost.get().multiply(event.getAmount());
-            if (energyRequirement.isZero()) {
-                //No energy is actually needed to absorb the damage, either because of the config
-                // or how small the amount to absorb is
-                event.setCanceled(true);
-                return true;
-            }
-            FloatingLong simulatedExtract = energyContainer.extract(energyRequirement, Action.SIMULATE, AutomationType.MANUAL);
-            if (simulatedExtract.equals(energyRequirement)) {
-                //If we could fully negate the damage cancel the event and extract it
-                energyContainer.extract(energyRequirement, Action.EXECUTE, AutomationType.MANUAL);
-                event.setCanceled(true);
-                return true;
             }
         }
         return false;
     }
 
-    private boolean handleDamage(LivingHurtEvent event, @Nullable IEnergyContainer energyContainer, FloatSupplier absorptionRatio, FloatingLongSupplier energyCost) {
+    private boolean tryAbsorbAll(float amount, @Nullable EnergyStorage energyContainer, FloatSupplier absorptionRatio, LongSupplier energyCost) {
+        if (energyContainer != null && absorptionRatio.getAsFloat() == 1) {
+            long energyRequirement = (long) (energyCost.getAsLong() * (double)amount);
+            if (energyRequirement == 0) {
+                //No energy is actually needed to absorb the damage, either because of the config
+                // or how small the amount to absorb is
+                return true;
+            }
+            try(Transaction t=Transaction.openOuter()) {
+                long simulatedExtract = energyContainer.extract(energyRequirement, t);
+                if (simulatedExtract == energyRequirement) {
+                    //If we could fully negate the damage cancel the event and extract it
+                    t.commit();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean handleDamage(float amountSource, Consumer<Float> setAmount, @Nullable EnergyStorage energyContainer, FloatSupplier absorptionRatio, LongSupplier energyCost) {
         if (energyContainer != null) {
             float absorption = absorptionRatio.getAsFloat();
-            float amount = event.getAmount() * absorption;
-            FloatingLong energyRequirement = energyCost.get().multiply(amount);
+            float amount = amountSource * absorption;
+            long energyRequirement = (long) (energyCost.getAsLong() * (double)amount);
             float ratioAbsorbed;
-            if (energyRequirement.isZero()) {
+            if (energyRequirement == 0) {
                 //No energy is actually needed to absorb the damage, either because of the config
                 // or how small the amount to absorb is
                 ratioAbsorbed = absorption;
             } else {
-                ratioAbsorbed = absorption * energyContainer.extract(energyRequirement, Action.EXECUTE, AutomationType.MANUAL).divide(amount).floatValue();
+                try(Transaction t=Transaction.openOuter()) {
+                    ratioAbsorbed = absorption * ((float) energyContainer.extract(energyRequirement, t) / amount);
+                    t.commit();
+                }
             }
             if (ratioAbsorbed > 0) {
-                float damageRemaining = event.getAmount() * Math.max(0, 1 - ratioAbsorbed);
+                float damageRemaining = amountSource * Math.max(0, 1 - ratioAbsorbed);
                 if (damageRemaining <= 0) {
-                    event.setCanceled(true);
                     return true;
                 } else {
-                    event.setAmount(damageRemaining);
+                    setAmount.accept(damageRemaining);
                 }
             }
         }
         return false;
     }
 
-    @SubscribeEvent
-    public void onLivingJump(LivingJumpEvent event) {
-        if (event.getEntity() instanceof Player player) {
+    public void onLivingJump(LivingEntity entity) {
+        if (entity instanceof Player player) {
             IModule<ModuleHydraulicPropulsionUnit> module = IModuleHelper.INSTANCE.load(player.getItemBySlot(EquipmentSlot.FEET), MekanismModules.HYDRAULIC_PROPULSION_UNIT);
             if (module != null && module.isEnabled() && Mekanism.keyMap.has(player.getUUID(), KeySync.BOOST)) {
                 float boost = module.getCustomInstance().getBoost();
-                FloatingLong usage = MekanismConfig.gear.mekaSuitBaseJumpEnergyUsage.get().multiply(boost / 0.1F);
-                IEnergyContainer energyContainer = module.getEnergyContainer();
+                long usage = (long) (MekanismConfig.gear.mekaSuitBaseJumpEnergyUsage * (boost / 0.1F));
+                EnergyStorage energyContainer = module.getEnergyContainer();
                 if (module.canUseEnergy(player, energyContainer, usage, false)) {
                     // if we're sprinting with the boost module, limit the height
                     IModule<ModuleLocomotiveBoostingUnit> boostModule = IModuleHelper.INSTANCE.load(player.getItemBySlot(EquipmentSlot.LEGS), MekanismModules.LOCOMOTIVE_BOOSTING_UNIT);
@@ -326,38 +315,35 @@ public class CommonPlayerTickHandler {
     private FallEnergyInfo getFallAbsorptionEnergyInfo(LivingEntity base) {
         ItemStack feetStack = base.getItemBySlot(EquipmentSlot.FEET);
         if (!feetStack.isEmpty()) {
+            SimpleSingleStackStorage storage = new SimpleSingleStackStorage(feetStack);
+            ContainerItemContext cic = ContainerItemContext.ofSingleSlot(storage);
             if (feetStack.getItem() instanceof ItemFreeRunners boots) {
                 if (boots.getMode(feetStack).preventsFallDamage()) {
-                    return new FallEnergyInfo(StorageUtils.getEnergyContainer(feetStack, 0), MekanismConfig.gear.freeRunnerFallDamageRatio,
-                          MekanismConfig.gear.freeRunnerFallEnergyCost);
+                    return new FallEnergyInfo(cic.find(EnergyStorage.ITEM), () -> MekanismConfig.gear.freeRunnerFallDamageRatio,
+                            () -> MekanismConfig.gear.freeRunnerFallEnergyCost);
                 }
             } else if (feetStack.getItem() instanceof ItemMekaSuitArmor) {
-                return new FallEnergyInfo(StorageUtils.getEnergyContainer(feetStack, 0), MekanismConfig.gear.mekaSuitFallDamageRatio,
-                      MekanismConfig.gear.mekaSuitEnergyUsageFall);
+                return new FallEnergyInfo(cic.find(EnergyStorage.ITEM), () ->MekanismConfig.gear.mekaSuitFallDamageRatio,
+                        () -> MekanismConfig.gear.mekaSuitEnergyUsageFall);
             }
         }
         return null;
     }
 
-    private record FallEnergyInfo(@Nullable IEnergyContainer container, FloatSupplier damageRatio, FloatingLongSupplier energyCost) {
+    private record FallEnergyInfo(@Nullable EnergyStorage container, FloatSupplier damageRatio, LongSupplier energyCost) {
     }
 
-    @SubscribeEvent
-    public void getBreakSpeed(BreakSpeed event) {
-        Player player = event.getEntity();
-        float speed = event.getNewSpeed();
-
-        Optional<BlockPos> position = event.getPosition();
-        if (position.isPresent()) {
+    public float getBreakSpeed(Player player, float speed, BlockState state, Optional<BlockPos> position) {
+        if (position.isPresent()) { // currently its always false
             BlockPos pos = position.get();
             // Blasting item speed check
             ItemStack mainHand = player.getMainHandItem();
             if (!mainHand.isEmpty() && mainHand.getItem() instanceof IBlastingItem tool) {
-                Map<BlockPos, BlockState> blocks = tool.getBlastedBlocks(player.level(), player, mainHand, pos, event.getState());
+                Map<BlockPos, BlockState> blocks = tool.getBlastedBlocks(player.level(), player, mainHand, pos, state);
                 if (!blocks.isEmpty()) {
                     // Scales mining speed based on hardest block
                     // Does not take into account the tool check for those blocks or other mining speed changes that don't apply to the target block.
-                    float targetHardness = event.getState().getDestroySpeed(player.level(), pos);
+                    float targetHardness = state.getDestroySpeed(player.level(), pos);
                     float maxHardness = blocks.entrySet().stream()
                           .map(entry -> entry.getValue().getDestroySpeed(player.level(), entry.getKey()))
                           .reduce(targetHardness, Float::max);
@@ -369,7 +355,7 @@ public class CommonPlayerTickHandler {
         //Gyroscopic stabilization check
         ItemStack legs = player.getItemBySlot(EquipmentSlot.LEGS);
         if (!legs.isEmpty() && IModuleHelper.INSTANCE.isEnabled(legs, MekanismModules.GYROSCOPIC_STABILIZATION_UNIT)) {
-            if (player.isEyeInFluidType(ForgeMod.WATER_TYPE.get()) && !EnchantmentHelper.hasAquaAffinity(player)) {
+            if (player.isEyeInFluid(ConventionalFluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(player)) {
                 speed *= 5.0F;
             }
 
@@ -378,6 +364,6 @@ public class CommonPlayerTickHandler {
             }
         }
 
-        event.setNewSpeed(speed);
+        return speed;
     }
 }

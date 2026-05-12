@@ -1,11 +1,12 @@
 package mekanism.common.capabilities.holder.slot;
 
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.capabilities.holder.QuantumEntangloporterConfigHolder;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.TileEntityQuantumEntangloporter;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,9 +22,8 @@ public class QuantumEntangloporterInventorySlotHolder extends QuantumEntanglopor
         return TransmissionType.ITEM;
     }
 
-    @NotNull
     @Override
-    public List<IInventorySlot> getInventorySlots(@Nullable Direction side) {
-        return entangloporter.hasFrequency() && entangloporter.hasInventory() ? entangloporter.getFreq().getInventorySlots(side) : Collections.emptyList();
+    public @NotNull Storage<ItemVariant> getInventorySlots(@Nullable Direction side) {
+        return entangloporter.hasFrequency() && entangloporter.hasInventory() ? new CombinedStorage<>(entangloporter.getFreq().getInventorySlots(side)) : Storage.empty();
     }
 }

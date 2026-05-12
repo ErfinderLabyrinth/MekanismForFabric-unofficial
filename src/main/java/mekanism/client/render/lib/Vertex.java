@@ -2,14 +2,15 @@ package mekanism.client.render.lib;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import mekanism.common.lib.Color;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Vertex {
 
@@ -195,7 +196,7 @@ public class Vertex {
         consumer.uv2(lightU, lightV);
         consumer.normal(normal.x(), normal.y(), normal.z());
         for (Map.Entry<VertexFormatElement, int[]> entry : miscData.entrySet()) {
-            consumer.misc(entry.getKey(), entry.getValue());
+            //consumer.misc(entry.getKey(), entry.getValue());
         }
         consumer.endVertex();
     }

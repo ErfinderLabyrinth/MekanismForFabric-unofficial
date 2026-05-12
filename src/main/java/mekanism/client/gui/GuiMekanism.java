@@ -1,12 +1,6 @@
 package mekanism.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 import mekanism.api.text.ILangEntry;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiElement.IHoverable;
@@ -45,6 +39,13 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 public abstract class GuiMekanism<CONTAINER extends AbstractContainerMenu> extends VirtualSlotContainerScreen<CONTAINER> implements IGuiWrapper, IFancyFontRenderer {
 
@@ -416,7 +417,7 @@ public abstract class GuiMekanism<CONTAINER extends AbstractContainerMenu> exten
     @Nullable
     @Override
     @Deprecated//Don't use directly, this is normally private in ContainerScreen
-    protected Slot findSlot(double mouseX, double mouseY) {
+    public Slot findSlot(double mouseX, double mouseY) {
         //We override the implementation we have in VirtualSlotContainerScreen so that we can cache getting our window
         // and have some general performance improvements given we can batch a bunch of lookups together
         boolean checkedWindow = false;
@@ -645,5 +646,30 @@ public abstract class GuiMekanism<CONTAINER extends AbstractContainerMenu> exten
 
     public LRU<GuiWindow>.LRUIterator getWindowsDescendingIterator() {
         return windows.descendingIterator();
+    }
+
+    @Override
+    public int getXSize() {
+        return imageWidth;
+    }
+
+    @Override
+    public int getLeft() {
+        return leftPos;
+    }
+
+    @Override
+    public int getTop() {
+        return topPos;
+    }
+
+    @Override
+    public int getWidth() {
+        return imageWidth;
+    }
+
+    @Override
+    public int getHeight() {
+        return imageHeight;
     }
 }

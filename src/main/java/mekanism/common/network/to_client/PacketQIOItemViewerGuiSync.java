@@ -2,19 +2,22 @@ package mekanism.common.network.to_client;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import mekanism.api.MekanismAPI;
 import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.lib.inventory.HashedItem.UUIDAwareHashedItem;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 //TODO - 1.19: Split this packet as it is possible for it to technically become too large and cause a crash
 // Also ideally we only would sync the hashed item for types we haven't sent a given client yet so that then
 // we can also send a smaller packet to each client until they disconnect and then we clear what packets they know
 public class PacketQIOItemViewerGuiSync implements IMekanismPacket {
+    public static final PacketType<PacketQIOItemViewerGuiSync> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "qio_item_viewer_gui_sync"), PacketQIOItemViewerGuiSync::decode);
 
     private final Type type;
     private final Object2LongMap<UUIDAwareHashedItem> itemMap;
@@ -41,8 +44,7 @@ public class PacketQIOItemViewerGuiSync implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        LocalPlayer player = Minecraft.getInstance().player;
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null && player.containerMenu instanceof QIOItemViewerContainer container) {
             switch (type) {
                 case BATCH -> container.handleBatchUpdate(itemMap, countCapacity, typeCapacity);
@@ -79,6 +81,11 @@ public class PacketQIOItemViewerGuiSync implements IMekanismPacket {
                   buf -> new UUIDAwareHashedItem(buf.readItem(), BasePacketHandler.readOptional(buf, FriendlyByteBuf::readUUID)), FriendlyByteBuf::readVarLong);
         }
         return new PacketQIOItemViewerGuiSync(type, map, countCapacity, typeCapacity);
+    }
+
+    @Override
+    public PacketType<PacketQIOItemViewerGuiSync> getType() {
+        return TYPE;
     }
 
     public enum Type {

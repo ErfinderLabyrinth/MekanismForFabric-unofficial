@@ -1,8 +1,5 @@
 package mekanism.common.content.gear.mekasuit;
 
-import java.util.Map;
-import java.util.Optional;
-import mekanism.api.Action;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
@@ -12,21 +9,25 @@ import mekanism.api.gear.IModuleHelper;
 import mekanism.api.gear.config.IModuleConfigItem;
 import mekanism.api.gear.config.ModuleBooleanData;
 import mekanism.api.gear.config.ModuleConfigItemCreator;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.config.MekanismConfig;
+import mekanism.common.inventory.SimpleSingleStackStorage;
 import mekanism.common.registries.MekanismGases;
 import mekanism.common.registries.MekanismItems;
 import mekanism.common.registries.MekanismModules;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.FluidInDetails;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.fluids.FluidType;
+
+import java.util.Map;
 
 @ParametersAreNotNullByDefault
 public class ModuleElectrolyticBreathingUnit implements ICustomModule<ModuleElectrolyticBreathingUnit> {
@@ -45,14 +46,14 @@ public class ModuleElectrolyticBreathingUnit implements ICustomModule<ModuleElec
         //Note: Being in water is checked first to ensure that if it is raining and the player is in water
         // they get the full strength production
         float eyeHeight = player.getEyeHeight();
-        Map<FluidType, FluidInDetails> fluidsIn = MekanismUtils.getFluidsIn(player, bb -> {
+        Map<Fluid, FluidInDetails> fluidsIn = MekanismUtils.getFluidsIn(player, bb -> {
             //Grab the center of the BB as that is where the player is for purposes of what it renders it intersects with
             double centerX = (bb.minX + bb.maxX) / 2;
             double centerZ = (bb.minZ + bb.maxZ) / 2;
             //For the y range check a range of where the mask's breathing unit is based on where the eyes are
             return new AABB(centerX, Math.min(bb.minY + eyeHeight - 0.27, bb.maxY), centerZ, centerX, Math.min(bb.minY + eyeHeight - 0.14, bb.maxY), centerZ);
         });
-        if (fluidsIn.entrySet().stream().anyMatch(entry -> entry.getKey() == ForgeMod.WATER_TYPE.get() && entry.getValue().getMaxHeight() >= 0.11)) {
+        if (fluidsIn.entrySet().stream().anyMatch(entry -> entry.getKey().isSame(Fluids.WATER) && entry.getValue().getMaxHeight() >= 0.11)) {
             //If the position the bottom of the mask is almost entirely in water set the production rate to our max rate
             // if the mask is only partially in water treat it as not being in it enough to actually function
             productionRate = getMaxRate(module);
@@ -61,28 +62,39 @@ public class ModuleElectrolyticBreathingUnit implements ICustomModule<ModuleElec
             productionRate = getMaxRate(module) / 2;
         }
         if (productionRate > 0) {
-            FloatingLong usage = MekanismConfig.general.FROM_H2.get().multiply(2);
-            int maxRate = Math.min(productionRate, module.getContainerEnergy().divideToInt(usage));
+            long usage = MekanismConfig.general.FROM_H2 * 2;
+            int maxRate = Math.min(productionRate, (int) (module.getContainerEnergy() / usage));
             long hydrogenUsed = 0;
             GasStack hydrogenStack = MekanismGases.HYDROGEN.getStack(maxRate * 2L);
             ItemStack chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
             if (checkChestPlate(chestStack)) {
-                Optional<IGasHandler> chestCapability = chestStack.getCapability(Capabilities.GAS_HANDLER).resolve();
-                if (chestCapability.isPresent()) {
-                    hydrogenUsed = maxRate * 2L - chestCapability.get().insertChemical(hydrogenStack, Action.EXECUTE).getAmount();
+                SimpleSingleStackStorage chestStorage = new SimpleSingleStackStorage(chestStack);
+                IGasHandler chestCapability = ContainerItemContext.ofPlayerSlot(player, chestStorage).find(Capabilities.GAS_HANDLER_ITEM);
+                if (chestCapability != null) {
+                    try(Transaction t=Transaction.openOuter()) {
+                        hydrogenUsed = chestCapability.insert(hydrogenStack.getType(), hydrogenStack.getAmount(), t);
+                        t.commit();
+                    }
                     hydrogenStack.shrink(hydrogenUsed);
                 }
+                player.setItemSlot(EquipmentSlot.CHEST, chestStorage.getStack());
             }
             if (fillHeld.get()) {
                 ItemStack handStack = player.getItemBySlot(EquipmentSlot.MAINHAND);
-                Optional<IGasHandler> handCapability = handStack.getCapability(Capabilities.GAS_HANDLER).resolve();
-                if (handCapability.isPresent()) {
-                    hydrogenUsed = maxRate * 2L - handCapability.get().insertChemical(hydrogenStack, Action.EXECUTE).getAmount();
+                SimpleSingleStackStorage handStorage = new SimpleSingleStackStorage(handStack);
+
+                IGasHandler handCapability = ContainerItemContext.ofPlayerSlot(player, handStorage).find(Capabilities.GAS_HANDLER_ITEM);
+                if (handCapability != null) {
+                    try(Transaction t=Transaction.openOuter()) {
+                        hydrogenUsed = handCapability.insert(hydrogenStack.getType(), hydrogenStack.getAmount(), t);
+                        t.commit();
+                    }
                 }
+                player.setItemSlot(EquipmentSlot.MAINHAND, handStorage.getStack());
             }
             int oxygenUsed = Math.min(maxRate, player.getMaxAirSupply() - player.getAirSupply());
             long used = Math.max((int) Math.ceil(hydrogenUsed / 2D), oxygenUsed);
-            module.useEnergy(player, usage.multiply(used));
+            module.useEnergy(player, usage * used);
             player.setAirSupply(player.getAirSupply() + oxygenUsed);
         }
     }

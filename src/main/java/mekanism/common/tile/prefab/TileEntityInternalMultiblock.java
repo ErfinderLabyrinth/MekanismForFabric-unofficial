@@ -1,7 +1,5 @@
 package mekanism.common.tile.prefab;
 
-import java.util.Objects;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.lib.multiblock.IInternalMultiblock;
@@ -14,6 +12,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.UUID;
 
 public class TileEntityInternalMultiblock extends TileEntityMekanism implements IInternalMultiblock {
 
@@ -95,8 +96,8 @@ public class TileEntityInternalMultiblock extends TileEntityMekanism implements 
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void handleUpdatePacket(@NotNull CompoundTag tag) {
+        super.handleUpdatePacket(tag);
         NBTUtils.setUUIDIfPresentElse(tag, NBTConstants.INVENTORY_ID, this::setMultiblock, () -> multiblockUUID = null);
     }
 }

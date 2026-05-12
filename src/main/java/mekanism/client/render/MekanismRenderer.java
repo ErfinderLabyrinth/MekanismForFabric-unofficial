@@ -3,13 +3,7 @@ package mekanism.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import mekanism.api.FluidStack;
 import mekanism.api.SupportsColorMap;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -21,13 +15,7 @@ import mekanism.client.render.data.FluidRenderData;
 import mekanism.client.render.data.ValveRenderData;
 import mekanism.client.render.lib.ColorAtlas;
 import mekanism.client.render.lib.ColorAtlas.ColorRegistryObject;
-import mekanism.client.render.tileentity.RenderDigitalMiner;
-import mekanism.client.render.tileentity.RenderDimensionalStabilizer;
-import mekanism.client.render.tileentity.RenderFluidTank;
-import mekanism.client.render.tileentity.RenderNutritionalLiquifier;
-import mekanism.client.render.tileentity.RenderPigmentMixer;
-import mekanism.client.render.tileentity.RenderSeismicVibrator;
-import mekanism.client.render.tileentity.RenderTeleporter;
+import mekanism.client.render.tileentity.*;
 import mekanism.client.render.transmitter.RenderLogisticalTransporter;
 import mekanism.client.render.transmitter.RenderMechanicalPipe;
 import mekanism.client.render.transmitter.RenderTransmitterBase;
@@ -37,6 +25,10 @@ import mekanism.common.lib.multiblock.IValveHandler.ValveData;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -49,16 +41,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@Mod.EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
 public class MekanismRenderer {
 
     //TODO: Replace various usages of LightTexture.FULL_BRIGHT with the getter for calculating glow light, at least if we end up making it only
@@ -79,25 +68,11 @@ public class MekanismRenderer {
      * @return the sprite, or missing sprite if not found
      */
     public static TextureAtlasSprite getBaseFluidTexture(@NotNull Fluid fluid, @NotNull FluidTextureType type) {
-        IClientFluidTypeExtensions properties = IClientFluidTypeExtensions.of(fluid);
-        ResourceLocation spriteLocation;
-        if (type == FluidTextureType.STILL) {
-            spriteLocation = properties.getStillTexture();
-        } else {
-            spriteLocation = properties.getFlowingTexture();
-        }
-        return getSprite(spriteLocation);
+        return FluidVariantRendering.getSprites(FluidVariant.of(fluid))[type.ordinal()];
     }
 
     public static TextureAtlasSprite getFluidTexture(@NotNull FluidStack fluidStack, @NotNull FluidTextureType type) {
-        IClientFluidTypeExtensions properties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-        ResourceLocation spriteLocation;
-        if (type == FluidTextureType.STILL) {
-            spriteLocation = properties.getStillTexture(fluidStack);
-        } else {
-            spriteLocation = properties.getFlowingTexture(fluidStack);
-        }
-        return getSprite(spriteLocation);
+        return FluidVariantRendering.getSprites(fluidStack.variant())[type.ordinal()];
     }
 
     public static TextureAtlasSprite getChemicalTexture(@NotNull Chemical<?> chemical) {
@@ -188,7 +163,9 @@ public class MekanismRenderer {
 
     public static void color(GuiGraphics guiGraphics, @NotNull FluidStack fluid) {
         if (!fluid.isEmpty()) {
-            color(guiGraphics, IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor(fluid));
+            FluidRenderHandler handler = FluidRenderHandlerRegistry.INSTANCE.get(fluid.getFluid());
+            int tintColor = handler != null ? handler.getFluidColor(null, null, fluid.getFluid().defaultFluidState()) : 0xFFFFFFFF;
+            color(guiGraphics, tintColor);
         }
     }
 
@@ -220,7 +197,9 @@ public class MekanismRenderer {
     }
 
     public static int getColorARGB(@NotNull FluidStack fluidStack) {
-        return IClientFluidTypeExtensions.of(fluidStack.getFluid()).getTintColor(fluidStack);
+        FluidRenderHandler handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidStack.getFluid());
+        int tintColor = handler != null ? handler.getFluidColor(null, null, fluidStack.getFluid().defaultFluidState()) : 0xFFFFFFFF;
+        return tintColor;
     }
 
     public static int getColorARGB(@NotNull FluidStack fluidStack, float fluidScale) {
@@ -261,7 +240,7 @@ public class MekanismRenderer {
     }
 
     public static int calculateGlowLight(int combinedLight, @NotNull FluidStack fluid) {
-        return fluid.isEmpty() ? combinedLight : calculateGlowLight(combinedLight, fluid.getFluid().getFluidType().getLightLevel(fluid));
+        return fluid.isEmpty() ? combinedLight : calculateGlowLight(combinedLight, fluid.getFluid().defaultFluidState().createLegacyBlock().getLightEmission());
     }
 
     public static int calculateGlowLight(int combinedLight, int glow) {
@@ -300,9 +279,7 @@ public class MekanismRenderer {
         }
     }
 
-    @SubscribeEvent
-    public static void onStitch(TextureStitchEvent.Post event) {
-        TextureAtlas map = event.getAtlas();
+    public static void onStitch(TextureAtlas map) {
         if (!map.location().equals(TextureAtlas.LOCATION_BLOCKS)) {
             return;
         }
@@ -316,7 +293,7 @@ public class MekanismRenderer {
         redstonePulse = map.getSprite(Mekanism.rl("icon/redstone_control_pulse"));
         teleporterPortal = map.getSprite(Mekanism.rl("block/teleporter_portal"));
 
-        DigitalMinerBakedModel.onStitch(event);
+        DigitalMinerBakedModel.onStitch(map);
 
         //Note: These are called in post rather than pre to make sure the icons have properly been stitched/attached
         RenderLogisticalTransporter.onStitch(map);

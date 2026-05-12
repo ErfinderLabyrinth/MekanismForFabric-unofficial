@@ -1,7 +1,7 @@
 package mekanism.common.integration.computer;
 
 import mekanism.common.integration.computer.ComputerMethodFactory.ComputerFunctionCaller;
-import net.minecraftforge.fml.ModList;
+import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 
 public record MethodData<T>(String name, MethodRestriction restriction, String[] requiredMods, boolean threadSafe, String[] argumentNames, Class<?>[] argClasses,
@@ -19,7 +19,7 @@ public record MethodData<T>(String name, MethodRestriction restriction, String[]
 
     private boolean modsLoaded(String[] mods) {
         for (String mod : mods) {
-            if (!ModList.get().isLoaded(mod)) {
+            if (!FabricLoader.getInstance().isModLoaded(mod)) {
                 return false;
             }
         }

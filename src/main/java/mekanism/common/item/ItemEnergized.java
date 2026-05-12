@@ -1,37 +1,36 @@
 package mekanism.common.item;
 
-import java.util.List;
-import java.util.function.Predicate;
 import mekanism.api.AutomationType;
-import mekanism.api.math.FloatingLong;
-import mekanism.api.math.FloatingLongSupplier;
-import mekanism.common.capabilities.ItemCapabilityWrapper.ItemCapability;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
-import mekanism.common.capabilities.energy.item.RateLimitEnergyHandler;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.config.value.CachedFloatingLongValue;
 import mekanism.common.registration.impl.CreativeTabDeferredRegister.ICustomCreativeTabContents;
 import mekanism.common.util.StorageUtils;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class ItemEnergized extends CapabilityItem implements ICustomCreativeTabContents {
+import java.util.List;
+import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 
-    private final FloatingLongSupplier chargeRateSupplier;
-    private final FloatingLongSupplier maxEnergySupplier;
+public class ItemEnergized extends Item implements ICustomCreativeTabContents {
+
+    private final LongSupplier chargeRateSupplier;
+    private final LongSupplier maxEnergySupplier;
     private final Predicate<@NotNull AutomationType> canExtract;
     private final Predicate<@NotNull AutomationType> canInsert;
 
-    public ItemEnergized(FloatingLongSupplier chargeRateSupplier, FloatingLongSupplier maxEnergySupplier, Properties properties) {
+    public ItemEnergized(LongSupplier chargeRateSupplier, LongSupplier maxEnergySupplier, Properties properties) {
         this(chargeRateSupplier, maxEnergySupplier, BasicEnergyContainer.manualOnly, BasicEnergyContainer.alwaysTrue, properties);
     }
 
-    public ItemEnergized(FloatingLongSupplier chargeRateSupplier, FloatingLongSupplier maxEnergySupplier, Predicate<@NotNull AutomationType> canExtract,
+    public ItemEnergized(LongSupplier chargeRateSupplier, LongSupplier maxEnergySupplier, Predicate<@NotNull AutomationType> canExtract,
           Predicate<@NotNull AutomationType> canInsert, Properties properties) {
         super(properties.stacksTo(1));
         this.chargeRateSupplier = chargeRateSupplier;
@@ -52,7 +51,7 @@ public class ItemEnergized extends CapabilityItem implements ICustomCreativeTabC
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        return MekanismConfig.client.energyColor.get();
+        return MekanismConfig.client.energyColor;
     }
 
     @Override
@@ -62,43 +61,35 @@ public class ItemEnergized extends CapabilityItem implements ICustomCreativeTabC
 
     @Override
     public void addItems(CreativeModeTab.Output tabOutput) {
-        if (maxEnergySupplier instanceof CachedFloatingLongValue configValue) {
-            tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this), configValue));
-        } else {
-            tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this), maxEnergySupplier.get()));
-        }
+        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this), maxEnergySupplier.getAsLong()));
     }
 
-    protected FloatingLong getMaxEnergy(ItemStack stack) {
-        return maxEnergySupplier.get();
+    protected long getMaxEnergy(ItemStack stack) {
+        return maxEnergySupplier.getAsLong();
     }
 
-    protected FloatingLong getChargeRate(ItemStack stack) {
-        return chargeRateSupplier.get();
+    protected long getChargeRate(ItemStack stack) {
+        return chargeRateSupplier.getAsLong();
     }
 
-    @Override
-    protected boolean areCapabilityConfigsLoaded() {
-        return super.areCapabilityConfigsLoaded() && MekanismConfig.gear.isLoaded();
-    }
-
-    @Override
-    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {
-        super.gatherCapabilities(capabilities, stack, nbt);
+    public static void register() {
         //Note: We interact with this capability using "manual" as the automation type, to ensure we can properly bypass the energy limit for extracting
         // Internal is used by the "null" side, which is what will get used for most items
-        capabilities.add(RateLimitEnergyHandler.create(() -> getChargeRate(stack), () -> getMaxEnergy(stack), canExtract, canInsert));
+//        EnergyStorage.ITEM.registerFallback((stack, context) -> {
+//            if(stack.getItem() instanceof ItemEnergized item) {
+//                return RateLimitEnergyHandler.create(() -> item.getChargeRate(stack), () -> item.getMaxEnergy(stack), item.canExtract, item.canInsert);
+//            }
+//            return null;
+//        });
     }
 
     @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-        //Ignore NBT for energized items causing re-equip animations
-        return slotChanged || oldStack.getItem() != newStack.getItem();
-    }
-
-    @Override
-    public boolean shouldCauseBlockBreakReset(ItemStack oldStack, ItemStack newStack) {
-        //Ignore NBT for energized items causing block break reset
+    public boolean allowNbtUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
         return oldStack.getItem() != newStack.getItem();
+    }
+
+    @Override
+    public boolean allowContinuingBlockBreaking(Player player, ItemStack oldStack, ItemStack newStack) {
+        return oldStack.getItem() == newStack.getItem();
     }
 }

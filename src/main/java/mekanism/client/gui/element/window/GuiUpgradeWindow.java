@@ -1,7 +1,5 @@
 package mekanism.client.gui.element.window;
 
-import java.util.EnumMap;
-import java.util.Map;
 import mekanism.api.Upgrade;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.IGuiWrapper;
@@ -26,6 +24,9 @@ import mekanism.common.util.UpgradeUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class GuiUpgradeWindow extends GuiWindow {
 

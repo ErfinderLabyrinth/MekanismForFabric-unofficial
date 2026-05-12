@@ -1,23 +1,15 @@
 package mekanism.common.tile.machine;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiFunction;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import mekanism.api.IConfigCardAccess;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
-import mekanism.api.math.FloatingLong;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.energy.FixedUsageEnergyContainer;
 import mekanism.common.capabilities.holder.energy.EnergyContainerHelper;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
@@ -34,22 +26,27 @@ import mekanism.common.tile.component.TileComponentChunkLoader;
 import mekanism.common.tile.interfaces.IHasVisualization;
 import mekanism.common.tile.interfaces.ISustainedData;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TileEntityDimensionalStabilizer extends TileEntityMekanism implements IChunkLoader, ISustainedData, IHasVisualization {
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
+
+public class TileEntityDimensionalStabilizer extends TileEntityMekanism implements IChunkLoader, ISustainedData, IHasVisualization, IConfigCardAccess {
 
     public static final int MAX_LOAD_RADIUS = 2;
     public static final int MAX_LOAD_DIAMETER = 2 * MAX_LOAD_RADIUS + 1;
     private static final String COMPUTER_RANGE_STR = "Range: [-"+MAX_LOAD_RADIUS+", "+MAX_LOAD_RADIUS+"]";
     private static final String COMPUTER_RANGE_RAD = "Range: [1, "+MAX_LOAD_RADIUS+"]";
-    private static final BiFunction<FloatingLong, TileEntityDimensionalStabilizer, FloatingLong> BASE_ENERGY_CALCULATOR = (base, tile) -> base.multiply(tile.chunksLoaded);
+    private static final BiFunction<Long, TileEntityDimensionalStabilizer, Long> BASE_ENERGY_CALCULATOR = (base, tile) -> base * tile.chunksLoaded;
 
     private final ChunkLoader chunkLoaderComponent;
     private final boolean[][] loadingChunks;
@@ -63,7 +60,6 @@ public class TileEntityDimensionalStabilizer extends TileEntityMekanism implemen
 
     public TileEntityDimensionalStabilizer(BlockPos pos, BlockState state) {
         super(MekanismBlocks.DIMENSIONAL_STABILIZER, pos, state);
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIG_CARD, this));
 
         chunkLoaderComponent = new ChunkLoader(this);
         loadingChunks = new boolean[MAX_LOAD_DIAMETER][MAX_LOAD_DIAMETER];
@@ -92,13 +88,15 @@ public class TileEntityDimensionalStabilizer extends TileEntityMekanism implemen
         super.onUpdateServer();
         energySlot.fillContainerOrConvert();
         //Only attempt to use power if chunk loading isn't disabled in the config
-        if (MekanismConfig.general.allowChunkloading.get() && MekanismUtils.canFunction(this)) {
-            FloatingLong energyPerTick = energyContainer.getEnergyPerTick();
-            if (energyContainer.extract(energyPerTick, Action.SIMULATE, AutomationType.INTERNAL).equals(energyPerTick)) {
-                energyContainer.extract(energyPerTick, Action.EXECUTE, AutomationType.INTERNAL);
-                setActive(true);
-            } else {
-                setActive(false);
+        if (MekanismConfig.general.allowChunkloading && MekanismUtils.canFunction(this)) {
+            long energyPerTick = energyContainer.getEnergyPerTick();
+            try(Transaction t=Transaction.openOuter()) {
+                if (energyContainer.extract(energyPerTick, t) == energyPerTick) {
+                    t.commit();
+                    setActive(true);
+                } else {
+                    setActive(false);
+                }
             }
         } else {
             setActive(false);
@@ -199,25 +197,25 @@ public class TileEntityDimensionalStabilizer extends TileEntityMekanism implemen
         return getRedstoneLevel();
     }
 
-    @NotNull
-    @Override
-    public AABB getRenderBoundingBox() {
-        if (isClientRendering() && canDisplayVisuals() && level != null) {
-            int chunkX = SectionPos.blockToSectionCoord(worldPosition.getX());
-            int chunkZ = SectionPos.blockToSectionCoord(worldPosition.getZ());
-            ChunkPos minChunk = new ChunkPos(chunkX - MAX_LOAD_RADIUS, chunkZ - MAX_LOAD_RADIUS);
-            ChunkPos maxChunk = new ChunkPos(chunkX + MAX_LOAD_RADIUS, chunkZ + MAX_LOAD_RADIUS);
-            return new AABB(
-                  minChunk.getMinBlockX(),
-                  level.getMinBuildHeight(),
-                  minChunk.getMinBlockZ(),
-                  maxChunk.getMaxBlockX() + 1,
-                  level.getMaxBuildHeight(),
-                  maxChunk.getMaxBlockZ() + 1
-            );
-        }
-        return super.getRenderBoundingBox();
-    }
+//    @NotNull
+//    @Override
+//    public AABB getRenderBoundingBox() {
+//        if (isClientRendering() && canDisplayVisuals() && level != null) {
+//            int chunkX = SectionPos.blockToSectionCoord(worldPosition.getX());
+//            int chunkZ = SectionPos.blockToSectionCoord(worldPosition.getZ());
+//            ChunkPos minChunk = new ChunkPos(chunkX - MAX_LOAD_RADIUS, chunkZ - MAX_LOAD_RADIUS);
+//            ChunkPos maxChunk = new ChunkPos(chunkX + MAX_LOAD_RADIUS, chunkZ + MAX_LOAD_RADIUS);
+//            return new AABB(
+//                  minChunk.getMinBlockX(),
+//                  level.getMinBuildHeight(),
+//                  minChunk.getMinBlockZ(),
+//                  maxChunk.getMaxBlockX() + 1,
+//                  level.getMaxBuildHeight(),
+//                  maxChunk.getMaxBlockZ() + 1
+//            );
+//        }
+//        return super.getRenderBoundingBox();
+//    }
 
     @Override
     public boolean isClientRendering() {
@@ -352,7 +350,7 @@ public class TileEntityDimensionalStabilizer extends TileEntityMekanism implemen
 
         @Override
         public boolean canOperate() {
-            return MekanismConfig.general.allowChunkloading.get() && getActive();
+            return MekanismConfig.general.allowChunkloading && getActive();
         }
     }
 }

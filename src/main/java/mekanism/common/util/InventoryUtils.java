@@ -1,30 +1,32 @@
 package mekanism.common.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import mekanism.api.BigItemStack;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.common.Mekanism;
 import mekanism.common.inventory.container.SelectedWindowData;
 import mekanism.common.item.interfaces.IDroppableContents;
 import mekanism.common.lib.inventory.TileTransitRequest;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 public final class InventoryUtils {
 
@@ -46,7 +48,7 @@ public final class InventoryUtils {
                 shouldDrop = ISecurityUtils.INSTANCE.canAccess(null, stack, false);
             }
             if (shouldDrop) {
-                for (IInventorySlot slot : inventory.getDroppedSlots(stack)) {
+                for (IInventorySlot slot : inventory.getDroppedSlots(stack, entity.getServer())) {
                     if (!slot.isEmpty()) {
                         //Note: While some implementations return a dummy slot, so we would be able to pass them directly without copying
                         // we have implementations that pass the actual backing slot, so we have to copy the stack just in case
@@ -84,43 +86,35 @@ public final class InventoryUtils {
     }
 
     /**
-     * Like {@link ItemHandlerHelper#canItemStacksStack(ItemStack, ItemStack)} but empty stacks mean equal (either param). Thiakil: not sure why.
-     *
      * @param toInsert stack a
      * @param inSlot   stack b
      *
      * @return true if they are compatible
      */
     public static boolean areItemsStackable(ItemStack toInsert, ItemStack inSlot) {
-        if (toInsert.isEmpty() || inSlot.isEmpty()) {
-            return true;
-        }
-        return ItemHandlerHelper.canItemStacksStack(inSlot, toInsert);
+        return ItemStack.isSameItemSameTags(toInsert, inSlot);
     }
 
     @Nullable
-    public static IItemHandler assertItemHandler(String desc, BlockEntity tile, Direction side) {
-        Optional<IItemHandler> capability = CapabilityUtils.getCapability(tile, ForgeCapabilities.ITEM_HANDLER, side).resolve();
-        if (capability.isPresent()) {
-            return capability.get();
+    public static Storage<ItemVariant> assertItemHandler(String desc, Level level, BlockPos pos, Direction side) {
+        Storage<ItemVariant> storage = ItemStorage.SIDED.find(level, pos, side);
+        if (storage != null) {
+            return storage;
         }
         Mekanism.logger.warn("'{}' was wrapped around a non-IItemHandler inventory. This should not happen!", desc, new Exception());
-        if (tile == null) {
-            Mekanism.logger.warn(" - null tile");
-        } else {
-            Mekanism.logger.warn(" - details: {} {}", tile, tile.getBlockPos());
-        }
+        Mekanism.logger.warn(" - position: {}", pos);
         return null;
     }
 
-    public static boolean isItemHandler(BlockEntity tile, Direction side) {
-        return CapabilityUtils.getCapability(tile, ForgeCapabilities.ITEM_HANDLER, side).isPresent();
+    public static boolean isItemHandler(Level level, BlockPos pos, Direction side) {
+        return ItemStorage.SIDED.find(level, pos, side) != null;
     }
 
-    public static TileTransitRequest getEjectItemMap(BlockEntity tile, Direction side, List<IInventorySlot> slots) {
-        return getEjectItemMap(new TileTransitRequest(tile, side), slots);
+    public static TileTransitRequest getEjectItemMap(Level tileLevel, BlockPos tilePos, Direction side, List<IInventorySlot> slots) {
+        return getEjectItemMap(new TileTransitRequest(tileLevel, tilePos, side), slots);
     }
 
+    //@Deprecated(forRemoval = true)
     @Contract("_, _ -> param1")
     public static <REQUEST extends TileTransitRequest> REQUEST getEjectItemMap(REQUEST request, List<IInventorySlot> slots) {
         // shuffle the order we look at our slots to avoid ejection patterns
@@ -128,9 +122,12 @@ public final class InventoryUtils {
         Collections.shuffle(shuffled);
         for (IInventorySlot slot : shuffled) {
             //Note: We are using EXTERNAL as that is what we actually end up using when performing the extraction in the end
-            ItemStack simulatedExtraction = slot.extractItem(slot.getCount(), Action.SIMULATE, AutomationType.EXTERNAL);
-            if (!simulatedExtraction.isEmpty()) {
-                request.addItem(simulatedExtraction, slots.indexOf(slot));
+            long simulatedExtraction;
+            try(Transaction t=Transaction.openOuter()) {
+                simulatedExtraction = slot.extract(slot.getResource(), slot.getCount(), t);
+            }
+            if (simulatedExtraction != 0) {
+                request.addItem(new BigItemStack(slot.getResource(), simulatedExtraction), slot);
             }
         }
         return request;
@@ -141,16 +138,13 @@ public final class InventoryUtils {
      *
      * @param slots          Slots to insert into
      * @param stack          Stack to insert (do not modify).
-     * @param action         The action to perform, either {@link Action#EXECUTE} or {@link Action#SIMULATE}
-     * @param automationType The method that this slot is being interacted from.
+     * @param t              The Transaction
      *
      * @return Remainder
-     *
-     * @see ItemHandlerHelper#insertItemStacked(IItemHandler, ItemStack, boolean)
      */
-    public static ItemStack insertItem(List<? extends IInventorySlot> slots, @NotNull ItemStack stack, Action action, AutomationType automationType) {
-        stack = insertItem(slots, stack, true, false, action, automationType);
-        return insertItem(slots, stack, false, false, action, automationType);
+    public static ItemStack insertItem(List<? extends IInventorySlot> slots, @NotNull ItemStack stack, TransactionContext t) {
+        stack = insertItem(slots, stack, true, false, t);
+        return insertItem(slots, stack, false, false, t);
     }
 
     /**
@@ -160,31 +154,30 @@ public final class InventoryUtils {
      * @param stack          Stack to insert (do not modify).
      * @param ignoreEmpty    {@code true} to ignore/skip empty slots, {@code false} to ignore/skip non-empty slots.
      * @param checkAll       {@code true} to check all slots regardless of empty state. When this is {@code true}, {@code ignoreEmpty} is ignored.
-     * @param action         The action to perform, either {@link Action#EXECUTE} or {@link Action#SIMULATE}
-     * @param automationType The method that this slot is being interacted from.
+     * @param t              The Transaction
      *
      * @return Remainder
      *
-     * @see mekanism.common.inventory.container.MekanismContainer#insertItem(List, ItemStack, boolean, boolean, SelectedWindowData, Action)
+     * @see mekanism.common.inventory.container.MekanismContainer#insertItem(List, ItemStack, boolean, boolean, SelectedWindowData, TransactionContext)
      */
     @NotNull
-    public static ItemStack insertItem(List<? extends IInventorySlot> slots, @NotNull ItemStack stack, boolean ignoreEmpty, boolean checkAll, Action action,
-          AutomationType automationType) {
+    public static ItemStack insertItem(List<? extends IInventorySlot> slots, @NotNull ItemStack stack, boolean ignoreEmpty, boolean checkAll, TransactionContext t) {
         if (stack.isEmpty()) {
             //Skip doing anything if the stack is already empty.
             // Makes it easier to chain calls, rather than having to check if the stack is empty after our previous call
             return stack;
         }
+        long amountInserted = 0;
         for (IInventorySlot slot : slots) {
             if (!checkAll && ignoreEmpty == slot.isEmpty()) {
                 //Skip checking empty stacks if we want to ignore them, and skip non-empty stacks if we don't want ot ignore them
                 continue;
             }
-            stack = slot.insertItem(stack, action, automationType);
+            amountInserted = slot.insert(ItemVariant.of(stack), stack.getCount(), t);
             if (stack.isEmpty()) {
                 break;
             }
         }
-        return stack;
+        return stack.copyWithCount(stack.getCount() - (int) amountInserted);
     }
 }

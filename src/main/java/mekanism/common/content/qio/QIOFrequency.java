@@ -5,21 +5,8 @@ import com.google.common.collect.SetMultimap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.ObjLongConsumer;
-import java.util.function.Supplier;
 import mekanism.api.Action;
+import mekanism.api.BigItemStack;
 import mekanism.api.NBTConstants;
 import mekanism.api.inventory.IHashedItem;
 import mekanism.api.inventory.qio.IQIOFrequency;
@@ -46,8 +33,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.util.Lazy;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.ObjLongConsumer;
+import java.util.function.Supplier;
 
 public class QIOFrequency extends Frequency implements IColorableFrequency, IQIOFrequency {
 
@@ -62,7 +52,7 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
     private final Map<String, Set<HashedItem>> modIDLookupMap = new HashMap<>();
     // efficiently keep track of the items for use in fuzzy lookup utilized by the items stored
     private final Map<Item, Set<HashedItem>> fuzzyItemLookupMap = new IdentityHashMap<>();
-    // a sensitive cache for wildcard tag lookups (wildcard -> [matching tags])
+    // a sensitive cache for wildcard tagSupplier lookups (wildcard -> [matching tags])
     private final SetMultimap<String, String> tagWildcardCache = HashMultimap.create();
     private final Set<String> failedWildcardTags = new HashSet<>();
     // a sensitive cache for wildcard modid lookups (wildcard -> [matching modids])
@@ -171,7 +161,7 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
         if (!tags.isEmpty()) {
             boolean hasAllKeys = tagLookupMap.hasAllKeys(tags);
             if (tagLookupMap.putAll(tags, type) && !hasAllKeys) {
-                //If we added any tag item combinations, and we didn't have all the keys for tags this item has,
+                //If we added any tagSupplier item combinations, and we didn't have all the keys for tags this item has,
                 // then we need to clear our wildcard cache as our new tags may be valid for some of our wildcards
                 tagWildcardCache.clear();
                 failedWildcardTags.clear();
@@ -209,20 +199,20 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
         return removed;
     }
 
-    public ItemStack removeItem(int amount) {
+    public BigItemStack removeItem(int amount) {
         return removeByType(null, amount);
     }
 
-    public ItemStack removeItem(ItemStack stack, int amount) {
+    public BigItemStack removeItem(ItemStack stack, int amount) {
         if (stack.isEmpty()) {
-            return ItemStack.EMPTY;
+            return BigItemStack.EMPTY;
         }
         return removeByType(HashedItem.raw(stack), amount);
     }
 
-    public ItemStack removeByType(@Nullable HashedItem itemType, int amount) {
+    public BigItemStack removeByType(@Nullable HashedItem itemType, long amount) {
         if (itemDataMap.isEmpty() || amount <= 0) {
-            return ItemStack.EMPTY;
+            return BigItemStack.EMPTY;
         }
 
         QIOItemTypeData data;
@@ -233,11 +223,11 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
         } else {
             data = itemDataMap.get(itemType);
             if (data == null) {
-                return ItemStack.EMPTY;
+                return BigItemStack.EMPTY;
             }
         }
 
-        ItemStack removed = data.remove(amount);
+        BigItemStack removed = data.remove(amount);
         // remove this item type if it's now empty
         if (data.count == 0) {
             removeItemData(data.itemType);
@@ -252,7 +242,7 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
         Set<String> tags = new HashSet<>(tagLookupMap.getKeys(type));
         if (tagLookupMap.removeValue(type) && !tagLookupMap.hasAllKeys(tags)) {
             //If we completely removed any tags clear our wildcard cache as it may have some wildcards that are
-            // matching a tag that is no longer stored
+            // matching a tagSupplier that is no longer stored
             tagWildcardCache.clear();
             //Note: We don't need to clear the failed wildcard tags as if we are removing tags they still won't have any matches
         }
@@ -440,21 +430,20 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
         if (!updatedItems.isEmpty() || needsUpdate) {
             //Only calculate the packet and the update map if there are actually players viewing this frequency,
             // otherwise we can just skip looking up UUIDs and counts
-            Lazy<PacketQIOItemViewerGuiSync> lazyPacket = Lazy.of(() -> {
-                Object2LongMap<UUIDAwareHashedItem> map = new Object2LongOpenHashMap<>(updatedItems.size());
-                updatedItems.forEach(uuid -> {
-                    HashedItem type = QIOGlobalItemLookup.INSTANCE.getTypeByUUID(uuid);
-                    if (type != null) {//The type should never be null as we create a UUID if there isn't one before adding but validate it
-                        QIOItemTypeData data = itemDataMap.get(type);
-                        map.put(new UUIDAwareHashedItem(type, uuid), data == null ? 0 : data.count);
-                    }
-                });
-                return PacketQIOItemViewerGuiSync.update(map, totalCountCapacity, totalTypeCapacity);
+            Object2LongMap<UUIDAwareHashedItem> map = new Object2LongOpenHashMap<>(updatedItems.size());
+            updatedItems.forEach(uuid -> {
+                HashedItem type = QIOGlobalItemLookup.INSTANCE.getTypeByUUID(uuid);
+                if (type != null) {//The type should never be null as we create a UUID if there isn't one before adding but validate it
+                    QIOItemTypeData data = itemDataMap.get(type);
+                    map.put(new UUIDAwareHashedItem(type, uuid), data == null ? 0 : data.count);
+                }
             });
+            PacketQIOItemViewerGuiSync lazyPacket = PacketQIOItemViewerGuiSync.update(map, totalCountCapacity, totalTypeCapacity);
+
             for (Iterator<ServerPlayer> viewingIterator = playersViewingItems.iterator(); viewingIterator.hasNext(); ) {
                 ServerPlayer player = viewingIterator.next();
                 if (player.containerMenu instanceof QIOItemViewerContainer) {
-                    Mekanism.packetHandler().sendTo(lazyPacket.get(), player);
+                    Mekanism.packetHandler().sendTo(lazyPacket, player);
                 } else {
                     //flush players that somehow didn't send a container close packet
                     viewingIterator.remove();
@@ -713,9 +702,9 @@ public class QIOFrequency extends Frequency implements IColorableFrequency, IQIO
             return removed;
         }
 
-        private ItemStack remove(int amount) {
-            int removed = MathUtils.clampToInt(remove(amount, Action.EXECUTE));
-            return removed == 0 ? ItemStack.EMPTY : itemType.createStack(removed);
+        private BigItemStack remove(long amount) {
+            long removed = MathUtils.clampToLong(remove(amount, Action.EXECUTE));
+            return removed == 0 ? BigItemStack.EMPTY : itemType.createPendingStack(removed);
         }
 
         public long getCount() {

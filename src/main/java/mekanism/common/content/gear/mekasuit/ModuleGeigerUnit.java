@@ -1,6 +1,5 @@
 package mekanism.common.content.gear.mekasuit;
 
-import java.util.function.Consumer;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IHUDElement;
@@ -19,6 +18,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.function.Consumer;
+
 @ParametersAreNotNullByDefault
 public class ModuleGeigerUnit implements ICustomModule<ModuleGeigerUnit> {
 
@@ -29,7 +30,7 @@ public class ModuleGeigerUnit implements ICustomModule<ModuleGeigerUnit> {
         if (module.isEnabled()) {
             double magnitude = RadiationManager.get().getClientEnvironmentalRadiation();
             Component text = UnitDisplayUtils.getDisplayShort(magnitude, RadiationUnit.SV, 2);
-            if (MekanismConfig.common.enableDecayTimers.get() && magnitude > RadiationManager.BASELINE) {
+            if (MekanismConfig.common.enableDecayTimers && magnitude > RadiationManager.BASELINE) {
                 double maxMagnitude = RadiationManager.get().getClientMaxMagnitude();
                 text = MekanismLang.GENERIC_WITH_PARENTHESIS.translate(text, TextUtils.getHoursMinutes(RadiationManager.get().getDecayTime(maxMagnitude, true)));
             }

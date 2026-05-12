@@ -1,9 +1,5 @@
 package mekanism.common.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.UnaryOperator;
 import mekanism.common.Mekanism;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Rotation;
@@ -12,6 +8,11 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.UnaryOperator;
 
 public final class VoxelShapeUtils {
 

@@ -1,10 +1,6 @@
 package mekanism.common.content.sps;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.List;
-import java.util.Map;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.NBTConstants;
 import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
 import mekanism.api.chemical.gas.GasStack;
@@ -16,7 +12,12 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerChemicalTankWrapper;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
-import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
+import mekanism.common.inventory.container.sync.ISyncableData;
+import mekanism.common.inventory.container.sync.SyncableDouble;
+import mekanism.common.inventory.container.sync.SyncableFloatingLong;
+import mekanism.common.inventory.container.sync.SyncableInt;
+import mekanism.common.inventory.container.sync.chemical.SyncableGasStack;
+import mekanism.common.inventory.container.sync.dynamic.IContainerSyncable;
 import mekanism.common.lib.multiblock.IValveHandler;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.registries.MekanismGases;
@@ -24,6 +25,7 @@ import mekanism.common.tile.multiblock.TileEntitySPSCasing;
 import mekanism.common.tile.multiblock.TileEntitySPSPort;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -34,26 +36,28 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
-public class SPSMultiblockData extends MultiblockData implements IValveHandler {
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
-    @ContainerSync
+public class SPSMultiblockData extends MultiblockData implements IValveHandler, IContainerSyncable {
+
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getInput", "getInputCapacity", "getInputNeeded", "getInputFilledPercentage"}, docPlaceholder = "input tank")
     public IGasTank inputTank;
-    @ContainerSync
+
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getOutput", "getOutputCapacity", "getOutputNeeded", "getOutputFilledPercentage"}, docPlaceholder = "output tank")
     public IGasTank outputTank;
 
     public final SyncableCoilData coilData = new SyncableCoilData();
 
-    @ContainerSync
     public double progress;
-    @ContainerSync
+
     public int inputProcessed = 0;
 
     public FloatingLong receivedEnergy = FloatingLong.ZERO;
-    @ContainerSync
+
     public FloatingLong lastReceivedEnergy = FloatingLong.ZERO;
-    @ContainerSync
+
     public double lastProcessed;
 
     public boolean couldOperate;
@@ -63,7 +67,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         super(tile);
         gasTanks.add(inputTank = MultiblockChemicalTankBuilder.GAS.input(this, this::getMaxInputGas, gas -> gas == MekanismGases.POLONIUM.get(),
               ChemicalAttributeValidator.ALWAYS_ALLOW, createSaveAndComparator()));
-        gasTanks.add(outputTank = MultiblockChemicalTankBuilder.GAS.output(this, MekanismConfig.general.spsOutputTankCapacity,
+        gasTanks.add(outputTank = MultiblockChemicalTankBuilder.GAS.output(this, () -> MekanismConfig.general.spsOutputTankCapacity,
               gas -> gas == MekanismGases.ANTIMATTER.get(), ChemicalAttributeValidator.ALWAYS_ALLOW, this));
     }
 
@@ -74,7 +78,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
     }
 
     private long getMaxInputGas() {
-        return MekanismConfig.general.spsInputPerAntimatter.get() * 2L;
+        return MekanismConfig.general.spsInputPerAntimatter * 2L;
     }
 
     @Override
@@ -84,9 +88,9 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         couldOperate = canOperate();
         if (couldOperate && !receivedEnergy.isZero()) {
             double lastProgress = progress;
-            final int inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter.get();
+            final int inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter;
             long inputNeeded = (inputPerAntimatter - inputProcessed) + inputPerAntimatter * (outputTank.getNeeded() - 1);
-            double processable = receivedEnergy.doubleValue() / MekanismConfig.general.spsEnergyPerInput.get().doubleValue();
+            double processable = receivedEnergy.doubleValue() / MekanismConfig.general.spsEnergyPerInput.doubleValue();
             if (processable + progress >= inputNeeded) {
                 processed = process(inputNeeded);
                 progress = 0;
@@ -146,14 +150,16 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         if (operations == 0) {
             return 0;
         }
-        long processed = inputTank.shrinkStack(operations, Action.EXECUTE);
+        long processed = inputTank.shrinkStack(operations);
         int lastInputProcessed = inputProcessed;
         //Limit how much input we actually increase the input processed by to how much we were actually able to remove from the input tank
         inputProcessed += MathUtils.clampToInt(processed);
-        final int inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter.get();
+        final int inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter;
         if (inputProcessed >= inputPerAntimatter) {
             GasStack toAdd = MekanismGases.ANTIMATTER.getStack(inputProcessed / inputPerAntimatter);
-            outputTank.insert(toAdd, Action.EXECUTE, AutomationType.INTERNAL);
+            try(Transaction t=Transaction.openOuter()) {
+                outputTank.insert(toAdd.getType(), toAdd.getAmount(), t);
+            }
             inputProcessed %= inputPerAntimatter;
         }
         if (lastInputProcessed != inputProcessed) {
@@ -181,7 +187,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         coilData.coilMap.put(portPos, new CoilData(portPos, side));
     }
 
-    public void supplyCoilEnergy(TileEntitySPSPort tile, FloatingLong energy) {
+    public void supplyCoilEnergy(TileEntitySPSPort tile, long energy) {
         receivedEnergy = receivedEnergy.plusEqual(energy);
         coilData.coilMap.get(tile.getBlockPos()).receiveEnergy(energy);
     }
@@ -190,20 +196,20 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
         return !inputTank.isEmpty() && outputTank.getNeeded() > 0;
     }
 
-    private static int getCoilLevel(FloatingLong energy) {
-        if (energy.isZero()) {
+    private static int getCoilLevel(long energy) {
+        if (energy == 0) {
             return 0;
         }
-        return 1 + Math.max(0, (int) ((Math.log10(energy.doubleValue()) - 3) * 1.8));
+        return 1 + Math.max(0, (int) ((Math.log10((double)energy) - 3) * 1.8));
     }
 
     @ComputerMethod
     public double getProcessRate() {
-        return Math.round((lastProcessed / MekanismConfig.general.spsInputPerAntimatter.get()) * 1_000) / 1_000D;
+        return Math.round((lastProcessed / MekanismConfig.general.spsInputPerAntimatter) * 1_000) / 1_000D;
     }
 
     public double getScaledProgress() {
-        return (inputProcessed + progress) / MekanismConfig.general.spsInputPerAntimatter.get();
+        return (inputProcessed + progress) / MekanismConfig.general.spsInputPerAntimatter;
     }
 
     public boolean handlesSound(TileEntitySPSCasing tile) {
@@ -215,6 +221,24 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
     @ComputerMethod
     int getCoils() {
         return coilData.coilMap.size();
+    }
+
+    @Override
+    public void addSyncables(Consumer<ISyncableData> acceptor, String tag) {
+        if (!"default".equals(tag)) return;
+
+        // inputTank
+        acceptor.accept(SyncableGasStack.create(inputTank));
+        // outputTank
+        acceptor.accept(SyncableGasStack.create(outputTank));
+        // progress
+        acceptor.accept(SyncableDouble.create(() -> progress, newValue -> progress = newValue));
+        // inputProcessed
+        acceptor.accept(SyncableInt.create(() -> inputProcessed, newValue -> inputProcessed = newValue));
+        // lastReceivedEnergy
+        acceptor.accept(SyncableFloatingLong.create(() -> lastReceivedEnergy, newValue -> lastReceivedEnergy = newValue));
+        // lastReceivedEnergy
+        acceptor.accept(SyncableDouble.create(() -> lastProcessed, newValue -> lastProcessed = newValue));
     }
     //End computer related methods
 
@@ -274,7 +298,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler {
             this.side = side;
         }
 
-        private void receiveEnergy(FloatingLong energy) {
+        private void receiveEnergy(long energy) {
             laserLevel += getCoilLevel(energy);
         }
 

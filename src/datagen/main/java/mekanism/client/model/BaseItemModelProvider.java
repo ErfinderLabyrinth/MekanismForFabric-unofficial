@@ -12,8 +12,13 @@ import mekanism.common.registration.impl.FluidDeferredRegister;
 import mekanism.common.registration.impl.FluidRegistryObject;
 import mekanism.common.registration.impl.ItemDeferredRegister;
 import mekanism.common.util.RegistryUtils;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.model.ModelTemplate;
+import net.minecraft.data.models.model.ModelTemplates;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ArmorItem;
@@ -25,14 +30,19 @@ import net.minecraftforge.client.model.generators.loaders.DynamicFluidContainerM
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class BaseItemModelProvider extends ItemModelProvider {
-
-    @SuppressWarnings("rawtypes")
-    private final FieldReflectionHelper<ModelBuilder, Map<String, String>> MODEL_TEXTURES = new FieldReflectionHelper<>(ModelBuilder.class, "textures", HashMap::new);
+public abstract class BaseItemModelProvider extends FabricModelProvider {
+    //private final FieldReflectionHelper<ModelBuilder, Map<String, String>> MODEL_TEXTURES = new FieldReflectionHelper<>(ModelBuilder.class, "textures", HashMap::new);
     private static final TrimModelDataHelper<?> TRIM_HELPER = new TrimModelDataHelper<>();
+    private final String modid;
 
-    protected BaseItemModelProvider(PackOutput output, String modid, ExistingFileHelper existingFileHelper) {
-        super(output, modid, existingFileHelper);
+    protected BaseItemModelProvider(FabricDataOutput output, String modid) {
+        super(output);
+        this.modid = modid;
+    }
+
+    @Override
+    public void generateBlockStateModels(BlockModelGenerators blockStateModelGenerator) {
+        //Unused
     }
 
     @NotNull
@@ -46,37 +56,37 @@ public abstract class BaseItemModelProvider extends ItemModelProvider {
     }
 
     protected ResourceLocation itemTexture(IItemProvider itemProvider) {
-        return modLoc("item/" + itemProvider.getName());
+        return new ResourceLocation(modid, "item/" + itemProvider.getName());
     }
 
-    protected void registerGenerated(IItemProvider... itemProviders) {
+    protected void registerGenerated(ItemModelGenerators generators, IItemProvider... itemProviders) {
         for (IItemProvider itemProvider : itemProviders) {
-            generated(itemProvider);
+            generated(generators, itemProvider.asItem());
         }
     }
 
-    protected void registerModules(ItemDeferredRegister register) {
+    protected void registerModules(ItemModelGenerators generators, ItemDeferredRegister register) {
         for (IItemProvider itemProvider : register.getAllItems()) {
             Item item = itemProvider.asItem();
             if (item instanceof ItemModule) {
-                generated(itemProvider);
+                generated(generators, item);
             }
         }
     }
 
-    protected void registerBuckets(FluidDeferredRegister register) {
-        for (FluidRegistryObject<?, ?, ?, ?, ?> fluidRegistryObject : register.getAllFluids()) {
-            registerBucket(fluidRegistryObject);
+    protected void registerBuckets(ItemModelGenerators generators, FluidDeferredRegister register) {
+        for (FluidRegistryObject<?, ?, ?, ?> fluidRegistryObject : register.getAllFluids()) {
+            registerBucket(generators, fluidRegistryObject);
         }
     }
 
-    protected ItemModelBuilder generated(IItemProvider itemProvider) {
-        return generated(itemProvider, itemTexture(itemProvider));
+    protected void generated(ItemModelGenerators generators, Item item) {
+        generators.generateFlatItem(item, ModelTemplates.FLAT_ITEM);
     }
 
-    protected ItemModelBuilder generated(IItemProvider itemProvider, ResourceLocation texture) {
-        return withExistingParent(itemProvider.getName(), "item/generated").texture("layer0", texture);
-    }
+//    protected ItemModelBuilder generated(ItemModelGenerators generators, Item item, ResourceLocation texture) {
+//        return generators.generateFlatItem(item, ModelTemplates.FLAT_ITEM);withExistingParent(itemProvider.getName(), "item/generated").texture("layer0", texture);
+//    }
 
     protected ItemModelBuilder resource(IItemProvider itemProvider, String type) {
         //TODO: Try to come up with a better solution to this. Currently we have an empty texture for layer zero so that we can set
@@ -90,41 +100,30 @@ public abstract class BaseItemModelProvider extends ItemModelProvider {
         return modelBuilder;
     }
 
-    protected void registerHandheld(IItemProvider... itemProviders) {
+    protected void registerHandheld(ItemModelGenerators generators, IItemProvider... itemProviders) {
         for (IItemProvider itemProvider : itemProviders) {
-            handheld(itemProvider);
+            handheld(generators, itemProvider.asItem());
         }
     }
 
-    protected ItemModelBuilder handheld(IItemProvider itemProvider) {
-        return handheld(itemProvider, itemTexture(itemProvider));
+    protected void handheld(ItemModelGenerators generators, Item item) {
+        generators.generateFlatItem(item, ModelTemplates.FLAT_HANDHELD_ITEM);
     }
 
-    protected ItemModelBuilder handheld(IItemProvider itemProvider, ResourceLocation texture) {
-        return withExistingParent(itemProvider.getName(), "item/handheld").texture("layer0", texture);
-    }
+//    protected ItemModelBuilder handheld(IItemProvider itemProvider, ResourceLocation texture) {
+//        return withExistingParent(itemProvider.getName(), "item/handheld").texture("layer0", texture);
+//    }
 
-    protected ItemModelBuilder armorWithTrim(IItemProvider itemProvider, ResourceLocation texture) {
-        ItemModelBuilder builder = generated(itemProvider, texture);
-        ArmorItem.Type type = ((ArmorItem) itemProvider.asItem()).getType();
-        TRIM_HELPER.forEachTrim((trimId, itemModelIndex) -> {
-                  ItemModelBuilder override = withExistingParent(builder.getLocation().withSuffix("_" + trimId + "_trim").getPath(), "item/generated")
-                        .texture("layer0", texture);
-                  //Directly add the layer1 to the texture map as the file doesn't actually exist
-                  MODEL_TEXTURES.getValue(override).put("layer1", new ResourceLocation(type.getName() + "_trim_" + trimId).withPrefix("trims/items/").toString());
-                  builder.override()
-                        .predicate(ItemModelGenerators.TRIM_TYPE_PREDICATE_ID, itemModelIndex)
-                        .model(override);
-              }
-        );
-        return builder;
+    protected void armorWithTrim(ItemModelGenerators generators, ArmorItem armor) {
+        generators.generateArmorTrims(armor);
     }
 
     //Note: This isn't the best way to do this in terms of model file validation, but it works
-    protected void registerBucket(FluidRegistryObject<?, ?, ?, ?, ?> fluidRO) {
-        withExistingParent(RegistryUtils.getPath(fluidRO.getBucket()), new ResourceLocation("forge", "item/bucket"))
-              .customLoader(DynamicFluidContainerModelBuilder::begin)
-              .fluid(fluidRO.getStillFluid());
+    protected void registerBucket(ItemModelGenerators generators, FluidRegistryObject<?, ?, ?, ?> fluidRO) {
+        generated(generators, fluidRO.getBucket());
+//        withExistingParent(RegistryUtils.getPath(fluidRO.getBucket()), new ResourceLocation("forge", "item/bucket"))
+//              .customLoader(DynamicFluidContainerModelBuilder::begin)
+//              .fluid(fluidRO.getStillFluid());
     }
 
     private static class TrimModelDataHelper<TMD_CLASS> {

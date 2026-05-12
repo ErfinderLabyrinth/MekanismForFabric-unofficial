@@ -1,16 +1,16 @@
 package mekanism.common.network.to_client.container.property;
 
 import mekanism.common.inventory.container.MekanismContainer;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
 
 public class RegistryEntryPropertyData<V> extends PropertyData {
 
-    private final IForgeRegistry<V> registry;
+    private final Registry<V> registry;
     private final V value;
 
-    public RegistryEntryPropertyData(short property, IForgeRegistry<V> registry, V value) {
+    public RegistryEntryPropertyData(short property, Registry<V> registry, V value) {
         super(PropertyType.REGISTRY_ENTRY, property);
         this.registry = registry;
         this.value = value;
@@ -19,8 +19,8 @@ public class RegistryEntryPropertyData<V> extends PropertyData {
     public static <V> RegistryEntryPropertyData<V> readRegistryEntry(short property, FriendlyByteBuf buffer) {
         //Copy of IForgeFriendlyByteBuf#readRegistryId but captures the registry
         //TODO: If forge ever actually changes the registry name to being an id update this
-        IForgeRegistry<V> registry = RegistryManager.ACTIVE.getRegistry(buffer.readResourceLocation());
-        return new RegistryEntryPropertyData<>(property, registry, buffer.readRegistryIdUnsafe(registry));
+        Registry<V> registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(buffer.readResourceLocation());
+        return new RegistryEntryPropertyData<>(property, registry, registry.byId(buffer.readVarInt()));
     }
 
     @Override
@@ -31,6 +31,6 @@ public class RegistryEntryPropertyData<V> extends PropertyData {
     @Override
     public void writeToPacket(FriendlyByteBuf buffer) {
         super.writeToPacket(buffer);
-        buffer.writeRegistryId(registry, value);
+        buffer.writeVarInt(registry.getId(value));
     }
 }

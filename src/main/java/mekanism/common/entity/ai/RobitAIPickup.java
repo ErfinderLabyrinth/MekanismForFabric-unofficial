@@ -1,12 +1,13 @@
 package mekanism.common.entity.ai;
 
-import java.util.List;
-import java.util.function.Predicate;
 import mekanism.common.entity.EntityRobit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
+
+import java.util.List;
+import java.util.function.Predicate;
 
 public class RobitAIPickup extends RobitAIBase {
 

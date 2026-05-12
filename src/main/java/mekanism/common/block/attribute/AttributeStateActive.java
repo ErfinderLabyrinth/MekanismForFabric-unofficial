@@ -1,6 +1,5 @@
 package mekanism.common.block.attribute;
 
-import java.util.List;
 import mekanism.common.block.states.BlockStateHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -8,6 +7,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class AttributeStateActive implements AttributeState {
 

@@ -1,16 +1,12 @@
 package mekanism.common.content.gear.mekasuit;
 
-import java.util.List;
-import java.util.Objects;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
-import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.config.IModuleConfigItem;
 import mekanism.api.gear.config.ModuleConfigItemCreator;
 import mekanism.api.gear.config.ModuleEnumData;
-import mekanism.api.math.FloatingLong;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.common.Mekanism;
@@ -23,6 +19,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.List;
+import java.util.Objects;
 
 @ParametersAreNotNullByDefault
 public class ModuleMagneticAttractionUnit implements ICustomModule<ModuleMagneticAttractionUnit> {
@@ -38,10 +38,10 @@ public class ModuleMagneticAttractionUnit implements ICustomModule<ModuleMagneti
     public void tickServer(IModule<ModuleMagneticAttractionUnit> module, Player player) {
         if (range.get() != Range.OFF) {
             float size = 4 + range.get().getRange();
-            FloatingLong usage = MekanismConfig.gear.mekaSuitEnergyUsageItemAttraction.get().multiply(range.get().getRange());
-            boolean free = usage.isZero() || player.isCreative();
-            IEnergyContainer energyContainer = free ? null : module.getEnergyContainer();
-            if (free || (energyContainer != null && energyContainer.getEnergy().greaterOrEqual(usage))) {
+            long usage = (long) (MekanismConfig.gear.mekaSuitEnergyUsageItemAttraction * range.get().getRange());
+            boolean free = usage == 0 || player.isCreative();
+            EnergyStorage energyContainer = free ? null : module.getEnergyContainer();
+            if (free || (energyContainer != null && energyContainer.getAmount() >= usage)) {
                 //If the energy cost is free, or we have enough energy for at least one pull grab all the items that can be picked up.
                 //Note: We check distance afterwards so that we aren't having to calculate a bunch of distances when we may run out
                 // of energy, and calculating distance is a bit more expensive than just checking if it can be picked up
@@ -50,12 +50,12 @@ public class ModuleMagneticAttractionUnit implements ICustomModule<ModuleMagneti
                     if (item.distanceTo(player) > 0.001) {
                         if (free) {
                             pullItem(player, item);
-                        } else if (module.useEnergy(player, energyContainer, usage, true).isZero()) {
+                        } else if (module.useEnergy(player, energyContainer, usage, true) == 0) {
                             //If we can't actually extract energy, exit
                             break;
                         } else {
                             pullItem(player, item);
-                            if (energyContainer.getEnergy().smallerThan(usage)) {
+                            if (energyContainer.getAmount() < usage) {
                                 //If after using energy, our energy is now smaller than how much we need to use, exit
                                 break;
                             }

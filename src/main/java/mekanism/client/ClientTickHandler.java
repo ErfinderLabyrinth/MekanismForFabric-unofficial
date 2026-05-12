@@ -1,11 +1,6 @@
 package mekanism.client;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.UUID;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.radial.RadialData;
@@ -37,11 +32,14 @@ import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.MekanismModules;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ArmorStandModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -52,14 +50,13 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.FogType;
-import net.minecraftforge.client.event.InputEvent.MouseScrollingEvent;
-import net.minecraftforge.client.event.RecipesUpdatedEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent.ClientTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.joml.Vector3f;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.UUID;
 
 /**
  * Client-side tick handler for Mekanism. Used mainly for the update check upon startup.
@@ -130,7 +127,7 @@ public class ClientTickHandler {
     }
 
     public static void portableTeleport(Player player, InteractionHand hand, FrequencyIdentity identity) {
-        int delay = MekanismConfig.gear.portableTeleporterDelay.get();
+        int delay = MekanismConfig.gear.portableTeleporterDelay;
         if (delay == 0) {
             Mekanism.packetHandler().sendToServer(new PacketPortableTeleporterTeleport(hand, identity));
         } else {
@@ -138,11 +135,8 @@ public class ClientTickHandler {
         }
     }
 
-    @SubscribeEvent
-    public void onTick(ClientTickEvent event) {
-        if (event.phase == Phase.START) {
-            tickStart();
-        }
+    public void onTick(Minecraft client) {
+        tickStart();
     }
 
     public void tickStart() {
@@ -174,9 +168,25 @@ public class ClientTickHandler {
             UUID playerUUID = minecraft.player.getUUID();
             // Update player's state for various items; this also automatically notifies server if something changed and
             // kicks off sounds as necessary
-            ItemStack jetpack = IJetpackItem.getActiveJetpack(minecraft.player);
-            boolean jetpackInUse = isJetpackInUse(minecraft.player, jetpack);
-            Mekanism.playerState.setJetpackState(playerUUID, jetpackInUse, true);
+            ContainerItemContext jetpackContext = IJetpackItem.getActiveJetpack(minecraft.player);
+            if (!jetpackContext.getItemVariant().isBlank()) {
+                ItemStack jetpack = jetpackContext.getItemVariant().toStack((int)jetpackContext.getAmount());
+                boolean jetpackInUse = isJetpackInUse(minecraft.player, jetpack);
+                Mekanism.playerState.setJetpackState(playerUUID, jetpackInUse, true);
+
+                if (!jetpack.isEmpty()) {
+                    ContainerItemContext primaryJetpackContext = IJetpackItem.getPrimaryJetpack(minecraft.player);
+                    ItemStack primaryJetpack = primaryJetpackContext.getItemVariant().toStack((int)primaryJetpackContext.getAmount());
+                    if (!primaryJetpack.isEmpty()) {
+                        JetpackMode primaryMode = ((IJetpackItem) primaryJetpack.getItem()).getJetpackMode(primaryJetpack);
+                        JetpackMode mode = IJetpackItem.getPlayerJetpackMode(minecraft.player, primaryMode, () -> minecraft.player.input.jumping);
+                        MekanismClient.updateKey(minecraft.player.input.jumping, KeySync.ASCEND);
+                        if (jetpackInUse && IJetpackItem.handleJetpackMotion(minecraft.player, mode, () -> minecraft.player.input.jumping)) {
+                            minecraft.player.resetFallDistance();
+                        }
+                    }
+                }
+            }
             Mekanism.playerState.setScubaMaskState(playerUUID, isScubaMaskOn(minecraft.player), true);
             Mekanism.playerState.setGravitationalModulationState(playerUUID, isGravitationalModulationOn(minecraft.player), true);
             Mekanism.playerState.setFlamethrowerState(playerUUID, hasFlamethrower(minecraft.player), isFlamethrowerOn(minecraft.player), true);
@@ -194,18 +204,6 @@ public class ClientTickHandler {
                 if (minecraft.level.getGameTime() == data.teleportTime) {
                     Mekanism.packetHandler().sendToServer(new PacketPortableTeleporterTeleport(data.hand, data.identity));
                     iter.remove();
-                }
-            }
-
-            if (!jetpack.isEmpty()) {
-                ItemStack primaryJetpack = IJetpackItem.getPrimaryJetpack(minecraft.player);
-                if (!primaryJetpack.isEmpty()) {
-                    JetpackMode primaryMode = ((IJetpackItem) primaryJetpack.getItem()).getJetpackMode(primaryJetpack);
-                    JetpackMode mode = IJetpackItem.getPlayerJetpackMode(minecraft.player, primaryMode, () -> minecraft.player.input.jumping);
-                    MekanismClient.updateKey(minecraft.player.input.jumping, KeySync.ASCEND);
-                    if (jetpackInUse && IJetpackItem.handleJetpackMotion(minecraft.player, mode, () -> minecraft.player.input.jumping)) {
-                        minecraft.player.resetFallDistance();
-                    }
                 }
             }
 
@@ -241,7 +239,7 @@ public class ClientTickHandler {
                 }
             }
 
-            if (MekanismConfig.client.enablePlayerSounds.get()) {
+            if (MekanismConfig.client.enablePlayerSounds) {
                 RadiationScale scale = RadiationManager.get().getClientScale();
                 if (scale != RadiationScale.NONE && !SoundHandler.radiationSoundMap.containsKey(scale)) {
                     GeigerSound sound = GeigerSound.create(minecraft.player, scale);
@@ -270,69 +268,66 @@ public class ClientTickHandler {
         return false;
     }
 
-    @SubscribeEvent
-    public void onMouseEvent(MouseScrollingEvent event) {
-        if (MekanismConfig.client.allowModeScroll.get() && minecraft.player != null && minecraft.player.isShiftKeyDown()) {
-            handleModeScroll(event, EquipmentSlot.MAINHAND, event.getScrollDelta());
+    public static boolean onMouseScroll(double delta) {
+        if (MekanismConfig.client.allowModeScroll && minecraft.player != null && minecraft.player.isShiftKeyDown()) {
+            return handleModeScroll(EquipmentSlot.MAINHAND, delta);
         }
+        return false;
     }
 
-    private void handleModeScroll(Event event, EquipmentSlot slot, double delta) {
+    private static boolean handleModeScroll(EquipmentSlot slot, double delta) {
         if (delta != 0 && IModeItem.isModeItem(minecraft.player, slot)) {
             int shift = scrollIncrementer.scroll(delta);
             if (shift != 0) {
                 MekanismStatusOverlay.INSTANCE.setTimer();
                 Mekanism.packetHandler().sendToServer(new PacketModeChange(slot, shift));
             }
-            event.setCanceled(true);
+            return true;
         }
+        return false;
     }
 
-    @SubscribeEvent
-    public void onFogLighting(ViewportEvent.ComputeFogColor event) {
+    public Vector3f onFogLighting(Vector3f original) {
         if (visionEnhancement) {
             float oldRatio = 0.1F;
             float newRatio = 1 - oldRatio;
-            float red = oldRatio * event.getRed();
-            float green = oldRatio * event.getGreen();
-            float blue = oldRatio * event.getBlue();
-            event.setRed(red + newRatio * 0.4F);
-            event.setGreen(green + newRatio * 0.8F);
-            event.setBlue(blue + newRatio * 0.4F);
+            float red = oldRatio * original.x();
+            float green = oldRatio * original.y();
+            float blue = oldRatio * original.z();
+            return new Vector3f(red + newRatio * 0.4F, green + newRatio * 0.8F, blue + newRatio * 0.4F);
         }
+        return original;
     }
 
-    @SubscribeEvent
-    public void onFog(ViewportEvent.RenderFog event) {
-        if (visionEnhancement && event.getCamera().getEntity() instanceof Player player) {
+    public Entry<Float, Float> onFog(Camera camera, float nearPlaneDistance, float farPlaneDistance, FogType type) {
+        if (visionEnhancement && camera.getEntity() instanceof Player player) {
             IModule<ModuleVisionEnhancementUnit> module = IModuleHelper.INSTANCE.load(player.getItemBySlot(EquipmentSlot.HEAD), MekanismModules.VISION_ENHANCEMENT_UNIT);
             //Double-check the module is present before doing any calculations. This should always be true here, but better safe than sorry
             if (module != null) {
                 //This near plane is the same as spectators have set for lava and powdered snow
-                event.setNearPlaneDistance(-8.0F);
-                if (event.getFarPlaneDistance() < 20) {
+                nearPlaneDistance = -8.0F;
+                if (farPlaneDistance < 20) {
                     float scalar;
-                    if (event.getType() == FogType.LAVA) {
+                    if (type == FogType.LAVA) {
                         //Special handling for lava which is usually either at 1 or 3
-                        scalar = 24 * event.getFarPlaneDistance();
+                        scalar = 24 * farPlaneDistance;
                     } else {
                         //Shortly before 27 this ends up being 192, but we want to get it beforehand, so we just allow numbers below 20
-                        scalar = 5 + 2.5F * (float) Math.pow(Math.E, 0.16F * event.getFarPlaneDistance());
+                        scalar = 5 + 2.5F * (float) Math.pow(Math.E, 0.16F * farPlaneDistance);
                     }
                     //192 is roughly equivalent to what spectators have lava, powdered snow, and a couple other bounds for fog are,
                     // so we want to make sure we don't go above that
-                    event.setFarPlaneDistance(Math.min(192, scalar));
+                    farPlaneDistance = Math.min(192, scalar);
                 }
                 //Scale the distance based on the number of installed modules
-                event.scaleFarPlaneDistance(((float) Math.pow(module.getInstalledCount(), 1.25)) / module.getData().getMaxStackSize());
+                farPlaneDistance *= ((float) Math.pow(module.getInstalledCount(), 1.25)) / module.getData().getMaxStackSize();
                 //Cancel the event to ensure our changes are applied
-                event.setCanceled(true);
             }
         }
+        return Map.entry(nearPlaneDistance, farPlaneDistance);
     }
 
-    @SubscribeEvent
-    public void recipesUpdated(RecipesUpdatedEvent event) {
+    public void recipesUpdated() {
         //Note: Dedicated servers first connection the server sends recipes then tags, and on reload sends tags then recipes.
         // We ignore this fact and only clear the cache in the recipes updated event however, as the cache should already be
         // empty on our initial connection, and even if it isn't the client has no way to query the recipes and cause the
@@ -340,21 +335,19 @@ public class ClientTickHandler {
         MekanismRecipeType.clearCache();
     }
 
-    @SubscribeEvent
-    public void renderEntityPre(RenderLivingEvent.Pre<?, ?> evt) {
-        EntityModel<?> model = evt.getRenderer().getModel();
+    public void renderEntityPre(LivingEntityRenderer renderer, LivingEntity entity) {
+        EntityModel<?> model = renderer.getModel();
         if (model instanceof HumanoidModel<?> humanoidModel) {
             //If the entity has a biped model, then see if it is wearing a meka suit, in which case we want to hide various parts of the model
-            setModelVisibility(evt.getEntity(), humanoidModel, false);
+            setModelVisibility(entity, humanoidModel, false);
         }
     }
 
-    @SubscribeEvent
-    public void renderEntityPost(RenderLivingEvent.Post<?, ?> evt) {
-        EntityModel<?> model = evt.getRenderer().getModel();
+    public void renderEntityPost(LivingEntityRenderer renderer, LivingEntity entity) {
+        EntityModel<?> model = renderer.getModel();
         if (model instanceof HumanoidModel<?> humanoidModel) {
             //Undo model visibility changes we made to ensure that other entities of the same type are properly visible
-            setModelVisibility(evt.getEntity(), humanoidModel, true);
+            setModelVisibility(entity, humanoidModel, true);
         }
     }
 

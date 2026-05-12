@@ -13,12 +13,13 @@ import mekanism.api.providers.IBlockProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.client.lang.BaseLanguageProvider;
 import mekanism.common.registration.impl.ItemRegistryObject;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.PackOutput;
 
 public class AdditionsLangProvider extends BaseLanguageProvider {
 
-    public AdditionsLangProvider(PackOutput output) {
-        super(output, MekanismAdditions.MODID, MekanismAdditions.instance);
+    public AdditionsLangProvider(FabricDataOutput dataGenerator) {
+        super(dataGenerator, MekanismAdditions.instance);
     }
 
     @Override

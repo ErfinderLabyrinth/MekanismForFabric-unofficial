@@ -1,64 +1,62 @@
 package mekanism.common.registration;
 
+import com.mojang.serialization.Lifecycle;
+import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
-import mekanism.common.Mekanism;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryBuilder;
-import net.minecraftforge.registries.RegistryObject;
 
 public class WrappedDeferredRegister<T> {
 
-    protected final DeferredRegister<T> internal;
+    protected final Registry<T> internal;
 
-    protected WrappedDeferredRegister(DeferredRegister<T> internal) {
+    protected WrappedDeferredRegister(Registry<T> internal) {
         this.internal = internal;
     }
 
-    protected WrappedDeferredRegister(String modid, IForgeRegistry<T> registry) {
-        this(DeferredRegister.create(registry, modid));
-    }
 
     /**
      * @apiNote For use with vanilla or custom registries
      */
-    protected WrappedDeferredRegister(String modid, ResourceKey<? extends Registry<T>> registryName) {
-        this(DeferredRegister.create(registryName, modid));
+    protected WrappedDeferredRegister(ResourceKey<? extends Registry<T>> registryName) {
+        this(new MappedRegistry<>(registryName, Lifecycle.stable()));
     }
 
-    protected <I extends T, W extends WrappedRegistryObject<I>> W register(String name, Supplier<? extends I> sup, Function<RegistryObject<I>, W> objectWrapper) {
-        return objectWrapper.apply(internal.register(name, sup));
+    protected <I extends T, W extends WrappedRegistryObject<I>> W register(ResourceLocation id, Supplier<I> sup, Function<I, W> objectWrapper) {
+        return objectWrapper.apply(Registry.register(internal, id, sup.get()));
     }
 
-    public void register(IEventBus bus) {
-        internal.register(bus);
+    public void register(RegistryAttribute... attributes) {
+        FabricRegistryBuilder.from((WritableRegistry<? extends Object>) internal).attribute(RegistryAttribute.MODDED).attribute(RegistryAttribute.SYNCED).buildAndRegister();
+    }
+
+    public void register() {
+        register(RegistryAttribute.MODDED, RegistryAttribute.SYNCED);
     }
 
     /**
      * Only call this from mekanism and for custom registries
      */
-    public Supplier<IForgeRegistry<T>> createAndRegister(IEventBus bus) {
-        return createAndRegister(bus, UnaryOperator.identity());
-    }
 
     /**
      * Only call this from mekanism and for custom chemical registries
      */
-    public Supplier<IForgeRegistry<T>> createAndRegisterChemical(IEventBus bus) {
-        return createAndRegister(bus, builder -> builder.hasTags().setDefaultKey(Mekanism.rl("empty")));
+    public Supplier<Registry<T>> createAndRegisterChemical() {
+        return createAndRegister(/*builder -> builder.hasTags().setDefaultKey(Mekanism.rl("empty"))*/);
     }
 
     /**
      * Only call this from mekanism and for custom registries
      */
-    public Supplier<IForgeRegistry<T>> createAndRegister(IEventBus bus, UnaryOperator<RegistryBuilder<T>> builder) {
-        Supplier<IForgeRegistry<T>> registry = internal.makeRegistry(() -> builder.apply(new RegistryBuilder<>()));
-        register(bus);
+    public Supplier<Registry<T>> createAndRegister() {
+        Supplier<Registry<T>> registry = () -> internal;
+        register();
         return registry;
     }
 }

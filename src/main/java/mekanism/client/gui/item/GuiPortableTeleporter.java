@@ -1,6 +1,5 @@
 package mekanism.client.gui.item;
 
-import mekanism.api.energy.IEnergyContainer;
 import mekanism.client.ClientTickHandler;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
@@ -15,12 +14,13 @@ import mekanism.common.MekanismLang;
 import mekanism.common.content.teleporter.TeleporterFrequency;
 import mekanism.common.inventory.container.item.PortableTeleporterContainer;
 import mekanism.common.lib.frequency.FrequencyType;
-import mekanism.common.util.StorageUtils;
 import mekanism.common.util.text.EnergyDisplay;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+import team.reborn.energy.api.EnergyStorage;
 
 public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContainer> implements IItemGuiFrequencySelector<TeleporterFrequency, PortableTeleporterContainer>,
       IGuiColorFrequencySelector<TeleporterFrequency> {
@@ -40,22 +40,22 @@ public class GuiPortableTeleporter extends GuiMekanism<PortableTeleporterContain
         addRenderableWidget(new GuiVerticalPowerBar(this, new IBarInfoHandler() {
             @Override
             public Component getTooltip() {
-                IEnergyContainer container = StorageUtils.getEnergyContainer(menu.getStack(), 0);
+                EnergyStorage container = ContainerItemContext.withConstant(menu.getStack()).find(EnergyStorage.ITEM);
                 return container == null ? EnergyDisplay.ZERO.getTextComponent() : EnergyDisplay.of(container).getTextComponent();
             }
 
             @Override
             public double getLevel() {
-                IEnergyContainer container = StorageUtils.getEnergyContainer(menu.getStack(), 0);
-                return container == null ? 0 : container.getEnergy().divideToLevel(container.getMaxEnergy());
+                EnergyStorage container = ContainerItemContext.withConstant(menu.getStack()).find(EnergyStorage.ITEM);
+                return container == null ? 0 : (double) container.getAmount() / container.getCapacity();
             }
         }, 158, 26));
         teleportButton = addRenderableWidget(new TranslationButton(this, 42, 147, 92, 20, MekanismLang.BUTTON_TELEPORT, () -> {
             TeleporterFrequency frequency = getFrequency();
             if (frequency != null && menu.getStatus() == 1) {
                 //This should always be true if the teleport button is active, but validate it just in case
-                ClientTickHandler.portableTeleport(getMinecraft().player, menu.getHand(), frequency.getIdentity());
-                getMinecraft().player.closeContainer();
+                ClientTickHandler.portableTeleport(minecraft.player, menu.getHand(), frequency.getIdentity());
+                minecraft.player.closeContainer();
             } else {
                 //If something did go wrong make the teleport button not able to be pressed
                 teleportButton.active = false;

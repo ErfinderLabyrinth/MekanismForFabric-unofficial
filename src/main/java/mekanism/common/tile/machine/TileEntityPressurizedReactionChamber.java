@@ -1,6 +1,6 @@
 package mekanism.common.tile.machine;
 
-import java.util.List;
+import mekanism.api.FluidStack;
 import mekanism.api.IContentsListener;
 import mekanism.api.RelativeSide;
 import mekanism.api.Upgrade;
@@ -9,7 +9,6 @@ import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
-import mekanism.api.math.FloatingLong;
 import mekanism.api.recipes.PressurizedReactionRecipe;
 import mekanism.api.recipes.PressurizedReactionRecipe.PressurizedReactionRecipeOutput;
 import mekanism.api.recipes.cache.CachedRecipe;
@@ -52,9 +51,10 @@ import mekanism.common.util.MekanismUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class TileEntityPressurizedReactionChamber extends TileEntityProgressMachine<PressurizedReactionRecipe> implements
       ItemFluidChemicalRecipeLookupHandler<Gas, GasStack, PressurizedReactionRecipe> {
@@ -86,7 +86,7 @@ public class TileEntityPressurizedReactionChamber extends TileEntityProgressMach
                                                                                         "getOutputGasFilledPercentage"}, docPlaceholder = "gas output")
     public IGasTank outputGasTank;
 
-    private FloatingLong recipeEnergyRequired = FloatingLong.ZERO;
+    private long recipeEnergyRequired = 0;
     private final IOutputHandler<@NotNull PressurizedReactionRecipeOutput> outputHandler;
     private final IInputHandler<@NotNull ItemStack> itemInputHandler;
     private final IInputHandler<@NotNull FluidStack> fluidInputHandler;
@@ -166,7 +166,7 @@ public class TileEntityPressurizedReactionChamber extends TileEntityProgressMach
         int recipeDuration;
         if (cachedRecipe == null) {
             recipeDuration = BASE_DURATION;
-            recipeEnergyRequired = FloatingLong.ZERO;
+            recipeEnergyRequired = 0;
         } else {
             PressurizedReactionRecipe recipe = cachedRecipe.getRecipe();
             recipeDuration = recipe.getDuration();
@@ -188,7 +188,7 @@ public class TileEntityPressurizedReactionChamber extends TileEntityProgressMach
         recipeCacheLookupMonitor.updateAndProcess();
     }
 
-    public FloatingLong getRecipeEnergyRequired() {
+    public long getRecipeEnergyRequired() {
         return recipeEnergyRequired;
     }
 
@@ -223,8 +223,8 @@ public class TileEntityPressurizedReactionChamber extends TileEntityProgressMach
 
     //Methods relating to IComputerTile
     @ComputerMethod(methodDescription = ComputerConstants.DESCRIPTION_GET_ENERGY_USAGE)
-    FloatingLong getEnergyUsage() {
-        return getActive() ? energyContainer.getEnergyPerTick() : FloatingLong.ZERO;
+    long getEnergyUsage() {
+        return getActive() ? energyContainer.getEnergyPerTick() : 0;
     }
     //End methods IComputerTile
 }

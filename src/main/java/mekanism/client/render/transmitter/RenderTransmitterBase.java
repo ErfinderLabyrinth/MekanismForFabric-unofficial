@@ -4,18 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.client.mixinhelper.ModelManagerModelBakeryGetter;
 import mekanism.client.model.MekanismModelCache;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.lib.Quad;
 import mekanism.client.render.lib.QuadUtils;
-import mekanism.client.render.obj.VisibleModelConfiguration;
 import mekanism.client.render.tileentity.MekanismTileEntityRenderer;
-import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.util.EnumUtils;
@@ -32,20 +27,22 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.StandaloneGeometryBakingContext;
 import org.joml.Vector3f;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @NothingNullByDefault
 public abstract class RenderTransmitterBase<TRANSMITTER extends TileEntityTransmitter> extends MekanismTileEntityRenderer<TRANSMITTER> {
 
     public static final ResourceLocation MODEL_LOCATION = MekanismUtils.getResource(ResourceType.MODEL, "transmitter_contents.obj");
-    private static final IGeometryBakingContext contentsConfiguration = StandaloneGeometryBakingContext.builder()
-          .withGui3d(false)
-          .withUseBlockLight(false)
-          .withUseAmbientOcclusion(false)
-          .build(Mekanism.rl("transmitter_contents"));
+//    private static final IGeometryBakingContext contentsConfiguration = StandaloneGeometryBakingContext.builder()
+//          .withGui3d(false)
+//          .withUseBlockLight(false)
+//          .withUseAmbientOcclusion(false)
+//          .build(Mekanism.rl("transmitter_contents"));
     private static final Map<ContentsModelData, List<BakedQuad>> contentModelCache = new Object2ObjectOpenHashMap<>();
     private static final Vector3f NORMAL = Util.make(new Vector3f(1, 1, 1), Vector3f::normalize);
 
@@ -55,15 +52,15 @@ public abstract class RenderTransmitterBase<TRANSMITTER extends TileEntityTransm
 
     private static List<BakedQuad> getBakedQuads(List<String> visible, TextureAtlasSprite icon, Level world) {
         return contentModelCache.computeIfAbsent(new ContentsModelData(visible, icon), modelData -> {
-            ModelBaker baker = Minecraft.getInstance().getModelManager().getModelBakery().new ModelBakerImpl(
+            ModelBaker baker = ((ModelManagerModelBakeryGetter)Minecraft.getInstance().getModelManager()).getModelBakery().new ModelBakerImpl(
                   (modelLoc, material) -> material.sprite(),
                   MODEL_LOCATION
             );
             //Note: We get model and then bake as we use different parameters and are caching after modifying
             List<BakedQuad> bakedQuads = MekanismModelCache.INSTANCE.TRANSMITTER_CONTENTS.getModel()
-                  .bake(new VisibleModelConfiguration(contentsConfiguration, modelData.visible), baker, material -> modelData.icon,
+                  .bake(baker, material -> modelData.icon,
                         BlockModelRotation.X0_Y0, ItemOverrides.EMPTY, MODEL_LOCATION)
-                  .getQuads(null, null, world.getRandom(), ModelData.EMPTY, null);
+                  .getQuads(null, null, world.getRandom());
             List<Quad> unpackedQuads = QuadUtils.unpack(bakedQuads);
             for (Quad unpackedQuad : unpackedQuads) {
                 //Set the normals to ones that ignore the diffuse light in the same way we do it in Render Resizable Cuboid
@@ -91,7 +88,7 @@ public abstract class RenderTransmitterBase<TRANSMITTER extends TileEntityTransm
             Pose entry = matrix.last();
             //Get all the sides
             for (BakedQuad quad : getBakedQuads(visible, icon, transmitter.getLevel())) {
-                builder.putBulkData(entry, quad, red, green, blue, alpha, light, overlayLight, false);
+                builder.putBulkData(entry, quad, red, green, blue, light, overlayLight);
             }
         }
     }
@@ -102,7 +99,7 @@ public abstract class RenderTransmitterBase<TRANSMITTER extends TileEntityTransm
     }
 
     protected boolean shouldRenderTransmitter(TRANSMITTER tile, Vec3 camera) {
-        return !MekanismConfig.client.opaqueTransmitters.get();
+        return !MekanismConfig.client.opaqueTransmitters;
     }
 
     private record ContentsModelData(List<String> visible, TextureAtlasSprite icon) {

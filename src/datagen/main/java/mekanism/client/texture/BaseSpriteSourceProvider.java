@@ -8,6 +8,7 @@ import mekanism.api.chemical.Chemical;
 import mekanism.common.registration.impl.FluidDeferredRegister;
 import mekanism.common.registration.impl.FluidDeferredRegister.MekanismFluidType;
 import mekanism.common.registration.impl.FluidRegistryObject;
+import net.fabricmc.fabric.api.client.particle.v1.FabricSpriteProvider;
 import net.minecraft.client.renderer.texture.atlas.sources.DirectoryLister;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.data.PackOutput;
@@ -16,7 +17,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.SpriteSourceProvider;
 import net.minecraftforge.registries.IForgeRegistry;
 
-public abstract class BaseSpriteSourceProvider extends SpriteSourceProvider {
+public abstract class BaseSpriteSourceProvider extends  {
 
     private final Set<ResourceLocation> trackedSingles = new HashSet<>();
 

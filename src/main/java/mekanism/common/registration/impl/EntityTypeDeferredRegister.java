@@ -1,24 +1,27 @@
 package mekanism.common.registration.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
 import mekanism.common.Mekanism;
 import mekanism.common.registration.WrappedDeferredRegister;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 public class EntityTypeDeferredRegister extends WrappedDeferredRegister<EntityType<?>> {
 
     private Map<EntityTypeRegistryObject<? extends LivingEntity>, Supplier<Builder>> livingEntityAttributes = new HashMap<>();
 
+    String modid;
     public EntityTypeDeferredRegister(String modid) {
-        super(modid, ForgeRegistries.ENTITY_TYPES);
+        super(BuiltInRegistries.ENTITY_TYPE);
+        this.modid = modid;
     }
 
     public <ENTITY extends LivingEntity> EntityTypeRegistryObject<ENTITY> register(String name, EntityType.Builder<ENTITY> builder, Supplier<Builder> attributes) {
@@ -28,22 +31,25 @@ public class EntityTypeDeferredRegister extends WrappedDeferredRegister<EntityTy
     }
 
     public <ENTITY extends Entity> EntityTypeRegistryObject<ENTITY> register(String name, EntityType.Builder<ENTITY> builder) {
-        return register(name, () -> builder.build(name), EntityTypeRegistryObject::new);
+        return register(new ResourceLocation(modid, name), () -> builder.build(name), EntityTypeRegistryObject::new);
     }
 
     @Override
-    public void register(IEventBus bus) {
-        super.register(bus);
-        bus.addListener(this::registerEntityAttributes);
+    public void register() {
+        super.register();
+        registerEntityAttributes();
     }
 
-    private void registerEntityAttributes(EntityAttributeCreationEvent event) {
+    private void registerEntityAttributes() {
         if (livingEntityAttributes == null) {
             Mekanism.logger.error("GlobalEntityTypeAttributes have already been set. This should not happen.");
         } else {
             //Register our living entity attributes
             for (Map.Entry<EntityTypeRegistryObject<? extends LivingEntity>, Supplier<Builder>> entry : livingEntityAttributes.entrySet()) {
-                event.put(entry.getKey().get(), entry.getValue().get().build());
+                FabricDefaultAttributeRegistry.register(
+                        entry.getKey().get(),
+                        entry.getValue().get().build()
+                );
             }
             //And set the map to null to allow it to be garbage collected
             livingEntityAttributes = null;

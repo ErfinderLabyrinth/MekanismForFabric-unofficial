@@ -1,29 +1,26 @@
 package mekanism.client.render.hud;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.render.HUDRenderer;
 import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.integration.curios.CuriosIntegration;
 import mekanism.common.item.interfaces.IItemHUDProvider;
 import mekanism.common.tags.MekanismTags;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.items.IItemHandler;
 
-public class MekanismHUD implements IGuiOverlay {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+public class MekanismHUD {
 
     public static final MekanismHUD INSTANCE = new MekanismHUD();
     private static final EquipmentSlot[] EQUIPMENT_ORDER = {EquipmentSlot.OFFHAND, EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS,
@@ -34,11 +31,10 @@ public class MekanismHUD implements IGuiOverlay {
     private MekanismHUD() {
     }
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTicks, int screenWidth, int screenHeight) {
-        Minecraft minecraft = gui.getMinecraft();
+    public void render(Gui gui, GuiGraphics guiGraphics, float partialTicks, int screenWidth, int screenHeight) {
+        Minecraft minecraft = gui.minecraft;
         Player player = minecraft.player;
-        if (!minecraft.options.hideGui && player != null && !player.isSpectator() && MekanismConfig.client.enableHUD.get()) {
+        if (!minecraft.options.hideGui && player != null && !player.isSpectator() && MekanismConfig.client.enableHUD) {
             int count = 0;
             List<List<Component>> renderStrings = new ArrayList<>();
             for (EquipmentSlot slotType : EQUIPMENT_ORDER) {
@@ -48,22 +44,23 @@ public class MekanismHUD implements IGuiOverlay {
                 }
             }
             if (Mekanism.hooks.CuriosLoaded) {
-                Optional<? extends IItemHandler> invOptional = CuriosIntegration.getCuriosInventory(player);
-                if (invOptional.isPresent()) {
-                    IItemHandler inv = invOptional.get();
-                    for (int i = 0, slots = inv.getSlots(); i < slots; i++) {
-                        ItemStack stack = inv.getStackInSlot(i);
-                        if (stack.getItem() instanceof IItemHUDProvider hudProvider) {
-                            count += makeComponent(list -> hudProvider.addCurioHUDStrings(list, player, stack), renderStrings);
-                        }
-                    }
-                }
+                //TODO add support
+//                Optional<? extends IItemHandler> invOptional = CuriosIntegration.getCuriosInventory(player);
+//                if (invOptional.isPresent()) {
+//                    IItemHandler inv = invOptional.get();
+//                    for (int i = 0, slots = inv.getSlots(); i < slots; i++) {
+//                        ItemStack stack = inv.getStackInSlot(i);
+//                        if (stack.getItem() instanceof IItemHUDProvider hudProvider) {
+//                            count += makeComponent(list -> hudProvider.addCurioHUDStrings(list, player, stack), renderStrings);
+//                        }
+//                    }
+//                }
             }
             Font font = gui.getFont();
-            boolean reverseHud = MekanismConfig.client.reverseHUD.get();
+            boolean reverseHud = MekanismConfig.client.reverseHUD;
             int maxTextHeight = screenHeight;
             if (count > 0) {
-                float hudScale = MekanismConfig.client.hudScale.get();
+                float hudScale = MekanismConfig.client.hudScale;
                 int xScale = (int) (screenWidth / hudScale);
                 int yScale = (int) (screenHeight / hudScale);
                 int start = (renderStrings.size() * 2) + (count * 9);

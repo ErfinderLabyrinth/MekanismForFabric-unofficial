@@ -1,9 +1,6 @@
 package mekanism.common.inventory.slot;
 
-import java.util.Objects;
-import java.util.function.Predicate;
 import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -11,11 +8,17 @@ import mekanism.common.inventory.container.slot.InventoryContainerSlot;
 import mekanism.common.item.block.ItemBlockBin;
 import mekanism.common.tier.BinTier;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.Predicate;
 
 @NothingNullByDefault
 public class BinInventorySlot extends BasicInventorySlot {
@@ -37,28 +40,43 @@ public class BinInventorySlot extends BasicInventorySlot {
     }
 
     @Override
-    public ItemStack insertItem(ItemStack stack, Action action, AutomationType automationType) {
+    public long insert(ItemVariant resource, long amount, TransactionContext transaction) {
+        updateSnapshots(transaction);
         if (isEmpty()) {
-            if (isLocked() && !ItemHandlerHelper.canItemStacksStack(lockStack, stack)) {
+            if (isLocked() && !ItemEntity.areMergable(lockStack, resource.toStack((int) amount))) {
                 // When locked, we need to make sure the correct item type is being inserted
-                return stack;
-            } else if (isCreative && action.execute() && automationType != AutomationType.EXTERNAL) {
+                return 0;
+            } else if (isCreative) {
                 //If a player manually inserts into a creative bin, that is empty we need to allow setting the type,
                 // Note: We check that it is not external insertion because an empty creative bin acts as a "void" for automation
-                ItemStack simulatedRemainder = super.insertItem(stack, Action.SIMULATE, automationType);
-                if (simulatedRemainder.isEmpty()) {
+                long amountInserted = super.insert(resource, amount, transaction);
+                if (amountInserted == amount) {
                     //If we are able to insert it then set perform the action of setting it to full
-                    setStackUnchecked(stack.copyWithCount(getLimit(stack)));
+                    setStackUnchecked(resource.toStack(getLimit(resource.toStack(1))));
                 }
-                return simulatedRemainder;
+                return amountInserted;
             }
         }
-        return super.insertItem(stack, action.combine(!isCreative), automationType);
+        long amountInserted;
+        try(Transaction t=Transaction.openOuter()) {
+            amountInserted = super.insert(resource, amount, t);
+            if (!isCreative) {
+                t.commit();
+            }
+        }
+        return amountInserted;
     }
 
     @Override
-    public ItemStack extractItem(int amount, Action action, AutomationType automationType) {
-        return super.extractItem(amount, action.combine(!isCreative), automationType);
+    public long extract(ItemVariant resource, long amount, TransactionContext t) {
+        long amountExtracted;
+        try(Transaction t2=Transaction.openOuter()) {
+            amountExtracted = super.extract(resource, amount, t2);
+            if (!isCreative) {
+                t2.commit();
+            }
+        }
+        return amountExtracted;
     }
 
     /**
@@ -68,8 +86,15 @@ public class BinInventorySlot extends BasicInventorySlot {
      * this method.
      */
     @Override
-    public int setStackSize(int amount, Action action) {
-        return super.setStackSize(amount, action.combine(!isCreative));
+    public int setStackSize(int amount) {
+        if (isCreative) {
+            if (isEmpty() || amount <= 0) {
+                return 0;
+            }
+
+            return Math.min(amount, getLimit(current.getStack()));
+        }
+        return super.setStackSize(amount);
     }
 
     @Nullable
@@ -89,7 +114,7 @@ public class BinInventorySlot extends BasicInventorySlot {
         if (isEmpty()) {
             return ItemStack.EMPTY;
         }
-        return current.copyWithCount(Math.min(getCount(), current.getMaxStackSize()));
+        return current.getStack().copyWithCount(Math.min(getCount(), current.getStack().getMaxStackSize()));
     }
 
     /**
@@ -107,7 +132,7 @@ public class BinInventorySlot extends BasicInventorySlot {
         if (isCreative || isLocked() == lock || (lock && isEmpty())) {
             return false;
         }
-        lockStack = lock ? current.copyWithCount(1) : ItemStack.EMPTY;
+        lockStack = lock ? current.getStack().copyWithCount(1) : ItemStack.EMPTY;
         return true;
     }
 
@@ -134,7 +159,7 @@ public class BinInventorySlot extends BasicInventorySlot {
     public CompoundTag serializeNBT() {
         CompoundTag nbt = super.serializeNBT();
         if (isLocked()) {
-            nbt.put(NBTConstants.LOCK_STACK, lockStack.serializeNBT());
+            nbt.put(NBTConstants.LOCK_STACK, lockStack.save(new CompoundTag()));
         }
         return nbt;
     }

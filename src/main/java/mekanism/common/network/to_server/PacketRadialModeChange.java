@@ -1,20 +1,24 @@
 package mekanism.common.network.to_server;
 
-import java.util.List;
+import mekanism.api.MekanismAPI;
 import mekanism.api.radial.RadialData;
 import mekanism.api.radial.mode.INestedRadialMode;
 import mekanism.api.radial.mode.IRadialMode;
 import mekanism.common.Mekanism;
 import mekanism.common.lib.radial.IGenericRadialModeItem;
 import mekanism.common.network.IMekanismPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+
+import java.util.List;
 
 public class PacketRadialModeChange implements IMekanismPacket {
+    public static final PacketType<PacketQIOItemViewerSlotInteract> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "qiu_item_viewer_slot_interact"), PacketQIOItemViewerSlotInteract::decode);
 
     private final List<ResourceLocation> path;
     private final EquipmentSlot slot;
@@ -28,8 +32,7 @@ public class PacketRadialModeChange implements IMekanismPacket {
 
     @Override
     @SuppressWarnings("ConstantConditions")//not null, validated by hasNestedData
-    public void handle(NetworkEvent.Context context) {
-        Player player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null) {
             ItemStack stack = player.getItemBySlot(slot);
             if (!stack.isEmpty() && stack.getItem() instanceof IGenericRadialModeItem radialModeItem) {
@@ -68,5 +71,10 @@ public class PacketRadialModeChange implements IMekanismPacket {
         List<ResourceLocation> path = buffer.readList(FriendlyByteBuf::readResourceLocation);
         int networkRepresentation = buffer.readVarInt();
         return new PacketRadialModeChange(slot, path, networkRepresentation);
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 }

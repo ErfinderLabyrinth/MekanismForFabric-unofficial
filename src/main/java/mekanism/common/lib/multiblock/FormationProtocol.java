@@ -3,13 +3,6 @@ package mekanism.common.lib.multiblock;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Predicate;
 import mekanism.api.Coord4D;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.attribute.GasAttributes;
@@ -29,6 +22,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.*;
+import java.util.function.Predicate;
 
 public class FormationProtocol<T extends MultiblockData> {
 
@@ -127,7 +123,7 @@ public class FormationProtocol<T extends MultiblockData> {
                     }
                     if (radiation > 0) {
                         Coord4D dumpLocation = new Coord4D(structureFound.getBounds().getCenter(), world);
-                        IRadiationManager.INSTANCE.radiate(dumpLocation, radiation);
+                        IRadiationManager.INSTANCE.radiate(dumpLocation, radiation, world.getServer());
                     }
                 }
             }

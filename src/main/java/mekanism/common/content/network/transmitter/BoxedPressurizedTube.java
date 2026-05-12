@@ -1,27 +1,19 @@
 package mekanism.common.content.network.transmitter;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.NBTConstants;
-import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.ChemicalTankBuilder;
-import mekanism.api.chemical.ChemicalType;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.IChemicalTank;
+import mekanism.api.chemical.*;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.infuse.IInfusionTank;
+import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.merged.BoxedChemical;
 import mekanism.api.chemical.merged.BoxedChemicalStack;
 import mekanism.api.chemical.merged.MergedChemicalTank;
 import mekanism.api.chemical.merged.MergedChemicalTank.Current;
 import mekanism.api.chemical.pigment.IPigmentTank;
+import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.slurry.ISlurryTank;
+import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.capabilities.chemical.BoxedChemicalHandler;
@@ -39,26 +31,34 @@ import mekanism.common.tier.TubeTier;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.upgrade.transmitter.PressurizedTubeUpgradeData;
 import mekanism.common.upgrade.transmitter.TransmitterUpgradeData;
-import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandler, BoxedChemicalNetwork, BoxedChemicalStack, BoxedPressurizedTube>
       implements IGasTracker, IInfusionTracker, IPigmentTracker, ISlurryTracker, IUpgradeableTransmitter<PressurizedTubeUpgradeData> {
 
     public final TubeTier tier;
     public final MergedChemicalTank chemicalTank;
-    private final List<IGasTank> gasTanks;
-    private final List<IInfusionTank> infusionTanks;
-    private final List<IPigmentTank> pigmentTanks;
-    private final List<ISlurryTank> slurryTanks;
+    private final IGasTank gasTanks;
+    private final IInfusionTank infusionTanks;
+    private final IPigmentTank pigmentTanks;
+    private final ISlurryTank slurryTanks;
     @NotNull
     public BoxedChemicalStack saveShare = BoxedChemicalStack.EMPTY;
 
@@ -71,10 +71,15 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
               ChemicalTankBuilder.PIGMENT.createAllValid(getCapacity(), this),
               ChemicalTankBuilder.SLURRY.createAllValid(getCapacity(), this)
         );
-        gasTanks = Collections.singletonList(chemicalTank.getGasTank());
-        infusionTanks = Collections.singletonList(chemicalTank.getInfusionTank());
-        pigmentTanks = Collections.singletonList(chemicalTank.getPigmentTank());
-        slurryTanks = Collections.singletonList(chemicalTank.getSlurryTank());
+        gasTanks = chemicalTank.getGasTank();
+        infusionTanks = chemicalTank.getInfusionTank();
+        pigmentTanks = chemicalTank.getPigmentTank();
+        slurryTanks = chemicalTank.getSlurryTank();
+    }
+
+    @Override
+    protected BlockApiLookup<BoxedChemicalHandler, Direction> getAcceptorCacheLookup() {
+        return null;
     }
 
     @Override
@@ -116,7 +121,7 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
     }
 
     private boolean pullFromAcceptor(BoxedChemicalHandler acceptor, ChemicalType chemicalType, BoxedChemicalStack bufferWithFallback, boolean bufferIsEmpty) {
-        IChemicalHandler<?, ?> handler = acceptor.getHandlerFor(chemicalType);
+        IChemicalHandler<?, ?, ?> handler = acceptor.getHandlerFor(chemicalType);
         if (handler != null) {
             return pullFromAcceptor(handler, bufferWithFallback, chemicalType, bufferIsEmpty);
         }
@@ -131,24 +136,39 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
      *
      * @return {@code true} if we successfully pulled a chemical, {@code false} if we were unable to pull a chemical.
      */
-    private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK>>
+    private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>>
     boolean pullFromAcceptor(HANDLER connectedAcceptor, BoxedChemicalStack bufferWithFallback, ChemicalType chemicalType, boolean bufferIsEmpty) {
         long availablePull = getAvailablePull(chemicalType);
-        STACK received;
+        STACK received = connectedAcceptor.getEmptyStack();
         if (bufferIsEmpty) {
+            Iterator<StorageView<CHEMICAL>> iterator = connectedAcceptor.nonEmptyIterator();
+            if (iterator.hasNext()) {
+                try(Transaction t=Transaction.openOuter()) {
+                    CHEMICAL resource = iterator.next().getResource();
+                    received = (STACK) resource.getStack(connectedAcceptor.extract(iterator.next().getResource(), availablePull, t));
+                }
+            }
             //If we don't have a chemical stored try pulling as much as we are able to
-            received = connectedAcceptor.extractChemical(availablePull, Action.SIMULATE);
         } else {
             //Otherwise, try draining the same type of chemical we have stored requesting up to as much as we are able to pull
             // We do this to better support multiple tanks in case the chemical we have stored we could pull out of a block's
             // second tank but just asking to drain a specific amount
-            received = connectedAcceptor.extractChemical(ChemicalUtil.copyWithAmount((STACK) bufferWithFallback.getChemicalStack(), availablePull), Action.SIMULATE);
+            try(Transaction t=Transaction.openOuter()) {
+                CHEMICAL resource = (CHEMICAL) bufferWithFallback.getChemicalStack().getType();
+                received = (STACK) resource.getStack(connectedAcceptor.extract(resource, availablePull, t));
+            }
         }
-        if (!received.isEmpty() && takeChemical(chemicalType, received, Action.SIMULATE).isEmpty()) {
+        boolean canTakeFully;
+        try(Transaction t=Transaction.openOuter()) {
+            canTakeFully = takeChemical(chemicalType, received, t).isEmpty();
+        }
+        if (!received.isEmpty() && canTakeFully) {
             //If we received some chemical and are able to insert it all, then actually extract it and insert it into our thing.
             // Note: We extract first after simulating ourselves because if the target gave a faulty simulation value, we want to handle it properly
             // and not accidentally dupe anything, and we know our simulation we just performed on taking it is valid
-            takeChemical(chemicalType, connectedAcceptor.extractChemical(received, Action.EXECUTE), Action.EXECUTE);
+            try(Transaction t=Transaction.openOuter()) {
+                takeChemical(chemicalType, received.getType().getStack(connectedAcceptor.extract(received.getType(), received.getAmount(), t)), t);
+            }
             return true;
         }
         return false;
@@ -176,7 +196,10 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
     public void parseUpgradeData(@NotNull PressurizedTubeUpgradeData data) {
         redstoneReactive = data.redstoneReactive;
         setConnectionTypesRaw(data.connectionTypes);
-        takeChemical(data.contents, Action.EXECUTE);
+        try(Transaction t=Transaction.openOuter()) {
+            takeChemical(data.contents, t);
+            t.commit();
+        }
     }
 
     @Override
@@ -216,8 +239,9 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
     }
 
     @Override
-    public boolean isValidAcceptor(BlockEntity tile, Direction side) {
-        return super.isValidAcceptor(tile, side) && getAcceptorCache().isChemicalAcceptorAndListen(tile, side);
+    public boolean isValidAcceptor(Level level, BlockPos pos, Direction side) {
+        BlockEntity tile;
+        return super.isValidAcceptor(level, pos, side) && (tile = level.getBlockEntity(pos)) != null && getAcceptorCache().isChemicalAcceptorAndListen(tile, side);
     }
 
     @Override
@@ -310,14 +334,14 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
             if (networkCurrent != Current.EMPTY && !saveShare.isEmpty()) {
                 ChemicalStack<?> chemicalStack = saveShare.getChemicalStack();
                 long amount = chemicalStack.getAmount();
-                MekanismUtils.logMismatchedStackSize(transmitterNetwork.chemicalTank.getTankFromCurrent(networkCurrent).shrinkStack(amount, Action.EXECUTE), amount);
+                MekanismUtils.logMismatchedStackSize(transmitterNetwork.chemicalTank.getTankFromCurrent(networkCurrent).shrinkStack(amount), amount);
                 setStackClearOthers(chemicalStack, chemicalTank.getTankFromCurrent(networkCurrent));
             }
         }
     }
 
-    public void takeChemical(BoxedChemicalStack stack, Action action) {
-        takeChemical(stack.getChemicalType(), stack.getChemicalStack(), action);
+    public void takeChemical(BoxedChemicalStack stack, TransactionContext t) {
+        takeChemical(stack.getChemicalType(), stack.getChemicalStack(), t);
     }
 
     /**
@@ -325,48 +349,87 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
      */
     @NotNull
     @SuppressWarnings("unchecked")
-    private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> STACK takeChemical(ChemicalType type, STACK stack, Action action) {
+    private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> STACK takeChemical(ChemicalType type, STACK stack, TransactionContext t) {
         IChemicalTank<CHEMICAL, STACK> tank;
         if (hasTransmitterNetwork()) {
             tank = (IChemicalTank<CHEMICAL, STACK>) getTransmitterNetwork().chemicalTank.getTankForType(type);
         } else {
             tank = (IChemicalTank<CHEMICAL, STACK>) chemicalTank.getTankForType(type);
         }
-        return tank.insert(stack, action, AutomationType.INTERNAL);
+        try(Transaction t2=Transaction.openOuter()) {
+            STACK result = (STACK) stack.getType().getStack(tank.insert(stack.getType(), stack.getAmount(), t));
+            t2.commit();
+            return result;
+        }
+    }
+
+    @Override
+    public List<IGasTank> getGasTanks() {
+        if (hasTransmitterNetwork()) {
+            return getTransmitterNetwork().getGasTanks();
+        }
+        return Collections.singletonList(gasTanks);
     }
 
     @NotNull
     @Override
-    public List<IGasTank> getGasTanks(@Nullable Direction side) {
+    public Storage<Gas> getGasStorage(@Nullable Direction side) {
         if (hasTransmitterNetwork()) {
-            return getTransmitterNetwork().getGasTanks(side);
+            return getTransmitterNetwork().getGasStorage(side);
         }
         return gasTanks;
     }
 
     @NotNull
     @Override
-    public List<IInfusionTank> getInfusionTanks(@Nullable Direction side) {
+    public List<IInfusionTank> getInfusionTanks() {
         if (hasTransmitterNetwork()) {
-            return getTransmitterNetwork().getInfusionTanks(side);
+            return getTransmitterNetwork().getInfusionTanks();
+        }
+        return Collections.singletonList(infusionTanks);
+    }
+
+    @NotNull
+    @Override
+    public Storage<InfuseType> getInfusionStorage(@Nullable Direction side) {
+        if (hasTransmitterNetwork()) {
+            return getTransmitterNetwork().getInfusionStorage(side);
         }
         return infusionTanks;
     }
 
     @NotNull
     @Override
-    public List<IPigmentTank> getPigmentTanks(@Nullable Direction side) {
+    public List<IPigmentTank> getPigmentTanks() {
         if (hasTransmitterNetwork()) {
-            return getTransmitterNetwork().getPigmentTanks(side);
+            return getTransmitterNetwork().getPigmentTanks();
+        }
+        return Collections.singletonList(pigmentTanks);
+    }
+
+    @NotNull
+    @Override
+    public Storage<Pigment> getPigmentStorage(@Nullable Direction side) {
+        if (hasTransmitterNetwork()) {
+            return getTransmitterNetwork().getPigmentStorage(side);
         }
         return pigmentTanks;
     }
 
     @NotNull
     @Override
-    public List<ISlurryTank> getSlurryTanks(@Nullable Direction side) {
+    public List<ISlurryTank> getSlurryTanks() {
         if (hasTransmitterNetwork()) {
-            return getTransmitterNetwork().getSlurryTanks(side);
+            return getTransmitterNetwork().getSlurryTanks();
+        }
+        return Collections.singletonList(slurryTanks);
+    }
+
+    @NotNull
+    @Override
+    public Storage<Slurry> getSlurryStorage(@Nullable Direction side) {
+        if (hasTransmitterNetwork()) {
+            return getTransmitterNetwork().getSlurryStorage(side);
         }
         return slurryTanks;
     }

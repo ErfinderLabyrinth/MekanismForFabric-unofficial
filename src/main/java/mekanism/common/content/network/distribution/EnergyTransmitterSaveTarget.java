@@ -1,10 +1,11 @@
 package mekanism.common.content.network.distribution;
 
-import java.util.Collection;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.content.network.transmitter.UniversalCable;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
+
+import java.util.Collection;
 
 public class EnergyTransmitterSaveTarget extends Target<EnergyTransmitterSaveTarget.SaveHandler, FloatingLong, FloatingLong> {
 
@@ -31,7 +32,7 @@ public class EnergyTransmitterSaveTarget extends Target<EnergyTransmitterSaveTar
 
     public static class SaveHandler {
 
-        private FloatingLong currentStored = FloatingLong.ZERO;
+        private long currentStored = 0;
         private final UniversalCable transmitter;
 
         public SaveHandler(UniversalCable transmitter) {
@@ -40,7 +41,7 @@ public class EnergyTransmitterSaveTarget extends Target<EnergyTransmitterSaveTar
 
         protected void acceptAmount(SplitInfo<FloatingLong> splitInfo, FloatingLong amount) {
             amount = amount.min(transmitter.getCapacityAsFloatingLong().subtract(currentStored));
-            currentStored = currentStored.plusEqual(amount);
+            currentStored = currentStored + amount.longValue();
             splitInfo.send(amount);
         }
 
@@ -49,7 +50,7 @@ public class EnergyTransmitterSaveTarget extends Target<EnergyTransmitterSaveTar
         }
 
         protected void saveShare() {
-            if (!currentStored.isZero() || !transmitter.lastWrite.isZero()) {
+            if (currentStored != 0 || transmitter.lastWrite != 0) {
                 transmitter.lastWrite = currentStored;
                 transmitter.getTransmitterTile().markForSave();
             }

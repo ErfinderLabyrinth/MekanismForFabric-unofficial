@@ -1,27 +1,33 @@
 package mekanism.client.render.item;
 
-import java.util.Optional;
-import java.util.function.Predicate;
+import mekanism.api.FluidStack;
+import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.math.MathUtils;
 import mekanism.client.gui.GuiUtils;
+import mekanism.common.capabilities.Capabilities;
 import mekanism.common.util.FluidUtils;
 import mekanism.common.util.StorageUtils;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IItemDecorator;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import org.apache.commons.compress.utils.Lists;
 
-public class ChemicalFluidBarDecorator implements IItemDecorator {
+import java.util.List;
+import java.util.function.Predicate;
 
-    private final Capability<? extends IChemicalHandler<?, ?>>[] chemicalCaps;
+public class ChemicalFluidBarDecorator{
+
+//    private final Capability<? extends IChemicalHandler<?, ?>>[] chemicalCaps;
     private final boolean showFluid;
     private final Predicate<ItemStack> visibleFor;
 
@@ -30,40 +36,36 @@ public class ChemicalFluidBarDecorator implements IItemDecorator {
      * @param visibleFor   checks if bars should be rendered for the given itemstack
      * @param chemicalCaps the capabilities to be displayed in order, starting from the bottom
      */
-    @SafeVarargs
-    public ChemicalFluidBarDecorator(boolean showFluid, Predicate<ItemStack> visibleFor, Capability<? extends IChemicalHandler<?, ?>>... chemicalCaps) {
+    public ChemicalFluidBarDecorator(boolean showFluid, Predicate<ItemStack> visibleFor) {
         this.showFluid = showFluid;
-        this.chemicalCaps = chemicalCaps;
+//        this.chemicalCaps = chemicalCaps;
         this.visibleFor = visibleFor;
     }
 
-    @Override
     public boolean render(GuiGraphics guiGraphics, Font font, ItemStack stack, int xOffset, int yOffset) {
         if (!visibleFor.test(stack)) {
             return false;
         }
         yOffset += 12;
-        for (Capability<? extends IChemicalHandler<?, ?>> chemicalCap : chemicalCaps) {
-            Optional<? extends IChemicalHandler<?, ?>> capabilityInstance = stack.getCapability(chemicalCap).resolve();
-            if (capabilityInstance.isPresent()) {
-                IChemicalHandler<?, ?> chemicalHandler = capabilityInstance.get();
-                int tank = getDisplayTank(chemicalHandler.getTanks());
-                if (tank != -1) {
-                    ChemicalStack<?> chemicalInTank = chemicalHandler.getChemicalInTank(tank);
-                    renderBar(guiGraphics, xOffset, yOffset, chemicalInTank.getAmount(), chemicalHandler.getTankCapacity(tank), chemicalInTank.getChemicalColorRepresentation());
+        for (ItemApiLookup<? extends IChemicalHandler<? extends Chemical<?>, ? extends ChemicalStack<? extends Chemical<?>>, ?>, ContainerItemContext> chemicalCap : List.of(Capabilities.GAS_HANDLER_ITEM, Capabilities.INFUSION_HANDLER_ITEM, Capabilities.PIGMENT_HANDLER_ITEM, Capabilities.SLURRY_HANDLER_ITEM)) {
+            IChemicalHandler<? extends Chemical<?>, ? extends ChemicalStack<? extends Chemical<?>>, ?> handler = ContainerItemContext.withConstant(stack).find(chemicalCap);
+            if (handler != null) {
+                StorageView<? extends Chemical<?>> tank = getDisplayTank(handler);
+                if (tank != null) {
+                    //ChemicalStack<?> chemicalInTank = chemicalHandler.getChemicalInTank(tank);
+                    renderBar(guiGraphics, xOffset, yOffset, tank.getAmount(), tank.getCapacity(), tank.getResource().getColorRepresentation());
                     yOffset--;
                 }
             }
         }
 
         if (showFluid) {
-            Optional<IFluidHandlerItem> capabilityInstance = FluidUtil.getFluidHandler(stack).resolve();
-            if (capabilityInstance.isPresent()) {
-                IFluidHandlerItem fluidHandler = capabilityInstance.get();
-                int tank = getDisplayTank(fluidHandler.getTanks());
-                if (tank != -1) {
-                    FluidStack fluidInTank = fluidHandler.getFluidInTank(tank);
-                    renderBar(guiGraphics, xOffset, yOffset, fluidInTank.getAmount(), fluidHandler.getTankCapacity(tank), FluidUtils.getRGBDurabilityForDisplay(stack).orElse(0xFFFFFFFF));
+            Storage<FluidVariant> storage = ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM);
+            if (storage != null) {
+                StorageView<FluidVariant> tank = getDisplayTank(storage);
+                if (tank != null) {
+                    FluidStack fluidInTank = new FluidStack(tank.getResource(), tank.getAmount());
+                    renderBar(guiGraphics, xOffset, yOffset, fluidInTank.amount(), tank.getCapacity(), FluidUtils.getRGBDurabilityForDisplay(stack).orElse(0xFFFFFFFF));
                 }
             }
         }
@@ -88,5 +90,16 @@ public class ChemicalFluidBarDecorator implements IItemDecorator {
             return (int) (Minecraft.getInstance().level.getGameTime() / 20) % tanks;
         }
         return 0;
+    }
+
+    private <T> StorageView<T> getDisplayTank(Storage<T> storage) {
+        List<StorageView<T>> views = Lists.newArrayList(storage.iterator());
+        if (views.size() == 0) {
+            return null;
+        } else if (Minecraft.getInstance().level != null) {
+            //Cycle through multiple tanks every second, to save some space if multiple tanks are present
+            return views.get((int) ((Minecraft.getInstance().level.getGameTime() / 20) % views.size()));
+        }
+        return views.get(0);
     }
 }

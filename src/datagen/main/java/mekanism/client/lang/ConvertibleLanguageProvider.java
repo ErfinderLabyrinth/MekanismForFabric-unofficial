@@ -2,13 +2,14 @@ package mekanism.client.lang;
 
 import java.util.List;
 import mekanism.client.lang.FormatSplitter.Component;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.LanguageProvider;
 
-public abstract class ConvertibleLanguageProvider extends LanguageProvider {
+public abstract class ConvertibleLanguageProvider extends FabricLanguageProvider {
 
-    public ConvertibleLanguageProvider(PackOutput output, String modid, String locale) {
-        super(output, modid, locale);
+    public ConvertibleLanguageProvider(FabricDataOutput dataGenerator, String locale) {
+        super(dataGenerator, locale);
     }
 
     public abstract void convert(String key, List<Component> splitEnglish);

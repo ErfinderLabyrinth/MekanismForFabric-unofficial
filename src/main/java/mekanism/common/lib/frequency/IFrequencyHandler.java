@@ -1,10 +1,11 @@
 package mekanism.common.lib.frequency;
 
-import java.util.List;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
 import net.minecraft.nbt.CompoundTag;
+
+import java.util.List;
+import java.util.UUID;
 
 public interface IFrequencyHandler {
 

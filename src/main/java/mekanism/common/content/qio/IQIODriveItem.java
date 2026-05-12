@@ -2,12 +2,13 @@ package mekanism.common.content.qio;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.util.ItemDataUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.UUID;
 
 public interface IQIODriveItem {
 
@@ -35,7 +36,7 @@ public interface IQIODriveItem {
     }
 
     /**
-     * Writes the item map in a compact form to the stack. This compact form is a single long array tag that stores the data in partitions of three. The first partition
+     * Writes the item map in a compact form to the stack. This compact form is a single long array tagSupplier that stores the data in partitions of three. The first partition
      * stores the most significant bits of the UUID that represents the stack, the second partition stores the least significant bits, and the final partition stores the
      * amount of the item that is stored in the drive. This maxes out at using {@code 3 * types per drive size * bytes per long + bytes per int} bytes to store just the
      * array of items to in the drive. For our max drive size this is equivalent to {@code 3 * 8,192 * 8 + 4 = 196,612} bytes.

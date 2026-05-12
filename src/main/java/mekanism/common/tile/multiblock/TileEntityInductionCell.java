@@ -6,7 +6,6 @@ import mekanism.common.block.attribute.Attribute;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.capabilities.holder.energy.EnergyContainerHelper;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
-import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.tier.InductionCellTier;
 import mekanism.common.tile.prefab.TileEntityInternalMultiblock;
 import net.minecraft.core.BlockPos;
@@ -21,7 +20,7 @@ public class TileEntityInductionCell extends TileEntityInternalMultiblock {
     public TileEntityInductionCell(IBlockProvider blockProvider, BlockPos pos, BlockState state) {
         super(blockProvider, pos, state);
         //Never externally expose the energy capability
-        addDisabledCapabilities(EnergyCompatUtils.getEnabledEnergyCapabilities());
+        //addDisabledCapabilities(EnergyCompatUtils.getEnabledEnergyCapabilities());
     }
 
     @NotNull

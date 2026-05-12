@@ -1,33 +1,32 @@
 package mekanism.common.content.oredictionificator;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.IntBinaryOperator;
 import mekanism.api.NBTConstants;
-import mekanism.common.config.value.CachedOredictionificatorConfigValue;
 import mekanism.common.content.filter.BaseFilter;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.tile.machine.TileEntityOredictionificator;
 import mekanism.common.util.NBTUtils;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.tags.ITag;
-import net.minecraftforge.registries.tags.ITagManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.IntBinaryOperator;
 
 public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends OredictionificatorFilter<TYPE, STACK, FILTER>> extends BaseFilter<FILTER> {
 
     @Nullable
     private TagKey<TYPE> filterLocation;
     @Nullable
-    private ITag<TYPE> filterTag;
+    private Optional<HolderSet.Named<TYPE>> filterTag;
     @NotNull
     private TYPE selectedOutput = getFallbackElement();
     @Nullable
@@ -46,15 +45,15 @@ public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends Oredi
     }
 
     public void flushCachedTag() {
-        //If the filter doesn't exist (because we loaded a tag that is no longer valid), then just set the filter to being empty
-        filterTag = filterLocation == null ? null : getTagManager().getTag(filterLocation);
-        if (filterTag == null || !filterTag.isBound()) {
+        //If the filter doesn't exist (because we loaded a tagSupplier that is no longer valid), then just set the filter to being empty
+        filterTag = filterLocation == null ? null : getTagLookup().get(filterLocation);
+        if (filterTag == null || !filterTag.isPresent()) {
             setSelectedOutput(getFallbackElement());
-        } else if (!filterTag.contains(selectedOutput)) {
-            filterTag.stream().findFirst().ifPresentOrElse(this::setSelectedOutput, () -> setSelectedOutput(getFallbackElement()));
+        } else if (!filterTag.get().contains(getRegistry().createIntrusiveHolder(selectedOutput))) {
+            filterTag.get().stream().findFirst().ifPresentOrElse(holder -> setSelectedOutput(holder.value()), () -> setSelectedOutput(getFallbackElement()));
         }
-        //Note: Even though the tag instance may have changed, we don't need to reset the cached
-        // stack if the tag still contains the selected output as that means it is not empty and
+        //Note: Even though the tagSupplier instance may have changed, we don't need to reset the cached
+        // stack if the tagSupplier still contains the selected output as that means it is not empty and
         // the stack is still valid
     }
 
@@ -64,8 +63,8 @@ public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends Oredi
     }
 
     public void checkValidity() {
-        if (filterLocation != null && getTagManager().isKnownTagName(filterLocation)) {
-            for (String filter : getValidValuesConfig().get().getOrDefault(filterLocation.location().getNamespace(), Collections.emptyList())) {
+        if (filterLocation != null && getTagLookup().get(filterLocation).isPresent()) {
+            for (String filter : getValidValuesConfig().getOrDefault(filterLocation.location().getNamespace(), Collections.emptyList())) {
                 if (filterLocation.location().getPath().startsWith(filter)) {
                     isValid = true;
                     return;
@@ -84,7 +83,7 @@ public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends Oredi
      * This method should only be called if the filter is valid or if it isn't the validity should be rechecked afterwards
      */
     public final void setFilter(@Nullable ResourceLocation location) {
-        filterLocation = location == null ? null : getTagManager().createTagKey(location);
+        filterLocation = location == null ? null : TagKey.create(getRegistry().key(), location);
         flushCachedTag();
         isValid = true;
     }
@@ -92,7 +91,7 @@ public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends Oredi
     @ComputerMethod(nameOverride = "setFilter")
     public void computerSetFilter(ResourceLocation tag) throws ComputerException {
         if (tag == null || !TileEntityOredictionificator.isValidTarget(tag)) {
-            throw new ComputerException("Invalid tag");
+            throw new ComputerException("Invalid tagSupplier");
         }
         setFilter(tag);
     }
@@ -148,7 +147,7 @@ public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends Oredi
     }
 
     private void setSelectedOrFallback(@NotNull ResourceLocation resourceLocation) {
-        TYPE output = getRegistry().getValue(resourceLocation);
+        TYPE output = getRegistry().get(resourceLocation);
         setSelectedOutput(output == null ? getFallbackElement() : output);
     }
 
@@ -190,7 +189,7 @@ public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends Oredi
     }
 
     private List<TYPE> matchingElements() {
-        return filterTag == null || !filterTag.isBound() ? Collections.emptyList() : filterTag.stream().toList();
+        return filterTag == null || filterTag.isEmpty() ? Collections.emptyList() : filterTag.get().stream().map(Holder::value).toList();
     }
 
     private void adjustSelected(IntBinaryOperator calculateSelected) {
@@ -226,9 +225,9 @@ public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends Oredi
 
     public abstract TYPE getResultElement();
 
-    protected abstract IForgeRegistry<TYPE> getRegistry();
+    protected abstract Registry<TYPE> getRegistry();
 
-    protected abstract ITagManager<TYPE> getTagManager();
+    protected abstract HolderLookup.RegistryLookup<TYPE> getTagLookup();
 
     protected abstract TYPE getFallbackElement();
 
@@ -236,7 +235,7 @@ public abstract class OredictionificatorFilter<TYPE, STACK, FILTER extends Oredi
 
     protected abstract STACK createResultStack(TYPE type);
 
-    protected abstract CachedOredictionificatorConfigValue getValidValuesConfig();
+    protected abstract Map<String, List<String>> getValidValuesConfig();
 
     @Override
     @ComputerMethod(threadSafe = true)

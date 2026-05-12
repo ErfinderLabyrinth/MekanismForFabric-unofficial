@@ -8,9 +8,9 @@ import mekanism.api.chemical.ChemicalTags;
 import mekanism.api.chemical.ChemicalUtils;
 import mekanism.api.providers.IGasProvider;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -26,11 +26,11 @@ public class Gas extends Chemical<Gas> implements IGasProvider {
     }
 
     /**
-     * Returns the Gas stored in the defined tag compound.
+     * Returns the Gas stored in the defined tagSupplier compound.
      *
-     * @param nbtTags - tag compound to get the Gas from
+     * @param nbtTags - tagSupplier compound to get the Gas from
      *
-     * @return Gas stored in the tag compound
+     * @return Gas stored in the tagSupplier compound
      */
     public static Gas readFromNBT(@Nullable CompoundTag nbtTags) {
         return ChemicalUtils.readChemicalFromNBT(nbtTags, MekanismAPI.EMPTY_GAS, NBTConstants.GAS_NAME, Gas::getFromRegistry);
@@ -60,7 +60,7 @@ public class Gas extends Chemical<Gas> implements IGasProvider {
     @SuppressWarnings("ConstantConditions")
     public final ResourceLocation getRegistryName() {
         //May be null if called before the object is registered
-        IForgeRegistry<Gas> registry = MekanismAPI.gasRegistry();
+        Registry<Gas> registry = MekanismAPI.gasRegistry();
         return registry == null ? null : registry.getKey(this);
     }
 

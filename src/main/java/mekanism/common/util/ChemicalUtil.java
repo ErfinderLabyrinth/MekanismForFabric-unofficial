@@ -1,21 +1,8 @@
 package mekanism.common.util;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.ChemicalTankBuilder;
-import mekanism.api.chemical.ChemicalType;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.IChemicalTank;
+import mekanism.api.chemical.*;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasBuilder;
 import mekanism.api.chemical.gas.GasStack;
@@ -30,28 +17,34 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryBuilder;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.api.functions.ConstantPredicates;
-import mekanism.api.providers.IChemicalProvider;
-import mekanism.api.providers.IGasProvider;
-import mekanism.api.providers.IInfuseTypeProvider;
-import mekanism.api.providers.IPigmentProvider;
-import mekanism.api.providers.ISlurryProvider;
+import mekanism.api.providers.*;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.Capabilities;
-import mekanism.common.config.value.CachedLongValue;
 import mekanism.common.content.network.distribution.ChemicalHandlerTarget;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.tier.ChemicalTankTier;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * @apiNote This class is called ChemicalUtil instead of ChemicalUtils so that it does not overlap with {@link mekanism.api.chemical.ChemicalUtils}
@@ -63,29 +56,55 @@ public class ChemicalUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <CHEMICAL extends Chemical<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, ?>> Capability<HANDLER> getCapabilityForChemical(CHEMICAL chemical) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, ?, ?>> ItemApiLookup<HANDLER, ContainerItemContext> getItemLookupForChemical(CHEMICAL chemical) {
         if (chemical instanceof Gas) {
-            return (Capability<HANDLER>) Capabilities.GAS_HANDLER;
+            return (ItemApiLookup<HANDLER, ContainerItemContext>) Capabilities.GAS_HANDLER_ITEM;
         } else if (chemical instanceof InfuseType) {
-            return (Capability<HANDLER>) Capabilities.INFUSION_HANDLER;
+            return (ItemApiLookup<HANDLER, ContainerItemContext>) Capabilities.INFUSION_HANDLER_ITEM;
         } else if (chemical instanceof Pigment) {
-            return (Capability<HANDLER>) Capabilities.PIGMENT_HANDLER;
+            return (ItemApiLookup<HANDLER, ContainerItemContext>) Capabilities.PIGMENT_HANDLER_ITEM;
         } else if (chemical instanceof Slurry) {
-            return (Capability<HANDLER>) Capabilities.SLURRY_HANDLER;
+            return (ItemApiLookup<HANDLER, ContainerItemContext>) Capabilities.SLURRY_HANDLER_ITEM;
         } else {
             throw new IllegalStateException("Unknown Chemical Type: " + chemical.getClass().getName());
         }
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK>> Capability<HANDLER>
-    getCapabilityForChemical(STACK stack) {
-        return getCapabilityForChemical(stack.getType());
+    @SuppressWarnings("unchecked")
+    public static <CHEMICAL extends Chemical<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, ?, ?>> BlockApiLookup<HANDLER, Direction> getBlockLookupForChemical(CHEMICAL chemical) {
+        if (chemical instanceof Gas) {
+            return (BlockApiLookup<HANDLER, Direction>) Capabilities.GAS_HANDLER_BLOCK;
+        } else if (chemical instanceof InfuseType) {
+            return (BlockApiLookup<HANDLER, Direction>) Capabilities.INFUSION_HANDLER_BLOCK;
+        } else if (chemical instanceof Pigment) {
+            return (BlockApiLookup<HANDLER, Direction>) Capabilities.PIGMENT_HANDLER_BLOCK;
+        } else if (chemical instanceof Slurry) {
+            return (BlockApiLookup<HANDLER, Direction>) Capabilities.SLURRY_HANDLER_BLOCK;
+        } else {
+            throw new IllegalStateException("Unknown Chemical Type: " + chemical.getClass().getName());
+        }
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK>> Capability<HANDLER>
-    getCapabilityForChemical(IChemicalTank<CHEMICAL, STACK> tank) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> ItemApiLookup<HANDLER, ContainerItemContext>
+    getItemLookupForChemical(STACK stack) {
+        return getItemLookupForChemical(stack.getType());
+    }
+
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> BlockApiLookup<HANDLER, Direction>
+    getBlockLookupForChemical(STACK stack) {
+        return getBlockLookupForChemical(stack.getType());
+    }
+
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> ItemApiLookup<HANDLER, ContainerItemContext>
+    getItemLookupForChemical(IChemicalTank<CHEMICAL, STACK> tank) {
         //Note: We just use getEmptyStack as it still has enough information
-        return getCapabilityForChemical(tank.getEmptyStack());
+        return getItemLookupForChemical(tank.getEmptyStack());
+    }
+
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> BlockApiLookup<HANDLER, Direction>
+    getBlockLookupForChemical(IChemicalTank<CHEMICAL, STACK> tank) {
+        //Note: We just use getEmptyStack as it still has enough information
+        return getBlockLookupForChemical(tank.getEmptyStack());
     }
 
     /**
@@ -198,10 +217,6 @@ public class ChemicalUtil {
         }).getItemStack();
     }
 
-    public static ItemStack getFilledVariant(ItemStack toFill, CachedLongValue capacity, IChemicalProvider<?> provider) {
-        return getFilledVariant(toFill, capacity.getOrDefault(), provider);
-    }
-
     public static ItemStack getFilledVariant(ItemStack toFill, long capacity, IChemicalProvider<?> provider) {
         if (provider instanceof IGasProvider gasProvider) {
             return getFilledVariant(toFill, ChemicalTankBuilder.GAS, capacity, gasProvider, NBTConstants.GAS_TANKS);
@@ -247,21 +262,20 @@ public class ChemicalUtil {
     }
 
     public static boolean hasGas(ItemStack stack) {
-        return hasChemical(stack, ConstantPredicates.alwaysTrue(), Capabilities.GAS_HANDLER);
+        return hasChemical(stack, ConstantPredicates.alwaysTrue(), Capabilities.GAS_HANDLER_ITEM);
     }
 
     public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> boolean hasChemical(ItemStack stack, CHEMICAL type) {
-        Capability<IChemicalHandler<CHEMICAL, STACK>> capability = getCapabilityForChemical(type);
+        ItemApiLookup<IChemicalHandler<CHEMICAL, STACK, ?>, ContainerItemContext> capability = getItemLookupForChemical(type);
         return hasChemical(stack, s -> s.isTypeEqual(type), capability);
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK>> boolean hasChemical(
-          ItemStack stack, Predicate<STACK> validityCheck, Capability<HANDLER> capability) {
-        Optional<HANDLER> cap = stack.getCapability(capability).resolve();
-        if (cap.isPresent()) {
-            HANDLER handler = cap.get();
-            for (int tank = 0; tank < handler.getTanks(); tank++) {
-                STACK chemicalStack = handler.getChemicalInTank(tank);
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> boolean hasChemical(
+          ItemStack stack, Predicate<STACK> validityCheck, ItemApiLookup<HANDLER, ContainerItemContext> capability) {
+        HANDLER handler = ContainerItemContext.withConstant(stack).find(capability);
+        if (handler != null) {
+            for (StorageView<CHEMICAL> chemicalView:handler) {
+                STACK chemicalStack = (STACK) chemicalView.getResource().getStack(chemicalView.getAmount());
                 if (!chemicalStack.isEmpty() && validityCheck.test(chemicalStack)) {
                     return true;
                 }
@@ -287,17 +301,25 @@ public class ChemicalUtil {
         }
     }
 
-    public static void emit(IChemicalTank<?, ?> tank, BlockEntity from) {
-        emit(EnumSet.allOf(Direction.class), tank, from);
+    public static void emit(IChemicalTank<?, ?> tank, Level level, BlockPos pos) {
+        emit(EnumSet.allOf(Direction.class), tank, level, pos);
     }
 
-    public static void emit(Set<Direction> outputSides, IChemicalTank<?, ?> tank, BlockEntity from) {
-        emit(outputSides, tank, from, tank.getCapacity());
+    public static void emit(Set<Direction> outputSides, IChemicalTank<?, ?> tank, Level level, BlockPos pos) {
+        emit(outputSides, tank, level, pos, tank.getCapacity());
     }
 
-    public static void emit(Set<Direction> outputSides, IChemicalTank<?, ?> tank, BlockEntity from, long maxOutput) {
+    public static <T extends Chemical<T>> void emit(Set<Direction> outputSides, IChemicalTank<T, ?> tank, Level level, BlockPos pos, long maxOutput) {
         if (!tank.isEmpty() && maxOutput > 0) {
-            tank.extract(emit(outputSides, tank.extract(maxOutput, Action.SIMULATE, AutomationType.INTERNAL), from), Action.EXECUTE, AutomationType.INTERNAL);
+            long simulatedExtract;
+            try(Transaction t=Transaction.openOuter()) {
+                simulatedExtract = tank.extract(tank.getResource(), maxOutput, t);
+            }
+            long amountExtract = emit(outputSides, tank.getResource().getStack(simulatedExtract), level, pos);
+            try(Transaction t=Transaction.openOuter()) {
+                tank.extract(tank.getResource(), amountExtract, t);
+                t.commit();
+            }
         }
     }
 
@@ -306,23 +328,25 @@ public class ChemicalUtil {
      *
      * @param sides - the list of sides to output from
      * @param stack - the stack to output
-     * @param from  - the TileEntity to output from
+     * @param level - the world of the output block
+     * @param pos   - the pos of the output block
      *
      * @return the amount of chemical emitted
      */
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> long emit(Set<Direction> sides, @NotNull STACK stack, BlockEntity from) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> long emit(Set<Direction> sides, @NotNull STACK stack, Level level, BlockPos pos) {
         if (stack.isEmpty() || sides.isEmpty()) {
             return 0;
         }
-        Capability<IChemicalHandler<CHEMICAL, STACK>> capability = getCapabilityForChemical(stack);
-        ChemicalHandlerTarget<CHEMICAL, STACK, IChemicalHandler<CHEMICAL, STACK>> target = new ChemicalHandlerTarget<>(stack, 6);
-        EmitUtils.forEachSide(from.getLevel(), from.getBlockPos(), sides, (acceptor, side) -> {
+        BlockApiLookup<IChemicalHandler<CHEMICAL, STACK, ?>, Direction> capability = getBlockLookupForChemical(stack);
+        ChemicalHandlerTarget<CHEMICAL, STACK, IChemicalHandler<CHEMICAL, STACK, ?>> target = new ChemicalHandlerTarget<>(stack, 6);
+        EmitUtils.forEachSidePos(pos, sides, (neighbor, side) -> {
             //Insert to access side and collect the cap if it is present, and we can insert the type of the stack into it
-            CapabilityUtils.getCapability(acceptor, capability, side.getOpposite()).ifPresent(handler -> {
+            IChemicalHandler<CHEMICAL, STACK, ?> handler = capability.find(level, neighbor, side.getOpposite());
+            if(handler != null) {
                 if (canInsert(handler, stack)) {
                     target.addHandler(handler);
                 }
-            });
+            }
         });
         if (target.getHandlerCount() > 0) {
             return EmitUtils.sendToAcceptors(target, stack.getAmount(), ChemicalUtil.copy(stack));
@@ -330,9 +354,11 @@ public class ChemicalUtil {
         return 0;
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK>> boolean canInsert(
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> boolean canInsert(
           HANDLER handler, @NotNull STACK stack) {
-        return handler.insertChemical(stack, Action.SIMULATE).getAmount() < stack.getAmount();
+        try(Transaction t=Transaction.openOuter()) {
+            return handler.insert(stack.getType(), stack.getAmount(), t) > 0;
+        }
     }
 
     public static Gas gas(GasBuilder builder, @Nullable Integer colorRepresentation) {

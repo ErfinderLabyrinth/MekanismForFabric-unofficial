@@ -1,11 +1,8 @@
 package mekanism.api.gear;
 
-import java.util.Objects;
-import java.util.function.Consumer;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.functions.FloatSupplier;
 import mekanism.api.gear.config.ModuleConfigItemCreator;
-import mekanism.api.math.FloatingLongSupplier;
 import mekanism.api.radial.RadialData;
 import mekanism.api.radial.mode.IRadialMode;
 import mekanism.api.radial.mode.NestedRadialMode;
@@ -19,9 +16,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraftforge.common.ToolAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 
 /**
  * Interface used to describe and implement custom modules. Instances of this should be returned via the {@link ModuleData}.
@@ -250,9 +250,10 @@ public interface ICustomModule<MODULE extends ICustomModule<MODULE>> {
      * @param module Module instance.
      * @param action Tool action to check.
      */
-    default boolean canPerformAction(IModule<MODULE> module, ToolAction action) {
-        return false;
-    }
+    //TODO
+//    default boolean canPerformAction(IModule<MODULE> module, ToolAction action) {
+//        return false;
+//    }
 
     /**
      * Called when the Meka-Tool is used on an entity to allow modules to implement custom interact behavior.
@@ -285,7 +286,7 @@ public interface ICustomModule<MODULE extends ICustomModule<MODULE>> {
      * @param absorptionRatio Ratio of damage this module can absorb up to, returns a value between zero and one.
      * @param energyCost      Energy cost per point of damage reduced.
      */
-    record ModuleDamageAbsorbInfo(@NotNull FloatSupplier absorptionRatio, @NotNull FloatingLongSupplier energyCost) {
+    record ModuleDamageAbsorbInfo(@NotNull FloatSupplier absorptionRatio, @NotNull LongSupplier energyCost) {
 
         /**
          * @param absorptionRatio Ratio of damage this module can absorb up to, returns a value between zero and one.

@@ -1,17 +1,8 @@
 package mekanism.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.math.MathUtils;
 import mekanism.api.radial.RadialData;
 import mekanism.api.radial.mode.INestedRadialMode;
@@ -39,6 +30,12 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.function.Supplier;
 
 //TODO: Do we Automatically want to go through nested things if there is only one option and potentially not even allow opening it?
 // For now no as it might be confusing to people what the menu is relating to especially on the Meka-Tool but it is worth thinking more about
@@ -177,7 +174,7 @@ public class GuiRadialSelector extends Screen {
         }
 
         // Labels (has to be separate from icons or the icons occasionally will get extra artifacts for some reason)
-        boolean whiteRadialText = MekanismConfig.client.whiteRadialText.get();
+        boolean whiteRadialText = MekanismConfig.client.whiteRadialText;
         for (PositionedText toDraw : textToDraw) {
             pose.pushPose();
             pose.translate(toDraw.x, toDraw.y, 0);

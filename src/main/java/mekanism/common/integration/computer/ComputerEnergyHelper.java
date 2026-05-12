@@ -31,7 +31,7 @@ public class ComputerEnergyHelper {
 
     private static FloatingLong convert(EnergyUnit type, FloatingLong energy, boolean to) throws ComputerException {
         if (type.isEnabled()) {
-            return to ? type.convertTo(energy) : type.convertFrom(energy);
+            return to ? FloatingLong.create(type.convertTo(energy.longValue())) : type.convertFrom(energy);
         }
         String name = type.name().replace('_', ' ').toLowerCase(Locale.ROOT);
         String between = to ? "Joules and " + name : name + " and Joules";

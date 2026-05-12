@@ -1,7 +1,5 @@
 package mekanism.common.tile.component.config.slot;
 
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.infuse.IInfusionTank;
 import mekanism.api.chemical.pigment.IPigmentTank;
@@ -14,6 +12,9 @@ import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.GasSlotInfo;
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.InfusionSlotInfo;
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.PigmentSlotInfo;
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.SlurrySlotInfo;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 public interface IProxiedSlotInfo extends ISlotInfo {
 

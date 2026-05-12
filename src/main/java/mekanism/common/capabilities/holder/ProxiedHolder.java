@@ -1,10 +1,11 @@
 package mekanism.common.capabilities.holder;
 
-import java.util.function.Predicate;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class ProxiedHolder implements IHolder {
+import java.util.function.Predicate;
+
+public abstract class ProxiedHolder<T> implements IHolder<T> {
 
     private final Predicate<Direction> insertPredicate;
     private final Predicate<Direction> extractPredicate;

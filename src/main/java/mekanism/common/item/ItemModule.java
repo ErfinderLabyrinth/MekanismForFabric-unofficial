@@ -1,7 +1,5 @@
 package mekanism.common.item;
 
-import java.util.List;
-import java.util.Set;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.gear.ModuleData;
 import mekanism.api.providers.IModuleDataProvider;
@@ -19,19 +17,22 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.Set;
+
 public class ItemModule extends Item implements IModuleItem {
 
     private final IModuleDataProvider<?> moduleData;
 
     public ItemModule(IModuleDataProvider<?> moduleData, Properties properties) {
-        super(properties);
+        super(properties.stacksTo(moduleData.getModuleData().getMaxStackSize()));
         this.moduleData = moduleData;
     }
 
-    @Override
-    public int getMaxStackSize(ItemStack stack) {
-        return getModuleData().getMaxStackSize();
-    }
+//    @Override
+//    public int getMaxStackSize(ItemStack stack) {
+//        return getModuleData().getMaxStackSize();
+//    }
 
     @Override
     public ModuleData<?> getModuleData() {

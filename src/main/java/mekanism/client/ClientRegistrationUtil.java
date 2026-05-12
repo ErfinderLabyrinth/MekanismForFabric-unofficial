@@ -1,6 +1,5 @@
 package mekanism.client;
 
-import java.lang.ref.WeakReference;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.providers.IItemProvider;
 import mekanism.api.text.EnumColor;
@@ -12,11 +11,14 @@ import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.item.interfaces.IColoredItem;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import mekanism.common.registration.impl.FluidDeferredRegister;
-import mekanism.common.registration.impl.FluidDeferredRegister.MekanismFluidType;
 import mekanism.common.registration.impl.FluidRegistryObject;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
+import mekanism.common.registries.MekanismFluids;
 import mekanism.common.tile.prefab.TileEntityAdvancedElectricMachine;
 import mekanism.common.tile.prefab.TileEntityElectricMachine;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -24,28 +26,27 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.MenuScreens.ScreenConstructor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.model.DynamicFluidContainerModel;
+import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.ref.WeakReference;
 
 public class ClientRegistrationUtil {
 
@@ -77,18 +78,28 @@ public class ClientRegistrationUtil {
         }
         return -1;
     };
-    private static final ItemColor BUCKET_ITEM_COLOR = new DynamicFluidContainerModel.Colors();
+    private static final ItemColor BUCKET_ITEM_COLOR = (ItemStack itemStack, int tintIndex) -> {
+        if (itemStack.getItem() instanceof BucketItem bucket) {
+            Fluid fluid = bucket.content;
+            for (FluidRegistryObject<?, ?, ?, ?> registeredFluid : MekanismFluids.FLUIDS.getAllFluids()) {
+                if (registeredFluid.getFluid() == fluid || registeredFluid.getFlowingFluid() == fluid) {
+                    return registeredFluid.getRenderProperties().getColor();
+                }
+            }
+        }
+        return 0xFFFFFFFF;
+    };
 
     private ClientRegistrationUtil() {
     }
 
     @SafeVarargs
-    public static <T extends BlockEntity> void bindTileEntityRenderer(EntityRenderersEvent.RegisterRenderers event, BlockEntityRendererProvider<T> rendererProvider,
+    public static <T extends BlockEntity> void bindTileEntityRenderer(BlockEntityRendererProvider<T> rendererProvider,
           TileEntityTypeRegistryObject<? extends T>... tileEntityTypeROs) {
         if (tileEntityTypeROs.length == 0) {
             throw new IllegalArgumentException("No renderers provided.");
         } else if (tileEntityTypeROs.length == 1) {
-            event.registerBlockEntityRenderer(tileEntityTypeROs[0].get(), rendererProvider);
+            BlockEntityRenderers.register(tileEntityTypeROs[0].get(), rendererProvider);
         } else {
             BlockEntityRendererProvider<T> provider = new BlockEntityRendererProvider<>() {
                 @Nullable
@@ -111,14 +122,8 @@ public class ClientRegistrationUtil {
                 }
             };
             for (TileEntityTypeRegistryObject<? extends T> tileTypeRO : tileEntityTypeROs) {
-                event.registerBlockEntityRenderer(tileTypeRO.get(), provider);
+                BlockEntityRenderers.register(tileTypeRO.get(), provider);
             }
-        }
-    }
-
-    public static void registerClientReloadListeners(RegisterClientReloadListenersEvent event, PreparableReloadListener... listeners) {
-        for (PreparableReloadListener listener : listeners) {
-            event.registerReloadListener(listener);
         }
     }
 
@@ -150,50 +155,51 @@ public class ClientRegistrationUtil {
         });
     }
 
-    public static void registerKeyBindings(RegisterKeyMappingsEvent event, KeyMapping... keys) {
+    public static void registerKeyBindings(KeyMapping... keys) {
         for (KeyMapping key : keys) {
-            event.register(key);
+            KeyBindingHelper.registerKeyBinding(key);
         }
     }
 
-    public static void setPropertyOverride(IItemProvider itemProvider, ResourceLocation override, ItemPropertyFunction propertyGetter) {
+    public static void setPropertyOverride(IItemProvider itemProvider, ResourceLocation override, ClampedItemPropertyFunction propertyGetter) {
         ItemProperties.register(itemProvider.asItem(), override, propertyGetter);
     }
 
-    public static void registerItemColorHandler(RegisterColorHandlersEvent.Item event, ItemColor itemColor, IItemProvider... items) {
+    public static void registerItemColorHandler(ItemColor itemColor, IItemProvider... items) {
         for (IItemProvider itemProvider : items) {
-            event.register(itemColor, itemProvider.asItem());
+            ColorProviderRegistry.ITEM.register(itemColor, itemProvider.asItem());
         }
     }
 
-    public static void registerBlockColorHandler(RegisterColorHandlersEvent.Block event, BlockColor blockColor, IBlockProvider... blocks) {
+    public static void registerBlockColorHandler(BlockColor blockColor, IBlockProvider... blocks) {
         for (IBlockProvider blockProvider : blocks) {
-            event.register(blockColor, blockProvider.getBlock());
+            ColorProviderRegistry.BLOCK.register(blockColor, blockProvider.getBlock());
         }
     }
 
-    public static void registerBucketColorHandler(RegisterColorHandlersEvent.Item event, FluidDeferredRegister register) {
-        for (FluidRegistryObject<? extends MekanismFluidType, ?, ?, ?, ?> fluidRO : register.getAllFluids()) {
-            event.register(BUCKET_ITEM_COLOR, fluidRO.getBucket());
+    public static void registerBucketColorHandler(FluidDeferredRegister register) {
+        for (FluidRegistryObject<?, ?, ?, ?> fluidRO : register.getAllFluids()) {
+            ColorProviderRegistry.ITEM.register(BUCKET_ITEM_COLOR, fluidRO.getBucket());
         }
     }
 
-    public static void registerIColoredBlockHandler(RegisterColorHandlersEvent event, IBlockProvider... blocks) {
-        if (event instanceof RegisterColorHandlersEvent.Block blockEvent) {
-            registerBlockColorHandler(blockEvent, COLORED_BLOCK_COLOR, blocks);
-        } else if (event instanceof RegisterColorHandlersEvent.Item itemEvent) {
-            registerItemColorHandler(itemEvent, COLORED_BLOCK_ITEM_COLOR, blocks);
+    public static void registerIColoredBlockHandler(boolean block, IBlockProvider... blocks) {
+        if (block) {
+            registerBlockColorHandler(COLORED_BLOCK_COLOR, blocks);
+        } else {
+            registerItemColorHandler(COLORED_BLOCK_ITEM_COLOR, blocks);
         }
     }
 
-    public static void registerIColoredItemHandler(RegisterColorHandlersEvent.Item event, IItemProvider... items) {
-        registerItemColorHandler(event, COLORED_ITEM_COLOR, items);
+    public static void registerIColoredItemHandler(IItemProvider... items) {
+        registerItemColorHandler(COLORED_ITEM_COLOR, items);
     }
 
-    public static void setRenderLayer(RenderType type, FluidRegistryObject<?, ?, ?, ?, ?>... fluidROs) {
-        for (FluidRegistryObject<?, ?, ?, ?, ?> fluidRO : fluidROs) {
-            ItemBlockRenderTypes.setRenderLayer(fluidRO.getStillFluid(), type);
-            ItemBlockRenderTypes.setRenderLayer(fluidRO.getFlowingFluid(), type);
+    public static void setRenderLayer(RenderType type, FluidRegistryObject<?, ?, ?, ?>... fluidROs) {
+        for (FluidRegistryObject<?, ?, ?, ?> fluidRO : fluidROs) {
+            BlockRenderLayerMap.INSTANCE.putFluids(type, fluidRO.getStillFluid(), fluidRO.getFlowingFluid());
         }
     }
+
+    public static void registerRenderHandler(FluidRegistryObject<?, ?, ?, ?>... fluidROs) {}
 }

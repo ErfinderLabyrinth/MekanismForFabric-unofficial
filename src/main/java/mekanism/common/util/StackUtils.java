@@ -1,12 +1,11 @@
 package mekanism.common.util;
 
-import java.util.ArrayList;
-import java.util.List;
-import mekanism.api.Action;
+import mekanism.api.BigItemStack;
 import mekanism.api.inventory.IInventorySlot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -15,9 +14,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class StackUtils {
 
@@ -25,8 +26,8 @@ public final class StackUtils {
     }
 
     //TODO: Evaluate moving remainder of uses to copyWithCount. This method mainly is just useful for better handling when size is <= 0
-    public static ItemStack size(ItemStack stack, int size) {
-        return size <= 0 ? ItemStack.EMPTY : stack.copyWithCount(size);
+    public static BigItemStack size(BigItemStack stack, long size) {
+        return size <= 0 ? BigItemStack.EMPTY : stack.copyWithCount(size);
     }
 
     public static List<ItemStack> merge(@NotNull List<IInventorySlot> orig, @NotNull List<IInventorySlot> toAdd) {
@@ -51,8 +52,8 @@ public final class StackUtils {
                         //Add any remainder to the rejects (if this is zero this will no-op
                         addStack(rejects, toAddStack.copyWithCount(toAddStack.getCount() - max));
                     }
-                } else if (ItemHandlerHelper.canItemStacksStack(origSlot.getStack(), toAddStack)) {
-                    int added = origSlot.growStack(toAddStack.getCount(), Action.EXECUTE);
+                } else if (ItemEntity.areMergable(origSlot.getStack(), toAddStack)) {
+                    int added = origSlot.growStack(toAddStack.getCount());
                     //Add any remainder to the rejects (if this is zero this will no-op
                     addStack(rejects, toAddStack.copyWithCount(toAddStack.getCount() - added));
                 } else {
@@ -69,7 +70,7 @@ public final class StackUtils {
         if (!stack.isEmpty()) {
             for (ItemStack existingStack : stacks) {
                 int needed = existingStack.getMaxStackSize() - existingStack.getCount();
-                if (needed > 0 && ItemHandlerHelper.canItemStacksStack(existingStack, stack)) {
+                if (needed > 0 && ItemEntity.areMergable(existingStack, stack)) {
                     //This stack needs some items and can stack with the one we are adding
                     int toAdd = Math.min(needed, stack.getCount());
                     //Add the amount we can

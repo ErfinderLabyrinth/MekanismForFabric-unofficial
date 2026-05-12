@@ -37,10 +37,11 @@ public class ItemDosimeter extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (!player.isShiftKeyDown()) {
             if (!world.isClientSide) {
-                player.getCapability(Capabilities.RADIATION_ENTITY).ifPresent(cap -> {
-                    sendDosimeterLevel(cap, player, MekanismLang.RADIATION_EXPOSURE);
+                IRadiationEntity radiationEntity = player.getAttached(Capabilities.RADIATION_ENTITY);
+                if (radiationEntity != null) {
+                    sendDosimeterLevel(radiationEntity, player, MekanismLang.RADIATION_EXPOSURE);
                     CriteriaTriggers.USING_ITEM.trigger((ServerPlayer) player, stack);
-                });
+                }
             }
             return InteractionResultHolder.sidedSuccess(stack, world.isClientSide);
         }
@@ -52,7 +53,10 @@ public class ItemDosimeter extends Item {
     public InteractionResult interactLivingEntity(@NotNull ItemStack stack, @NotNull Player player, @NotNull LivingEntity entity, @NotNull InteractionHand hand) {
         if (!player.isShiftKeyDown()) {
             if (!player.level().isClientSide) {
-                entity.getCapability(Capabilities.RADIATION_ENTITY).ifPresent(cap -> sendDosimeterLevel(cap, player, MekanismLang.RADIATION_EXPOSURE_ENTITY));
+                IRadiationEntity radiationEntity = player.getAttached(Capabilities.RADIATION_ENTITY);
+                if (radiationEntity != null) {
+                    sendDosimeterLevel(radiationEntity, player, MekanismLang.RADIATION_EXPOSURE_ENTITY);
+                }
             }
             return InteractionResult.sidedSuccess(player.level().isClientSide);
         }
@@ -63,7 +67,7 @@ public class ItemDosimeter extends Item {
         double radiation = IRadiationManager.INSTANCE.isRadiationEnabled() ? cap.getRadiation() : 0;
         EnumColor severityColor = RadiationScale.getSeverityColor(radiation);
         player.sendSystemMessage(doseLangEntry.translateColored(EnumColor.GRAY, severityColor, UnitDisplayUtils.getDisplayShort(radiation, RadiationUnit.SV, 3)));
-        if (MekanismConfig.common.enableDecayTimers.get() && radiation > RadiationManager.MIN_MAGNITUDE) {
+        if (MekanismConfig.common.enableDecayTimers && radiation > RadiationManager.MIN_MAGNITUDE) {
             player.sendSystemMessage(MekanismLang.RADIATION_DECAY_TIME.translateColored(EnumColor.GRAY, severityColor,
                   TextUtils.getHoursMinutes(RadiationManager.get().getDecayTime(radiation, false))));
         }

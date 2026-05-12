@@ -1,6 +1,5 @@
 package mekanism.common.item.block;
 
-import java.util.List;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
 import mekanism.common.block.BlockRadioactiveWasteBarrel;
@@ -14,6 +13,8 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class ItemBlockRadioactiveWasteBarrel extends ItemBlockTooltip<BlockRadioactiveWasteBarrel> {
 
     public ItemBlockRadioactiveWasteBarrel(BlockRadioactiveWasteBarrel block, Item.Properties properties) {
@@ -22,9 +23,9 @@ public class ItemBlockRadioactiveWasteBarrel extends ItemBlockTooltip<BlockRadio
 
     @Override
     protected void addStats(@NotNull ItemStack stack, Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
-        tooltip.add(MekanismLang.CAPACITY_MB.translateColored(EnumColor.INDIGO, EnumColor.GRAY, TextUtils.format(MekanismConfig.general.radioactiveWasteBarrelMaxGas.get())));
-        int ticks = MekanismConfig.general.radioactiveWasteBarrelProcessTicks.get();
-        long decayAmount = MekanismConfig.general.radioactiveWasteBarrelDecayAmount.get();
+        tooltip.add(MekanismLang.CAPACITY_MB.translateColored(EnumColor.INDIGO, EnumColor.GRAY, TextUtils.format(MekanismConfig.general.radioactiveWasteBarrelMaxGas)));
+        int ticks = MekanismConfig.general.radioactiveWasteBarrelProcessTicks;
+        long decayAmount = MekanismConfig.general.radioactiveWasteBarrelDecayAmount;
         if (decayAmount == 0 || ticks == 1) {
             tooltip.add(MekanismLang.WASTE_BARREL_DECAY_RATE.translateColored(EnumColor.INDIGO, EnumColor.GRAY, TextUtils.format(decayAmount)));
         } else {

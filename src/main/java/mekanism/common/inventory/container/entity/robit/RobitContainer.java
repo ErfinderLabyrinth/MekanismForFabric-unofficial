@@ -1,6 +1,5 @@
 package mekanism.common.inventory.container.entity.robit;
 
-import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.inventory.container.entity.MekanismEntityContainer;
@@ -9,6 +8,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class RobitContainer extends MekanismEntityContainer<EntityRobit> {
 

@@ -21,6 +21,8 @@ import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.api.math.FloatingLong;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
@@ -29,8 +31,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 @NothingNullByDefault
@@ -201,7 +201,7 @@ public class SerializerHelper {
      *
      * @return Fluid Stack.
      */
-    public static FluidStack deserializeFluid(@NotNull JsonObject json) {
+    public static mekanism.api.FluidStack deserializeFluid(@NotNull JsonObject json) {
         if (!json.has(JsonConstants.AMOUNT)) {
             throw new JsonSyntaxException("Expected to receive a amount that is greater than zero");
         }
@@ -214,7 +214,7 @@ public class SerializerHelper {
             throw new JsonSyntaxException("Expected amount to be greater than zero.");
         }
         ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(json, JsonConstants.FLUID));
-        Fluid fluid = ForgeRegistries.FLUIDS.getValue(resourceLocation);
+        Fluid fluid = BuiltInRegistries.FLUID.get(resourceLocation);
         if (fluid == null || fluid == Fluids.EMPTY) {
             throw new JsonSyntaxException("Invalid fluid type '" + resourceLocation + "'");
         }
@@ -231,7 +231,7 @@ public class SerializerHelper {
                 throw new JsonSyntaxException("Invalid NBT entry for fluid '" + resourceLocation + "'");
             }
         }
-        return new FluidStack(fluid, amount, nbt);
+        return new FluidStack(FluidVariant.of(fluid, nbt), amount);
     }
 
     /**
@@ -309,7 +309,7 @@ public class SerializerHelper {
      */
     public static JsonElement serializeItemStack(@NotNull ItemStack stack) {
         JsonObject json = new JsonObject();
-        json.addProperty(JsonConstants.ITEM, ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
+        json.addProperty(JsonConstants.ITEM, BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
         if (stack.getCount() > 1) {
             json.addProperty(JsonConstants.COUNT, stack.getCount());
         }
@@ -326,10 +326,10 @@ public class SerializerHelper {
      *
      * @return Json representation.
      */
-    public static JsonElement serializeFluidStack(@NotNull FluidStack stack) {
+    public static JsonElement serializeFluidStack(@NotNull mekanism.api.FluidStack stack) {
         JsonObject json = new JsonObject();
-        json.addProperty(JsonConstants.FLUID, ForgeRegistries.FLUIDS.getKey(stack.getFluid()).toString());
-        json.addProperty(JsonConstants.AMOUNT, stack.getAmount());
+        json.addProperty(JsonConstants.FLUID, BuiltInRegistries.FLUID.getKey(stack.getFluid()).toString());
+        json.addProperty(JsonConstants.AMOUNT, stack.amount());
         if (stack.hasTag()) {
             json.addProperty(JsonConstants.NBT, stack.getTag().toString());
         }

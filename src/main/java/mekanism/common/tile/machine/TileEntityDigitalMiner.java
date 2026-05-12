@@ -4,39 +4,16 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
-import mekanism.api.IContentsListener;
-import mekanism.api.NBTConstants;
-import mekanism.api.RelativeSide;
-import mekanism.api.Upgrade;
+import it.unimi.dsi.fastutil.objects.*;
+import mekanism.api.*;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.CommonWorldTickHandler;
 import mekanism.common.base.MekFakePlayer;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.energy.MinerEnergyContainer;
 import mekanism.common.capabilities.holder.energy.EnergyContainerHelper;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.filter.SortableFilterManager;
 import mekanism.common.content.miner.MinerFilter;
@@ -47,13 +24,8 @@ import mekanism.common.integration.computer.SpecialComputerMethodWrapper.Compute
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
 import mekanism.common.integration.computer.computercraft.ComputerConstants;
-import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.inventory.container.MekanismContainer;
-import mekanism.common.inventory.container.sync.SyncableBoolean;
-import mekanism.common.inventory.container.sync.SyncableEnum;
-import mekanism.common.inventory.container.sync.SyncableInt;
-import mekanism.common.inventory.container.sync.SyncableItemStack;
-import mekanism.common.inventory.container.sync.SyncableRegistryEntry;
+import mekanism.common.inventory.container.sync.*;
 import mekanism.common.inventory.container.tile.DigitalMinerConfigContainer;
 import mekanism.common.inventory.slot.BasicInventorySlot;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
@@ -72,22 +44,21 @@ import mekanism.common.tile.interfaces.IHasVisualization;
 import mekanism.common.tile.interfaces.ISustainedData;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
 import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
-import mekanism.common.util.InventoryUtils;
-import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.NBTUtils;
-import mekanism.common.util.StackUtils;
-import mekanism.common.util.UpgradeUtils;
-import mekanism.common.util.WorldUtils;
+import mekanism.common.util.*;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -101,16 +72,13 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class TileEntityDigitalMiner extends TileEntityMekanism implements ISustainedData, IChunkLoader, IBoundingBlock, ITileFilterHolder<MinerFilter<?>>,
       IHasVisualization {
@@ -140,7 +108,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     private boolean recheckOverflow;
 
     private int delay;
-    private int delayLength = MekanismConfig.general.minerTicksPerMine.get();
+    private int delayLength = MekanismConfig.general.minerTicksPerMine;
     private int cachedToMine;
     private boolean silkTouch;
     private boolean running;
@@ -161,9 +129,8 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     public TileEntityDigitalMiner(BlockPos pos, BlockState state) {
         super(MekanismBlocks.DIGITAL_MINER, pos, state);
         radius = DEFAULT_RADIUS;
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIG_CARD, this));
         //Return some capabilities as disabled, and handle them with offset capabilities instead
-        addDisabledCapabilities(ForgeCapabilities.ITEM_HANDLER);
+//        addDisabledCapabilities(ForgeCapabilities.ITEM_HANDLER);
     }
 
     @NotNull
@@ -244,21 +211,23 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
 
         //Note: If we have any overflow don't function or use any energy until the overflow has been dealt with
         if (!hasOverflow && MekanismUtils.canFunction(this) && running && searcher.state == State.FINISHED && !oresToMine.isEmpty()) {
-            FloatingLong energyPerTick = energyContainer.getEnergyPerTick();
-            if (energyContainer.extract(energyPerTick, Action.SIMULATE, AutomationType.INTERNAL).equals(energyPerTick)) {
-                setActive(true);
-                if (delay > 0) {
-                    delay--;
+            long energyPerTick = energyContainer.getEnergyPerTick();
+            try(Transaction t = Transaction.openOuter()) {
+                if (energyContainer.extract(energyPerTick, t) == energyPerTick) {
+                    setActive(true);
+                    if (delay > 0) {
+                        delay--;
+                    }
+                    //TODO: Eventually we may want to avoid draining energy if we can't function due to a missing replace stack or the normal drops
+                    // being too much to fit
+                    t.commit();
+                    if (delay == 0) {
+                        tryMineBlock();
+                        delay = getDelay();
+                    }
+                } else {
+                    setActive(false);
                 }
-                //TODO: Eventually we may want to avoid draining energy if we can't function due to a missing replace stack or the normal drops
-                // being too much to fit
-                energyContainer.extract(energyPerTick, Action.EXECUTE, AutomationType.INTERNAL);
-                if (delay == 0) {
-                    tryMineBlock();
-                    delay = getDelay();
-                }
-            } else {
-                setActive(false);
             }
         } else {
             setActive(false);
@@ -267,22 +236,22 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         if (doEject && delayTicks == 0) {
             Direction oppositeDirection = getOppositeDirection();
             BlockEntity ejectInv = WorldUtils.getTileEntity(level, getBlockPos().above().relative(oppositeDirection, 2));
-            BlockEntity ejectTile = WorldUtils.getTileEntity(getLevel(), getBlockPos().above().relative(oppositeDirection));
-            if (ejectInv != null && ejectTile != null) {
-                TransitRequest ejectMap = InventoryUtils.getEjectItemMap(ejectTile, oppositeDirection, mainSlots);
-                if (!ejectMap.isEmpty()) {
-                    TransitResponse response;
-                    if (ejectInv instanceof TileEntityLogisticalTransporterBase transporter) {
-                        response = transporter.getTransmitter().insert(ejectTile, ejectMap, transporter.getTransmitter().getColor(), true, 0);
-                    } else {
-                        response = ejectMap.addToInventory(ejectInv, oppositeDirection, 0, false);
-                    }
-                    if (!response.isEmpty()) {
-                        response.useAll();
-                    }
+//            BlockEntity ejectTile = WorldUtils.getTileEntity(getLevel(), getBlockPos().above().relative(oppositeDirection));
+//            if (ejectInv != null && ejectTile != null) {
+            TransitRequest ejectMap = InventoryUtils.getEjectItemMap(getLevel(), getBlockPos().above().relative(oppositeDirection), oppositeDirection, mainSlots);
+            if (!ejectMap.isEmpty()) {
+                TransitResponse response;
+                if (ejectInv instanceof TileEntityLogisticalTransporterBase transporter) {
+                    response = transporter.getTransmitter().insert(getLevel(), getBlockPos().above().relative(oppositeDirection), ejectMap, transporter.getTransmitter().getColor(), true, 0);
+                } else {
+                    response = ejectMap.addToInventory(level, getBlockPos().above().relative(oppositeDirection, 2), oppositeDirection, 0, false);
                 }
-                delayTicks = 10;
+                if (!response.isEmpty()) {
+                    response.useAll();
+                }
             }
+            delayTicks = 10;
+//            }
         } else if (delayTicks > 0) {
             delayTicks--;
         }
@@ -376,7 +345,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     }
 
     public void setRadiusFromPacket(int newRadius) {
-        setRadius(Mth.clamp(newRadius, 0, MekanismConfig.general.minerMaxRadius.get()));
+        setRadius(Mth.clamp(newRadius, 0, MekanismConfig.general.minerMaxRadius));
         //Send a packet to update the visual renderer
         //TODO: Only do this if the renderer is actually active
         sendUpdatePacket();
@@ -570,7 +539,8 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     }
 
     private boolean canMine(BlockState state, BlockPos pos) {
-        return withFakePlayer(dummy -> !MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, pos, state, dummy)));
+//        return withFakePlayer(dummy -> !MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, pos, state, dummy)));
+        return true;
     }
 
     private <R> R withFakePlayer(Function<MekFakePlayer, R> fakePlayerConsumer) {
@@ -588,7 +558,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         for (IInventorySlot slot : mainSlots) {
             ItemStack slotStack = slot.getStack();
             if (replaceStackMatches.test(slotStack.getItem())) {
-                MekanismUtils.logMismatchedStackSize(slot.shrinkStack(1, Action.EXECUTE), 1);
+                MekanismUtils.logMismatchedStackSize(slot.shrinkStack(1), 1);
                 return slotStack.copyWithCount(1);
             }
         }
@@ -600,14 +570,14 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         }
         //And finally source from the inventory on top if auto pull is enabled
         if (doPull) {
-            BlockEntity pullInv = getPullInv();
-            if (pullInv != null && InventoryUtils.isItemHandler(pullInv, Direction.DOWN)) {
-                TransitRequest request = TransitRequest.definedItem(pullInv, Direction.DOWN, 1, Finder.item(replaceTarget));
+            BlockPos pullInv = getPullInv();
+            if (pullInv != null && InventoryUtils.isItemHandler(getLevel(), pullInv, Direction.DOWN)) {
+                TransitRequest request = TransitRequest.definedItem(getLevel(), pullInv, Direction.DOWN, 1, Finder.item(replaceTarget));
                 if (!request.isEmpty()) {
                     TransitResponse response = request.createSimpleResponse();
                     if (response.useAll().isEmpty()) {
                         //If the request isn't empty, and we were able to successfully use it all
-                        return response.getStack().copyWithCount(1);
+                        return response.getStack().createStack(1);
                     }
                 }
             }
@@ -652,7 +622,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         //Try to simulate inserting into slots that are not currently empty
         for (int i = 0; i < slots; i++) {
             ItemCount cachedItem = cachedStacks.get(i);
-            if (cachedItem != null && ItemHandlerHelper.canItemStacksStack(stack, cachedItem.stack)) {
+            if (cachedItem != null && ItemEntity.areMergable(stack, cachedItem.stack)) {
                 //Ensure that our stack can stack with the item that is already in the slot
                 IInventorySlot slot = mainSlots.get(i);
                 int limit = slot.getLimit(stack);
@@ -678,14 +648,17 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
                 int stackSize = stack.getCount();
                 //Attempt to insert the stack into the slot, the expected outcome given our slots' restrictions is that
                 // this will succeed and insert the entire stack
-                stack = slot.insertItem(stack, Action.SIMULATE, AutomationType.INTERNAL);
-                int remainderSize = stack.getCount();
-                if (remainderSize < stackSize) {
+                long inserted;
+                try(Transaction t=Transaction.openOuter()) {
+                    inserted = slot.insert(ItemVariant.of(stack), stackSize, t);
+                }
+                //int remainderSize = stack.getCount();
+                if (inserted != 0) {
                     //If the slot accepted at least some item we are inserting, then cache the item type that we put into that slot
                     // Given the slot is empty the expected result is that we will always end up inserting into the first empty slot
                     // and end up inserting the entire stack
-                    cachedStacks.put(i, new ItemCount(stackToInsert, stackSize - remainderSize));
-                    if (stack.isEmpty()) {
+                    cachedStacks.put(i, new ItemCount(stackToInsert, (int)inserted));
+                    if (inserted == stackSize) {
                         //Stack was fully accepted, return that we have no remainder
                         return ItemStack.EMPTY;
                     }
@@ -695,14 +668,17 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         return stack;
     }
 
-    private BlockEntity getPullInv() {
-        return WorldUtils.getTileEntity(getLevel(), getBlockPos().above(2));
+    private BlockPos getPullInv() {
+        return getBlockPos().above(2);
     }
 
     private void add(List<ItemStack> stacks) {
         for (ItemStack stack : stacks) {
             //Try inserting it first where it can stack and then into empty slots
-            stack = InventoryUtils.insertItem(mainSlots, stack, Action.EXECUTE, AutomationType.INTERNAL);
+            try(Transaction t=Transaction.openOuter()) {
+                stack = InventoryUtils.insertItem(mainSlots, stack, t);
+                t.commit();
+            }
             if (!stack.isEmpty()) {
                 //Because of the simulated insertion the stack should never be able to be empty here,
                 // but in case it is keep track of any excess as overflow
@@ -738,7 +714,10 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
                 ItemStack stack = entry.getKey().createStack(amount);
                 //Note: Inserting properly handles oversized stacks, so we don't have to handle the case that amount might be greater than
                 // the max stack size here as the different slots will only accept up to the item's max stack size
-                stack = InventoryUtils.insertItem(mainSlots, stack, Action.EXECUTE, AutomationType.INTERNAL);
+                try(Transaction t=Transaction.openOuter()) {
+                    stack = InventoryUtils.insertItem(mainSlots, stack, t);
+                    t.commit();
+                }
                 //Note: We do not need to mark the miner for saving if something gets moved from overflow to a slot as the slot will do so
                 // when it accepts the item, so we can skip marking that we need to save because overflow changed
                 if (stack.isEmpty()) {
@@ -886,21 +865,21 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         return redstone || numPowering > 0;
     }
 
-    @NotNull
-    @Override
-    public AABB getRenderBoundingBox() {
-        if (isClientRendering() && canDisplayVisuals()) {
-            return new AABB(
-                  worldPosition.getX() - radius,
-                  minY,
-                  worldPosition.getZ() - radius,
-                  worldPosition.getX() + radius + 1,
-                  maxY + 1,
-                  worldPosition.getZ() + radius + 1
-            );
-        }
-        return super.getRenderBoundingBox();
-    }
+//    @NotNull
+//    @Override
+//    public AABB getRenderBoundingBox() {
+//        if (isClientRendering() && canDisplayVisuals()) {
+//            return new AABB(
+//                  worldPosition.getX() - radius,
+//                  minY,
+//                  worldPosition.getZ() - radius,
+//                  worldPosition.getX() + radius + 1,
+//                  maxY + 1,
+//                  worldPosition.getZ() + radius + 1
+//            );
+//        }
+//        return super.getRenderBoundingBox();
+//    }
 
     @Override
     public boolean isClientRendering() {
@@ -981,7 +960,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         dataMap.putBoolean(NBTConstants.SILK_TOUCH, getSilkTouch());
         dataMap.putBoolean(NBTConstants.INVERSE, inverse);
         if (inverseReplaceTarget != Items.AIR) {
-            NBTUtils.writeRegistryEntry(dataMap, NBTConstants.REPLACE_STACK, ForgeRegistries.ITEMS, inverseReplaceTarget);
+            NBTUtils.writeRegistryEntry(dataMap, NBTConstants.REPLACE_STACK, BuiltInRegistries.ITEM, inverseReplaceTarget);
         }
         dataMap.putBoolean(NBTConstants.INVERSE_REQUIRES_REPLACE, inverseRequiresReplacement);
         filterManager.writeToNBT(dataMap);
@@ -989,7 +968,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
 
     @Override
     public void readSustainedData(CompoundTag dataMap) {
-        setRadius(Math.min(dataMap.getInt(NBTConstants.RADIUS), MekanismConfig.general.minerMaxRadius.get()));
+        setRadius(Math.min(dataMap.getInt(NBTConstants.RADIUS), MekanismConfig.general.minerMaxRadius));
         NBTUtils.setIntIfPresent(dataMap, NBTConstants.MIN, newMinY -> {
             if (hasLevel() && !isRemote()) {
                 setMinY(Math.max(newMinY, level.getMinBuildHeight()));
@@ -1008,7 +987,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         NBTUtils.setBooleanIfPresent(dataMap, NBTConstants.PULL, pull -> doPull = pull);
         NBTUtils.setBooleanIfPresent(dataMap, NBTConstants.SILK_TOUCH, this::setSilkTouch);
         NBTUtils.setBooleanIfPresent(dataMap, NBTConstants.INVERSE, inverse -> this.inverse = inverse);
-        inverseReplaceTarget = NBTUtils.readRegistryEntry(dataMap, NBTConstants.REPLACE_STACK, ForgeRegistries.ITEMS, Items.AIR);
+        inverseReplaceTarget = NBTUtils.readRegistryEntry(dataMap, NBTConstants.REPLACE_STACK, BuiltInRegistries.ITEM, Items.AIR);
         NBTUtils.setBooleanIfPresent(dataMap, NBTConstants.INVERSE_REQUIRES_REPLACE, requiresReplace -> inverseRequiresReplacement = requiresReplace);
         filterManager.readFromNBT(dataMap);
         //Note: We read the overflow information if it is present in sustained data in order to grab the information from the digital miner item
@@ -1060,7 +1039,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     public void recalculateUpgrades(Upgrade upgrade) {
         super.recalculateUpgrades(upgrade);
         if (upgrade == Upgrade.SPEED) {
-            delayLength = MekanismUtils.getTicks(this, MekanismConfig.general.minerTicksPerMine.get());
+            delayLength = MekanismUtils.getTicks(this, MekanismConfig.general.minerTicksPerMine);
         }
     }
 
@@ -1070,35 +1049,35 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         return UpgradeUtils.getMultScaledInfo(this, upgrade);
     }
 
-    @NotNull
-    @Override
-    public <T> LazyOptional<T> getOffsetCapabilityIfEnabled(@NotNull Capability<T> capability, Direction side, @NotNull Vec3i offset) {
-        if (capability == ForgeCapabilities.ITEM_HANDLER) {
-            //Get item handler cap directly from here as we disable it entirely for the main block as we only have it enabled from ports
-            return itemHandlerManager.resolve(capability, side);
-        }
-        //Otherwise, we can just grab the capability from the tile normally
-        return getCapability(capability, side);
-    }
+//    @NotNull
+//    @Override
+//    public <T> LazyOptional<T> getOffsetCapabilityIfEnabled(@NotNull Capability<T> capability, Direction side, @NotNull Vec3i offset) {
+//        if (capability == ForgeCapabilities.ITEM_HANDLER) {
+//            //Get item handler cap directly from here as we disable it entirely for the main block as we only have it enabled from ports
+//            return itemHandlerManager.resolve(capability, side);
+//        }
+//        //Otherwise, we can just grab the capability from the tile normally
+//        return getCapability(capability, side);
+//    }
 
-    @Override
-    public boolean isOffsetCapabilityDisabled(@NotNull Capability<?> capability, Direction side, @NotNull Vec3i offset) {
-        if (!capability.isRegistered()) {
-            //Short circuit if a capability that is not registered is being queried
-            return true;
-        } else if (capability == ForgeCapabilities.ITEM_HANDLER) {
-            return notItemPort(side, offset);
-        } else if (EnergyCompatUtils.isEnergyCapability(capability)) {
-            return notEnergyPort(side, offset);
-        } else if (canEverResolve(capability) && IBoundingBlock.super.isOffsetCapabilityDisabled(capability, side, offset)) {
-            //If we are not an item handler or energy capability, and it is a capability that we can support,
-            // but it is one that normally should be disabled for offset capabilities, then expose it but only do so
-            // via our ports for things like computer integration capabilities, then we treat the capability as
-            // disabled if it is not against one of our ports
-            return notItemPort(side, offset) && notEnergyPort(side, offset);
-        }
-        return false;
-    }
+//    @Override
+//    public boolean isOffsetCapabilityDisabled(@NotNull Capability<?> capability, Direction side, @NotNull Vec3i offset) {
+//        if (!capability.isRegistered()) {
+//            //Short circuit if a capability that is not registered is being queried
+//            return true;
+//        } else if (capability == ForgeCapabilities.ITEM_HANDLER) {
+//            return notItemPort(side, offset);
+//        } else if (EnergyCompatUtils.isEnergyCapability(capability)) {
+//            return notEnergyPort(side, offset);
+//        } else if (canEverResolve(capability) && IBoundingBlock.super.isOffsetCapabilityDisabled(capability, side, offset)) {
+//            //If we are not an item handler or energy capability, and it is a capability that we can support,
+//            // but it is one that normally should be disabled for offset capabilities, then expose it but only do so
+//            // via our ports for things like computer integration capabilities, then we treat the capability as
+//            // disabled if it is not against one of our ports
+//            return notItemPort(side, offset) && notEnergyPort(side, offset);
+//        }
+//        return false;
+//    }
 
     private boolean notItemPort(Direction side, Vec3i offset) {
         if (offset.equals(new Vec3i(0, 1, 0))) {
@@ -1223,7 +1202,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         container.track(SyncableInt.create(this::getMaxY, this::setMaxY));
         container.track(SyncableBoolean.create(this::getInverse, value -> inverse = value));
         container.track(SyncableBoolean.create(this::getInverseRequiresReplacement, value -> inverseRequiresReplacement = value));
-        container.track(SyncableRegistryEntry.create(ForgeRegistries.ITEMS, this::getInverseReplaceTarget, value -> inverseReplaceTarget = value));
+        container.track(SyncableRegistryEntry.create(BuiltInRegistries.ITEM, this::getInverseReplaceTarget, value -> inverseReplaceTarget = value));
         filterManager.addContainerTrackers(container);
     }
 
@@ -1238,8 +1217,8 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void handleUpdatePacket(@NotNull CompoundTag tag) {
+        super.handleUpdatePacket(tag);
         NBTUtils.setIntIfPresent(tag, NBTConstants.RADIUS, this::setRadius);//the client is allowed to use whatever server sends
         NBTUtils.setIntIfPresent(tag, NBTConstants.MIN, this::setMinY);
         NBTUtils.setIntIfPresent(tag, NBTConstants.MAX, this::setMaxY);
@@ -1259,8 +1238,8 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
 
     //Methods relating to IComputerTile
     @ComputerMethod(methodDescription = ComputerConstants.DESCRIPTION_GET_ENERGY_USAGE)
-    FloatingLong getEnergyUsage() {
-        return getActive() ? energyContainer.getEnergyPerTick() : FloatingLong.ZERO;
+    long getEnergyUsage() {
+        return getActive() ? energyContainer.getEnergyPerTick() : 0;
     }
 
     @ComputerMethod(methodDescription = "Get the size of the Miner's internal inventory")
@@ -1324,7 +1303,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
 
     @ComputerMethod(methodDescription = "Get the maximum allowable Radius value, determined from the mod's config")
     int getMaxRadius() {
-        return MekanismConfig.general.minerMaxRadius.get();
+        return MekanismConfig.general.minerMaxRadius;
     }
 
     private void validateCanChangeConfiguration() throws ComputerException {
@@ -1338,9 +1317,9 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     @ComputerMethod(nameOverride = "setRadius", requiresPublicSecurity = true, methodDescription = "Update the mining radius (blocks). Requires miner to be stopped/reset first")
     void computerSetRadius(int radius) throws ComputerException {
         validateCanChangeConfiguration();
-        if (radius < 0 || radius > MekanismConfig.general.minerMaxRadius.get()) {
+        if (radius < 0 || radius > MekanismConfig.general.minerMaxRadius) {
             //Validate dimensions even though we can clamp
-            throw new ComputerException("Radius '%d' is out of range must be between 0 and %d. (Inclusive)", radius, MekanismConfig.general.minerMaxRadius.get());
+            throw new ComputerException("Radius '%d' is out of range must be between 0 and %d. (Inclusive)", radius, MekanismConfig.general.minerMaxRadius);
         }
         setRadiusFromPacket(radius);
     }

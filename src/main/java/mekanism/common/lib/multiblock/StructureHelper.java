@@ -1,14 +1,15 @@
 package mekanism.common.lib.multiblock;
 
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.Set;
 import mekanism.common.lib.math.voxel.VoxelCuboid;
 import mekanism.common.lib.math.voxel.VoxelCuboid.CuboidBuilder;
 import mekanism.common.lib.math.voxel.VoxelCuboid.CuboidSide;
 import mekanism.common.lib.math.voxel.VoxelCuboid.CuboidSide.Face;
 import mekanism.common.lib.math.voxel.VoxelPlane;
 import mekanism.common.lib.multiblock.Structure.Axis;
+
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Set;
 
 public class StructureHelper {
 

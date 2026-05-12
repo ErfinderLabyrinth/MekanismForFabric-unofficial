@@ -1,10 +1,11 @@
 package mekanism.api.radial;
 
-import java.util.Objects;
-import java.util.ServiceLoader;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.radial.mode.IRadialMode;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
+import java.util.ServiceLoader;
 
 /**
  * Helper class for creating builtin implementations of {@link RadialData}.

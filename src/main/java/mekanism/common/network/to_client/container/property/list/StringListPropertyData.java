@@ -1,9 +1,10 @@
 package mekanism.common.network.to_client.container.property.list;
 
-import java.util.List;
 import mekanism.common.network.BasePacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class StringListPropertyData extends ListPropertyData<String> {
 

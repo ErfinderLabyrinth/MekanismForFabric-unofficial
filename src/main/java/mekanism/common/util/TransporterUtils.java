@@ -1,7 +1,6 @@
 package mekanism.common.util;
 
-import java.util.List;
-import java.util.Optional;
+import mekanism.api.BigItemStack;
 import mekanism.api.RelativeSide;
 import mekanism.api.text.EnumColor;
 import mekanism.common.content.network.transmitter.LogisticalTransporter;
@@ -12,15 +11,18 @@ import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.TileEntityLogisticalSorter;
 import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public final class TransporterUtils {
 
@@ -43,7 +45,7 @@ public final class TransporterUtils {
         if (tile instanceof TileEntityTransmitter transmitter && TransmissionType.ITEM.checkTransmissionType(transmitter)) {
             return false;
         }
-        return InventoryUtils.isItemHandler(tile, side.getOpposite());
+        return InventoryUtils.isItemHandler(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
     }
 
     public static EnumColor increment(EnumColor color) {
@@ -69,7 +71,7 @@ public final class TransporterUtils {
             blockPos = blockPos.offset(Mth.floor(pos[0]), Mth.floor(pos[1]), Mth.floor(pos[2]));
         }
         TransporterManager.remove(transporter.getTileWorld(), stack);
-        Block.popResource(transporter.getTileWorld(), blockPos, stack.itemStack);
+        Block.popResource(transporter.getTileWorld(), blockPos, stack.itemStack.createStack());
     }
 
     public static float[] getStackPosition(LogisticalTransporterBase transporter, TransporterStack stack, float partial) {
@@ -92,7 +94,7 @@ public final class TransporterUtils {
         }
     }
 
-    public static boolean canInsert(BlockEntity tile, EnumColor color, ItemStack itemStack, Direction side, boolean force) {
+    public static boolean canInsert(BlockEntity tile, EnumColor color, BigItemStack itemStack, Direction side, boolean force) {
         if (force && tile instanceof TileEntityLogisticalSorter sorter) {
             return sorter.canSendHome(itemStack);
         }
@@ -103,13 +105,11 @@ public final class TransporterUtils {
                 return false;
             }
         }
-        Optional<IItemHandler> capability = CapabilityUtils.getCapability(tile, ForgeCapabilities.ITEM_HANDLER, side.getOpposite()).resolve();
-        if (capability.isPresent()) {
-            IItemHandler inventory = capability.get();
-            for (int i = 0, slots = inventory.getSlots(); i < slots; i++) {
-                // Simulate insert, this will handle validating the item is valid for the inventory
-                ItemStack rejects = inventory.insertItem(i, itemStack, true);
-                if (TransporterManager.didEmit(itemStack, rejects)) {
+        Storage<ItemVariant> itemStorage = ItemStorage.SIDED.find(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
+        if (itemStorage != null) {
+            try (Transaction t = Transaction.openOuter()) {
+                long transfered = itemStorage.insert(itemStack.getResource(), itemStack.amount(), t);
+                if (transfered != 0) {
                     return true;
                 }
             }

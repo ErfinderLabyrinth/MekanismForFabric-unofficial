@@ -1,29 +1,24 @@
 package mekanism.common.util;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
+import mekanism.api.FluidStack;
 import mekanism.common.Mekanism;
 import mekanism.common.tags.MekanismTags;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -32,12 +27,15 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.common.SoundActions;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public class WorldUtils {
 
@@ -413,10 +411,9 @@ public class WorldUtils {
                                                                    SectionPos.blockToSectionCoord(coord.getZ()) == chunk.z);
     }
 
-    public static boolean tryPlaceContainedLiquid(@Nullable Player player, Level world, BlockPos pos, @NotNull FluidStack fluidStack, @Nullable Direction side) {
-        Fluid fluid = fluidStack.getFluid();
-        FluidType fluidType = fluid.getFluidType();
-        if (!fluidType.canBePlacedInLevel(world, pos, fluidStack)) {
+    public static boolean tryPlaceContainedLiquid(@Nullable Player player, Level world, BlockPos pos, @NotNull FluidVariant fluidVariant, @Nullable Direction side) {
+        Fluid fluid = fluidVariant.getFluid();
+        if (fluid.defaultFluidState().createLegacyBlock().isAir()) {
             //If there is no fluid, or it cannot be placed in the world just
             return false;
         }
@@ -424,38 +421,44 @@ public class WorldUtils {
         boolean isReplaceable = state.canBeReplaced(fluid);
         boolean canContainFluid = state.getBlock() instanceof LiquidBlockContainer liquidBlockContainer && liquidBlockContainer.canPlaceLiquid(world, pos, state, fluid);
         if (state.isAir() || isReplaceable || canContainFluid) {
-            if (world.dimensionType().ultraWarm() && fluidType.isVaporizedOnPlacement(world, pos, fluidStack)) {
-                fluidType.onVaporize(player, world, pos, fluidStack);
+            if (world.dimensionType().ultraWarm() && fluid.is(FluidTags.WATER)) {
+                int i = pos.getX();
+                int j = pos.getY();
+                int k = pos.getZ();
+                world.playSound(player, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
+
+                for(int l = 0; l < 8; ++l) {
+                    world.addParticle(ParticleTypes.LARGE_SMOKE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0F, 0.0F, 0.0F);
+                }
             } else if (canContainFluid) {
-                if (!((LiquidBlockContainer) state.getBlock()).placeLiquid(world, pos, state, fluidType.getStateForPlacement(world, pos, fluidStack))) {
+                if (!((LiquidBlockContainer) state.getBlock()).placeLiquid(world, pos, state, fluid.defaultFluidState())) {
                     //If something went wrong return that we couldn't actually place it
                     return false;
                 }
-                playEmptySound(player, world, pos, fluidType, fluidStack);
+                playEmptySound(player, world, pos, fluidVariant);
             } else {
                 if (!world.isClientSide() && isReplaceable && !state.liquid()) {
                     world.destroyBlock(pos, true);
                 }
-                playEmptySound(player, world, pos, fluidType, fluidStack);
+                playEmptySound(player, world, pos, fluidVariant);
                 world.setBlock(pos, fluid.defaultFluidState().createLegacyBlock(), Block.UPDATE_ALL_IMMEDIATE);
             }
             return true;
         }
-        return side != null && tryPlaceContainedLiquid(player, world, pos.relative(side), fluidStack, null);
+        return side != null && tryPlaceContainedLiquid(player, world, pos.relative(side), fluidVariant, null);
     }
 
-    private static void playEmptySound(@Nullable Player player, LevelAccessor world, BlockPos pos, FluidType fluidType, @NotNull FluidStack fluidStack) {
-        SoundEvent soundevent = fluidType.getSound(player, world, pos, SoundActions.BUCKET_EMPTY);
+    private static void playEmptySound(@Nullable Player player, LevelAccessor world, BlockPos pos, @NotNull FluidVariant fluidVariant) {
+        SoundEvent soundevent = FluidVariantAttributes.getEmptySound(fluidVariant);
         if (soundevent == null) {
-            soundevent = MekanismTags.Fluids.LAVA_LOOKUP.contains(fluidStack.getFluid()) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
+            soundevent = MekanismTags.Fluids.LAVA_LOOKUP.contains(fluidVariant.getFluid()) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
         }
         world.playSound(player, pos, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
     }
 
     public static void playFillSound(@Nullable Player player, LevelAccessor world, BlockPos pos, @NotNull FluidStack fluidStack, @Nullable SoundEvent soundEvent) {
         if (soundEvent == null) {
-            Fluid fluid = fluidStack.getFluid();
-            soundEvent = fluid.getPickupSound().orElseGet(() -> fluid.getFluidType().getSound(player, world, pos, SoundActions.BUCKET_FILL));
+            soundEvent = FluidVariantAttributes.getFillSound(fluidStack.variant());
         }
         if (soundEvent != null) {
             world.playSound(player, pos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -476,7 +479,7 @@ public class WorldUtils {
                 BlockPos offset = pos.relative(side);
                 if (isBlockLoaded(world, offset)) {
                     BlockState blockState = world.getBlockState(offset);
-                    boolean weakPower = blockState.getBlock().shouldCheckWeakPower(blockState, world, pos, side);
+                    boolean weakPower = blockState.isRedstoneConductor(world, pos);
                     if (weakPower && isDirectlyGettingPowered(world, offset) || !weakPower && blockState.getSignal(world, offset, side) > 0) {
                         return true;
                     }
@@ -560,9 +563,9 @@ public class WorldUtils {
                     if (isBlockLoaded(world, offset)) {
                         Block block1 = world.getBlockState(offset).getBlock();
                         //TODO: Make sure this is passing the correct state
-                        if (block1.getWeakChanges(state, world, offset)) {
-                            block1.onNeighborChange(state, world, offset, pos);
-                        }
+//                        if (block1.getWeakChanges(state, world, offset)) {
+//                            block1.onNeighborChange(state, world, offset, pos);
+//                        }
                     }
                 }
             }
@@ -582,7 +585,7 @@ public class WorldUtils {
                 for (Direction neighbor : neighbors) {
                     BlockPos pos = fromPos.relative(neighbor);
                     getBlockState(world, pos).ifPresent(state -> {
-                        state.onNeighborChange(world, pos, fromPos);
+//                        state.onNeighborChange(world, pos, fromPos);
                         state.neighborChanged(world, pos, sourceState.getBlock(), fromPos, false);
                     });
                 }
@@ -599,7 +602,7 @@ public class WorldUtils {
      */
     public static void notifyNeighborOfChange(@Nullable Level world, BlockPos pos, BlockPos fromPos) {
         getBlockState(world, pos).ifPresent(state -> {
-            state.onNeighborChange(world, pos, fromPos);
+//            state.onNeighborChange(world, pos, fromPos);
             state.neighborChanged(world, pos, world.getBlockState(fromPos).getBlock(), fromPos, false);
         });
     }

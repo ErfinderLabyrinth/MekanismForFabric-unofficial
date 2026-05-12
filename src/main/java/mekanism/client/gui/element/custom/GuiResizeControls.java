@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.custom;
 
-import java.util.function.Consumer;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiSideHolder;
@@ -14,6 +13,8 @@ import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
 
 public class GuiResizeControls extends GuiSideHolder {
 
@@ -82,7 +83,7 @@ public class GuiResizeControls extends GuiSideHolder {
     }
 
     private int getIndex() {
-        return MekanismConfig.client.qioItemViewerSlotsY.get();
+        return MekanismConfig.client.qioItemViewerSlotsY;
     }
 
     public enum ResizeType {

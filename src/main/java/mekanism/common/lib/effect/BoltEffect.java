@@ -1,14 +1,10 @@
 package mekanism.common.lib.effect;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
 import mekanism.common.lib.Color;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.*;
 
 public class BoltEffect {
 

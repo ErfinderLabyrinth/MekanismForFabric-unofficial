@@ -1,9 +1,5 @@
 package mekanism.common.capabilities.chemical.variable;
 
-import java.util.Objects;
-import java.util.function.BiPredicate;
-import java.util.function.LongSupplier;
-import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -30,6 +26,11 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.BiPredicate;
+import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 
 @NothingNullByDefault
 public class VariableCapacityChemicalTankBuilder<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>> {
@@ -80,7 +81,7 @@ public class VariableCapacityChemicalTankBuilder<CHEMICAL extends Chemical<CHEMI
               Predicate<@NotNull CHEMICAL> validator, @Nullable ChemicalAttributeValidator attributeValidator, @Nullable IContentsListener listener);
     }
 
-    public static class VariableCapacityGasTank extends VariableCapacityChemicalTank<Gas, GasStack> implements IGasHandler, IGasTank {
+    public static class VariableCapacityGasTank extends VariableCapacityChemicalTank<Gas, GasStack, IGasTank> implements IGasHandler, IGasTank {
 
         protected VariableCapacityGasTank(LongSupplier capacity, BiPredicate<@NotNull Gas, @NotNull AutomationType> canExtract,
               BiPredicate<@NotNull Gas, @NotNull AutomationType> canInsert, Predicate<@NotNull Gas> validator, @Nullable ChemicalAttributeValidator attributeValidator,
@@ -89,7 +90,7 @@ public class VariableCapacityChemicalTankBuilder<CHEMICAL extends Chemical<CHEMI
         }
     }
 
-    public static class VariableCapacityInfusionTank extends VariableCapacityChemicalTank<InfuseType, InfusionStack> implements IInfusionHandler, IInfusionTank {
+    public static class VariableCapacityInfusionTank extends VariableCapacityChemicalTank<InfuseType, InfusionStack, IInfusionTank> implements IInfusionHandler, IInfusionTank {
 
         protected VariableCapacityInfusionTank(LongSupplier capacity, BiPredicate<@NotNull InfuseType, @NotNull AutomationType> canExtract,
               BiPredicate<@NotNull InfuseType, @NotNull AutomationType> canInsert, Predicate<@NotNull InfuseType> validator,
@@ -98,7 +99,7 @@ public class VariableCapacityChemicalTankBuilder<CHEMICAL extends Chemical<CHEMI
         }
     }
 
-    public static class VariableCapacityPigmentTank extends VariableCapacityChemicalTank<Pigment, PigmentStack> implements IPigmentHandler, IPigmentTank {
+    public static class VariableCapacityPigmentTank extends VariableCapacityChemicalTank<Pigment, PigmentStack, IPigmentTank> implements IPigmentHandler, IPigmentTank {
 
         protected VariableCapacityPigmentTank(LongSupplier capacity, BiPredicate<@NotNull Pigment, @NotNull AutomationType> canExtract,
               BiPredicate<@NotNull Pigment, @NotNull AutomationType> canInsert, Predicate<@NotNull Pigment> validator,
@@ -107,7 +108,7 @@ public class VariableCapacityChemicalTankBuilder<CHEMICAL extends Chemical<CHEMI
         }
     }
 
-    public static class VariableCapacitySlurryTank extends VariableCapacityChemicalTank<Slurry, SlurryStack> implements ISlurryHandler, ISlurryTank {
+    public static class VariableCapacitySlurryTank extends VariableCapacityChemicalTank<Slurry, SlurryStack, ISlurryTank> implements ISlurryHandler, ISlurryTank {
 
         protected VariableCapacitySlurryTank(LongSupplier capacity, BiPredicate<@NotNull Slurry, @NotNull AutomationType> canExtract,
               BiPredicate<@NotNull Slurry, @NotNull AutomationType> canInsert, Predicate<@NotNull Slurry> validator,

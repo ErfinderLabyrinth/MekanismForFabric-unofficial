@@ -1,32 +1,35 @@
 package mekanism.common.network.to_server;
 
-import java.util.function.BiConsumer;
-import mekanism.api.math.FloatingLong;
+import mekanism.api.MekanismAPI;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.laser.TileEntityLaserAmplifier;
 import mekanism.common.tile.machine.TileEntityResistiveHeater;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.BiConsumer;
 
 public class PacketGuiSetEnergy implements IMekanismPacket {
+    public static final PacketType<PacketGuiSetEnergy> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "gui_set_energy"), PacketGuiSetEnergy::decode);
 
     private final GuiEnergyValue interaction;
     private final BlockPos tilePosition;
-    private final FloatingLong value;
+    private final long value;
 
-    public PacketGuiSetEnergy(GuiEnergyValue interaction, BlockPos tilePosition, FloatingLong value) {
+    public PacketGuiSetEnergy(GuiEnergyValue interaction, BlockPos tilePosition, long value) {
         this.interaction = interaction;
         this.tilePosition = tilePosition;
         this.value = value;
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        Player player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null) {
             TileEntityMekanism tile = WorldUtils.getTileEntity(TileEntityMekanism.class, player.level(), tilePosition);
             if (tile != null) {
@@ -39,11 +42,11 @@ public class PacketGuiSetEnergy implements IMekanismPacket {
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(interaction);
         buffer.writeBlockPos(tilePosition);
-        value.writeToBuffer(buffer);
+        buffer.writeLong(value);
     }
 
     public static PacketGuiSetEnergy decode(FriendlyByteBuf buffer) {
-        return new PacketGuiSetEnergy(buffer.readEnum(GuiEnergyValue.class), buffer.readBlockPos(), FloatingLong.readFromBuffer(buffer));
+        return new PacketGuiSetEnergy(buffer.readEnum(GuiEnergyValue.class), buffer.readBlockPos(), buffer.readLong());
     }
 
     public enum GuiEnergyValue {
@@ -63,14 +66,19 @@ public class PacketGuiSetEnergy implements IMekanismPacket {
             }
         });
 
-        private final BiConsumer<TileEntityMekanism, FloatingLong> consumerForTile;
+        private final BiConsumer<TileEntityMekanism, Long> consumerForTile;
 
-        GuiEnergyValue(BiConsumer<TileEntityMekanism, FloatingLong> consumerForTile) {
+        GuiEnergyValue(BiConsumer<TileEntityMekanism, Long> consumerForTile) {
             this.consumerForTile = consumerForTile;
         }
 
-        public void consume(TileEntityMekanism tile, FloatingLong value) {
+        public void consume(TileEntityMekanism tile, long value) {
             consumerForTile.accept(tile, value);
         }
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 }

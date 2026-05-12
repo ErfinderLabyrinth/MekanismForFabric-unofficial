@@ -13,4 +13,8 @@ public class MekanismHeightProviderTypes {
     public static final HeightProviderTypeDeferredRegister HEIGHT_PROVIDER_TYPES = new HeightProviderTypeDeferredRegister(Mekanism.MODID);
 
     public static final HeightProviderTypeRegistryObject<ConfigurableHeightProvider> CONFIGURABLE = HEIGHT_PROVIDER_TYPES.register("configurable", ConfigurableHeightProvider.CODEC);
+
+    public static void register() {
+
+    }
 }

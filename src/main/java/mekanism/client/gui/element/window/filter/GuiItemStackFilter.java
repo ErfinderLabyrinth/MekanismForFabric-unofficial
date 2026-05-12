@@ -1,7 +1,5 @@
 package mekanism.client.gui.element.window.filter;
 
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.text.ILangEntry;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.jei.interfaces.IJEIGhostTarget.IGhostItemConsumer;
@@ -14,6 +12,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 public abstract class GuiItemStackFilter<FILTER extends IItemStackFilter<FILTER>, TILE extends TileEntityMekanism & ITileFilterHolder<? super FILTER>>
       extends GuiFilter<FILTER, TILE> {
@@ -62,6 +63,6 @@ public abstract class GuiItemStackFilter<FILTER extends IItemStackFilter<FILTER>
 
     protected void setFilterStackWithSound(@NotNull ItemStack stack) {
         setFilterStack(stack);
-        playClickSound(SoundEvents.UI_BUTTON_CLICK);
+        playClickSound(SoundEvents.UI_BUTTON_CLICK::value);
     }
 }

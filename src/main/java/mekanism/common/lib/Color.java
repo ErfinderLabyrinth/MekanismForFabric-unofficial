@@ -1,7 +1,8 @@
 package mekanism.common.lib;
 
-import java.util.Objects;
 import mekanism.common.util.StatUtils;
+
+import java.util.Objects;
 
 public class Color {
 

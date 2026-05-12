@@ -2,7 +2,6 @@ package mekanism.common.content.gear.mekatool;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import java.util.function.Consumer;
 import mekanism.api.IIncrementalEnum;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
@@ -28,21 +27,22 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 @ParametersAreNotNullByDefault
 public class ModuleExcavationEscalationUnit implements ICustomModule<ModuleExcavationEscalationUnit> {
 
     private static final ResourceLocation RADIAL_ID = Mekanism.rl("excavation_mode");
-    private static final Int2ObjectMap<Lazy<NestedRadialMode>> RADIAL_DATAS = Util.make(() -> {
+    private static final Int2ObjectMap<NestedRadialMode> RADIAL_DATAS = Util.make(() -> {
         int types = ExcavationMode.MODES.length - 2;
-        Int2ObjectMap<Lazy<NestedRadialMode>> map = new Int2ObjectArrayMap<>(types);
+        Int2ObjectMap<NestedRadialMode> map = new Int2ObjectArrayMap<>(types);
         for (int type = 1; type <= types; type++) {
             int accessibleValues = type + 2;
-            map.put(type, Lazy.of(() -> new NestedRadialMode(IRadialDataHelper.INSTANCE.dataForTruncated(RADIAL_ID, accessibleValues, ExcavationMode.NORMAL),
-                  MekanismLang.RADIAL_EXCAVATION_SPEED, ExcavationMode.NORMAL.icon(), EnumColor.YELLOW)));
+            map.put(type, new NestedRadialMode(IRadialDataHelper.INSTANCE.dataForTruncated(RADIAL_ID, accessibleValues, ExcavationMode.NORMAL),
+                  MekanismLang.RADIAL_EXCAVATION_SPEED, ExcavationMode.NORMAL.icon(), EnumColor.YELLOW));
         }
         return map;
     });
@@ -56,7 +56,7 @@ public class ModuleExcavationEscalationUnit implements ICustomModule<ModuleExcav
     }
 
     private NestedRadialMode getNestedData(IModule<ModuleExcavationEscalationUnit> module) {
-        return RADIAL_DATAS.get(module.getInstalledCount()).get();
+        return RADIAL_DATAS.get(module.getInstalledCount());
     }
 
     private RadialData<?> getRadialData(IModule<ModuleExcavationEscalationUnit> module) {

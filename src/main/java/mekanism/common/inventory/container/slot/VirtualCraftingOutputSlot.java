@@ -1,17 +1,19 @@
 package mekanism.common.inventory.container.slot;
 
-import java.util.List;
-import java.util.function.Consumer;
-import mekanism.api.Action;
 import mekanism.common.content.qio.QIOCraftingWindow;
 import mekanism.common.inventory.container.sync.ISyncableData;
 import mekanism.common.inventory.container.sync.SyncableBoolean;
 import mekanism.common.inventory.slot.BasicInventorySlot;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 public class VirtualCraftingOutputSlot extends VirtualInventoryContainerSlot implements IHasExtraData {
 
@@ -41,11 +43,10 @@ public class VirtualCraftingOutputSlot extends VirtualInventoryContainerSlot imp
         return false;
     }
 
-    @NotNull
     @Override
-    public ItemStack insertItem(@NotNull ItemStack stack, Action action) {
+    public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
         //Short circuit don't allow inserting into the output slot
-        return stack;
+        return 0;
     }
 
     @NotNull

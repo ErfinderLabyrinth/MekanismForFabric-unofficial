@@ -1,9 +1,5 @@
 package mekanism.common.content.blocktype;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream.Builder;
 import mekanism.api.functions.TriConsumer;
 import mekanism.api.text.ILangEntry;
 import mekanism.api.tier.ITier;
@@ -21,6 +17,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream.Builder;
 
 public class BlockType {
 

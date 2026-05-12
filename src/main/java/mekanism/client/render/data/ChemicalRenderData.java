@@ -1,6 +1,5 @@
 package mekanism.client.render.data;
 
-import java.util.Objects;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.gas.Gas;
@@ -11,6 +10,8 @@ import mekanism.client.render.MekanismRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 //TODO - 1.18: Make it possible for chemicals to define a "glow/light" value and then use that here
 @NothingNullByDefault

@@ -7,18 +7,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.crafting.IShapedRecipe;
 
 @NothingNullByDefault
-public abstract class WrappedShapedRecipe implements CraftingRecipe, IShapedRecipe<CraftingContainer> {
+public abstract class WrappedShapedRecipe extends ShapedRecipe {
 
     private final ShapedRecipe internal;
 
     protected WrappedShapedRecipe(ShapedRecipe internal) {
+        super(null, null, null, 0, 0, null, null);
         this.internal = internal;
     }
 
@@ -82,13 +81,13 @@ public abstract class WrappedShapedRecipe implements CraftingRecipe, IShapedReci
     }
 
     @Override
-    public int getRecipeWidth() {
-        return internal.getRecipeWidth();
+    public int getWidth() {
+        return internal.getWidth();
     }
 
     @Override
-    public int getRecipeHeight() {
-        return internal.getRecipeHeight();
+    public int getHeight() {
+        return internal.getHeight();
     }
 
     @Override

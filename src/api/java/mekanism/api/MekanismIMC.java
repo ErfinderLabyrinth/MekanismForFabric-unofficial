@@ -1,8 +1,10 @@
 package mekanism.api;
 
+import mekanism.api.gear.IModuleHelper;
 import mekanism.api.providers.IModuleDataProvider;
-import net.minecraftforge.fml.InterModComms;
 
+
+//TODO
 /**
  * Class containing various helpers for sending IMC messages to Mekanism.
  */
@@ -123,6 +125,7 @@ public class MekanismIMC {
         if (moduleDataProviders == null || moduleDataProviders.length == 0) {
             throw new IllegalArgumentException("No module data providers given.");
         }
-        InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, method, () -> moduleDataProviders);
+        IModuleHelper.INSTANCE.addSupportedModule(method, moduleDataProviders);
+        //InterModComms.sendTo(MekanismAPI.MEKANISM_MODID, method, () -> moduleDataProviders);
     }
 }

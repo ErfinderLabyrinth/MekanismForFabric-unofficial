@@ -1,17 +1,12 @@
 package mekanism.common.recipe.upgrade;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
 import mekanism.api.MekanismAPI;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
-import mekanism.api.security.ISecurityObject;
+import mekanism.api.security.IItemOwnerObjectGetter;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.security.SecurityMode;
+import mekanism.client.MekanismClient;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.attribute.AttributeUpgradeSupport;
 import mekanism.common.block.interfaces.IHasTileEntity;
@@ -32,15 +27,23 @@ import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.factory.TileEntityFactory;
 import mekanism.common.util.ItemDataUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.fluids.FluidUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.*;
+import java.util.function.Function;
 
 @ParametersAreNotNullByDefault
 public interface RecipeUpgradeData<TYPE extends RecipeUpgradeData<TYPE>> {
@@ -51,7 +54,7 @@ public interface RecipeUpgradeData<TYPE extends RecipeUpgradeData<TYPE>> {
     /**
      * @return {@code false} if it failed to apply to the stack due to being invalid
      */
-    boolean applyToStack(ItemStack stack);
+    ItemStack applyToStack(ItemStack stack);
 
     @NotNull
     static Set<RecipeUpgradeType> getSupportedTypes(ItemStack stack) {
@@ -74,34 +77,34 @@ public interface RecipeUpgradeData<TYPE extends RecipeUpgradeData<TYPE>> {
                 supportedTypes.add(RecipeUpgradeType.UPGRADE);
             }
         }
-        if (stack.getCapability(Capabilities.STRICT_ENERGY).isPresent() || tile != null && tile.handles(SubstanceType.ENERGY)) {
+        if (ContainerItemContext.withConstant(stack).find(EnergyStorage.ITEM) != null || tile != null && tile.handles(SubstanceType.ENERGY)) {
             //If we are for a block that handles energy, or we have an energy handler capability
             supportedTypes.add(RecipeUpgradeType.ENERGY);
         }
-        if (FluidUtil.getFluidHandler(stack).isPresent() || tile != null && tile.handles(SubstanceType.FLUID)) {
+        if (ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM) != null || tile != null && tile.handles(SubstanceType.FLUID)) {
             //If we are for a block that handles fluid, or we have a fluid handler capability
             supportedTypes.add(RecipeUpgradeType.FLUID);
         }
-        if (stack.getCapability(Capabilities.GAS_HANDLER).isPresent() || tile != null && tile.handles(SubstanceType.GAS)) {
+        if (ContainerItemContext.withConstant(stack).find(Capabilities.GAS_HANDLER_ITEM) != null || tile != null && tile.handles(SubstanceType.GAS)) {
             //If we are for a block that handles gas, or we have a gas handler capability
             supportedTypes.add(RecipeUpgradeType.GAS);
         }
-        if (stack.getCapability(Capabilities.INFUSION_HANDLER).isPresent() || tile != null && tile.handles(SubstanceType.INFUSION)) {
+        if (ContainerItemContext.withConstant(stack).find(Capabilities.INFUSION_HANDLER_ITEM) != null || tile != null && tile.handles(SubstanceType.INFUSION)) {
             //If we are for a block that handles infusion, or we have an infusion handler capability
             supportedTypes.add(RecipeUpgradeType.INFUSION);
         }
-        if (stack.getCapability(Capabilities.PIGMENT_HANDLER).isPresent() || tile != null && tile.handles(SubstanceType.PIGMENT)) {
+        if (ContainerItemContext.withConstant(stack).find(Capabilities.PIGMENT_HANDLER_ITEM) != null || tile != null && tile.handles(SubstanceType.PIGMENT)) {
             //If we are for a block that handles pigment, or we have a pigment handler capability
             supportedTypes.add(RecipeUpgradeType.PIGMENT);
         }
-        if (stack.getCapability(Capabilities.SLURRY_HANDLER).isPresent() || tile != null && tile.handles(SubstanceType.SLURRY)) {
+        if (ContainerItemContext.withConstant(stack).find(Capabilities.SLURRY_HANDLER_ITEM) != null || tile != null && tile.handles(SubstanceType.SLURRY)) {
             //If we are for a block that handles slurry, or we have a slurry handler capability
             supportedTypes.add(RecipeUpgradeType.SLURRY);
         }
         if (item instanceof IItemSustainedInventory || tile != null && tile.persistInventory()) {
             supportedTypes.add(RecipeUpgradeType.ITEM);
         }
-        if (stack.getCapability(Capabilities.OWNER_OBJECT).isPresent() || tile != null && tile.hasSecurity()) {
+        if ((stack.getItem() instanceof IItemOwnerObjectGetter getter && getter.getOwnerObject(stack) != null) || tile != null && tile.hasSecurity()) {
             //Note: We only check if it has the owner capability as there is a contract that if there is a security capability
             // there will be an owner one so given our security upgrade supports owner or security we only have to check for owner
             supportedTypes.add(RecipeUpgradeType.SECURITY);
@@ -143,7 +146,7 @@ public interface RecipeUpgradeData<TYPE extends RecipeUpgradeData<TYPE>> {
                     ListTag inventory = sustainedInventory.getSustainedInventory(stack);
                     yield inventory == null || inventory.isEmpty() ? null : new ItemRecipeData(inventory);
                 } else if (item instanceof ItemBlockPersonalStorage<?>) {
-                    yield PersonalStorageManager.getInventoryIfPresent(stack).map(inv -> new ItemRecipeData(inv.getInventorySlots(null))).orElse(null);
+                    yield PersonalStorageManager.getInventoryIfPresent(stack, FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? MekanismClient.tryGetSingleplayerServer() : (MinecraftServer) FabricLoader.getInstance().getGameInstance()).map(inv -> new ItemRecipeData(inv.getSlots())).orElse(null);
                 }
                 if (MekanismAPI.debug) {
                     throw new IllegalStateException("Requested ITEM upgrade data, but unable to handle");
@@ -162,7 +165,8 @@ public interface RecipeUpgradeData<TYPE extends RecipeUpgradeData<TYPE>> {
                 }
                 //Treat owner items as public even though they are private as we don't want to lower the output
                 // item's security just because it has one item that is owned
-                SecurityMode securityMode = stack.getCapability(Capabilities.SECURITY_OBJECT).map(ISecurityObject::getSecurityMode).orElse(SecurityMode.PUBLIC);
+                SecurityMode securityMode = ISecurityUtils.INSTANCE.getSecurityMode(stack, false);
+//                SecurityMode securityMode = stack.getCapability(Capabilities.SECURITY_OBJECT).map(ISecurityObject::getSecurityMode).orElse(SecurityMode.PUBLIC);
                 yield new SecurityRecipeData(ownerUUID, securityMode);
             }
             case SORTING -> {

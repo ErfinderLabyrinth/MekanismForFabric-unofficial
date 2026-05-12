@@ -1,17 +1,18 @@
 package mekanism.common.tile.interfaces.chemical;
 
-import java.util.List;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
-import mekanism.common.capabilities.chemical.dynamic.DynamicChemicalHandler.DynamicGasHandler;
 import mekanism.common.capabilities.chemical.dynamic.IGasTracker;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.capabilities.resolver.manager.ChemicalHandlerManager.GasHandlerManager;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 @MethodsReturnNonnullByDefault
 public interface IGasTile extends IGasTracker {
@@ -22,7 +23,7 @@ public interface IGasTile extends IGasTracker {
      * @apiNote This should not be overridden, or directly called except for initial creation
      */
     default GasHandlerManager getInitialGasManager(IContentsListener listener) {
-        return new GasHandlerManager(getInitialGasTanks(listener), new DynamicGasHandler(this::getGasTanks, this::extractGasCheck, this::insertGasCheck, listener));
+        return new GasHandlerManager(getInitialGasTanks(listener));
     }
 
     /**
@@ -44,8 +45,16 @@ public interface IGasTile extends IGasTracker {
      * @apiNote This should not be overridden
      */
     @Override
-    default List<IGasTank> getGasTanks(@Nullable Direction side) {
+    default Storage<Gas> getGasStorage(@Nullable Direction side) {
         return getGasManager().getContainers(side);
+    }
+
+    @Override
+    default List<IGasTank> getGasTanks() {
+        if (getGasManager().canHandle()) {
+            return getGasManager().getHolder().getAll();
+        }
+        return List.of();
     }
 
     default boolean extractGasCheck(int tank, @Nullable Direction side) {

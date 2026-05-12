@@ -1,41 +1,22 @@
 package mekanism.common.content.entangloporter;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.BiConsumer;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.Coord4D;
+import mekanism.api.FluidStack;
+import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
-import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.ChemicalTankBuilder;
-import mekanism.api.chemical.ChemicalUtils;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.IChemicalTank;
+import mekanism.api.chemical.*;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.infuse.IInfusionTank;
 import mekanism.api.chemical.pigment.IPigmentTank;
 import mekanism.api.chemical.slurry.ISlurryTank;
 import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.energy.IMekanismStrictEnergyHandler;
+import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.fluid.IExtendedFluidTank;
-import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.api.heat.HeatAPI;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.api.inventory.IMekanismInventory;
 import mekanism.api.math.FloatingLong;
-import mekanism.common.capabilities.chemical.dynamic.IGasTracker;
-import mekanism.common.capabilities.chemical.dynamic.IInfusionTracker;
-import mekanism.common.capabilities.chemical.dynamic.IPigmentTracker;
-import mekanism.common.capabilities.chemical.dynamic.ISlurryTracker;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.fluid.BasicFluidTank;
 import mekanism.common.capabilities.heat.BasicHeatCapacitor;
@@ -51,25 +32,24 @@ import mekanism.common.lib.frequency.FrequencyType;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.TileEntityQuantumEntangloporter;
 import mekanism.common.tile.component.config.ConfigInfo;
-import mekanism.common.util.CapabilityUtils;
-import mekanism.common.util.ChemicalUtil;
-import mekanism.common.util.EmitUtils;
-import mekanism.common.util.EnumUtils;
-import mekanism.common.util.FluidUtils;
-import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.WorldUtils;
+import mekanism.common.util.*;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class InventoryFrequency extends Frequency implements IMekanismInventory, IMekanismFluidHandler, IMekanismStrictEnergyHandler, ITileHeatHandler, IGasTracker,
-      IInfusionTracker, IPigmentTracker, ISlurryTracker {
+import java.util.*;
+import java.util.function.BiConsumer;
+
+public class InventoryFrequency extends Frequency implements /*IMekanismInventory, IMekanismFluidHandler, IMekanismStrictEnergyHandler, */ITileHeatHandler, /*IGasTracker,
+      IInfusionTracker, IPigmentTracker, ISlurryTracker implements */IContentsListener {
 
     private final Map<Coord4D, TileEntityQuantumEntangloporter> activeQEs = new Object2ObjectOpenHashMap<>();
     private long lastEject = -1;
@@ -106,13 +86,13 @@ public class InventoryFrequency extends Frequency implements IMekanismInventory,
     }
 
     private void presetVariables() {
-        fluidTanks = Collections.singletonList(storedFluid = BasicFluidTank.create(MekanismConfig.general.entangloporterFluidBuffer.get(), this));
-        gasTanks = Collections.singletonList(storedGas = ChemicalTankBuilder.GAS.create(MekanismConfig.general.entangloporterChemicalBuffer.get(), this));
-        infusionTanks = Collections.singletonList(storedInfusion = ChemicalTankBuilder.INFUSION.create(MekanismConfig.general.entangloporterChemicalBuffer.get(), this));
-        pigmentTanks = Collections.singletonList(storedPigment = ChemicalTankBuilder.PIGMENT.create(MekanismConfig.general.entangloporterChemicalBuffer.get(), this));
-        slurryTanks = Collections.singletonList(storedSlurry = ChemicalTankBuilder.SLURRY.create(MekanismConfig.general.entangloporterChemicalBuffer.get(), this));
+        fluidTanks = Collections.singletonList(storedFluid = BasicFluidTank.create(MekanismConfig.general.entangloporterFluidBuffer, this));
+        gasTanks = Collections.singletonList(storedGas = ChemicalTankBuilder.GAS.create(MekanismConfig.general.entangloporterChemicalBuffer, this));
+        infusionTanks = Collections.singletonList(storedInfusion = ChemicalTankBuilder.INFUSION.create(MekanismConfig.general.entangloporterChemicalBuffer, this));
+        pigmentTanks = Collections.singletonList(storedPigment = ChemicalTankBuilder.PIGMENT.create(MekanismConfig.general.entangloporterChemicalBuffer, this));
+        slurryTanks = Collections.singletonList(storedSlurry = ChemicalTankBuilder.SLURRY.create(MekanismConfig.general.entangloporterChemicalBuffer, this));
         inventorySlots = Collections.singletonList(storedItem = EntangloporterInventorySlot.create(this));
-        energyContainers = Collections.singletonList(storedEnergy = BasicEnergyContainer.create(MekanismConfig.general.entangloporterEnergyBuffer.get(), this));
+        energyContainers = Collections.singletonList(storedEnergy = BasicEnergyContainer.create(MekanismConfig.general.entangloporterEnergyBuffer, this));
         heatCapacitors = Collections.singletonList(storedHeat = BasicHeatCapacitor.create(HeatAPI.DEFAULT_HEAT_CAPACITY, HeatAPI.DEFAULT_INVERSE_CONDUCTION,
               1_000, null, this));
     }
@@ -146,8 +126,9 @@ public class InventoryFrequency extends Frequency implements IMekanismInventory,
     @Override
     public void write(FriendlyByteBuf buffer) {
         super.write(buffer);
-        storedEnergy.getEnergy().writeToBuffer(buffer);
-        buffer.writeFluidStack(storedFluid.getFluid());
+        buffer.writeLong(storedEnergy.getEnergy());
+        buffer.writeNbt(storedFluid.getFluid().variant().toNbt());
+        buffer.writeLong(storedFluid.getFluid().amount());
         ChemicalUtils.writeChemicalStack(buffer, storedGas.getStack());
         ChemicalUtils.writeChemicalStack(buffer, storedInfusion.getStack());
         ChemicalUtils.writeChemicalStack(buffer, storedPigment.getStack());
@@ -160,8 +141,10 @@ public class InventoryFrequency extends Frequency implements IMekanismInventory,
     protected void read(FriendlyByteBuf dataStream) {
         super.read(dataStream);
         presetVariables();
-        storedEnergy.setEnergy(FloatingLong.readFromBuffer(dataStream));
-        storedFluid.setStack(dataStream.readFluidStack());
+        storedEnergy.setEnergy(dataStream.readLong());
+        FluidVariant variant = FluidVariant.fromNbt(dataStream.readNbt());
+        long amount = dataStream.readLong();
+        storedFluid.setStack(new FluidStack(variant, amount));
         storedGas.setStack(ChemicalUtils.readGasStack(dataStream));
         storedInfusion.setStack(ChemicalUtils.readInfusionStack(dataStream));
         storedPigment.setStack(ChemicalUtils.readPigmentStack(dataStream));
@@ -171,49 +154,49 @@ public class InventoryFrequency extends Frequency implements IMekanismInventory,
     }
 
     @NotNull
-    @Override
+    //@Override
     public List<IInventorySlot> getInventorySlots(@Nullable Direction side) {
         return inventorySlots;
     }
 
     @NotNull
-    @Override
+    //@Override
     public List<IGasTank> getGasTanks(@Nullable Direction side) {
         return gasTanks;
     }
 
     @NotNull
-    @Override
+    //@Override
     public List<IInfusionTank> getInfusionTanks(@Nullable Direction side) {
         return infusionTanks;
     }
 
     @NotNull
-    @Override
+    //@Override
     public List<IPigmentTank> getPigmentTanks(@Nullable Direction side) {
         return pigmentTanks;
     }
 
     @NotNull
-    @Override
+    //@Override
     public List<ISlurryTank> getSlurryTanks(@Nullable Direction side) {
         return slurryTanks;
     }
 
     @NotNull
-    @Override
+    //@Override
     public List<IExtendedFluidTank> getFluidTanks(@Nullable Direction side) {
         return fluidTanks;
     }
 
     @NotNull
-    @Override
+    //@Override
     public List<IEnergyContainer> getEnergyContainers(@Nullable Direction side) {
         return energyContainers;
     }
 
     @NotNull
-    @Override
+    //@Override
     public List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction side) {
         return heatCapacitors;
     }
@@ -303,31 +286,48 @@ public class InventoryFrequency extends Frequency implements IMekanismInventory,
     }
 
     private void addEnergyTransferHandler(Map<TransmissionType, BiConsumer<BlockEntity, Direction>> typesToEject, List<Runnable> transferHandlers, int expected) {
-        FloatingLong toSend = storedEnergy.extract(storedEnergy.getMaxEnergy(), Action.SIMULATE, AutomationType.INTERNAL);
-        if (!toSend.isZero()) {
+        long toSend;
+        try(Transaction t = Transaction.openOuter()) {
+            toSend = storedEnergy.extract(storedEnergy.getMaxEnergy(), t);
+        }
+        if (toSend != 0) {
             EnergyAcceptorTarget target = new EnergyAcceptorTarget(expected);
-            typesToEject.put(TransmissionType.ENERGY, (tile, side) -> EnergyCompatUtils.getLazyStrictEnergyHandler(tile, side.getOpposite()).ifPresent(target::addHandler));
+            typesToEject.put(TransmissionType.ENERGY, (tile, side) -> {
+                IStrictEnergyHandler energyHandler = EnergyCompatUtils.getLazyStrictEnergyHandler(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
+                if (energyHandler != null) {
+                    target.addHandler(energyHandler);
+                }
+            });
             transferHandlers.add(() -> {
                 if (target.getHandlerCount() > 0) {
-                    storedEnergy.extract(EmitUtils.sendToAcceptors(target, toSend), Action.EXECUTE, AutomationType.INTERNAL);
+                    try(Transaction t = Transaction.openOuter()) {
+                        storedEnergy.extract(EmitUtils.sendToAcceptors(target, FloatingLong.create(toSend)).longValue(), t);
+                        t.commit();
+                    }
                 }
             });
         }
     }
 
     private void addFluidTransferHandler(Map<TransmissionType, BiConsumer<BlockEntity, Direction>> typesToEject, List<Runnable> transferHandlers, int expected) {
-        FluidStack fluidToSend = storedFluid.extract(storedFluid.getCapacity(), Action.SIMULATE, AutomationType.INTERNAL);
-        if (!fluidToSend.isEmpty()) {
+        FluidStack fluidToSend;
+        try(Transaction t=Transaction.openOuter()) {
+            fluidToSend = new FluidStack(storedFluid.getFluid(), storedFluid.extract(storedFluid.getResource(), storedFluid.getCapacity(), t));
+        }
+        if (fluidToSend.amount() != 0) {
             FluidHandlerTarget target = new FluidHandlerTarget(fluidToSend, expected);
-            typesToEject.put(TransmissionType.FLUID, (tile, side) ->
-                  CapabilityUtils.getCapability(tile, ForgeCapabilities.FLUID_HANDLER, side.getOpposite()).ifPresent(handler -> {
-                      if (FluidUtils.canFill(handler, fluidToSend)) {
-                          target.addHandler(handler);
-                      }
-                  }));
+            typesToEject.put(TransmissionType.FLUID, (tile, side) -> {
+                Storage<FluidVariant> storage = FluidStorage.SIDED.find(tile.getLevel(), tile.getBlockPos(), side);
+                if (FluidUtils.canFill(storage, fluidToSend)) {
+                    target.addHandler(storage);
+                };
+            });
             transferHandlers.add(() -> {
                 if (target.getHandlerCount() > 0) {
-                    storedFluid.extract(EmitUtils.sendToAcceptors(target, fluidToSend.getAmount(), fluidToSend), Action.EXECUTE, AutomationType.INTERNAL);
+                    try(Transaction t=Transaction.openOuter()) {
+                        storedFluid.extract(fluidToSend.variant(), EmitUtils.sendToAcceptors(target, fluidToSend.amount(), fluidToSend), t);
+                        t.commit();
+                    }
                 }
             });
         }
@@ -335,18 +335,29 @@ public class InventoryFrequency extends Frequency implements IMekanismInventory,
 
     private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> void addChemicalTransferHandler(TransmissionType chemicalType,
           IChemicalTank<CHEMICAL, STACK> tank, Map<TransmissionType, BiConsumer<BlockEntity, Direction>> typesToEject, List<Runnable> transferHandlers, int expected) {
-        STACK toSend = tank.extract(tank.getCapacity(), Action.SIMULATE, AutomationType.INTERNAL);
+        long toSendAmount;
+        try(Transaction t=Transaction.openOuter()) {
+            toSendAmount = tank.extract(tank.getResource(), tank.getCapacity(), t);
+        }
+        STACK toSend = (STACK) tank.getResource().getStack(toSendAmount);
         if (!toSend.isEmpty()) {
-            Capability<IChemicalHandler<CHEMICAL, STACK>> capability = ChemicalUtil.getCapabilityForChemical(toSend);
-            ChemicalHandlerTarget<CHEMICAL, STACK, IChemicalHandler<CHEMICAL, STACK>> target = new ChemicalHandlerTarget<>(toSend, expected);
-            typesToEject.put(chemicalType, (tile, side) -> CapabilityUtils.getCapability(tile, capability, side.getOpposite()).ifPresent(handler -> {
-                if (ChemicalUtil.canInsert(handler, toSend)) {
-                    target.addHandler(handler);
+            BlockApiLookup<IChemicalHandler<CHEMICAL, STACK, ?>, Direction> capability = ChemicalUtil.getBlockLookupForChemical(toSend);
+            ChemicalHandlerTarget<CHEMICAL, STACK, IChemicalHandler<CHEMICAL, STACK, ?>> target = new ChemicalHandlerTarget<>(toSend, expected);
+            typesToEject.put(chemicalType, (tile, side) -> {
+                IChemicalHandler<CHEMICAL, STACK, ?> handler = capability.find(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
+                if(handler != null) {
+                    if (ChemicalUtil.canInsert(handler, toSend)) {
+                        target.addHandler(handler);
+                    }
                 }
-            }));
+            });
             transferHandlers.add(() -> {
                 if (target.getHandlerCount() > 0) {
-                    tank.extract(EmitUtils.sendToAcceptors(target, toSend.getAmount(), toSend), Action.EXECUTE, AutomationType.INTERNAL);
+                    long amountExtract = EmitUtils.sendToAcceptors(target, toSend.getAmount(), toSend);
+                    try(Transaction t=Transaction.openOuter()) {
+                        tank.extract(tank.getResource(), amountExtract, t);
+                        t.commit();
+                    }
                 }
             });
         }

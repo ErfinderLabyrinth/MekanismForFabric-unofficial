@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import mekanism.client.RobitSpriteUploader;
 import mekanism.client.model.MekanismModelCache;
+import mekanism.client.model.robit.RobitBakedModel;
 import mekanism.client.render.entity.RenderRobit.RobitModelWrapper;
 import mekanism.common.Mekanism;
 import mekanism.common.entity.EntityRobit;
@@ -56,13 +57,13 @@ public class RenderRobit extends MobRenderer<EntityRobit, RobitModelWrapper> {
             if (model == null) {
                 //No model means we can't render (this shouldn't happen as we try to fall back to the default skin)
                 Mekanism.logger.warn("Robit with skin: {} does not have a model. If this happened during a resource reload this can be ignored.", skinLookup.location());
-            } else {
+            } else if(model instanceof RobitBakedModel robitBakedModel) {
                 matrix.pushPose();
                 matrix.mulPose(Axis.XP.rotationDegrees(180));
                 matrix.translate(-0.5, -1.5, -0.5);
                 PoseStack.Pose last = matrix.last();
-                for (BakedQuad quad : model.getQuads(null, null, robit.level().random, robit.getModelData(), null)) {
-                    builder.putBulkData(last, quad, red, green, blue, alpha, light, overlayLight, false);
+                for (BakedQuad quad : robitBakedModel.getQuads(null, null, robit.level().random, robit.getSkin())) {
+                    builder.putBulkData(last, quad, red, green, blue, light, overlayLight);
                 }
                 matrix.popPose();
             }

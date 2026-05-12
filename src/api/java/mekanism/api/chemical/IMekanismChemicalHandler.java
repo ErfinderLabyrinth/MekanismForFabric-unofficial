@@ -1,16 +1,21 @@
 package mekanism.api.chemical;
 
 import java.util.List;
+
+import com.google.common.collect.Iterators;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
 public interface IMekanismChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>>
-      extends ISidedChemicalHandler<CHEMICAL, STACK>, IContentsListener {
+      extends ISidedChemicalHandler<CHEMICAL, STACK, TANK>, IContentsListener {
 
     /**
      * Used to check if an instance of {@link IMekanismChemicalHandler} actually has the ability to handle chemicals.
@@ -46,52 +51,81 @@ public interface IMekanismChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, S
      *
      * @return The {@link TANK} that has the given index from the list of tanks on the given side.
      */
+    @Deprecated(forRemoval = true)
     @Nullable
-    default TANK getChemicalTank(int tank, @Nullable Direction side) {
+    default STACK getChemicalStack(int tank, @Nullable Direction side) {
         List<TANK> tanks = getChemicalTanks(side);
-        return tank >= 0 && tank < tanks.size() ? tanks.get(tank) : null;
-    }
-
-    @Override
-    default int getTanks(@Nullable Direction side) {
-        return getChemicalTanks(side).size();
-    }
-
-    @Override
-    default STACK getChemicalInTank(int tank, @Nullable Direction side) {
-        TANK chemicalTank = getChemicalTank(tank, side);
-        return chemicalTank == null ? getEmptyStack() : chemicalTank.getStack();
-    }
-
-    @Override
-    default void setChemicalInTank(int tank, STACK stack, @Nullable Direction side) {
-        TANK chemicalTank = getChemicalTank(tank, side);
-        if (chemicalTank != null) {
-            chemicalTank.setStack(stack);
+        if (tank >= 0 && tank < getChemicalTanks(side).size()) {
+            StorageView<CHEMICAL> view = getChemicalTanks(side).get(tank);
+            return (STACK) view.getResource().getStack(view.getAmount());
         }
+        return null;
     }
 
     @Override
-    default long getTankCapacity(int tank, @Nullable Direction side) {
-        TANK chemicalTank = getChemicalTank(tank, side);
-        return chemicalTank == null ? 0 : chemicalTank.getCapacity();
+    default List<TANK> getTanks(@Nullable Direction side) {
+        return getChemicalTanks(side);
     }
 
-    @Override
-    default boolean isValid(int tank, STACK stack, @Nullable Direction side) {
-        TANK chemicalTank = getChemicalTank(tank, side);
-        return chemicalTank != null && chemicalTank.isValid(stack);
-    }
+//    @Override
+//    @Deprecated(forRemoval = true)
+//    default STACK getChemicalInTank(int tank, @Nullable Direction side) {
+//        STACK chemicalStack = getChemicalStack(tank, side);
+//        return chemicalStack == null ? getEmptyStack() : chemicalStack;
+//    }
 
-    @Override
-    default STACK insertChemical(int tank, STACK stack, @Nullable Direction side, Action action) {
-        TANK chemicalTank = getChemicalTank(tank, side);
-        return chemicalTank == null ? stack : chemicalTank.insert(stack, action, side == null ? AutomationType.INTERNAL : AutomationType.EXTERNAL);
-    }
+//    @Override
+//    @Deprecated(forRemoval = true)
+//    default void setChemicalInTank(int tank, STACK stack, @Nullable Direction side) {
+//        List<TANK> tanks = getChemicalTanks(side);
+//        if (tank >= 0 && tank < getChemicalTanks(side).size()) {
+//            TANK view = getChemicalTanks(side).get(tank);
+//            System.out.println("IMekanismChemicalHandler: Try to set the stack, but not supported");
+//        }
+//    }
 
-    @Override
-    default STACK extractChemical(int tank, long amount, @Nullable Direction side, Action action) {
-        TANK chemicalTank = getChemicalTank(tank, side);
-        return chemicalTank == null ? getEmptyStack() : chemicalTank.extract(amount, action, side == null ? AutomationType.INTERNAL : AutomationType.EXTERNAL);
-    }
+//    @Override
+//    @Deprecated(forRemoval = true)
+//    default long getTankCapacity(int tank, @Nullable Direction side) {
+//        List<TANK> tanks = getChemicalTanks(side);
+//        if (tank >= 0 && tank < getChemicalTanks(side).size()) {
+//            TANK view = getChemicalTanks(side).get(tank);
+//            return view.getCapacity();
+//        }
+//        return 0;
+//    }
+
+//    @Override
+//    @Deprecated(forRemoval = true)
+//    default boolean isValid(int tank, STACK stack, @Nullable Direction side) {
+//        STACK chemicalStack = getChemicalStack(tank, side);
+//        return chemicalStack != null && chemicalStack.getType().equals(stack.getType());
+//    }
+
+//    @Override
+//    @Deprecated(forRemoval = true)
+//    default STACK insertChemical(int tank, STACK stack, @Nullable Direction side, Action action) {
+//        Storage<CHEMICAL> tanks = getChemicalTanks(side);
+//        if (tank >= 0 && tank < Iterators.size(getChemicalTanks(side).iterator())) {
+//            StorageView<CHEMICAL> view = Iterators.get(getChemicalTanks(side).iterator(), tank);
+//            System.out.println("IMekanismChemicalHandler: Try to insert to tank, but not supported");
+//        }
+//        return null;
+//    }
+
+//    @Override
+//    @Deprecated(forRemoval = true)
+//    default long extract(int tank, long amount, @Nullable Direction side, Action action) {
+//        List<TANK> tanks = getChemicalTanks(side);
+//        if (tank >= 0 && tank < Iterators.size(getChemicalTanks(side).iterator())) {
+//            StorageView<CHEMICAL> view = Iterators.get(getChemicalTanks(side).iterator(), tank);
+//            long amountExtracted = 0;
+//            try(Transaction transaction = Transaction.openOuter()) {
+//                amountExtracted = view.extract(view.getResource(), amount, transaction);
+//                transaction.commit();
+//            }
+//            return (STACK) view.getResource().getStack(amountExtracted);
+//        }
+//        return null;
+//    }
 }

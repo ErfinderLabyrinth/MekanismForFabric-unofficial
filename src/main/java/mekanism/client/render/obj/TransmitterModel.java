@@ -1,41 +1,36 @@
 package mekanism.client.render.obj;
 
-import java.util.function.Function;
+import mekanism.client.model.CustomGeometry;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
-import net.minecraftforge.client.model.obj.ObjModel;
 import org.jetbrains.annotations.Nullable;
 
-public class TransmitterModel implements IUnbakedGeometry<TransmitterModel> {
+import java.util.function.Function;
 
-    private final ObjModel internal;
+public class TransmitterModel extends CustomGeometry {
+
+    private final UnbakedModel internal;
     @Nullable
-    private final ObjModel glass;
+    private final UnbakedModel glass;
 
-    public TransmitterModel(ObjModel internalModel, @Nullable ObjModel glass) {
+    public TransmitterModel(UnbakedModel internalModel, @Nullable UnbakedModel glass) {
         this.internal = internalModel;
         this.glass = glass;
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
+    public BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
           ItemOverrides overrides, ResourceLocation modelLocation) {
-        return new TransmitterBakedModel(internal, glass, owner, baker, spriteGetter, modelTransform, overrides, modelLocation);
+        return new TransmitterBakedModel(internal, glass, baker, spriteGetter, modelTransform, overrides, modelLocation);
     }
 
     @Override
-    public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, IGeometryBakingContext context) {
-        internal.resolveParents(modelGetter, context);
+    public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
+        internal.resolveParents(modelGetter);
         if (glass != null) {
-            glass.resolveParents(modelGetter, context);
+            glass.resolveParents(modelGetter);
         }
     }
 }

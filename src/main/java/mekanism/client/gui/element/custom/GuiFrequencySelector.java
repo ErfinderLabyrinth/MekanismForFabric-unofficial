@@ -1,8 +1,5 @@
 package mekanism.client.gui.element.custom;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.text.APILang;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
@@ -21,12 +18,8 @@ import mekanism.client.gui.element.window.GuiConfirmationDialog.DialogType;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.item.FrequencyItemContainer;
-import mekanism.common.lib.frequency.Frequency;
+import mekanism.common.lib.frequency.*;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
-import mekanism.common.lib.frequency.FrequencyManager;
-import mekanism.common.lib.frequency.FrequencyType;
-import mekanism.common.lib.frequency.IColorableFrequency;
-import mekanism.common.lib.frequency.IFrequencyHandler;
 import mekanism.common.network.to_server.PacketGuiSetFrequency;
 import mekanism.common.network.to_server.PacketGuiSetFrequency.FrequencyUpdate;
 import mekanism.common.network.to_server.PacketGuiSetFrequencyColor;
@@ -37,6 +30,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class GuiFrequencySelector<FREQ extends Frequency> extends GuiElement {
 

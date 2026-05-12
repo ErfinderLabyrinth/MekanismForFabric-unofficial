@@ -1,22 +1,12 @@
 package mekanism.common.integration.computer;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import mekanism.api.Coord4D;
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.math.FloatingLong;
 import mekanism.api.text.EnumColor;
-import mekanism.common.content.filter.FilterType;
-import mekanism.common.content.filter.IFilter;
-import mekanism.common.content.filter.IItemStackFilter;
-import mekanism.common.content.filter.IModIDFilter;
-import mekanism.common.content.filter.ITagFilter;
+import mekanism.common.content.filter.*;
 import mekanism.common.content.miner.MinerFilter;
 import mekanism.common.content.miner.MinerItemStackFilter;
 import mekanism.common.content.miner.MinerModIDFilter;
@@ -37,6 +27,7 @@ import mekanism.common.util.RegistryUtils;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -47,12 +38,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -64,7 +53,7 @@ import java.util.stream.Collectors;
  * convert methods should not wrap results, as they will be used to convert lists/maps
  */
 public abstract class BaseComputerHelper {
-    public static final Lazy<Map<Class<?>, TableType>> BUILTIN_TABLES = Lazy.of(BaseComputerHelper::getBuiltInTables);
+    public static final Map<Class<?>, TableType> BUILTIN_TABLES = BaseComputerHelper.getBuiltInTables();
 
     @NotNull
     private <T> T requireNonNull(int param, @Nullable T value) throws ComputerException {
@@ -162,7 +151,7 @@ public abstract class BaseComputerHelper {
         if (itemName == null) {
             return Items.AIR;
         }
-        Item item = ForgeRegistries.ITEMS.getValue(itemName);
+        Item item = BuiltInRegistries.ITEM.get(itemName);
         if (item != null) {
             return item;
         }
@@ -198,7 +187,7 @@ public abstract class BaseComputerHelper {
     public Object convert(@Nullable FloatingLong result) {
         if (result == null) {
             return 0;
-        } else if (result.getDecimal() == 0 && result.getValue() >= 0) {
+        } else if (result.getDecimal() == 0 && result.longValue() >= 0) {
             return result.longValue();
         }
         return result.doubleValue();
@@ -255,7 +244,7 @@ public abstract class BaseComputerHelper {
         if (stack == null) {
             return null;
         }
-        return SpecialConverters.wrapStack(RegistryUtils.getName(stack.getFluid()), "amount", stack.getAmount(), stack.getTag());
+        return SpecialConverters.wrapStack(RegistryUtils.getName(stack.getFluid()), "amount", stack.amount(), stack.getTag());
     }
 
     public Object convert(@Nullable ItemStack stack) {
@@ -345,7 +334,7 @@ public abstract class BaseComputerHelper {
         } else if (result instanceof IModIDFilter<?> modIDFilter) {
             wrapped.put("modId", modIDFilter.getModID());
         } else if (result instanceof ITagFilter<?> tagFilter) {
-            wrapped.put("tag", tagFilter.getTagName());
+            wrapped.put("tagSupplier", tagFilter.getTagName());
         }
         return wrapped;
     }
@@ -514,7 +503,7 @@ public abstract class BaseComputerHelper {
               .addField("public", boolean.class, "Whether the Frequency is public or not")
               .build(types);
 
-        TableType.builder(IFilter.class, "Common Filter properties. Use the API Global to make constructing these a little easier.\nFilters are a combination of these base properties, an ItemStack or Mod Id or Tag component, and a device specific type.\nThe exception to that is an Oredictionificator filter, which does not have an item/mod/tag component.")
+        TableType.builder(IFilter.class, "Common Filter properties. Use the API Global to make constructing these a little easier.\nFilters are a combination of these base properties, an ItemStack or Mod Id or Tag component, and a device specific type.\nThe exception to that is an Oredictionificator filter, which does not have an item/mod/tagSupplier component.")
               .addField("type", FilterType.class, "The type of filter in this structure")
               .addField("enabled", boolean.class, "Whether the filter is enabled when added to a device")
               .build(types);
@@ -527,7 +516,7 @@ public abstract class BaseComputerHelper {
 
         TableType.builder(OredictionificatorItemFilter.class, "An Oredictionificator filter")
               .extendedFrom(IFilter.class)
-              .addField("target", String.class, "The target tag to match (input)")
+              .addField("target", String.class, "The target tagSupplier to match (input)")
               .addField("selected", Item.class, "The selected output item's registered name. Optional for adding a filter")
               .build(types);
 
@@ -568,7 +557,7 @@ public abstract class BaseComputerHelper {
 
         TableType.builder(tagFilterClass, deviceName + " filter with Tag filter properties")
               .extendedFrom(deviceFilterType)
-              .addField("tag", String.class, "The tag to filter. e.g. forge:ores")
+              .addField("tagSupplier", String.class, "The tagSupplier to filter. e.g. forge:ores")
               .build(types);
     }
 }

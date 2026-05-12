@@ -1,11 +1,5 @@
 package mekanism.common.recipe.upgrade;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.recipe.WrappedShapedRecipe;
 import mekanism.common.registries.MekanismRecipeSerializers;
@@ -14,6 +8,9 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 @NothingNullByDefault
 public class MekanismShapedRecipe extends WrappedShapedRecipe {
@@ -69,7 +66,7 @@ public class MekanismShapedRecipe extends WrappedShapedRecipe {
             if (!upgradeData.isEmpty()) {
                 //Skip any empty data, even though we should never have any
                 RecipeUpgradeData<?> data = RecipeUpgradeData.mergeUpgradeData(upgradeData);
-                if (data == null || !data.applyToStack(toReturn)) {
+                if (data == null || (toReturn = data.applyToStack(toReturn)) == null) {
                     //Fail, incompatible data
                     return ItemStack.EMPTY;
                 }

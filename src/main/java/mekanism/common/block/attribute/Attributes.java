@@ -1,14 +1,8 @@
 package mekanism.common.block.attribute;
 
-import java.util.function.BiFunction;
-import java.util.function.ToIntBiFunction;
 import mekanism.common.block.attribute.Attribute.TileAttribute;
 import mekanism.common.block.states.BlockStateHelper;
-import mekanism.common.lib.multiblock.IInternalMultiblock;
-import mekanism.common.lib.multiblock.IMultiblock;
-import mekanism.common.lib.multiblock.IStructuralMultiblock;
-import mekanism.common.lib.multiblock.MultiblockData;
-import mekanism.common.lib.multiblock.Structure;
+import mekanism.common.lib.multiblock.*;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
@@ -24,6 +18,9 @@ import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BiFunction;
+import java.util.function.ToIntBiFunction;
 
 public class Attributes {
 
@@ -141,7 +138,7 @@ public class Attributes {
                 return false;
             }
             //Super implementation
-            return state.isFaceSturdy(reader, pos, Direction.UP) && state.getLightEmission(reader, pos) < 14;
+            return state.isFaceSturdy(reader, pos, Direction.UP) && state.getLightEmission() < 14;
         });
 
         private final StateArgumentPredicate<EntityType<?>> spawningPredicate;

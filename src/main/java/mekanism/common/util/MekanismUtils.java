@@ -1,5 +1,6 @@
 package mekanism.common.util;
 
+import com.google.common.math.LongMath;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,24 +8,13 @@ import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.longs.Long2DoubleArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import mekanism.api.FluidStack;
+import mekanism.api.MekanismAPI;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.fluid.IExtendedFluidTank;
-import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.FloatingLong;
 import mekanism.api.math.MathUtils;
 import mekanism.api.text.APILang;
@@ -51,18 +41,29 @@ import mekanism.common.util.UnitDisplayUtils.EnergyUnit;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import mekanism.common.util.text.OwnerDisplay;
 import mekanism.common.util.text.UpgradeDisplay;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
@@ -88,23 +89,18 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.UsernameCache;
-import net.minecraftforge.common.util.NonNullSupplier;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.util.thread.EffectiveSide;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 /**
  * Utilities used by Mekanism. All miscellaneous methods are located here.
@@ -114,7 +110,7 @@ import org.jetbrains.annotations.Nullable;
 public final class MekanismUtils {
 
     public static final float ONE_OVER_ROOT_TWO = (float) (1 / Math.sqrt(2));
-    public static final NonNullSupplier<IllegalStateException> MISSING_CAP_ERROR = () -> new IllegalStateException("Capability is somehow not present after isPresent checks");
+    public static final Supplier<IllegalStateException> MISSING_CAP_ERROR = () -> new IllegalStateException("Capability is somehow not present after isPresent checks");
     private static final ItemStack MILK = new ItemStack(Items.MILK_BUCKET);
 
     private static final List<UUID> warnedFails = new ArrayList<>();
@@ -134,6 +130,12 @@ public final class MekanismUtils {
         }
     }
 
+    public static void logExpectedZero(long actual) {
+        if (actual != 0) {
+            Mekanism.logger.error("Energy value changed by a different amount ({}) than requested (zero).", actual, new Exception());
+        }
+    }
+
     public static Component logFormat(Object message) {
         return logFormat(EnumColor.GRAY, message);
     }
@@ -144,7 +146,8 @@ public final class MekanismUtils {
 
     @Nullable
     public static Player tryGetClientPlayer() {
-        if (FMLEnvironment.dist.isClient()) {
+        //if (FMLEnvironment.dist.isClient()) {
+        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return MekanismClient.tryGetClientPlayer();
         }
         //Note: Ideally we would have some way to get which player is in question on the server
@@ -160,15 +163,15 @@ public final class MekanismUtils {
     @NotNull
     public static String getModId(@NotNull ItemStack stack) {
         Item item = stack.getItem();
-        String modid = item.getCreatorModId(stack);
-        if (modid == null) {
-            ResourceLocation registryName = RegistryUtils.getName(item);
-            if (registryName == null) {
-                Mekanism.logger.error("Unexpected null registry name for item of class type: {}", item.getClass().getSimpleName());
-                return "";
-            }
-            return registryName.getNamespace();
-        }
+        String modid = BuiltInRegistries.ITEM.getKey(item).getNamespace();
+//        if (modid == null) {
+//            ResourceLocation registryName = RegistryUtils.getName(item);
+//            if (registryName == null) {
+//                Mekanism.logger.error("Unexpected null registry name for item of class type: {}", item.getClass().getSimpleName());
+//                return "";
+//            }
+//            return registryName.getNamespace();
+//        }
         return modid;
     }
 
@@ -218,7 +221,7 @@ public final class MekanismUtils {
     }
 
     public static float getScale(float prevScale, IExtendedFluidTank tank) {
-        return getScale(prevScale, tank.getFluidAmount(), tank.getCapacity(), tank.isEmpty());
+        return getScale(prevScale, tank.getAmount(), tank.getCapacity(), tank.isEmpty());
     }
 
     public static float getScale(float prevScale, IChemicalTank<?, ?> tank) {
@@ -236,14 +239,14 @@ public final class MekanismUtils {
 
     public static float getScale(float prevScale, IEnergyContainer container) {
         float targetScale;
-        FloatingLong stored = container.getEnergy();
-        FloatingLong capacity = container.getMaxEnergy();
-        if (capacity.isZero()) {
+        long stored = container.getEnergy();
+        long capacity = container.getMaxEnergy();
+        if (capacity == 0) {
             targetScale = 0;
         } else {
-            targetScale = stored.divide(capacity).floatValue();
+            targetScale = (float)stored / capacity;
         }
-        return getScale(prevScale, targetScale, container.isEmpty(), stored.equals(capacity));
+        return getScale(prevScale, targetScale, container.isEmpty(), stored == capacity);
     }
 
     public static float getScale(float prevScale, float targetScale, boolean empty, boolean full) {
@@ -274,7 +277,7 @@ public final class MekanismUtils {
                 // def * upgradeMultiplier ^ ((speed - gas) / 8)
                 //TODO: We may want to validate this provides the numbers we desire if we ever end up with any machines
                 // that use this that are not statistical and have gas upgrades so would go through this code path
-                return Math.round(def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(),
+                return Math.round(def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier,
                       fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.GAS)));
             }
             //If it doesn't support gas upgrades, we can fall through to the default value as the math would be:
@@ -294,7 +297,7 @@ public final class MekanismUtils {
      */
     public static int getTicks(IUpgradeTile tile, int def) {
         if (tile.supportsUpgrades()) {
-            return MathUtils.clampToInt(def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), -fractionUpgrades(tile, Upgrade.SPEED)));
+            return MathUtils.clampToInt(def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier, -fractionUpgrades(tile, Upgrade.SPEED)));
         }
         return def;
     }
@@ -307,9 +310,9 @@ public final class MekanismUtils {
      *
      * @return required energy per tick
      */
-    public static FloatingLong getEnergyPerTick(IUpgradeTile tile, FloatingLong def) {
+    public static long getEnergyPerTick(IUpgradeTile tile, long def) {
         if (tile.supportsUpgrades()) {
-            return def.multiply(Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), 2 * fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.ENERGY)));
+            return (long) (def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier, 2 * fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.ENERGY)));
         }
         return def;
     }
@@ -324,9 +327,9 @@ public final class MekanismUtils {
     public static double getGasPerTickMeanMultiplier(IUpgradeTile tile) {
         if (tile.supportsUpgrades()) {
             if (tile.supportsUpgrade(Upgrade.GAS)) {
-                return Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), 2 * fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.GAS));
+                return Math.pow(MekanismConfig.general.maxUpgradeMultiplier, 2 * fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.GAS));
             }
-            return Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), fractionUpgrades(tile, Upgrade.SPEED));
+            return Math.pow(MekanismConfig.general.maxUpgradeMultiplier, fractionUpgrades(tile, Upgrade.SPEED));
         }
         return 1;
     }
@@ -339,9 +342,9 @@ public final class MekanismUtils {
      *
      * @return max energy
      */
-    public static FloatingLong getMaxEnergy(IUpgradeTile tile, FloatingLong def) {
+    public static long getMaxEnergy(IUpgradeTile tile, long def) {
         if (tile.supportsUpgrades()) {
-            return def.multiply(Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), fractionUpgrades(tile, Upgrade.ENERGY)));
+            return (long) (def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier, fractionUpgrades(tile, Upgrade.ENERGY)));
         }
         return def;
     }
@@ -354,13 +357,13 @@ public final class MekanismUtils {
      *
      * @return max energy
      */
-    public static FloatingLong getMaxEnergy(ItemStack stack, FloatingLong def) {
+    public static long getMaxEnergy(ItemStack stack, long def) {
         float numUpgrades = 0;
         if (ItemDataUtils.hasData(stack, NBTConstants.COMPONENT_UPGRADE, Tag.TAG_COMPOUND)) {
             Map<Upgrade, Integer> upgrades = Upgrade.buildMap(ItemDataUtils.getCompound(stack, NBTConstants.COMPONENT_UPGRADE));
             numUpgrades = upgrades.getOrDefault(Upgrade.ENERGY, 0);
         }
-        return def.multiply(Math.pow(MekanismConfig.general.maxUpgradeMultiplier.get(), numUpgrades / Upgrade.ENERGY.getMax()));
+        return (long) (def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier, numUpgrades / Upgrade.ENERGY.getMax()));
     }
 
     /**
@@ -395,11 +398,13 @@ public final class MekanismUtils {
     }
 
     public static boolean lighterThanAirGas(FluidStack stack) {
-        return stack.getFluid().is(Tags.Fluids.GASEOUS) && stack.getFluid().getFluidType().getDensity(stack) <= 0;
+        TagKey<Fluid> gaseousTag = TagKey.create(Registries.FLUID, new ResourceLocation(MekanismAPI.MEKANISM_MODID, "gaseous"));
+        boolean isGas = BuiltInRegistries.FLUID.wrapAsHolder(stack.getFluid()).is(gaseousTag);
+        return isGas && FluidVariantAttributes.isLighterThanAir(stack.variant());
     }
 
     public static int getEnchantmentLevel(ListTag enchantments, Enchantment enchantment) {
-        //Copy of EnchantmentHelper#getTagEnchantmentLevel except modified to support being passed a tag
+        //Copy of EnchantmentHelper#getTagEnchantmentLevel except modified to support being passed a tagSupplier
         ResourceLocation enchantmentId = EnchantmentHelper.getEnchantmentId(enchantment);
         for (int i = 0; i < enchantments.size(); ++i) {
             CompoundTag compoundtag = enchantments.getCompound(i);
@@ -413,7 +418,7 @@ public final class MekanismUtils {
 
     public static boolean isLiquidBlock(Block block) {
         //Treat bubble columns as liquids
-        return block instanceof LiquidBlock || block instanceof BubbleColumnBlock || block instanceof IFluidBlock;
+        return block instanceof LiquidBlock || block instanceof BubbleColumnBlock;
     }
 
     /**
@@ -428,7 +433,14 @@ public final class MekanismUtils {
     }
 
     public static BlockHitResult rayTrace(Player player, ClipContext.Fluid fluidMode) {
-        return rayTrace(player, player.getBlockReach(), fluidMode);
+        return rayTrace(player, getBlockReach(player), fluidMode);
+    }
+
+    public static double getBlockReach(Player player) {
+        if (player.isCreative()) {
+            return 5.0D;
+        }
+        return 4.5D;
     }
 
     public static BlockHitResult rayTrace(Player player, double reach) {
@@ -499,9 +511,9 @@ public final class MekanismUtils {
               .forEach((upgrade, level) -> tooltip.add(UpgradeDisplay.of(upgrade, level).getTextComponent())));
     }
 
-    public static Component getEnergyDisplayShort(FloatingLong energy) {
+    public static Component getEnergyDisplayShort(double energy) {
         EnergyUnit configured = EnergyUnit.getConfigured();
-        return UnitDisplayUtils.getDisplayShort(configured.convertTo(energy), configured);
+        return UnitDisplayUtils.getDisplayShort(configured.convertTo((long) energy), configured);
     }
 
     /**
@@ -511,7 +523,7 @@ public final class MekanismUtils {
      *
      * @return energy converted to joules
      */
-    public static FloatingLong convertToJoules(FloatingLong energy) {
+    public static long convertToJoules(long energy) {
         return EnergyUnit.getConfigured().convertFrom(energy);
     }
 
@@ -522,7 +534,7 @@ public final class MekanismUtils {
      *
      * @return energy converted to configured unit
      */
-    public static FloatingLong convertToDisplay(FloatingLong energy) {
+    public static long convertToDisplay(long energy) {
         return EnergyUnit.getConfigured().convertTo(energy);
     }
 
@@ -535,7 +547,7 @@ public final class MekanismUtils {
      */
     public static Component getTemperatureDisplay(double temp, TemperatureUnit unit, boolean shift) {
         double tempKelvin = unit.convertToK(temp, true);
-        return UnitDisplayUtils.getDisplayShort(tempKelvin, MekanismConfig.common.tempUnit.get(), shift);
+        return UnitDisplayUtils.getDisplayShort(tempKelvin, MekanismConfig.common.tempUnit, shift);
     }
 
     public static CraftingContainer getDummyCraftingInv() {
@@ -555,7 +567,7 @@ public final class MekanismUtils {
     }
 
     /**
-     * Gets the wrench if the item is an IMekWrench, or a generic implementation if the item is in the forge wrenches tag
+     * Gets the wrench if the item is an IMekWrench, or a generic implementation if the item is in the forge wrenches tagSupplier
      */
     public static boolean canUseAsWrench(ItemStack stack) {
         if (stack.isEmpty()) {
@@ -567,13 +579,15 @@ public final class MekanismUtils {
     }
 
     @NotNull
-    public static String getLastKnownUsername(@Nullable UUID uuid) {
+    public static String getLastKnownUsername(@Nullable UUID uuid, @Nullable MinecraftServer server) {
         if (uuid == null) {
             return "<???>";
         }
-        String ret = UsernameCache.getLastKnownUsername(uuid);
-        if (ret == null && !warnedFails.contains(uuid) && EffectiveSide.get().isServer()) { // see if MC/Yggdrasil knows about it?!
-            Optional<GameProfile> gp = ServerLifecycleHooks.getCurrentServer().getProfileCache().get(uuid);
+
+        String ret = null;
+
+        if (!warnedFails.contains(uuid) && server != null) { // see if MC/Yggdrasil knows about it?!
+            Optional<GameProfile> gp = server.getProfileCache().get(uuid);
             if (gp.isPresent()) {
                 ret = gp.get().getName();
             }
@@ -601,7 +615,7 @@ public final class MekanismUtils {
 
     public static boolean shouldSpeedUpEffect(MobEffectInstance effectInstance) {
         //Only allow speeding up effects that can be sped up by milk. Also validate it isn't blacklisted by the modpack
-        return effectInstance.isCurativeItem(MILK) && !MekanismTags.MobEffects.SPEED_UP_BLACKLIST_LOOKUP.contains(effectInstance.getEffect());
+        return /*effectInstance.isCurativeItem(MILK) &&*/ !MekanismTags.MobEffects.SPEED_UP_BLACKLIST_LOOKUP.contains(effectInstance.getEffect());
     }
 
     /**
@@ -693,15 +707,15 @@ public final class MekanismUtils {
      *
      * @return A redstone level based on the percentage of the amount stored.
      */
-    public static int redstoneLevelFromContents(List<IInventorySlot> slots) {
+    public static int redstoneLevelFromContents(Storage<ItemVariant> slots) {
         long totalCount = 0;
         long totalLimit = 0;
-        for (IInventorySlot slot : slots) {
-            if (slot.isEmpty()) {
-                totalLimit += slot.getLimit(ItemStack.EMPTY);
+        for (StorageView<ItemVariant> slot : slots) {
+            if (slot.isResourceBlank() || slot.getAmount() == 0) {
+                totalLimit += slot.getCapacity();
             } else {
-                totalCount += slot.getCount();
-                totalLimit += slot.getLimit(slot.getStack());
+                totalCount += slot.getAmount();
+                totalLimit += slot.getCapacity();
             }
         }
         return redstoneLevelFromContents(totalCount, totalLimit);
@@ -746,7 +760,7 @@ public final class MekanismUtils {
      * Similar in concept to {@link net.minecraft.world.entity.Entity#updateFluidHeightAndDoFluidPushing()} except calculates if a given portion of the player is in the
      * fluids.
      */
-    public static Map<FluidType, FluidInDetails> getFluidsIn(Player player, UnaryOperator<AABB> modifyBoundingBox) {
+    public static Map<Fluid, FluidInDetails> getFluidsIn(Player player, UnaryOperator<AABB> modifyBoundingBox) {
         AABB bb = modifyBoundingBox.apply(player.getBoundingBox().deflate(0.001));
         int xMin = Mth.floor(bb.minX);
         int xMax = Mth.ceil(bb.maxX);
@@ -758,7 +772,7 @@ public final class MekanismUtils {
             //If the position isn't actually loaded, just return there isn't any fluids
             return Collections.emptyMap();
         }
-        Map<FluidType, FluidInDetails> fluidsIn = new IdentityHashMap<>();
+        Map<Fluid, FluidInDetails> fluidsIn = new IdentityHashMap<>();
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         for (int x = xMin; x < xMax; ++x) {
             for (int y = yMin; y < yMax; ++y) {
@@ -769,7 +783,7 @@ public final class MekanismUtils {
                         double fluidY = y + fluidState.getHeight(player.level(), mutablePos);
                         if (bb.minY <= fluidY) {
                             //The fluid intersects the bounding box
-                            FluidInDetails details = fluidsIn.computeIfAbsent(fluidState.getFluidType(), f -> new FluidInDetails());
+                            FluidInDetails details = fluidsIn.computeIfAbsent(fluidState.getType(), f -> new FluidInDetails());
                             details.positions.put(mutablePos.immutable(), fluidState);
                             double actualFluidHeight;
                             if (fluidY > bb.maxY) {
@@ -791,12 +805,12 @@ public final class MekanismUtils {
         return fluidsIn;
     }
 
-    public static void veinMineArea(IEnergyContainer energyContainer, FloatingLong energyRequired, Level world, BlockPos pos, ServerPlayer player, ItemStack stack, Item usedTool,
-          Object2IntMap<BlockPos> found, BlastEnergyFunction blastEnergy, VeinEnergyFunction veinEnergy) {
-        FloatingLong energyUsed = FloatingLong.ZERO;
-        FloatingLong energyAvailable = energyContainer.getEnergy();
+    public static void veinMineArea(EnergyStorage energyStorage, long energyRequired, Level world, BlockPos pos, ServerPlayer player, ItemStack stack, Item usedTool,
+                                    Object2IntMap<BlockPos> found, BlastEnergyFunction blastEnergy, VeinEnergyFunction veinEnergy) {
+        long energyUsed = 0;
+        long energyAvailable = energyStorage.getAmount();
         //Subtract from our available energy the amount that we will require to break the target block
-        energyAvailable = energyAvailable.subtract(energyRequired);
+        energyAvailable -= energyRequired;
         for (Object2IntMap.Entry<BlockPos> foundEntry : found.object2IntEntrySet()) {
             BlockPos foundPos = foundEntry.getKey();
             if (pos.equals(foundPos)) {
@@ -811,16 +825,16 @@ public final class MekanismUtils {
                 continue;
             }
             int distance = foundEntry.getIntValue();
-            FloatingLong destroyEnergy = distance == 0 ? blastEnergy.calc(hardness) : veinEnergy.calc(hardness, distance, targetState);
-            if (energyUsed.add(destroyEnergy).greaterThan(energyAvailable)) {
+            long destroyEnergy = distance == 0 ? blastEnergy.calc(hardness) : veinEnergy.calc(hardness, distance, targetState);
+            if (energyUsed + destroyEnergy >= energyAvailable) {
                 //If we don't have energy to break the block continue
                 //Note: We do not break as given the energy scales with hardness, so it is possible we still have energy to break another block
                 // Given we validate the blocks are the same but their block states may be different thus making them have different
                 // block hardness values in a modded context
                 continue;
             }
-            int exp = ForgeHooks.onBlockBreakEvent(world, player.gameMode.getGameModeForPlayer(), player, foundPos);
-            if (exp == -1) {
+            boolean success = PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(world, player, foundPos, world.getBlockState(foundPos), world.getBlockEntity(foundPos));
+            if (!success) {
                 //If we can't actually break the block continue (this allows mods to stop us from vein mining into protected land)
                 continue;
             }
@@ -829,20 +843,20 @@ public final class MekanismUtils {
             //Get the tile now so that we have it for when we try to harvest the block
             BlockEntity tileEntity = WorldUtils.getTileEntity(world, foundPos);
             //Remove the block
-            if (targetState.onDestroyedByPlayer(world, foundPos, player, true, targetState.getFluidState())) {
+            if (world.removeBlock(foundPos, false)) {
                 block.destroy(world, foundPos, targetState);
                 //Harvest the block allowing it to handle block drops, incrementing block mined count, and adding exhaustion
                 block.playerDestroy(world, player, foundPos, targetState, tileEntity, stack);
                 player.awardStat(Stats.ITEM_USED.get(usedTool));
-                if (exp > 0) {
-                    //If we have xp drop it
-                    block.popExperience((ServerLevel) world, foundPos, exp);
-                }
+
                 //Mark that we used that portion of the energy
-                energyUsed = energyUsed.plusEqual(destroyEnergy);
+                energyUsed = LongMath.saturatedAdd(energyUsed, destroyEnergy);
             }
         }
-        energyContainer.extract(energyUsed, Action.EXECUTE, AutomationType.MANUAL);
+        try (Transaction t=Transaction.openOuter()) {
+            energyStorage.extract(energyUsed, t);
+            t.commit();
+        }
     }
 
     public enum ResourceType {
@@ -893,12 +907,12 @@ public final class MekanismUtils {
     @FunctionalInterface
     public interface BlastEnergyFunction {
 
-        FloatingLong calc(float hardness);
+        long calc(float hardness);
     }
 
     @FunctionalInterface
     public interface VeinEnergyFunction {
 
-        FloatingLong calc(float hardness, int distance, BlockState state);
+        long calc(float hardness, int distance, BlockState state);
     }
 }

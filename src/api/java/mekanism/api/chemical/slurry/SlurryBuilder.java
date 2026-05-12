@@ -4,6 +4,7 @@ import java.util.Objects;
 import mekanism.api.MekanismAPI;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalBuilder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -55,16 +56,16 @@ public class SlurryBuilder extends ChemicalBuilder<Slurry, SlurryBuilder> {
     }
 
     /**
-     * Sets the tag that represents the ore that goes with this {@link Slurry}.
+     * Sets the tagSupplier that represents the ore that goes with this {@link Slurry}.
      *
-     * @param oreTagLocation {@link ResourceLocation} of the item tag representing the ore.
+     * @param oreTagLocation {@link ResourceLocation} of the item tagSupplier representing the ore.
      */
     public SlurryBuilder ore(ResourceLocation oreTagLocation) {
-        return ore(ItemTags.create(Objects.requireNonNull(oreTagLocation)));
+        return ore(TagKey.create(Registries.ITEM, oreTagLocation));
     }
 
     /**
-     * Sets the tag that represents the ore that goes with this {@link Slurry}.
+     * Sets the tagSupplier that represents the ore that goes with this {@link Slurry}.
      *
      * @param oreTag Tag representing the ore.
      */
@@ -74,7 +75,7 @@ public class SlurryBuilder extends ChemicalBuilder<Slurry, SlurryBuilder> {
     }
 
     /**
-     * Gets the item tag that represents the ore that goes with this {@link Slurry}.
+     * Gets the item tagSupplier that represents the ore that goes with this {@link Slurry}.
      */
     @Nullable
     public TagKey<Item> getOreTag() {

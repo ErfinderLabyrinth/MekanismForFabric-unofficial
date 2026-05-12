@@ -1,16 +1,10 @@
 package mekanism.common.content.network;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IMekanismStrictEnergyHandler;
 import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.math.FloatingLong;
+import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
@@ -20,14 +14,16 @@ import mekanism.common.content.network.transmitter.UniversalCable;
 import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.text.EnergyDisplay;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
-public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, EnergyNetwork, FloatingLong, UniversalCable> implements IMekanismStrictEnergyHandler {
+import java.util.*;
+
+public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, EnergyNetwork, Long, UniversalCable> implements IMekanismStrictEnergyHandler {
 
     private final List<IEnergyContainer> energyContainers;
     public final VariableCapacityEnergyContainer energyContainer;
@@ -36,7 +32,7 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
 
     public EnergyNetwork(UUID networkID) {
         super(networkID);
-        energyContainer = VariableCapacityEnergyContainer.create(this::getCapacityAsFloatingLong, BasicEnergyContainer.alwaysTrue, BasicEnergyContainer.alwaysTrue, this);
+        energyContainer = VariableCapacityEnergyContainer.create(this::getCapacity, BasicEnergyContainer.alwaysTrue, BasicEnergyContainer.alwaysTrue, this);
         energyContainers = Collections.singletonList(energyContainer);
     }
 
@@ -47,8 +43,8 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
 
     @Override
     protected void forceScaleUpdate() {
-        if (!energyContainer.isEmpty() && !energyContainer.getMaxEnergy().isZero()) {
-            currentScale = Math.min(1, energyContainer.getEnergy().divide(energyContainer.getMaxEnergy()).floatValue());
+        if (!energyContainer.isEmpty() && energyContainer.getMaxEnergy() != 0) {
+            currentScale = Math.min(1, (float)(energyContainer.getEnergy() / energyContainer.getMaxEnergy()));
         } else {
             currentScale = 0;
         }
@@ -64,31 +60,31 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
         FloatingLong capacity = getCapacityAsFloatingLong();
         currentScale = Math.min(1, capacity.isZero() ? 0 : ourScale.add(theirScale).divide(getCapacityAsFloatingLong()).floatValue());
         if (!isRemote() && !net.energyContainer.isEmpty()) {
-            energyContainer.setEnergy(energyContainer.getEnergy().add(net.getBuffer()));
-            net.energyContainer.setEmpty();
+            energyContainer.setEnergy(energyContainer.getEnergy() + net.getBuffer());
+            net.energyContainer.setEnergy(0);
         }
         return transmittersToUpdate;
     }
 
     @NotNull
     @Override
-    public FloatingLong getBuffer() {
+    public Long getBuffer() {
         return energyContainer.getEnergy();
     }
 
     @Override
     public void absorbBuffer(UniversalCable transmitter) {
-        FloatingLong energy = transmitter.releaseShare();
-        if (!energy.isZero()) {
-            energyContainer.setEnergy(energyContainer.getEnergy().add(energy));
+        long energy = transmitter.releaseShare();
+        if (energy != 0) {
+            energyContainer.setEnergy(energyContainer.getEnergy() + energy);
         }
     }
 
     @Override
     public void clampBuffer() {
         if (!energyContainer.isEmpty()) {
-            FloatingLong capacity = getCapacityAsFloatingLong();
-            if (energyContainer.getEnergy().greaterThan(capacity)) {
+            long capacity = getCapacity();
+            if (energyContainer.getEnergy() > capacity) {
                 energyContainer.setEnergy(capacity);
             }
         }
@@ -122,18 +118,22 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
         super.updateSaveShares(triggerTransmitter);
         if (!isEmpty()) {
             EnergyTransmitterSaveTarget saveTarget = new EnergyTransmitterSaveTarget(transmitters);
-            EmitUtils.sendToAcceptors(saveTarget, energyContainer.getEnergy().copy());
+            EmitUtils.sendToAcceptors(saveTarget, FloatingLong.create(energyContainer.getEnergy()));
             saveTarget.saveShare();
         }
     }
 
     private FloatingLong tickEmit(FloatingLong energyToSend) {
-        Collection<Map<Direction, LazyOptional<IStrictEnergyHandler>>> acceptorValues = acceptorCache.getAcceptorValues();
+        Collection<Map<Direction, Optional<IStrictEnergyHandler>>> acceptorValues = acceptorCache.getAcceptorValues();
         EnergyAcceptorTarget target = new EnergyAcceptorTarget(acceptorValues.size() * 2);
-        for (Map<Direction, LazyOptional<IStrictEnergyHandler>> acceptors : acceptorValues) {
-            for (LazyOptional<IStrictEnergyHandler> lazyAcceptor : acceptors.values()) {
+        for (Map<Direction, Optional<IStrictEnergyHandler>> acceptors : acceptorValues) {
+            for (Optional<IStrictEnergyHandler> lazyAcceptor : acceptors.values()) {
                 lazyAcceptor.ifPresent(acceptor -> {
-                    if (acceptor.insertEnergy(energyToSend, Action.SIMULATE).smallerThan(energyToSend)) {
+                    boolean shouldAdd;
+                    try(Transaction t = Transaction.openOuter()) {
+                        shouldAdd = acceptor.insertEnergy(energyToSend, t).smallerThan(energyToSend);
+                    }
+                    if (shouldAdd) {
                         target.addHandler(acceptor);
                     }
                 });
@@ -151,20 +151,22 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
     public void onUpdate() {
         super.onUpdate();
         if (needsUpdate) {
-            MinecraftForge.EVENT_BUS.post(new EnergyTransferEvent(this));
+            Mekanism.instance.onEnergyTransferred(new EnergyTransferEvent(this));
             needsUpdate = false;
         }
         if (energyContainer.isEmpty()) {
             prevTransferAmount = FloatingLong.ZERO;
         } else {
-            prevTransferAmount = tickEmit(energyContainer.getEnergy());
-            energyContainer.extract(prevTransferAmount, Action.EXECUTE, AutomationType.INTERNAL);
+            prevTransferAmount = tickEmit(FloatingLong.create(energyContainer.getEnergy()));
+            try(Transaction t = Transaction.openOuter()) {
+                energyContainer.extract(prevTransferAmount.longValue(), t);
+            }
         }
     }
 
     @Override
     protected float computeContentScale() {
-        float scale = (float) energyContainer.getEnergy().divideToLevel(energyContainer.getMaxEnergy());
+        float scale = (float) ((double)energyContainer.getEnergy() / energyContainer.getMaxEnergy());
         float ret = Math.max(currentScale, scale);
         if (!prevTransferAmount.isZero() && ret < 1) {
             ret = Math.min(1, ret + 0.02F);
@@ -200,10 +202,9 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
         return MekanismLang.NETWORK_DESCRIPTION.translate(MekanismLang.ENERGY_NETWORK, transmittersSize(), getAcceptorCount());
     }
 
-    @NotNull
     @Override
-    public List<IEnergyContainer> getEnergyContainers(@Nullable Direction side) {
-        return energyContainers;
+    public EnergyStorage getEnergyContainer(@Nullable Direction side) {
+        return energyContainers.get(0);
     }
 
     @Override

@@ -1,15 +1,16 @@
 package mekanism.common.inventory.slot;
 
-import java.util.function.BiPredicate;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.content.qio.QIOCraftingWindow;
 import mekanism.common.inventory.container.slot.VirtualInventoryContainerSlot;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BiPredicate;
 
 @NothingNullByDefault
 public class CraftingWindowInventorySlot extends BasicInventorySlot {
@@ -42,11 +43,11 @@ public class CraftingWindowInventorySlot extends BasicInventorySlot {
     public void onContentsChanged() {
         super.onContentsChanged();
         if (inputTypeChange != null) {
-            if (current.isEmpty() != wasEmpty || current != lastCurrent && !ItemHandlerHelper.canItemStacksStack(current, lastCurrent)) {
+            if (current.getStack().isEmpty() != wasEmpty || current.getStack() != lastCurrent && !ItemEntity.areMergable(current.getStack(), lastCurrent)) {
                 //If empty state changed, or they are not the same object, and they are not the same type, then mark our input type changed
                 // Note: If they are the same object (growing or shrinking) then we know they are the same type given they are not empty
-                lastCurrent = current;
-                wasEmpty = current.isEmpty();
+                lastCurrent = current.getStack();
+                wasEmpty = current.getStack().isEmpty();
                 inputTypeChange.onContentsChanged();
             }
         }

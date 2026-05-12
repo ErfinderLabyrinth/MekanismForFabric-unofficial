@@ -1,6 +1,5 @@
 package mekanism.common.block.states;
 
-import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.StringRepresentable;
@@ -16,9 +15,9 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public interface IStateFluidLoggable extends BucketPickup, LiquidBlockContainer {
 
@@ -108,7 +107,7 @@ public interface IStateFluidLoggable extends BucketPickup, LiquidBlockContainer 
         IFluidLogType fluidLogged = state.getValue(getFluidLoggedProperty());
         if (!fluidLogged.isEmpty()) {
             Fluid fluid = fluidLogged.getFluid();
-            ItemStack bucket = fluid.getFluidType().getBucket(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
+            ItemStack bucket = fluid.getBucket().getDefaultInstance();
             if (!bucket.isEmpty()) {
                 world.setBlock(pos, setState(state, Fluids.EMPTY), Block.UPDATE_ALL);
                 return bucket;
@@ -123,9 +122,9 @@ public interface IStateFluidLoggable extends BucketPickup, LiquidBlockContainer 
         return Optional.empty();
     }
 
-    @NotNull
-    @Override
-    default Optional<SoundEvent> getPickupSound(BlockState state) {
-        return getFluid(state).getType().getPickupSound();
-    }
+//    @NotNull
+//    @Override
+//    default Optional<SoundEvent> getPickupSound(BlockState state) {
+//        return getFluid(state).getType().getPickupSound();
+//    }
 }

@@ -1,9 +1,5 @@
 package mekanism.api.gear;
 
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.Set;
-import java.util.function.Predicate;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.functions.ConstantPredicates;
 import mekanism.api.gear.IHUDElement.HUDColor;
@@ -15,6 +11,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Helper class for interacting with and creating custom modules.
@@ -191,4 +192,8 @@ public interface IModuleHelper {
      * @apiNote Must only be called on the client side and from {@link net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent}.
      */
     void addMekaSuitModuleModelSpec(String name, IModuleDataProvider<?> moduleDataProvider, EquipmentSlot slotType, Predicate<LivingEntity> isActive);
+
+    void addSupportedModule(Item item, IModuleDataProvider<?>... providers);
+
+    void addSupportedModule(String itemMessage, IModuleDataProvider<?>... providers);
 }

@@ -1,10 +1,5 @@
 package mekanism.common.inventory.slot.chemical;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
@@ -18,20 +13,26 @@ import mekanism.common.inventory.slot.BasicInventorySlot;
 import mekanism.common.recipe.IMekanismRecipeTypeProvider;
 import mekanism.common.recipe.lookup.cache.InputRecipeCache.SingleItem;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.Capability;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @NothingNullByDefault
 public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends BasicInventorySlot {
 
-    @Nullable
-    protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK>>
-    HANDLER getCapability(ItemStack stack, Capability<HANDLER> capability) {
-        return stack.isEmpty() ? null : stack.getCapability(capability).resolve().orElse(null);
-    }
+//    @Nullable
+//    protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK>>
+//    HANDLER getCapability(ItemStack stack, Capability<HANDLER> capability) {
+//        return stack.isEmpty() ? null : stack.getCapability(capability).resolve().orElse(null);
+//    }
 
     /**
      * Gets the ChemicalStack from ItemStack conversion, ignoring the size of the item stack.
@@ -43,13 +44,13 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     }
 
     protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> Predicate<@NotNull ItemStack> getFillOrConvertExtractPredicate(
-          IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ItemStack, IChemicalHandler<CHEMICAL, STACK>> handlerFunction,
+          IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ContainerItemContext, IChemicalHandler<CHEMICAL, STACK, ?>> handlerFunction,
           Function<ItemStack, STACK> potentialConversionSupplier) {
         return stack -> {
-            IChemicalHandler<CHEMICAL, STACK> handler = handlerFunction.apply(stack);
+            IChemicalHandler<CHEMICAL, STACK, ?> handler = handlerFunction.apply(ContainerItemContext.withConstant(stack));
             if (handler != null) {
-                for (int tank = 0; tank < handler.getTanks(); tank++) {
-                    if (chemicalTank.isValid(handler.getChemicalInTank(tank))) {
+                for (StorageView<CHEMICAL> view:handler) {
+                    if (chemicalTank.isValid((STACK) view.getResource().getStack(view.getAmount()))) {
                         //False if the items contents are still valid
                         return false;
                     }
@@ -64,10 +65,10 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     }
 
     protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> Predicate<@NotNull ItemStack> getFillOrConvertInsertPredicate(
-          IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ItemStack, IChemicalHandler<CHEMICAL, STACK>> handlerFunction,
+          IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ContainerItemContext, IChemicalHandler<CHEMICAL, STACK, ?>> handlerFunction,
           Function<ItemStack, STACK> potentialConversionSupplier) {
         return stack -> {
-            if (fillInsertCheck(chemicalTank, handlerFunction.apply(stack))) {
+            if (fillInsertCheck(chemicalTank, handlerFunction.apply(ContainerItemContext.withConstant(stack)))) {
                 return true;
             }
             STACK conversion = potentialConversionSupplier.apply(stack);
@@ -75,7 +76,11 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
             if (conversion.isEmpty()) {
                 return false;
             }
-            if (chemicalTank.insert(conversion, Action.SIMULATE, AutomationType.INTERNAL).getAmount() < conversion.getAmount()) {
+            long canInserted;
+            try(Transaction t=Transaction.openOuter()) {
+                canInserted = chemicalTank.insert(conversion.getType(), conversion.getAmount(), t);
+            }
+            if (canInserted != 0) {
                 //If we can insert the converted substance into the tank allow insertion
                 return true;
             }
@@ -86,12 +91,12 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     }
 
     public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> Predicate<@NotNull ItemStack> getFillExtractPredicate(
-          IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ItemStack, IChemicalHandler<CHEMICAL, STACK>> handlerFunction) {
+          IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ContainerItemContext, IChemicalHandler<CHEMICAL, STACK, ?>> handlerFunction) {
         return stack -> {
-            IChemicalHandler<CHEMICAL, STACK> handler = handlerFunction.apply(stack);
+            IChemicalHandler<CHEMICAL, STACK, ?> handler = handlerFunction.apply(ContainerItemContext.withConstant(stack));
             if (handler != null) {
-                for (int tank = 0; tank < handler.getTanks(); tank++) {
-                    STACK storedChemical = handler.getChemicalInTank(tank);
+                for (StorageView<CHEMICAL> view : handler) {
+                    STACK storedChemical = (STACK) view.getResource().getStack(view.getAmount());
                     if (!storedChemical.isEmpty() && chemicalTank.isValid(storedChemical)) {
                         //False if the item isn't empty and the contents are still valid
                         return false;
@@ -105,14 +110,21 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     }
 
     public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> boolean fillInsertCheck(IChemicalTank<CHEMICAL, STACK> chemicalTank,
-          @Nullable IChemicalHandler<CHEMICAL, STACK> handler) {
+          @Nullable IChemicalHandler<CHEMICAL, STACK, ?> handler) {
         if (handler != null) {
-            for (int tank = 0; tank < handler.getTanks(); tank++) {
-                STACK chemicalInTank = handler.getChemicalInTank(tank);
-                if (!chemicalInTank.isEmpty() && chemicalTank.insert(chemicalInTank, Action.SIMULATE, AutomationType.INTERNAL).getAmount() < chemicalInTank.getAmount()) {
+            for (StorageView<CHEMICAL> view : handler) {
+                STACK chemicalInTank = (STACK) view.getResource().getStack(view.getAmount());
+                if (!chemicalInTank.isEmpty()) {
                     //True if we can fill the tank with any of our contents
                     // Note: We need to recheck the fact the chemical is not empty in case the item has multiple tanks and only some of the chemicals are valid
-                    return true;
+                    long amountInsertable;
+                    try(Transaction t=Transaction.openOuter()) {
+                        amountInsertable = chemicalTank.insert(chemicalInTank.getType(), chemicalInTank.getAmount(), t);
+                    }
+
+                    if (amountInsertable != 0) {
+                        return true;
+                    }
                 }
             }
         }
@@ -120,14 +132,14 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     }
 
     public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> Predicate<@NotNull ItemStack> getDrainInsertPredicate(
-          IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ItemStack, IChemicalHandler<CHEMICAL, STACK>> handlerFunction) {
+          IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ContainerItemContext, IChemicalHandler<CHEMICAL, STACK, ?>> handlerFunction) {
         return stack -> {
-            IChemicalHandler<CHEMICAL, STACK> handler = handlerFunction.apply(stack);
+            IChemicalHandler<CHEMICAL, STACK, ?> handler = handlerFunction.apply(ContainerItemContext.withConstant(stack));
             if (handler != null) {
                 if (chemicalTank.isEmpty()) {
                     //If the chemical tank is empty, accept the chemical item as long as it is not full
-                    for (int tank = 0; tank < handler.getTanks(); tank++) {
-                        if (handler.getChemicalInTank(tank).getAmount() < handler.getTankCapacity(tank)) {
+                    for (StorageView<CHEMICAL> view : handler) {
+                        if (view.getAmount() < view.getCapacity()) {
                             //True if we have any space in this tank
                             return true;
                         }
@@ -135,7 +147,9 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
                     return false;
                 }
                 //Otherwise, if we can accept any of the chemical that is currently stored in the tank, then we allow inserting the item
-                return handler.insertChemical(chemicalTank.getStack(), Action.SIMULATE).getAmount() < chemicalTank.getStored();
+                try(Transaction t=Transaction.openOuter()) {
+                    return handler.insert(chemicalTank.getType(), chemicalTank.getStored(), t) > 0;
+                }
             }
             return false;
         };
@@ -153,7 +167,7 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     }
 
     @Nullable
-    protected abstract IChemicalHandler<CHEMICAL, STACK> getCapability();
+    protected abstract IChemicalHandler<CHEMICAL, STACK, ?> getCapability();
 
     @Nullable
     protected ItemStackToChemicalRecipe<CHEMICAL, STACK> getConversionRecipe(@Nullable Level world, ItemStack stack) {
@@ -168,17 +182,23 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
             //Fill the tank from the item
             if (!fillTankFromItem()) {
                 //If filling from item failed, try doing it by conversion
-                ItemStackToChemicalRecipe<CHEMICAL, STACK> foundRecipe = getConversionRecipe(worldSupplier.get(), current);
+                ItemStackToChemicalRecipe<CHEMICAL, STACK> foundRecipe = getConversionRecipe(worldSupplier.get(), current.getStack());
                 if (foundRecipe != null) {
-                    ItemStack itemInput = foundRecipe.getInput().getMatchingInstance(current);
+                    ItemStack itemInput = foundRecipe.getInput().getMatchingInstance(current.getStack());
                     if (!itemInput.isEmpty()) {
                         STACK output = foundRecipe.getOutput(itemInput);
                         //Note: We use manual as the automation type to bypass our container's rate limit insertion checks
-                        if (!output.isEmpty() && chemicalTank.insert(output, Action.SIMULATE, AutomationType.MANUAL).isEmpty()) {
-                            //If we can accept it all, then add it and decrease our input
-                            MekanismUtils.logMismatchedStackSize(chemicalTank.insert(output, Action.EXECUTE, AutomationType.MANUAL).getAmount(), 0);
-                            int amountUsed = itemInput.getCount();
-                            MekanismUtils.logMismatchedStackSize(shrinkStack(amountUsed, Action.EXECUTE), amountUsed);
+                        if (!output.isEmpty()) {
+
+                            try(Transaction t=Transaction.openOuter()) {
+                                long amountInserted = chemicalTank.insert(output.getType(), output.getAmount(), t);
+                                if (amountInserted == output.getAmount()) {
+                                    //If we can accept it all, then add it and decrease our input
+                                    t.commit();
+                                    int amountUsed = itemInput.getCount();
+                                    MekanismUtils.logMismatchedStackSize(shrinkStack(amountUsed), amountUsed);
+                                }
+                            }
                         }
                     }
                 }
@@ -198,7 +218,7 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     }
 
     public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> void fillChemicalTank(IInventorySlot slot,
-          IChemicalTank<CHEMICAL, STACK> chemicalTank, @Nullable IChemicalHandler<CHEMICAL, STACK> handler) {
+          IChemicalTank<CHEMICAL, STACK> chemicalTank, @Nullable IChemicalHandler<CHEMICAL, STACK, ?> handler) {
         if (!slot.isEmpty() && chemicalTank.getNeeded() > 0) {
             //Try filling from the tank's item
             fillChemicalTankFromItem(slot, chemicalTank, handler);
@@ -209,25 +229,34 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
      * @implNote Does not pre-check if the current stack is empty or that the chemical tank needs chemical
      */
     public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> boolean fillChemicalTankFromItem(IInventorySlot slot,
-          IChemicalTank<CHEMICAL, STACK> chemicalTank, @Nullable IChemicalHandler<CHEMICAL, STACK> handler) {
+          IChemicalTank<CHEMICAL, STACK> chemicalTank, @Nullable IChemicalHandler<CHEMICAL, STACK, ?> handler) {
         //TODO: Do we need to/want to add any special handling for if the handler is stacked? For example with how buckets are for fluids
         // Note: None of Mekanism's chemical items stack so at the moment it doesn't fully matter
         if (handler != null) {
             boolean didTransfer = false;
-            for (int tank = 0; tank < handler.getTanks(); tank++) {
-                STACK chemicalInItem = handler.getChemicalInTank(tank);
+            for (StorageView<CHEMICAL> view : handler) {
+                STACK chemicalInItem = (STACK) view.getResource().getStack(view.getAmount());
                 if (!chemicalInItem.isEmpty()) {
                     //Simulate inserting chemical from each tank in the item into our tank
-                    STACK simulatedRemainder = chemicalTank.insert(chemicalInItem, Action.SIMULATE, AutomationType.INTERNAL);
+                    long amountInserted;
+                    try(Transaction t=Transaction.openOuter()) {
+                        amountInserted = chemicalTank.insert(chemicalInItem.getType(), chemicalInItem.getAmount(), t);
+                    }
                     long chemicalInItemAmount = chemicalInItem.getAmount();
-                    long remainder = simulatedRemainder.getAmount();
-                    if (remainder < chemicalInItemAmount) {
+                    if (amountInserted > 0) {
                         //If we were simulated that we could actually insert any, then
                         // extract up to as much chemical as we were able to accept from the item
-                        STACK extractedChemical = handler.extractChemical(tank, chemicalInItemAmount - remainder, Action.EXECUTE);
-                        if (!extractedChemical.isEmpty()) {
+                        long extractedAmount;
+                        try(Transaction t=Transaction.openOuter()) {
+                            extractedAmount = view.extract(view.getResource(), amountInserted, t);
+                            t.commit();
+                        }
+                        if (extractedAmount != 0) {
                             //If we were able to actually extract it from the item, then insert it into our chemical tank
-                            MekanismUtils.logMismatchedStackSize(chemicalTank.insert(extractedChemical, Action.EXECUTE, AutomationType.INTERNAL).getAmount(), 0);
+                            try(Transaction t = Transaction.openOuter()) {
+                                MekanismUtils.logMismatchedStackSize(chemicalTank.insert(view.getResource(), extractedAmount, t), extractedAmount);
+                                t.commit();
+                            }
                             //and mark that we were able to transfer at least some of it
                             didTransfer = true;
                             if (chemicalTank.getNeeded() == 0) {
@@ -255,20 +284,30 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
      * Drains tank into slot
      */
     public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> void drainChemicalTank(IInventorySlot slot,
-          IChemicalTank<CHEMICAL, STACK> chemicalTank, @Nullable IChemicalHandler<CHEMICAL, STACK> handler) {
+          IChemicalTank<CHEMICAL, STACK> chemicalTank, @Nullable IChemicalHandler<CHEMICAL, STACK, ?> handler) {
         //TODO: Do we need to/want to add any special handling for if the handler is stacked? For example with how buckets are for fluids
         // Note: None of Mekanism's chemical items stack so at the moment it doesn't fully matter
         if (!slot.isEmpty() && !chemicalTank.isEmpty() && handler != null) {
             STACK storedChemical = chemicalTank.getStack();
-            STACK simulatedRemainder = handler.insertChemical(storedChemical, Action.SIMULATE);
-            long remainder = simulatedRemainder.getAmount();
+            long inserted;
+            try(Transaction t=Transaction.openOuter()) {
+                inserted = handler.insert(storedChemical.getType(), storedChemical.getAmount(), t);
+            }
             long amount = storedChemical.getAmount();
-            if (remainder < amount) {
+            if (inserted > 0) {
                 //We are able to fit at least some of the chemical from our tank into the item
-                STACK extractedChemical = chemicalTank.extract(amount - remainder, Action.EXECUTE, AutomationType.INTERNAL);
-                if (!extractedChemical.isEmpty()) {
+                CHEMICAL resource = chemicalTank.getResource();
+                long amountExtracted;
+                try(Transaction t=Transaction.openOuter()) {
+                    amountExtracted = chemicalTank.extract(resource, inserted, t);
+                    t.commit();
+                }
+                if (amountExtracted != 0) {
                     //If we were able to actually extract it from our tank, then insert it into the item
-                    MekanismUtils.logMismatchedStackSize(handler.insertChemical(extractedChemical, Action.EXECUTE).getAmount(), 0);
+                    try(Transaction t=Transaction.openOuter()) {
+                        MekanismUtils.logMismatchedStackSize(handler.insert(resource, amountExtracted, t), 0);
+                        t.commit();
+                    }
                     slot.onContentsChanged();
                 }
             }

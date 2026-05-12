@@ -1,9 +1,9 @@
 package mekanism.api.text;
 
-import java.util.ServiceLoader;
-import mekanism.api.math.FloatingLong;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus.Internal;
+
+import java.util.ServiceLoader;
 
 /**
  * Interface mostly meant as a way to provide us a way to access some internal formatting helpers for some tooltips that are defined in the API. These methods are
@@ -14,7 +14,7 @@ public interface ITooltipHelper {
 
     ITooltipHelper INSTANCE = ServiceLoader.load(ITooltipHelper.class).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for ITooltipHelper found"));
 
-    Component getEnergyPerMBDisplayShort(FloatingLong energy);
+    Component getEnergyPerMBDisplayShort(long energy);
 
     Component getRadioactivityDisplayShort(double radioactivity);
 

@@ -1,22 +1,9 @@
 package mekanism.common.tile.machine;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
-import mekanism.api.IConfigurable;
-import mekanism.api.IContentsListener;
-import mekanism.api.NBTConstants;
-import mekanism.api.RelativeSide;
-import mekanism.api.Upgrade;
-import mekanism.api.math.FloatingLong;
+import mekanism.api.*;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.capabilities.fluid.BasicFluidTank;
 import mekanism.common.capabilities.holder.energy.EnergyContainerHelper;
@@ -25,7 +12,6 @@ import mekanism.common.capabilities.holder.fluid.FluidTankHelper;
 import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerFluidTankWrapper;
@@ -42,12 +28,9 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.registries.MekanismFluids;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.tile.base.TileEntityMekanism;
-import mekanism.common.util.EnumUtils;
-import mekanism.common.util.FluidUtils;
-import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.NBTUtils;
-import mekanism.common.util.UpgradeUtils;
-import mekanism.common.util.WorldUtils;
+import mekanism.common.util.*;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -66,11 +49,10 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.IFluidBlock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public class TileEntityElectricPump extends TileEntityMekanism implements IConfigurable {
 
@@ -109,8 +91,8 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
 
     public TileEntityElectricPump(BlockPos pos, BlockState state) {
         super(MekanismBlocks.ELECTRIC_PUMP, pos, state);
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIGURABLE, this));
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIG_CARD, this));
+//        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIGURABLE, this));
+//        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIG_CARD, this));
     }
 
     @NotNull
@@ -144,38 +126,43 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
         super.onUpdateServer();
         energySlot.fillContainerOrConvert();
         inputSlot.drainTank(outputSlot);
-        FloatingLong clientEnergyUsed = FloatingLong.ZERO;
+        long clientEnergyUsed = 0;
         if (MekanismUtils.canFunction(this) && (fluidTank.isEmpty() || estimateIncrementAmount() <= fluidTank.getNeeded())) {
-            FloatingLong energyPerTick = energyContainer.getEnergyPerTick();
-            if (energyContainer.extract(energyPerTick, Action.SIMULATE, AutomationType.INTERNAL).equals(energyPerTick)) {
-                if (!activeType.isEmpty()) {
-                    //If we have an active type of fluid, use energy. This can cause there to be ticks where there isn't actually
-                    // anything to suck that use energy, but those will balance out with the first set of ticks where it doesn't
-                    // use any energy until it actually picks up the first block
-                    clientEnergyUsed = energyContainer.extract(energyPerTick, Action.EXECUTE, AutomationType.INTERNAL);
-                }
-                operatingTicks++;
-                if (operatingTicks >= ticksRequired) {
-                    operatingTicks = 0;
-                    if (suck()) {
-                        if (clientEnergyUsed.isZero()) {
-                            //If it didn't already have an active type (hasn't used energy this tick), then extract energy
-                            clientEnergyUsed = energyContainer.extract(energyPerTick, Action.EXECUTE, AutomationType.INTERNAL);
+            long energyPerTick = energyContainer.getEnergyPerTick();
+            boolean b1;
+            try(Transaction t = Transaction.openOuter()) {
+                if (energyContainer.extract(energyPerTick, t) == energyPerTick) {
+                    if (!activeType.isEmpty()) {
+                        //If we have an active type of fluid, use energy. This can cause there to be ticks where there isn't actually
+                        // anything to suck that use energy, but those will balance out with the first set of ticks where it doesn't
+                        // use any energy until it actually picks up the first block
+                        t.commit();
+                        clientEnergyUsed = energyPerTick;
+                    }
+                    operatingTicks++;
+                    if (operatingTicks >= ticksRequired) {
+                        operatingTicks = 0;
+                        if (suck()) {
+                            if (clientEnergyUsed == 0) {
+                                //If it didn't already have an active type (hasn't used energy this tick), then extract energy
+                                t.commit();
+                                clientEnergyUsed = energyPerTick;
+                            }
+                        } else {
+                            reset();
                         }
-                    } else {
-                        reset();
                     }
                 }
             }
         }
-        usedEnergy = !clientEnergyUsed.isZero();
+        usedEnergy = clientEnergyUsed != 0;
         if (!fluidTank.isEmpty()) {
             FluidUtils.emit(Collections.singleton(Direction.UP), fluidTank, this, 256 * (1 + upgradeComponent.getUpgrades(Upgrade.SPEED)));
         }
     }
 
     public int estimateIncrementAmount() {
-        return fluidTank.getFluid().getFluid() == MekanismFluids.HEAVY_WATER.getFluid() ? MekanismConfig.general.pumpHeavyWaterAmount.get() : FluidType.BUCKET_VOLUME;
+        return fluidTank.getFluid().getFluid() == MekanismFluids.HEAVY_WATER.getFluid() ? MekanismConfig.general.pumpHeavyWaterAmount : 81000;
     }
 
     private boolean suck() {
@@ -196,7 +183,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
             //Add all the blocks surrounding this recurring node to the recurring node list
             for (Direction orientation : EnumUtils.DIRECTIONS) {
                 BlockPos side = tempPumpPos.relative(orientation);
-                if (WorldUtils.distanceBetween(worldPosition, side) <= MekanismConfig.general.maxPumpRange.get()) {
+                if (WorldUtils.distanceBetween(worldPosition, side) <= MekanismConfig.general.maxPumpRange) {
                     if (suck(side, hasFilter, true)) {
                         return true;
                     }
@@ -217,18 +204,12 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
                 //Just in case someone does weird things and has a fluid state that is empty and a source
                 // only allow collecting from non-empty sources
                 Block block = blockState.getBlock();
-                if (block instanceof IFluidBlock fluidBlock) {
-                    if (validFluid(fluidBlock.drain(level, pos, FluidAction.SIMULATE))) {
-                        //Actually drain it
-                        suck(fluidBlock.drain(level, pos, FluidAction.EXECUTE), pos, addRecurring);
-                        return true;
-                    }
-                } else if (block instanceof BucketPickup bucketPickup) {
+                if (block instanceof BucketPickup bucketPickup) {
                     Fluid sourceFluid = fluidState.getType();
                     FluidStack fluidStack = getOutput(sourceFluid, hasFilter);
                     if (validFluid(fluidStack)) {
                         //If it can be picked up by a bucket, and we actually want to pick it up, do so to update the fluid type we are doing
-                        if (sourceFluid != Fluids.WATER || MekanismConfig.general.pumpWaterSources.get()) {
+                        if (sourceFluid != Fluids.WATER || MekanismConfig.general.pumpWaterSources) {
                             //Note we only attempt taking if it is not water, or we want to pump water sources
                             // otherwise we assume the type from the fluid state is correct
                             ItemStack pickedUpStack = bucketPickup.pickupBlock(level, pos, blockState);
@@ -237,7 +218,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
                                 return false;
                             } else if (pickedUpStack.getItem() instanceof BucketItem bucket) {
                                 //This isn't the best validation check given it may not return a bucket, but it is good enough for now
-                                sourceFluid = bucket.getFluid();
+                                sourceFluid = bucket.content;
                                 //Update the fluid stack in case something somehow changed about the type
                                 // making sure that we replace to heavy water if we got heavy water
                                 fluidStack = getOutput(sourceFluid, hasFilter);
@@ -260,9 +241,9 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
 
     private FluidStack getOutput(Fluid sourceFluid, boolean hasFilter) {
         if (hasFilter && sourceFluid == Fluids.WATER) {
-            return MekanismFluids.HEAVY_WATER.getFluidStack(MekanismConfig.general.pumpHeavyWaterAmount.get());
+            return MekanismFluids.HEAVY_WATER.getFluidStack(MekanismConfig.general.pumpHeavyWaterAmount);
         }
-        return new FluidStack(sourceFluid, FluidType.BUCKET_VOLUME);
+        return new FluidStack(FluidVariant.of(sourceFluid), 81000);
     }
 
     private void suck(@NotNull FluidStack fluidStack, BlockPos pos, boolean addRecurring) {
@@ -271,16 +252,19 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
         if (addRecurring) {
             recurringNodes.add(pos);
         }
-        fluidTank.insert(fluidStack, Action.EXECUTE, AutomationType.INTERNAL);
+        try(Transaction t=Transaction.openOuter()) {
+            fluidTank.insert(fluidStack.variant(), fluidStack.amount(), t);
+            t.commit();
+        }
         level.gameEvent(null, GameEvent.FLUID_PICKUP, pos);
     }
 
     private boolean validFluid(@NotNull FluidStack fluidStack) {
-        if (!fluidStack.isEmpty() && (activeType.isEmpty() || activeType.isFluidEqual(fluidStack))) {
+        if (!fluidStack.isEmpty() && (activeType.isEmpty() || activeType.equals(fluidStack))) {
             if (fluidTank.isEmpty()) {
                 return true;
             } else if (fluidTank.isFluidEqual(fluidStack)) {
-                return fluidStack.getAmount() <= fluidTank.getNeeded();
+                return fluidStack.amount() <= fluidTank.getNeeded();
             }
         }
         return false;
@@ -347,7 +331,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
 
     @Override
     public int getRedstoneLevel() {
-        return MekanismUtils.redstoneLevelFromContents(fluidTank.getFluidAmount(), fluidTank.getCapacity());
+        return MekanismUtils.redstoneLevelFromContents(fluidTank.getAmount(), fluidTank.getCapacity());
     }
 
     @Override

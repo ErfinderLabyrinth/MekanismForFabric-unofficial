@@ -2,9 +2,6 @@ package mekanism.common.lib.radiation;
 
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.Util;
@@ -25,7 +22,11 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.ForgeEventFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+//import net.minecraftforge.event.ForgeEventFactory;
 
 public class Meltdown {
 
@@ -121,8 +122,8 @@ public class Meltdown {
                             BlockState blockstate = world.getBlockState(pos);
                             FluidState fluidstate = blockstate.getFluidState();
                             if (!blockstate.isAir() || !fluidstate.isEmpty()) {
-                                f -= (Math.max(blockstate.getExplosionResistance(world, pos, explosion),
-                                      fluidstate.getExplosionResistance(world, pos, explosion)) + 0.3F) * 0.3F;
+                                f -= (Math.max(blockstate.getBlock().getExplosionResistance(),
+                                      fluidstate.getExplosionResistance()) + 0.3F) * 0.3F;
                             }
                             if (f > 0.0F && minPos.getX() <= d4 && minPos.getY() <= d6 && minPos.getZ() <= d8 && d4 <= maxPos.getX() && d6 <= maxPos.getY() &&
                                 d8 <= maxPos.getZ()) {
@@ -138,10 +139,10 @@ public class Meltdown {
             }
         }
         //Try to make the explosion actually happen
-        if (!ForgeEventFactory.onExplosionStart(world, explosion)) {
-            explosion.explode();
-            explosion.finalizeExplosion(true);
-        }
+        //if (!ForgeEventFactory.onExplosionStart(world, explosion)) {
+        explosion.explode();
+        explosion.finalizeExplosion(true);
+        //}
         //Next go through the different locations that were inside our reactor that should have exploded and make sure
         // that if they didn't explode that we manually run the logic to make them "explode" so that the reactor stops
         //Note: Shuffle so that the drops don't end up all in one corner of an explosion
@@ -151,7 +152,7 @@ public class Meltdown {
             BlockState state = world.getBlockState(toExplode);
             //If the block didn't already get broken when running the normal explosion
             if (!state.isAir()) {
-                if (state.canDropFromExplosion(world, toExplode, explosion) && world instanceof ServerLevel level) {
+                if (state.getBlock().dropFromExplosion(explosion) && world instanceof ServerLevel level) {
                     BlockEntity tileentity = state.hasBlockEntity() ? world.getBlockEntity(toExplode) : null;
                     LootParams.Builder lootContextBuilder = new LootParams.Builder(level)
                           .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(toExplode))
@@ -164,7 +165,7 @@ public class Meltdown {
                     state.spawnAfterBreak(level, toExplode, ItemStack.EMPTY, false);
                     state.getDrops(lootContextBuilder).forEach(stack -> addBlockDrops(drops, stack, toExplode));
                 }
-                state.onBlockExploded(world, toExplode, explosion);
+                //state.getBlock().exonBlockExploded(world, toExplode, explosion);
             }
         }
         for (Pair<ItemStack, BlockPos> pair : drops) {

@@ -1,45 +1,24 @@
 package mekanism.client.jei;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import mekanism.api.providers.IItemProvider;
-import mekanism.api.recipes.ChemicalCrystallizerRecipe;
-import mekanism.api.recipes.ChemicalDissolutionRecipe;
-import mekanism.api.recipes.ChemicalInfuserRecipe;
-import mekanism.api.recipes.CombinerRecipe;
-import mekanism.api.recipes.ElectrolysisRecipe;
-import mekanism.api.recipes.FluidSlurryToSlurryRecipe;
-import mekanism.api.recipes.FluidToFluidRecipe;
-import mekanism.api.recipes.GasToGasRecipe;
-import mekanism.api.recipes.ItemStackGasToItemStackRecipe;
-import mekanism.api.recipes.ItemStackToEnergyRecipe;
-import mekanism.api.recipes.ItemStackToFluidRecipe;
-import mekanism.api.recipes.ItemStackToGasRecipe;
-import mekanism.api.recipes.ItemStackToInfuseTypeRecipe;
-import mekanism.api.recipes.ItemStackToItemStackRecipe;
-import mekanism.api.recipes.ItemStackToPigmentRecipe;
-import mekanism.api.recipes.MetallurgicInfuserRecipe;
-import mekanism.api.recipes.NucleosynthesizingRecipe;
-import mekanism.api.recipes.PaintingRecipe;
-import mekanism.api.recipes.PigmentMixingRecipe;
-import mekanism.api.recipes.PressurizedReactionRecipe;
-import mekanism.api.recipes.RotaryRecipe;
-import mekanism.api.recipes.SawmillRecipe;
+import mekanism.api.recipes.*;
 import mekanism.client.jei.recipe.BoilerJEIRecipe;
 import mekanism.client.jei.recipe.SPSJEIRecipe;
 import mekanism.common.Mekanism;
 import mekanism.common.registries.MekanismBlocks;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraftforge.common.util.Lazy;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 //Note: Do not use any classes from JEI here as this is to allow us to safely keep JEI optional while referencing from our GUIs
 //Note: the lazy uid is only lazy before any lookups by rl have been performed, and afterwards it is assumed everything is initialized
 // and it is instantly resolved to provide access to a reverse lookup map
-public record MekanismJEIRecipeType<RECIPE>(Lazy<ResourceLocation> lazyUid, Class<? extends RECIPE> recipeClass) {
+public record MekanismJEIRecipeType<RECIPE>(ResourceLocation rl, Class<? extends RECIPE> recipeClass) {
 
     private static final Map<ResourceLocation, MekanismJEIRecipeType<?>> knownTypes = new HashMap<>();
     @Nullable
@@ -103,11 +82,7 @@ public record MekanismJEIRecipeType<RECIPE>(Lazy<ResourceLocation> lazyUid, Clas
     public static final MekanismJEIRecipeType<ItemStackToFluidRecipe> NUTRITIONAL_LIQUIFICATION = new MekanismJEIRecipeType<>(MekanismBlocks.NUTRITIONAL_LIQUIFIER, ItemStackToFluidRecipe.class);
 
     public MekanismJEIRecipeType(IItemProvider item, Class<? extends RECIPE> recipeClass) {
-        this(Lazy.of(item::getRegistryName), recipeClass);
-    }
-
-    public MekanismJEIRecipeType(ResourceLocation uid, Class<? extends RECIPE> recipeClass) {
-        this(Lazy.of(() -> uid), recipeClass);
+        this(item.getRegistryName(), recipeClass);
     }
 
     public MekanismJEIRecipeType {
@@ -119,7 +94,7 @@ public record MekanismJEIRecipeType<RECIPE>(Lazy<ResourceLocation> lazyUid, Clas
     }
 
     public ResourceLocation uid() {
-        return lazyUid.get();
+        return rl;
     }
 
     public static MekanismJEIRecipeType<?> findType(ResourceLocation name) {

@@ -1,8 +1,5 @@
 package mekanism.common.block.basic;
 
-import java.util.function.UnaryOperator;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.common.block.prefab.BlockTile;
 import mekanism.common.content.blocktype.BlockTypeTile;
 import mekanism.common.inventory.slot.BinInventorySlot;
@@ -10,6 +7,8 @@ import mekanism.common.tile.TileEntityBin;
 import mekanism.common.tile.base.WrenchResult;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundEvents;
@@ -27,6 +26,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.UnaryOperator;
 
 public class BlockBin extends BlockTile<TileEntityBin, BlockTypeTile<TileEntityBin>> {
 
@@ -49,11 +50,11 @@ public class BlockBin extends BlockTile<TileEntityBin, BlockTypeTile<TileEntityB
                             bin.removeTicks = 3;
                             if (player.isShiftKeyDown()) {
                                 stack = binSlot.getStack().copyWithCount(1);
-                                MekanismUtils.logMismatchedStackSize(binSlot.shrinkStack(1, Action.EXECUTE), 1);
+                                MekanismUtils.logMismatchedStackSize(binSlot.shrinkStack(1), 1);
                             } else {
                                 stack = binSlot.getBottomStack();
                                 if (!stack.isEmpty()) {
-                                    MekanismUtils.logMismatchedStackSize(binSlot.shrinkStack(stack.getCount(), Action.EXECUTE), stack.getCount());
+                                    MekanismUtils.logMismatchedStackSize(binSlot.shrinkStack(stack.getCount()), stack.getCount());
                                 }
                             }
                             if (!player.getInventory().add(stack)) {
@@ -93,8 +94,12 @@ public class BlockBin extends BlockTile<TileEntityBin, BlockTypeTile<TileEntityB
             if (binSlot.getCount() < binMaxSize) {
                 if (bin.addTicks == 0) {
                     if (!stack.isEmpty()) {
-                        ItemStack remain = binSlot.insertItem(stack, Action.EXECUTE, AutomationType.MANUAL);
-                        player.setItemInHand(hand, remain);
+                        long inserted;
+                        try(Transaction t=Transaction.openOuter()) {
+                            inserted = binSlot.insert(ItemVariant.of(stack), stack.getCount(), t);
+                            t.commit();
+                        }
+                        player.setItemInHand(hand, stack.copyWithCount(stack.getCount() - (int)inserted));
                         bin.addTicks = 5;
                     }
                 } else if (bin.addTicks > 0 && bin.getItemCount() > 0) {
@@ -105,8 +110,12 @@ public class BlockBin extends BlockTile<TileEntityBin, BlockTypeTile<TileEntityB
                         }
                         ItemStack stackToAdd = inv.get(i);
                         if (!stackToAdd.isEmpty()) {
-                            ItemStack remain = binSlot.insertItem(stackToAdd, Action.EXECUTE, AutomationType.MANUAL);
-                            inv.set(i, remain);
+                            long inserted;
+                            try(Transaction t=Transaction.openOuter()) {
+                                inserted = binSlot.insert(ItemVariant.of(stack), stack.getCount(), t);
+                                t.commit();
+                            }
+                            inv.set(i, stackToAdd.copyWithCount(stackToAdd.getCount() - (int)inserted));
                             bin.addTicks = 5;
                         }
                         player.containerMenu.sendAllDataToRemote();

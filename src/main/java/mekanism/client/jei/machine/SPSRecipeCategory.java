@@ -1,8 +1,5 @@
 package mekanism.client.jei.machine;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.bar.GuiDynamicHorizontalRateBar;
@@ -27,6 +24,10 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class SPSRecipeCategory extends BaseRecipeCategory<SPSJEIRecipe> {
 
     private final GuiGauge<?> input;
@@ -39,7 +40,7 @@ public class SPSRecipeCategory extends BaseRecipeCategory<SPSJEIRecipe> {
             List<Component> list = new ArrayList<>();
             list.add(MekanismLang.STATUS.translate(MekanismLang.ACTIVE));
             list.add(MekanismLang.SPS_ENERGY_INPUT.translate(EnergyDisplay.of(
-                  MekanismConfig.general.spsEnergyPerInput.get().multiply(MekanismConfig.general.spsInputPerAntimatter.get()))));
+                  MekanismConfig.general.spsEnergyPerInput.multiply(MekanismConfig.general.spsInputPerAntimatter))));
             list.add(MekanismLang.PROCESS_RATE_MB.translate(1.0));
             return list;
         }));
@@ -56,7 +57,7 @@ public class SPSRecipeCategory extends BaseRecipeCategory<SPSJEIRecipe> {
     }
 
     public static List<SPSJEIRecipe> getSPSRecipes() {
-        return Collections.singletonList(new SPSJEIRecipe(IngredientCreatorAccess.gas().from(MekanismGases.POLONIUM, MekanismConfig.general.spsInputPerAntimatter.get()),
+        return Collections.singletonList(new SPSJEIRecipe(IngredientCreatorAccess.gas().from(MekanismGases.POLONIUM, MekanismConfig.general.spsInputPerAntimatter),
               MekanismGases.ANTIMATTER.getStack(1)));
     }
 }

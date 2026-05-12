@@ -1,6 +1,5 @@
 package mekanism.common.content.transporter;
 
-import java.util.Objects;
 import mekanism.api.NBTConstants;
 import mekanism.common.content.filter.FilterType;
 import mekanism.common.content.filter.IModIDFilter;
@@ -8,6 +7,8 @@ import mekanism.common.lib.inventory.Finder;
 import mekanism.common.network.BasePacketHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+
+import java.util.Objects;
 
 public class SorterModIDFilter extends SorterFilter<SorterModIDFilter> implements IModIDFilter<SorterModIDFilter> {
 

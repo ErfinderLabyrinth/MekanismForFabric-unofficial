@@ -1,6 +1,5 @@
 package mekanism.common.upgrade;
 
-import java.util.List;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.chemical.merged.MergedChemicalTank;
@@ -11,6 +10,8 @@ import mekanism.common.tile.TileEntityChemicalTank.GasMode;
 import mekanism.common.tile.component.ITileComponent;
 import mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl;
 import net.minecraft.nbt.CompoundTag;
+
+import java.util.List;
 
 public class ChemicalTankUpgradeData implements IUpgradeData {
 

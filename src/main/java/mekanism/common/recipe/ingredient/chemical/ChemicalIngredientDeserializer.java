@@ -1,16 +1,6 @@
 package mekanism.common.recipe.ingredient.chemical;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.IntFunction;
+import com.google.gson.*;
 import mekanism.api.JsonConstants;
 import mekanism.api.SerializerHelper;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -41,9 +31,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.registries.tags.ITagManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 
 @NothingNullByDefault
 @SuppressWarnings("Convert2Diamond")//The types cannot properly be inferred
@@ -146,7 +141,7 @@ public class ChemicalIngredientDeserializer<CHEMICAL extends Chemical<CHEMICAL>,
         JsonObject jsonObject = json.getAsJsonObject();
         String serializationKey = info.getSerializationKey();
         if (jsonObject.has(serializationKey) && jsonObject.has(JsonConstants.TAG)) {
-            throw new JsonParseException("An ingredient entry is either a tag or " + getNameWithPrefix() + ", not both.");
+            throw new JsonParseException("An ingredient entry is either a tagSupplier or " + getNameWithPrefix() + ", not both.");
         } else if (jsonObject.has(serializationKey)) {
             STACK stack = deserializeStack(jsonObject);
             if (stack.isEmpty()) {
@@ -166,15 +161,15 @@ public class ChemicalIngredientDeserializer<CHEMICAL extends Chemical<CHEMICAL>,
                 throw new JsonSyntaxException("Expected amount to be greater than zero.");
             }
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, JsonConstants.TAG));
-            Optional<ITagManager<CHEMICAL>> manager = tags.getManager();
-            if (manager.isEmpty()) {
-                throw new JsonSyntaxException("Unexpected error trying to retrieve the chemical tag manager.");
-            }
-            ITagManager<CHEMICAL> tagManager = manager.get();
-            TagKey<CHEMICAL> key = tagManager.createTagKey(resourceLocation);
+            //Optional<ITagManager<CHEMICAL>> manager = tags.getManager();
+            //if (manager.isEmpty()) {
+            //    throw new JsonSyntaxException("Unexpected error trying to retrieve the chemical tagSupplier manager.");
+            //}
+            //ITagManager<CHEMICAL> tagManager = manager.get();
+            TagKey<CHEMICAL> key = tags.tag(resourceLocation);
             return ingredientCreator.from(key, amount);
         }
-        throw new JsonSyntaxException("Expected to receive a resource location representing either a tag or " + getNameWithPrefix() + ".");
+        throw new JsonSyntaxException("Expected to receive a resource location representing either a tagSupplier or " + getNameWithPrefix() + ".");
     }
 
     /**

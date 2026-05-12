@@ -1,18 +1,19 @@
 package mekanism.common.util;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
+import mekanism.api.NBTSerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 //TODO - V11: Rewrite this into a helper object that gets made for a stack so that we can easier make sure it doesn't add any extra data when we don't want it
 // And then for some things we may want when they go back to a full empty state make the NBT go away
@@ -52,7 +53,7 @@ public final class ItemDataUtils {
             dataMap.remove(key);
             if (dataMap.isEmpty()) {
                 //If our data map no longer has any elements after removing a piece of stored data
-                // then remove the data tag to make the stack nice and clean again
+                // then remove the data tagSupplier to make the stack nice and clean again
                 stack.removeTagKey(NBTConstants.MEK_DATA);
             }
         }
@@ -193,15 +194,19 @@ public final class ItemDataUtils {
         }
     }
 
-    public static void readContainers(ItemStack stack, String containerKey, List<? extends INBTSerializable<CompoundTag>> containers) {
+    public static void readContainers(ItemStack stack, String containerKey, List<? extends NBTSerializable<?>> containers) {
         if (!stack.isEmpty()) {
             DataHandlerUtils.readContainers(containers, getList(stack, containerKey));
         }
     }
 
-    public static void writeContainers(ItemStack stack, String containerKey, List<? extends INBTSerializable<CompoundTag>> containers) {
+    public static void writeContainers(ItemStack stack, String containerKey, List<? extends NBTSerializable<CompoundTag>> containers) {
+        writeContainers(stack, containerKey, containers, NBTSerializable::serializeNBT);
+    }
+
+    public static <T> void writeContainers(ItemStack stack, String containerKey, List<T> containers, Function<T, CompoundTag> mapper) {
         if (!stack.isEmpty()) {
-            setListOrRemove(stack, containerKey, DataHandlerUtils.writeContainers(containers));
+            setListOrRemove(stack, containerKey, DataHandlerUtils.writeContainers(containers, mapper));
         }
     }
 }

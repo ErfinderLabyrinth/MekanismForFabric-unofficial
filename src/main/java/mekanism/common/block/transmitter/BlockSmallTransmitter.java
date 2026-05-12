@@ -1,12 +1,13 @@
 package mekanism.common.block.transmitter;
 
-import java.util.function.UnaryOperator;
 import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.VoxelShapeUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.function.UnaryOperator;
 
 public abstract class BlockSmallTransmitter extends BlockTransmitter {
 

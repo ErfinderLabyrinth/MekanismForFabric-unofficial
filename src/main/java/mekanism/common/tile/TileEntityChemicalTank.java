@@ -1,8 +1,6 @@
 package mekanism.common.tile;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Map;
-import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.IIncrementalEnum;
 import mekanism.api.NBTConstants;
@@ -66,6 +64,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 public class TileEntityChemicalTank extends TileEntityConfigurableMachine implements ISustainedData, IHasGasMode {
 
     @SyntheticComputerMethod(getter = "getDumpingMode", getterDescription = "Get the current Dumping configuration")
@@ -88,7 +88,7 @@ public class TileEntityChemicalTank extends TileEntityConfigurableMachine implem
         configComponent.setupIOConfig(TransmissionType.INFUSION, getInfusionTank(), RelativeSide.FRONT).setEjecting(true);
         configComponent.setupIOConfig(TransmissionType.PIGMENT, getPigmentTank(), RelativeSide.FRONT).setEjecting(true);
         configComponent.setupIOConfig(TransmissionType.SLURRY, getSlurryTank(), RelativeSide.FRONT).setEjecting(true);
-        ejectorComponent = new TileComponentEjector(this, () -> tier.getOutput());
+        ejectorComponent = new TileComponentEjector(this, () -> tier.getOutput(), () -> MekanismConfig.general.fluidAutoEjectRate);
         ejectorComponent.setOutputData(configComponent, TransmissionType.GAS, TransmissionType.INFUSION, TransmissionType.PIGMENT, TransmissionType.SLURRY)
               .setCanEject(type -> MekanismUtils.canFunction(this) && (tier == ChemicalTankTier.CREATIVE || dumping != GasMode.DUMPING));
     }
@@ -155,13 +155,13 @@ public class TileEntityChemicalTank extends TileEntityConfigurableMachine implem
             if (current != Current.EMPTY) {
                 IChemicalTank<?, ?> currentTank = chemicalTank.getTankFromCurrent(current);
                 if (dumping == GasMode.DUMPING) {
-                    currentTank.shrinkStack(tier.getStorage() / 400, Action.EXECUTE);
+                    currentTank.shrinkStack(tier.getStorage() / 400);
                 } else {//dumping == GasMode.DUMPING_EXCESS
-                    long target = MathUtils.clampToLong(currentTank.getCapacity() * MekanismConfig.general.dumpExcessKeepRatio.get());
+                    long target = MathUtils.clampToLong(currentTank.getCapacity() * MekanismConfig.general.dumpExcessKeepRatio);
                     long stored = currentTank.getStored();
                     if (target < stored) {
                         //Dump excess that we need to get to the target (capping at our eject rate for how much we can dump at once)
-                        currentTank.shrinkStack(Math.min(stored - target, tier.getOutput()), Action.EXECUTE);
+                        currentTank.shrinkStack(Math.min(stored - target, tier.getOutput()));
                     }
                 }
             }

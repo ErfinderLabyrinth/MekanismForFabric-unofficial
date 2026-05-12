@@ -1,31 +1,31 @@
 package mekanism.common.tier;
 
-import java.util.Locale;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.math.FloatingLong;
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedFloatingLongValue;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
+import java.util.function.LongSupplier;
+
 @NothingNullByDefault
 public enum EnergyCubeTier implements ITier, StringRepresentable {
-    BASIC(BaseTier.BASIC, FloatingLong.createConst(4_000_000), FloatingLong.createConst(4_000)),
-    ADVANCED(BaseTier.ADVANCED, FloatingLong.createConst(16_000_000), FloatingLong.createConst(16_000)),
-    ELITE(BaseTier.ELITE, FloatingLong.createConst(64_000_000), FloatingLong.createConst(64_000)),
-    ULTIMATE(BaseTier.ULTIMATE, FloatingLong.createConst(256_000_000), FloatingLong.createConst(256_000)),
-    CREATIVE(BaseTier.CREATIVE, FloatingLong.MAX_VALUE, FloatingLong.MAX_VALUE);
+    BASIC(BaseTier.BASIC, 4_000_000, 4_000),
+    ADVANCED(BaseTier.ADVANCED, 16_000_000, 16_000),
+    ELITE(BaseTier.ELITE, 64_000_000, 64_000),
+    ULTIMATE(BaseTier.ULTIMATE, 256_000_000, 256_000),
+    CREATIVE(BaseTier.CREATIVE, Long.MAX_VALUE, Long.MAX_VALUE);
 
-    private final FloatingLong baseMaxEnergy;
-    private final FloatingLong baseOutput;
+    private final long baseMaxEnergy;
+    private final long baseOutput;
     private final BaseTier baseTier;
     @Nullable
-    private CachedFloatingLongValue storageReference;
+    private LongSupplier storageReference;
     @Nullable
-    private CachedFloatingLongValue outputReference;
+    private LongSupplier outputReference;
 
-    EnergyCubeTier(BaseTier tier, FloatingLong max, FloatingLong out) {
+    EnergyCubeTier(BaseTier tier, long max, long out) {
         baseMaxEnergy = max;
         baseOutput = out;
         baseTier = tier;
@@ -41,26 +41,26 @@ public enum EnergyCubeTier implements ITier, StringRepresentable {
         return name().toLowerCase(Locale.ROOT);
     }
 
-    public FloatingLong getMaxEnergy() {
-        return storageReference == null ? getBaseMaxEnergy() : storageReference.getOrDefault();
+    public long getMaxEnergy() {
+        return storageReference == null ? getBaseMaxEnergy() : storageReference.getAsLong();
     }
 
-    public FloatingLong getOutput() {
-        return outputReference == null ? getBaseOutput() : outputReference.getOrDefault();
+    public long getOutput() {
+        return outputReference == null ? getBaseOutput() : outputReference.getAsLong();
     }
 
-    public FloatingLong getBaseMaxEnergy() {
+    public long getBaseMaxEnergy() {
         return baseMaxEnergy;
     }
 
-    public FloatingLong getBaseOutput() {
+    public long getBaseOutput() {
         return baseOutput;
     }
 
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the EnergyCubeTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedFloatingLongValue storageReference, CachedFloatingLongValue outputReference) {
+    public void setConfigReference(LongSupplier storageReference, LongSupplier outputReference) {
         this.storageReference = storageReference;
         this.outputReference = outputReference;
     }

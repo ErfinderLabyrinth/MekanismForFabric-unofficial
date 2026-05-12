@@ -3,60 +3,44 @@ package mekanism.client.render.obj;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.mojang.math.Transformation;
+import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.client.model.data.TransmitterModelData;
+import mekanism.common.lib.transmitter.ConnectionType;
+import mekanism.common.util.EnumUtils;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.*;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.client.model.data.TransmitterModelData;
-import mekanism.client.render.obj.TransmitterModelConfiguration.IconStatus;
-import mekanism.common.lib.transmitter.ConnectionType;
-import mekanism.common.tile.transmitter.TileEntityTransmitter;
-import mekanism.common.util.EnumUtils;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.ChunkRenderTypeSet;
-import net.minecraftforge.client.model.BakedModelWrapper;
-import net.minecraftforge.client.model.SimpleModelState;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.obj.ObjModel;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 @NothingNullByDefault
-public class TransmitterBakedModel extends BakedModelWrapper<BakedModel> {
+public class TransmitterBakedModel implements BakedModel {
 
-    private static final ChunkRenderTypeSet CUTOUT = ChunkRenderTypeSet.of(RenderType.cutout());
-    private static final ChunkRenderTypeSet FULL = ChunkRenderTypeSet.of(RenderType.cutout(), RenderType.translucent());
+//    private static final ChunkRenderTypeSet CUTOUT = ChunkRenderTypeSet.of(RenderType.cutout());
+//    private static final ChunkRenderTypeSet FULL = ChunkRenderTypeSet.of(RenderType.cutout(), RenderType.translucent());
 
-    private final IGeometryBakingContext owner;
+    private final BakedModel original;
+//    private final IGeometryBakingContext owner;
     private final ModelBaker baker;
     private final Function<Material, TextureAtlasSprite> spriteGetter;
     private final ModelState modelTransform;
     private final ItemOverrides overrides;
     private final ResourceLocation modelLocation;
-    private final LoadingCache<SidedConnection, List<BakedQuad>> internalPartsCache;
-    @Nullable
-    private final LoadingCache<SidedConnection, List<BakedQuad>> glassPartsCache;
+//    private final LoadingCache<SidedConnection, List<BakedQuad>> internalPartsCache;
+//    @Nullable
+//    private final LoadingCache<SidedConnection, List<BakedQuad>> glassPartsCache;
     //TODO: Debate making transmitter models actually have cleanup code and have them also add listeners for opaque transmitters so that when the config
     // changes then these update accordingly
     private final LoadingCache<TransmitterDataKey, List<BakedQuad>> cache = CacheBuilder.newBuilder().build(new CacheLoader<>() {
@@ -64,111 +48,139 @@ public class TransmitterBakedModel extends BakedModelWrapper<BakedModel> {
         @Override
         public List<BakedQuad> load(@NotNull TransmitterDataKey key) {
             //Glass cache should never be null if we have renderGlass as true
-            LoadingCache<SidedConnection, List<BakedQuad>> partsCache = key.renderGlass ? Objects.requireNonNull(glassPartsCache) : internalPartsCache;
+//            LoadingCache<SidedConnection, List<BakedQuad>> partsCache = key.renderGlass ? Objects.requireNonNull(glassPartsCache) : internalPartsCache;
             List<BakedQuad> quads = new ArrayList<>();
             for (Direction side : EnumUtils.DIRECTIONS) {
                 ConnectionType connectionType = key.data.getConnectionType(side);
-                IconStatus iconStatus = TransmitterModelConfiguration.getIconStatus(key.data, side, connectionType);
-                SidedConnection sidedConnection = new SidedConnection(side, connectionType, iconStatus);
-                quads.addAll(partsCache.getUnchecked(sidedConnection));
+//                IconStatus iconStatus = TransmitterModelConfiguration.getIconStatus(key.data, side, connectionType);
+//                SidedConnection sidedConnection = new SidedConnection(side, connectionType, iconStatus);
+//                quads.addAll(partsCache.getUnchecked(sidedConnection));
             }
             return quads;
         }
     });
 
-    public TransmitterBakedModel(ObjModel internal, @Nullable ObjModel glass, IGeometryBakingContext owner, ModelBaker baker,
-          Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+    public TransmitterBakedModel(UnbakedModel internal, @Nullable UnbakedModel glass, ModelBaker baker,
+                                 Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
         //We define our baked variant to be how the item is. As we should always have model data when we have a state
-        super(internal.bake(new VisibleModelConfiguration(owner, Arrays.stream(EnumUtils.DIRECTIONS).map(side -> getPartName(side, ConnectionType.NONE)).toList()),
-              baker, spriteGetter, modelTransform, overrides, modelLocation));
-        this.owner = owner;
+        //TODO new VisibleModelConfiguration(owner, Arrays.stream(EnumUtils.DIRECTIONS).map(side -> getPartName(side, ConnectionType.NONE)).toList())
+        original = internal.bake(baker, spriteGetter, modelTransform, modelLocation);
+//        this.owner = owner;
         this.baker = baker;
         this.spriteGetter = spriteGetter;
         this.modelTransform = modelTransform;
         this.overrides = overrides;
         this.modelLocation = modelLocation;
-        this.internalPartsCache = CacheBuilder.newBuilder().build(createPartCacheLoader(internal));
-        this.glassPartsCache = glass == null ? null : CacheBuilder.newBuilder().build(createPartCacheLoader(glass));
+//        this.internalPartsCache = CacheBuilder.newBuilder().build(createPartCacheLoader(internal));
+//        this.glassPartsCache = glass == null ? null : CacheBuilder.newBuilder().build(createPartCacheLoader(glass));
     }
 
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
-        return getQuads(state, side, rand, ModelData.EMPTY, null);
-    }
-
-    @NotNull
-    @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData,
-          @Nullable RenderType renderType) {
         if (side != null) {
             return Collections.emptyList();
         }
-        TransmitterModelData data = extraData.get(TileEntityTransmitter.TRANSMITTER_PROPERTY);
-        if (data != null) {
-            boolean renderGlass = renderType == RenderType.translucent();
-            if (renderGlass && (glassPartsCache == null || !data.getHasColor())) {
-                //Skip rendering the glass if we don't actually have any glass, or we don't have a color for it
-                return Collections.emptyList();
-            }
-            return cache.getUnchecked(new TransmitterDataKey(data, renderGlass));
-        }
+//        TransmitterModelData data = extraData.get(TileEntityTransmitter.TRANSMITTER_PROPERTY);
+//        if (data != null) {
+////            boolean renderGlass = renderType == RenderType.translucent();
+//            if (renderGlass && (glassPartsCache == null || !data.getHasColor())) {
+//                //Skip rendering the glass if we don't actually have any glass, or we don't have a color for it
+//                return Collections.emptyList();
+//            }
+//            return cache.getUnchecked(new TransmitterDataKey(data, renderGlass));
+//        }
         //Fallback to our "default" model arrangement. The item variant uses this
-        return super.getQuads(state, null, rand, extraData, renderType);
+        return original.getQuads(state, null, rand);
     }
 
     @Override
-    public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data) {
-        return glassPartsCache == null ? CUTOUT : FULL;
+    public boolean useAmbientOcclusion() {
+        return original.useAmbientOcclusion();
     }
 
     @Override
-    public List<RenderType> getRenderTypes(ItemStack itemStack, boolean fabulous) {
-        if (glassPartsCache == null) {
-            return List.of(Sheets.cutoutBlockSheet());
-        }
-        return List.of(Sheets.cutoutBlockSheet(), fabulous ? Sheets.translucentCullBlockSheet() : Sheets.translucentItemSheet());
+    public boolean isGui3d() {
+        return original.isGui3d();
     }
 
     @Override
-    public List<BakedModel> getRenderPasses(ItemStack stack, boolean fabulous) {
-        return Collections.singletonList(this);
+    public boolean usesBlockLight() {
+        return original.usesBlockLight();
     }
+
+    @Override
+    public boolean isCustomRenderer() {
+        return original.isCustomRenderer();
+    }
+
+    @Override
+    public TextureAtlasSprite getParticleIcon() {
+        return original.getParticleIcon();
+    }
+
+    @Override
+    public ItemTransforms getTransforms() {
+        return original.getTransforms();
+    }
+
+    @Override
+    public ItemOverrides getOverrides() {
+        return original.getOverrides();
+    }
+
+//    @Override
+//    public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data) {
+//        return glassPartsCache == null ? CUTOUT : FULL;
+//    }
+//
+//    @Override
+//    public List<RenderType> getRenderTypes(ItemStack itemStack, boolean fabulous) {
+//        if (glassPartsCache == null) {
+//            return List.of(Sheets.cutoutBlockSheet());
+//        }
+//        return List.of(Sheets.cutoutBlockSheet(), fabulous ? Sheets.translucentCullBlockSheet() : Sheets.translucentItemSheet());
+//    }
+//
+//    @Override
+//    public List<BakedModel> getRenderPasses(ItemStack stack, boolean fabulous) {
+//        return Collections.singletonList(this);
+//    }
 
     private static String getPartName(Direction side, ConnectionType connectionType) {
         return side.getSerializedName() + connectionType.name();
     }
 
-    private CacheLoader<SidedConnection, List<BakedQuad>> createPartCacheLoader(ObjModel model) {
-        return new CacheLoader<>() {
-            @NotNull
-            @Override
-            public List<BakedQuad> load(@NotNull SidedConnection key) {
-                Direction side = key.side();
-                ConnectionType connectionType = key.connection();
-                String part = getPartName(side, connectionType);
-                if (!model.getRootComponentNames().contains(part)) {
-                    //Validate the model actually has the part (this should always be true but if for some reason it isn't short circuit)
-                    return Collections.emptyList();
-                }
-                IconStatus iconStatus = key.status();
-                ModelState transform = modelTransform;
-                if (connectionType == ConnectionType.NONE && iconStatus.getAngle() > 0) {
-                    //If the part should be rotated, then we need to use a custom IModelTransform
-                    Vector3f vecForDirection = Vec3.atLowerCornerOf(side.getNormal()).toVector3f();
-                    vecForDirection.mul(-1);
-                    Quaternionf quaternion = new Quaternionf().setAngleAxis(iconStatus.getAngle(), vecForDirection.x, vecForDirection.y, vecForDirection.z);
-                    Transformation matrix = new Transformation(null, quaternion, null, null);
-                    transform = new SimpleModelState(transform.getRotation().compose(matrix), transform.isUvLocked());
-                }
-                BakedModel bakedModel = model.bake(new TransmitterModelConfiguration(owner, part, iconStatus), baker, spriteGetter, transform, overrides, modelLocation);
-                //Note: We don't actually care about the state, or the side anywhere and the model returns the proper values even if we don't provide a render type
-                // We also just use a new random source as we don't have one in our current context
-                return bakedModel.getQuads(null, null, RandomSource.create(), ModelData.EMPTY, null);
-            }
-        };
-    }
+//    private CacheLoader<SidedConnection, List<BakedQuad>> createPartCacheLoader(ObjModel model) {
+//        return new CacheLoader<>() {
+//            @NotNull
+//            @Override
+//            public List<BakedQuad> load(@NotNull SidedConnection key) {
+//                Direction side = key.side();
+//                ConnectionType connectionType = key.connection();
+//                String part = getPartName(side, connectionType);
+////                if (!model.getRootComponentNames().contains(part)) {
+////                    //Validate the model actually has the part (this should always be true but if for some reason it isn't short circuit)
+////                    return Collections.emptyList();
+////                }
+//                IconStatus iconStatus = key.status();
+//                ModelState transform = modelTransform;
+//                if (connectionType == ConnectionType.NONE && iconStatus.getAngle() > 0) {
+//                    //If the part should be rotated, then we need to use a custom IModelTransform
+//                    Vector3f vecForDirection = Vec3.atLowerCornerOf(side.getNormal()).toVector3f();
+//                    vecForDirection.mul(-1);
+//                    Quaternionf quaternion = new Quaternionf().setAngleAxis(iconStatus.getAngle(), vecForDirection.x, vecForDirection.y, vecForDirection.z);
+//                    Transformation matrix = new Transformation(null, quaternion, null, null);
+//                    transform = new SimpleModelState(transform.getRotation().compose(matrix), transform.isUvLocked());
+//                }
+//                BakedModel bakedModel = model.bake(new TransmitterModelConfiguration(owner, part, iconStatus), baker, spriteGetter, transform, overrides, modelLocation);
+//                //Note: We don't actually care about the state, or the side anywhere and the model returns the proper values even if we don't provide a render type
+//                // We also just use a new random source as we don't have one in our current context
+//                return bakedModel.getQuads(null, null, RandomSource.create(), ModelData.EMPTY, null);
+//            }
+//        };
+//    }
 
-    private record SidedConnection(Direction side, ConnectionType connection, IconStatus status) {
+    private record SidedConnection(Direction side, ConnectionType connection) {
     }
 
     private static class TransmitterDataKey {

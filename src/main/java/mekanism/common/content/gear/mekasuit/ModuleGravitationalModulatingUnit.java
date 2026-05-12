@@ -1,6 +1,5 @@
 package mekanism.common.content.gear.mekasuit;
 
-import java.util.function.Consumer;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IHUDElement;
@@ -19,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.function.Consumer;
 
 @ParametersAreNotNullByDefault
 public class ModuleGravitationalModulatingUnit implements ICustomModule<ModuleGravitationalModulatingUnit> {
@@ -56,7 +57,7 @@ public class ModuleGravitationalModulatingUnit implements ICustomModule<ModuleGr
     public void tickClient(IModule<ModuleGravitationalModulatingUnit> module, Player player) {
         //Client side handling of boost as movement needs to be applied on both the server and the client
         if (player.getAbilities().flying && MekanismKeyHandler.boostKey.isDown() &&
-            module.canUseEnergy(player, MekanismConfig.gear.mekaSuitEnergyUsageGravitationalModulation.get().multiply(4), false)) {
+            module.canUseEnergy(player, MekanismConfig.gear.mekaSuitEnergyUsageGravitationalModulation * 4, false)) {
             float boost = getBoost();
             if (boost > 0) {
                 player.moveRelative(boost, new Vec3(0, 0, 1));

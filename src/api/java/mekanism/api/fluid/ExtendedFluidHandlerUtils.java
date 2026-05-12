@@ -3,10 +3,11 @@ package mekanism.api.fluid;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import java.util.function.IntSupplier;
 import mekanism.api.Action;
-import net.minecraftforge.fluids.FluidStack;
+import mekanism.api.FluidStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.IntSupplier;
 
 public class ExtendedFluidHandlerUtils {
 
@@ -24,7 +25,7 @@ public class ExtendedFluidHandlerUtils {
             FluidStack inTank = inTankGetter.get(tank);
             if (inTank.isEmpty()) {
                 emptyTanks.add(tank);
-            } else if (inTank.isFluidEqual(stack)) {
+            } else if (inTank.equals(stack)) {
                 matchingTanks.add(tank);
             }
         }
@@ -54,15 +55,15 @@ public class ExtendedFluidHandlerUtils {
     /**
      * Util method for a generic extraction implementation for various handlers. Mainly for internal use only
      */
-    public static FluidStack extract(int amount, Action action, IntSupplier tankCount, Int2ObjectFunction<@NotNull FluidStack> inTankGetter, ExtractFluid extractFluid) {
+    public static FluidStack extract(long amount, Action action, IntSupplier tankCount, Int2ObjectFunction<@NotNull FluidStack> inTankGetter, ExtractFluid extractFluid) {
         int tanks = tankCount.getAsInt();
         if (tanks == 1) {
             return extractFluid.extract(0, amount, action);
         }
         FluidStack extracted = FluidStack.EMPTY;
-        int toDrain = amount;
+        long toDrain = amount;
         for (int tank = 0; tank < tanks; tank++) {
-            if (extracted.isEmpty() || extracted.isFluidEqual(inTankGetter.get(tank))) {
+            if (extracted.isEmpty() || extracted.equals(inTankGetter.get(tank))) {
                 //If there is fluid in the tank that matches the type we have started draining, or we haven't found a type yet
                 FluidStack drained = extractFluid.extract(tank, toDrain, action);
                 if (!drained.isEmpty()) {
@@ -70,9 +71,9 @@ public class ExtendedFluidHandlerUtils {
                     if (extracted.isEmpty()) {
                         extracted = drained;
                     } else {
-                        extracted.grow(drained.getAmount());
+                        extracted.grow(drained.amount());
                     }
-                    toDrain -= drained.getAmount();
+                    toDrain -= drained.amount();
                     if (toDrain == 0) {
                         //If we are done draining break and return the amount extracted
                         break;
@@ -92,15 +93,15 @@ public class ExtendedFluidHandlerUtils {
         int tanks = tankCount.getAsInt();
         if (tanks == 1) {
             FluidStack inTank = inTankGetter.get(0);
-            if (inTank.isEmpty() || !inTank.isFluidEqual(stack)) {
+            if (inTank.isEmpty() || !inTank.equals(stack)) {
                 return FluidStack.EMPTY;
             }
-            return extractFluid.extract(0, stack.getAmount(), action);
+            return extractFluid.extract(0, stack.amount(), action);
         }
         FluidStack extracted = FluidStack.EMPTY;
-        int toDrain = stack.getAmount();
+        long toDrain = stack.amount();
         for (int tank = 0; tank < tanks; tank++) {
-            if (stack.isFluidEqual(inTankGetter.get(tank))) {
+            if (stack.equals(inTankGetter.get(tank))) {
                 //If there is fluid in the tank that matches the type we are trying to drain, try to drain from it
                 FluidStack drained = extractFluid.extract(tank, toDrain, action);
                 if (!drained.isEmpty()) {
@@ -108,9 +109,9 @@ public class ExtendedFluidHandlerUtils {
                     if (extracted.isEmpty()) {
                         extracted = drained;
                     } else {
-                        extracted.grow(drained.getAmount());
+                        extracted.grow(drained.amount());
                     }
-                    toDrain -= drained.getAmount();
+                    toDrain -= drained.amount();
                     if (toDrain == 0) {
                         //If we are done draining break and return the amount extracted
                         break;
@@ -131,6 +132,6 @@ public class ExtendedFluidHandlerUtils {
     @FunctionalInterface
     public interface ExtractFluid {
 
-        FluidStack extract(int tank, int amount, Action action);
+        FluidStack extract(int tank, long amount, Action action);
     }
 }

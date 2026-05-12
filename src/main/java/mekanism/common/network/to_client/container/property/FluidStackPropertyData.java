@@ -1,8 +1,8 @@
 package mekanism.common.network.to_client.container.property;
 
+import mekanism.api.FluidStack;
 import mekanism.common.inventory.container.MekanismContainer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 public class FluidStackPropertyData extends PropertyData {
@@ -23,6 +23,6 @@ public class FluidStackPropertyData extends PropertyData {
     @Override
     public void writeToPacket(FriendlyByteBuf buffer) {
         super.writeToPacket(buffer);
-        buffer.writeFluidStack(value);
+        value.writeToBuffer(buffer);
     }
 }

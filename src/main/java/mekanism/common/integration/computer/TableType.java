@@ -2,10 +2,11 @@ package mekanism.common.integration.computer;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import mekanism.common.util.MekCodecs;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import mekanism.common.util.MekCodecs;
 
 /**
  * Defines the format of a "table" (Map) format of a Mekanism data structure

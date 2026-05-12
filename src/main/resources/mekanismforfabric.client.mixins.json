@@ -1,0 +1,32 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "mekanism.client.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "AbstractContainerScreenMixin",
+    "BlockModelDeserializerMixin",
+    "BlockModelMixin",
+    "BlockRenderDispatcherMixin",
+    "ClientPacketListenerMixin",
+    "ElytraLayerMixin",
+    "FogRendererMixin",
+    "GuiGraphicsMixin",
+    "GuiMixin",
+    "LevelRendererMixin",
+    "LivingEntityRendererMixin",
+    "MinecraftMixin",
+    "ModelManagerMixin",
+    "MouseHandlerMixin",
+    "PlayerRendererMixin",
+    "TextureAtlasMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "ChunkMapMixin",
+    "ChunkSerializerMixin",
+    "ServerPlayerGameModeMixin"
+  ]
+}

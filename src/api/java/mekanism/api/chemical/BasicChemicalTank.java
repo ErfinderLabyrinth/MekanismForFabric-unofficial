@@ -1,20 +1,27 @@
 package mekanism.api.chemical;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+
+import com.google.common.collect.Iterators;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
-public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> implements IChemicalTank<CHEMICAL, STACK>,
-      IChemicalHandler<CHEMICAL, STACK> {
+public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>> extends SnapshotParticipant<STACK> implements IChemicalTank<CHEMICAL, STACK>,
+      IChemicalHandler<CHEMICAL, STACK, TANK>, StorageView<CHEMICAL> {
 
     private final Predicate<@NotNull CHEMICAL> validator;
     protected final BiPredicate<@NotNull CHEMICAL, @NotNull AutomationType> canExtract;
@@ -88,7 +95,7 @@ public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STA
         onContentsChanged();
     }
 
-    @Override
+    @Deprecated(forRemoval = true)
     public STACK insert(@NotNull STACK stack, Action action, AutomationType automationType) {
         if (stack.isEmpty() || !isValid(stack) || !canInsert.test(stack.getType(), automationType)) {
             //"Fail quick" if the given stack is empty, or we can never insert the chemical or currently are unable to insert it
@@ -121,7 +128,7 @@ public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STA
         return stack;
     }
 
-    @Override
+    @Deprecated(forRemoval = true)
     public STACK extract(long amount, Action action, AutomationType automationType) {
         if (isEmpty() || amount < 1 || !canExtract.test(stored.getType(), automationType)) {
             //"Fail quick" if we don't can never extract from this tank, have a chemical stored, or the amount being requested is less than one
@@ -154,20 +161,18 @@ public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STA
      * directly modify our stack instead of having to make a copy.
      */
     @Override
-    public long setStackSize(long amount, Action action) {
+    public long setStackSize(long amount) {
         if (isEmpty()) {
             return 0;
         } else if (amount <= 0) {
-            if (action.execute()) {
-                setEmpty();
-            }
+            setEmpty();
             return 0;
         }
         long maxStackSize = getCapacity();
         if (amount > maxStackSize) {
             amount = maxStackSize;
         }
-        if (getStored() == amount || action.simulate()) {
+        if (getStored() == amount) {
             //If our size is not changing, or we are only simulating the change, don't do anything
             return amount;
         }
@@ -182,7 +187,7 @@ public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STA
      * @implNote Overwritten so that we can make this obey the rate limit our tank may have
      */
     @Override
-    public long growStack(long amount, Action action) {
+    public long growStack(long amount) {
         long current = getStored();
         if (amount > 0) {
             //Cap adding amount at how much we need, so that we don't risk long overflow
@@ -190,7 +195,7 @@ public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STA
         } else if (amount < 0) {
             amount = Math.max(amount, -getRate(null));
         }
-        long newSize = setStackSize(current + amount, action);
+        long newSize = setStackSize(current + amount);
         return newSize - current;
     }
 
@@ -276,39 +281,127 @@ public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STA
     }
 
     @Override
-    public int getTanks() {
-        return 1;
+    public List<TANK> getTanks() {
+        return List.of((TANK)this);
     }
 
-    @Override
-    public STACK getChemicalInTank(int tank) {
-        return tank == 0 ? getStack() : getEmptyStack();
-    }
+//    @Override
+//    public STACK getChemicalInTank(int tank) {
+//        return tank == 0 ? getStack() : getEmptyStack();
+//    }
+//
+//    @Override
+//    public void setChemicalInTank(int tank, STACK stack) {
+//        if (tank == 0) {
+//            setStack(stack);
+//        }
+//    }
+//
+//    @Override
+//    @Deprecated(forRemoval = true)
+//    public long getTankCapacity(int tank) {
+//        return tank == 0 ? getCapacity() : 0;
+//    }
+//
+//    @Override
+//    public boolean isValid(int tank, STACK stack) {
+//        return tank == 0 && isValid(stack);
+//    }
+//
+//    @Override
+//    public STACK insertChemical(int tank, STACK stack, Action action) {
+//        return tank == 0 ? insert(stack, action, AutomationType.EXTERNAL) : stack;
+//    }
+//
+//    @Override
+//    public STACK extractChemical(int tank, long amount, Action action) {
+//        return tank == 0 ? extract(amount, action, AutomationType.EXTERNAL) : getEmptyStack();
+//    }
+
+
 
     @Override
-    public void setChemicalInTank(int tank, STACK stack) {
-        if (tank == 0) {
-            setStack(stack);
+    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
+        STACK stack = createStack(resource, maxAmount);
+        updateSnapshots(transaction);
+        if (maxAmount == 0 || !isValid(stack) || !canInsert.test(stack.getType(), null)) {
+            //"Fail quick" if the given stack is empty, or we can never insert the chemical or currently are unable to insert it
+            return 0;
         }
+        long needed = Math.min(getRate(null), getNeeded());
+        if (needed <= 0) {
+            //Fail if we are a full tank or our rate is zero
+            return 0;
+        }
+        boolean sameType = false;
+        if (isEmpty() || (sameType = isTypeEqual(resource))) {
+            long toAdd = Math.min(maxAmount, needed);
+            //If we want to actually insert the chemical, then update the current chemical
+            if (sameType) {
+                //We can just grow our stack by the amount we want to increase it
+                stored.grow(toAdd);
+                onContentsChanged();
+            } else {
+                //If we are not the same type then we have to copy the stack and set it
+                // Just set it unchecked as we have already validated it
+                // Note: this also will mark that the contents changed
+                setStackUnchecked(createStack(resource, toAdd));
+            }
+            return toAdd;
+        }
+        //If we didn't accept this chemical, then just return the given stack
+        return 0;
     }
 
     @Override
-    public long getTankCapacity(int tank) {
-        return tank == 0 ? getCapacity() : 0;
+    public long extract(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
+        updateSnapshots(transaction);
+        if (isEmpty() || maxAmount < 1 || !canExtract.test(stored.getType(), null)) {
+            //"Fail quick" if we don't can never extract from this tank, have a chemical stored, or the amount being requested is less than one
+            return 0;
+        }
+        //Note: While we technically could just return the stack itself if we are removing all that we have, it would require a lot more checks
+        // We also are limiting it by the rate this tank has
+        long size = Math.min(Math.min(getRate(null), getStored()), maxAmount);
+        if (size == 0) {
+            return 0;
+        }
+        STACK ret = createStack(stored, size);
+        if (!ret.isEmpty()) {
+            //If shrink gets the size to zero it will update the empty state so that isEmpty() returns true.
+            stored.shrink(ret.getAmount());
+            onContentsChanged();
+        }
+        return ret.getAmount();
     }
 
     @Override
-    public boolean isValid(int tank, STACK stack) {
-        return tank == 0 && isValid(stack);
+    public Iterator<StorageView<CHEMICAL>> iterator() {
+        return Iterators.singletonIterator(this);
     }
 
     @Override
-    public STACK insertChemical(int tank, STACK stack, Action action) {
-        return tank == 0 ? insert(stack, action, AutomationType.EXTERNAL) : stack;
+    public boolean isResourceBlank() {
+        return stored.getType().isEmptyType();
     }
 
     @Override
-    public STACK extractChemical(int tank, long amount, Action action) {
-        return tank == 0 ? extract(amount, action, AutomationType.EXTERNAL) : getEmptyStack();
+    public CHEMICAL getResource() {
+        return stored.getType();
+    }
+
+    @Override
+    public long getAmount() {
+        return stored.getAmount();
+    }
+
+    @Override
+    protected STACK createSnapshot() {
+        return stored;
+    }
+
+    @Override
+    protected void readSnapshot(STACK snapshot) {
+        this.stored = snapshot;
     }
 }

@@ -1,22 +1,22 @@
 package mekanism.common.tile.prefab;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.UUID;
 import mekanism.api.IConfigurable;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
+import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.client.SparkleAnimation;
 import mekanism.common.MekanismLang;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.integration.computer.*;
+import mekanism.common.integration.computer.BoundMethodHolder;
+import mekanism.common.integration.computer.FactoryRegistry;
+import mekanism.common.integration.computer.MethodRestriction;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.inventory.container.MekanismContainer;
-import mekanism.common.inventory.container.sync.dynamic.SyncMapper;
+import mekanism.common.inventory.container.sync.dynamic.IContainerSyncable;
 import mekanism.common.lib.multiblock.FormationProtocol.FormationResult;
 import mekanism.common.lib.multiblock.IMultiblock;
 import mekanism.common.lib.multiblock.IStructuralMultiblock;
@@ -27,6 +27,8 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -39,9 +41,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.UUID;
 
 public abstract class TileEntityMultiblock<T extends MultiblockData> extends TileEntityMekanism implements IMultiblock<T>, IConfigurable {
 
@@ -71,7 +75,6 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
     public TileEntityMultiblock(IBlockProvider blockProvider, BlockPos pos, BlockState state) {
         super(blockProvider, pos, state);
         cacheCoord();
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIGURABLE, this));
     }
 
     @Override
@@ -170,7 +173,6 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
     }
 
     protected void structureChanged(T multiblock) {
-        invalidateCachedCapabilities();
         if (multiblock.isFormed() && !multiblock.hasMaster && canBeMaster()) {
             multiblock.hasMaster = true;
             isMaster = true;
@@ -258,8 +260,8 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void handleUpdatePacket(@NotNull CompoundTag tag) {
+        super.handleUpdatePacket(tag);
         NBTUtils.setBooleanIfPresent(tag, NBTConstants.RENDERING, value -> isMaster = value);
         T multiblock = getMultiblock();
         NBTUtils.setBooleanIfPresent(tag, NBTConstants.HAS_STRUCTURE, multiblock::setFormedForce);
@@ -285,7 +287,7 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
             // due to trying to validate if the value is actually a Player
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null && worldPosition.distSqr(player.blockPosition()) <= 1_600) {
-                if (MekanismConfig.client.enableMultiblockFormationParticles.get()) {
+                if (MekanismConfig.client.enableMultiblockFormationParticles) {
                     new SparkleAnimation(this, multiblock.renderLocation, multiblock.length() - 1, multiblock.width() - 1, multiblock.height() - 1).run();
                 } else {
                     player.displayClientMessage(MekanismLang.MULTIBLOCK_FORMED_CHAT.translateColored(EnumColor.INDIGO), true);
@@ -315,23 +317,25 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
     @Override
     public void addContainerTrackers(MekanismContainer container) {
         super.addContainerTrackers(container);
-        SyncMapper.INSTANCE.setup(container, getMultiblock().getClass(), this::getMultiblock);
+        if (getMultiblock() instanceof IContainerSyncable) {
+            ((IContainerSyncable) getMultiblock()).addSyncables(container::track, "default");
+        }
     }
 
-    @NotNull
-    @Override
-    public AABB getRenderBoundingBox() {
-        if (isMaster()) {
-            T multiblock = getMultiblock();
-            if (multiblock.isFormed() && multiblock.getBounds() != null) {
-                //TODO: Eventually we may want to look into caching this
-                //Note: We do basically the full dimensions as it still is a lot smaller than always rendering it, and makes sure no matter
-                // how the specific multiblock wants to render, that it is being viewed
-                return new AABB(multiblock.getMinPos(), multiblock.getMaxPos().offset(1, 1, 1));
-            }
-        }
-        return super.getRenderBoundingBox();
-    }
+//    @NotNull
+//    @Override
+//    public AABB getRenderBoundingBox() {
+//        if (isMaster()) {
+//            T multiblock = getMultiblock();
+//            if (multiblock.isFormed() && multiblock.getBounds() != null) {
+//                //TODO: Eventually we may want to look into caching this
+//                //Note: We do basically the full dimensions as it still is a lot smaller than always rendering it, and makes sure no matter
+//                // how the specific multiblock wants to render, that it is being viewed
+//                return new AABB(multiblock.getMinPos(), multiblock.getMaxPos().offset(1, 1, 1));
+//            }
+//        }
+//        return super.getRenderBoundingBox();
+//    }
 
     @Override
     public boolean persistInventory() {
@@ -341,7 +345,17 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
     @NotNull
     @Override
     protected IInventorySlotHolder getInitialInventory(IContentsListener listener) {
-        return side -> getMultiblock().getInventorySlots(side);
+        return new IInventorySlotHolder() {
+            @Override
+            public @NotNull Storage<ItemVariant> getInventorySlots(@Nullable Direction side) {
+                return getMultiblock().getInventoryStorage(side);
+            }
+
+            @Override
+            public List<IInventorySlot> getAll() {
+                return getMultiblock().getInventorySlots();
+            }
+        };
     }
 
     @Override

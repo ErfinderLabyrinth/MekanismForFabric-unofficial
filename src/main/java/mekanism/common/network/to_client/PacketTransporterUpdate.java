@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import mekanism.api.MekanismAPI;
 import mekanism.common.content.network.transmitter.DiversionTransporter;
 import mekanism.common.content.network.transmitter.DiversionTransporter.DiversionControl;
 import mekanism.common.content.network.transmitter.LogisticalTransporterBase;
@@ -13,12 +14,16 @@ import mekanism.common.network.IMekanismPacket;
 import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 public class PacketTransporterUpdate implements IMekanismPacket {
+    public static final PacketType<PacketTransporterUpdate> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "transporter_update"), PacketTransporterUpdate::decode);
 
     //Generic
     private final boolean isDiversion;
@@ -64,7 +69,7 @@ public class PacketTransporterUpdate implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
+    public void handle(Player player, PacketSender responseSender) {
         TileEntityLogisticalTransporterBase tile = WorldUtils.getTileEntity(TileEntityLogisticalTransporterBase.class, Minecraft.getInstance().level, pos);
         if (tile != null) {
             LogisticalTransporterBase transporter = tile.getTransmitter();
@@ -128,5 +133,10 @@ public class PacketTransporterUpdate implements IMekanismPacket {
             }
         }
         return packet;
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 }

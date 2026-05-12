@@ -1,8 +1,5 @@
 package mekanism.common.capabilities.holder.chemical;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
@@ -26,9 +23,15 @@ import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.InfusionSlotI
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.PigmentSlotInfo;
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.SlurrySlotInfo;
 import mekanism.common.tile.component.config.slot.ISlotInfo;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
 
 public abstract class ConfigChemicalTankHolder<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>>
       extends ConfigHolder<TANK> implements IChemicalTankHolder<CHEMICAL, STACK, TANK> {
@@ -44,10 +47,9 @@ public abstract class ConfigChemicalTankHolder<CHEMICAL extends Chemical<CHEMICA
     @NotNull
     protected abstract List<TANK> getTanksFromSlot(ISlotInfo slotInfo);
 
-    @NotNull
     @Override
-    public List<TANK> getTanks(@Nullable Direction direction) {
-        return getSlots(direction, this::getTanksFromSlot);
+    public @NotNull Storage<CHEMICAL> getTanks(@Nullable Direction direction) {
+        return new CombinedStorage<>(getSlots(direction, this::getTanksFromSlot));
     }
 
     public static class ConfigGasTankHolder extends ConfigChemicalTankHolder<Gas, GasStack, IGasTank> {

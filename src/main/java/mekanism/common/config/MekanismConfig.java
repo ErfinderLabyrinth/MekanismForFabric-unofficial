@@ -1,31 +1,45 @@
 package mekanism.common.config;
 
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingContext;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 
 public class MekanismConfig {
 
-    private MekanismConfig() {
+    private MekanismConfig() {}
+
+    // Define config instances
+    public static ClientConfig client;
+    public static CommonConfig common;
+    public static GeneralConfig general;
+    public static GearConfig gear;
+    public static StorageConfig storage;
+    public static TierConfig tiers;
+    public static UsageConfig usage;
+    public static WorldConfig world;
+
+    public static void registerClientConfig() {
+        AutoConfig.register(ClientConfig.class, Toml4jConfigSerializer::new);
+
+        client = AutoConfig.getConfigHolder(ClientConfig.class).getConfig();
     }
 
-    public static final ClientConfig client = new ClientConfig();
-    public static final CommonConfig common = new CommonConfig();
-    public static final GeneralConfig general = new GeneralConfig();
-    public static final GearConfig gear = new GearConfig();
-    public static final StorageConfig storage = new StorageConfig();
-    public static final TierConfig tiers = new TierConfig();
-    public static final UsageConfig usage = new UsageConfig();
-    public static final WorldConfig world = new WorldConfig();
+    public static void registerCommonConfigs() {
+        // Register each config with AutoConfig
+        AutoConfig.register(CommonConfig.class, Toml4jConfigSerializer::new);
+        AutoConfig.register(GeneralConfig.class, Toml4jConfigSerializer::new);
+        AutoConfig.register(GearConfig.class, Toml4jConfigSerializer::new);
+        AutoConfig.register(StorageConfig.class, Toml4jConfigSerializer::new);
+        AutoConfig.register(TierConfig.class, Toml4jConfigSerializer::new);
+        AutoConfig.register(UsageConfig.class, Toml4jConfigSerializer::new);
+        AutoConfig.register(WorldConfig.class, Toml4jConfigSerializer::new);
 
-    public static void registerConfigs(ModLoadingContext modLoadingContext) {
-        ModContainer modContainer = modLoadingContext.getActiveContainer();
-        MekanismConfigHelper.registerConfig(modContainer, client);
-        MekanismConfigHelper.registerConfig(modContainer, common);
-        MekanismConfigHelper.registerConfig(modContainer, general);
-        MekanismConfigHelper.registerConfig(modContainer, gear);
-        MekanismConfigHelper.registerConfig(modContainer, storage);
-        MekanismConfigHelper.registerConfig(modContainer, tiers);
-        MekanismConfigHelper.registerConfig(modContainer, usage);
-        MekanismConfigHelper.registerConfig(modContainer, world);
+        // Get instances
+        common = AutoConfig.getConfigHolder(CommonConfig.class).getConfig();
+        general = AutoConfig.getConfigHolder(GeneralConfig.class).getConfig();
+        gear = AutoConfig.getConfigHolder(GearConfig.class).getConfig();
+        storage = AutoConfig.getConfigHolder(StorageConfig.class).getConfig();
+        tiers = AutoConfig.getConfigHolder(TierConfig.class).getConfig();
+        usage = AutoConfig.getConfigHolder(UsageConfig.class).getConfig();
+        world = AutoConfig.getConfigHolder(WorldConfig.class).getConfig();
     }
 }

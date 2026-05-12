@@ -1,6 +1,5 @@
 package mekanism.common.content.gear.mekasuit;
 
-import java.util.function.Consumer;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IHUDElement;
@@ -14,6 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.function.Consumer;
+
 @ParametersAreNotNullByDefault
 public class ModuleVisionEnhancementUnit implements ICustomModule<ModuleVisionEnhancementUnit> {
 
@@ -21,7 +22,7 @@ public class ModuleVisionEnhancementUnit implements ICustomModule<ModuleVisionEn
 
     @Override
     public void tickServer(IModule<ModuleVisionEnhancementUnit> module, Player player) {
-        module.useEnergy(player, MekanismConfig.gear.mekaSuitEnergyUsageVisionEnhancement.get());
+        module.useEnergy(player, MekanismConfig.gear.mekaSuitEnergyUsageVisionEnhancement);
     }
 
     @Override

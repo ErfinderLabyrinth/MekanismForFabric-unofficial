@@ -24,12 +24,12 @@ public class ConfigurableUniformInt extends IntProvider {
 
     @Override
     public int getMinValue() {
-        return MekanismConfig.world.salt.minRadius.get();
+        return MekanismConfig.world.salt.minRadius;
     }
 
     @Override
     public int getMaxValue() {
-        return MekanismConfig.world.salt.maxRadius.get();
+        return MekanismConfig.world.salt.maxRadius;
     }
 
     @NotNull

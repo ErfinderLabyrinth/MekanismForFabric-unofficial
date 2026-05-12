@@ -1,17 +1,16 @@
 package mekanism.common.registration.impl;
 
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
-import mekanism.common.registration.WrappedDeferredRegister;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import org.jetbrains.annotations.NotNull;
 
-public class DataSerializerDeferredRegister extends WrappedDeferredRegister<EntityDataSerializer<?>> {
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+
+public class DataSerializerDeferredRegister{
 
     public DataSerializerDeferredRegister(String modid) {
-        super(modid, ForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS);
     }
 
     public <T extends Enum<T>> DataSerializerRegistryObject<T> registerEnum(String name, Class<T> enumClass) {
@@ -44,6 +43,8 @@ public class DataSerializerDeferredRegister extends WrappedDeferredRegister<Enti
     }
 
     public <T> DataSerializerRegistryObject<T> register(String name, Supplier<EntityDataSerializer<T>> sup) {
-        return register(name, sup, DataSerializerRegistryObject::new);
+        EntityDataSerializer<T> eds = sup.get();
+        EntityDataSerializers.registerSerializer(eds);
+        return new DataSerializerRegistryObject<>(eds);
     }
 }

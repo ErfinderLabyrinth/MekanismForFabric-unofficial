@@ -5,9 +5,9 @@ import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.providers.IInfuseTypeProvider;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -33,7 +33,7 @@ public final class InfusionStack extends ChemicalStack<InfuseType> {
     }
 
     @Override
-    protected IForgeRegistry<InfuseType> getRegistry() {
+    protected Registry<InfuseType> getRegistry() {
         return MekanismAPI.infuseTypeRegistry();
     }
 
@@ -43,11 +43,11 @@ public final class InfusionStack extends ChemicalStack<InfuseType> {
     }
 
     /**
-     * Returns the InfusionStack stored in the defined tag compound, or null if it doesn't exist.
+     * Returns the InfusionStack stored in the defined tagSupplier compound, or null if it doesn't exist.
      *
-     * @param nbtTags - tag compound to read from
+     * @param nbtTags - tagSupplier compound to read from
      *
-     * @return InfusionStack stored in the tag compound
+     * @return InfusionStack stored in the tagSupplier compound
      */
     public static InfusionStack readFromNBT(@Nullable CompoundTag nbtTags) {
         if (nbtTags == null || nbtTags.isEmpty()) {
@@ -65,7 +65,7 @@ public final class InfusionStack extends ChemicalStack<InfuseType> {
     }
 
     public static InfusionStack readFromPacket(FriendlyByteBuf buf) {
-        InfuseType infuseType = buf.readRegistryIdSafe(InfuseType.class);
+        InfuseType infuseType = InfuseType.getFromRegistry(buf.readResourceLocation());
         if (infuseType.isEmptyType()) {
             return EMPTY;
         }

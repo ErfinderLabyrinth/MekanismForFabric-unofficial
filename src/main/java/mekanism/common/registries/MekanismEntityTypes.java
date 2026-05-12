@@ -17,4 +17,8 @@ public class MekanismEntityTypes {
 
     public static final EntityTypeRegistryObject<EntityFlame> FLAME = ENTITY_TYPES.register("flame", EntityType.Builder.of(EntityFlame::new, MobCategory.MISC).sized(0.5F, 0.5F).fireImmune());
     public static final EntityTypeRegistryObject<EntityRobit> ROBIT = ENTITY_TYPES.register("robit", EntityType.Builder.of(EntityRobit::new, MobCategory.MISC).sized(0.6F, 0.65F).fireImmune().noSummon(), EntityRobit::getDefaultAttributes);
+
+    public static void register() {
+
+    }
 }

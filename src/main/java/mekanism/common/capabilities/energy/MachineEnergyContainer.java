@@ -1,12 +1,9 @@
 package mekanism.common.capabilities.energy;
 
-import java.util.Objects;
-import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.Upgrade;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.attribute.AttributeEnergy;
 import mekanism.common.tile.base.TileEntityMekanism;
@@ -14,6 +11,9 @@ import mekanism.common.tile.component.TileComponentUpgrade;
 import mekanism.common.util.MekanismUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.Predicate;
 
 @NothingNullByDefault
 public class MachineEnergyContainer<TILE extends TileEntityMekanism> extends BasicEnergyContainer {
@@ -38,14 +38,14 @@ public class MachineEnergyContainer<TILE extends TileEntityMekanism> extends Bas
     }
 
     protected final TILE tile;
-    private final FloatingLong baseEnergyPerTick;
-    private FloatingLong currentMaxEnergy;
-    protected FloatingLong currentEnergyPerTick;
+    private final long baseEnergyPerTick;
+    private long currentMaxEnergy;
+    protected long currentEnergyPerTick;
 
-    protected MachineEnergyContainer(FloatingLong maxEnergy, FloatingLong energyPerTick, Predicate<@NotNull AutomationType> canExtract,
+    protected MachineEnergyContainer(long maxEnergy, long energyPerTick, Predicate<@NotNull AutomationType> canExtract,
           Predicate<@NotNull AutomationType> canInsert, TILE tile, @Nullable IContentsListener listener) {
         super(maxEnergy, canExtract, canInsert, listener);
-        this.baseEnergyPerTick = energyPerTick.copyAsConst();
+        this.baseEnergyPerTick = energyPerTick;
         this.tile = tile;
         currentMaxEnergy = getBaseMaxEnergy();
         currentEnergyPerTick = baseEnergyPerTick;
@@ -56,32 +56,31 @@ public class MachineEnergyContainer<TILE extends TileEntityMekanism> extends Bas
     }
 
     @Override
-    public FloatingLong getMaxEnergy() {
+    public long getMaxEnergy() {
         return currentMaxEnergy;
     }
 
-    public FloatingLong getBaseMaxEnergy() {
+    public long getBaseMaxEnergy() {
         return super.getMaxEnergy();
     }
 
-    public void setMaxEnergy(FloatingLong maxEnergy) {
+    public void setMaxEnergy(long maxEnergy) {
         Objects.requireNonNull(maxEnergy, "Max energy cannot be null");
         this.currentMaxEnergy = maxEnergy;
-        if (getEnergy().greaterThan(getMaxEnergy())) {
+        if (getEnergy() > getMaxEnergy()) {
             setEnergy(getMaxEnergy());
         }
     }
 
-    public FloatingLong getEnergyPerTick() {
+    public long getEnergyPerTick() {
         return currentEnergyPerTick;
     }
 
-    public FloatingLong getBaseEnergyPerTick() {
+    public long getBaseEnergyPerTick() {
         return baseEnergyPerTick;
     }
 
-    public void setEnergyPerTick(FloatingLong energyPerTick) {
-        Objects.requireNonNull(energyPerTick, "Energy per tick cannot be null");
+    public void setEnergyPerTick(long energyPerTick) {
         this.currentEnergyPerTick = energyPerTick;
     }
 

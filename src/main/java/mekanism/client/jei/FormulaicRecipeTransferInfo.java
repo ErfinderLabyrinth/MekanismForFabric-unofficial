@@ -1,8 +1,5 @@
 package mekanism.client.jei;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import mekanism.common.inventory.container.slot.InventoryContainerSlot;
 import mekanism.common.inventory.container.tile.FormulaicAssemblicatorContainer;
 import mekanism.common.inventory.slot.FormulaicCraftingSlot;
@@ -13,6 +10,10 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class FormulaicRecipeTransferInfo implements IRecipeTransferInfo<FormulaicAssemblicatorContainer, CraftingRecipe> {
 

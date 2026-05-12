@@ -1,64 +1,59 @@
 package mekanism.client.model.energycube;
 
-import com.mojang.math.Transformation;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
 import mekanism.api.RelativeSide;
+import mekanism.client.model.CustomGeometry;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadUtils;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockElement;
-import net.minecraft.client.renderer.block.model.BlockElementFace;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.RenderTypeGroup;
-import net.minecraftforge.client.model.SimpleModelState;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 import org.jetbrains.annotations.Nullable;
 
-public class EnergyCubeGeometry implements IUnbakedGeometry<EnergyCubeGeometry> {
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Function;
+
+public class EnergyCubeGeometry extends CustomGeometry {
 
     private final List<BlockElement> frame;
     private final Map<RelativeSide, List<BlockElement>> leds;
     private final Map<RelativeSide, List<BlockElement>> ports;
 
     EnergyCubeGeometry(List<BlockElement> frame, Map<RelativeSide, List<BlockElement>> leds, Map<RelativeSide, List<BlockElement>> ports) {
+        super();
         this.frame = frame;
         this.leds = leds;
         this.ports = ports;
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
+    public BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
           ItemOverrides overrides, ResourceLocation modelLocation) {
-        TextureAtlasSprite particle = spriteGetter.apply(context.getMaterial("particle"));
+        //TODO
 
-        ResourceLocation renderTypeHint = context.getRenderTypeHint();
-        RenderTypeGroup renderTypes = renderTypeHint == null ? RenderTypeGroup.EMPTY : context.getRenderType(renderTypeHint);
+        //        TextureAtlasSprite particle = spriteGetter.apply(context.getMaterial("particle"));
 
-        Transformation rootTransform = context.getRootTransform();
-        if (!rootTransform.isIdentity()) {
-            modelState = new SimpleModelState(modelState.getRotation().compose(rootTransform), modelState.isUvLocked());
-        }
-        Function<String, TextureAtlasSprite> rawSpriteGetter = spriteGetter.compose(context::getMaterial);
-        FaceData frame = bakeElement(rawSpriteGetter, modelState, modelLocation, this.frame);
-        Map<RelativeSide, FaceData> leds = bakeElements(rawSpriteGetter, modelState, modelLocation, this.leds);
-        Map<RelativeSide, FaceData> ports = bakeElements(rawSpriteGetter, modelState, modelLocation, this.ports);
-        return new EnergyCubeBakedModel(context.useAmbientOcclusion(), context.useBlockLight(), context.isGui3d(), context.getTransforms(), overrides, particle, frame, leds, ports,
-              renderTypes);
+//        ResourceLocation renderTypeHint = context.getRenderTypeHint();
+//        RenderTypeGroup renderTypes = renderTypeHint == null ? RenderTypeGroup.EMPTY : context.getRenderType(renderTypeHint);
+//
+//        Transformation rootTransform = context.getRootTransform();
+//        if (!rootTransform.isIdentity()) {
+//            modelState = new SimpleModelState(modelState.getRotation().compose(rootTransform), modelState.isUvLocked());
+//        }
+//        Function<String, TextureAtlasSprite> rawSpriteGetter = spriteGetter.compose(context::getMaterial);
+//        FaceData frame = bakeElement(rawSpriteGetter, modelState, modelLocation, this.frame);
+//        Map<RelativeSide, FaceData> leds = bakeElements(rawSpriteGetter, modelState, modelLocation, this.leds);
+//        Map<RelativeSide, FaceData> ports = bakeElements(rawSpriteGetter, modelState, modelLocation, this.ports);
+//        return new EnergyCubeBakedModel(context.useAmbientOcclusion(), context.useBlockLight(), context.isGui3d(), context.getTransforms(), overrides, particle, frame, leds, ports,
+//              renderTypes);
+        return new EnergyCubeBakedModel(true, true, true, ItemTransforms.NO_TRANSFORMS, overrides, spriteGetter.apply(null), new FaceData(), Map.of(), Map.of());
+    }
+
+    @Override
+    public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
+
     }
 
     private Map<RelativeSide, FaceData> bakeElements(Function<String, TextureAtlasSprite> spriteGetter, ModelState modelState,
@@ -78,7 +73,7 @@ public class EnergyCubeGeometry implements IUnbakedGeometry<EnergyCubeGeometry> 
                 BlockElementFace face = faceEntry.getValue();
                 TextureAtlasSprite sprite = spriteGetter.apply(face.texture);
                 //noinspection ConstantConditions (can be null)
-                Direction direction = face.cullForDirection == null ? null : modelState.getRotation().rotateTransform(face.cullForDirection);
+                Direction direction = face.cullForDirection == null ? null : Direction.rotate(modelState.getRotation().getMatrix(), face.cullForDirection);
                 data.addFace(direction, BlockModel.bakeFace(element, face, sprite, faceEntry.getKey(), modelState, modelLocation));
             }
         }

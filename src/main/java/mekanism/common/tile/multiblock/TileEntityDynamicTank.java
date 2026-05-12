@@ -14,7 +14,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import org.jetbrains.annotations.NotNull;
 
 public class TileEntityDynamicTank extends TileEntityMultiblock<TankMultiblockData> implements IFluidContainerManager {
@@ -22,7 +21,7 @@ public class TileEntityDynamicTank extends TileEntityMultiblock<TankMultiblockDa
     public TileEntityDynamicTank(BlockPos pos, BlockState state) {
         this(MekanismBlocks.DYNAMIC_TANK, pos, state);
         //Disable item handler caps if we are the dynamic tank, don't disable it for the subclassed valve though
-        addDisabledCapabilities(ForgeCapabilities.ITEM_HANDLER);
+//        addDisabledCapabilities(ForgeCapabilities.ITEM_HANDLER);
     }
 
     public TileEntityDynamicTank(IBlockProvider blockProvider, BlockPos pos, BlockState state) {

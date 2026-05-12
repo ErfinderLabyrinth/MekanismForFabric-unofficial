@@ -1,12 +1,13 @@
 package mekanism.api.radial.mode;
 
-import java.util.Objects;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.ILangEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Record providing a basic implementation for simple radial modes.

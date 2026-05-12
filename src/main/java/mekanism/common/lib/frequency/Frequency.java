@@ -1,7 +1,5 @@
 package mekanism.common.lib.frequency;
 
-import java.util.Objects;
-import java.util.UUID;
 import mekanism.api.IFrequency;
 import mekanism.api.NBTConstants;
 import mekanism.api.security.SecurityMode;
@@ -12,6 +10,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.UUID;
 
 public abstract class Frequency implements IFrequency {
 
@@ -147,7 +148,7 @@ public abstract class Frequency implements IFrequency {
         getType().write(buffer);
         buffer.writeUtf(name);
         BasePacketHandler.writeOptional(buffer, ownerUUID, FriendlyByteBuf::writeUUID);
-        buffer.writeUtf(MekanismUtils.getLastKnownUsername(ownerUUID));
+        buffer.writeUtf(MekanismUtils.getLastKnownUsername(ownerUUID, null));
         buffer.writeBoolean(publicFreq);
     }
 

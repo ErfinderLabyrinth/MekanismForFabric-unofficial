@@ -1,6 +1,5 @@
 package mekanism.common.lib;
 
-import java.util.List;
 import mekanism.api.NBTConstants;
 import mekanism.common.content.transporter.TransporterPathfinder.Destination;
 import mekanism.common.util.NBTUtils;
@@ -10,6 +9,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public record SidedBlockPos(BlockPos pos, Direction side) {
 

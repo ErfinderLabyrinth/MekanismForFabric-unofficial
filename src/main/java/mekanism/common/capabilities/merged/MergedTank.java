@@ -1,7 +1,5 @@
 package mekanism.common.capabilities.merged;
 
-import java.util.Arrays;
-import java.util.Objects;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.IChemicalTank;
@@ -14,6 +12,9 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.capabilities.fluid.FluidTankWrapper;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundTag;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 @NothingNullByDefault
 public class MergedTank extends MergedChemicalTank {

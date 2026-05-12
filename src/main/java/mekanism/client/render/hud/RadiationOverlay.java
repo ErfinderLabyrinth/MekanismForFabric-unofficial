@@ -2,16 +2,15 @@ package mekanism.client.render.hud;
 
 import mekanism.api.radiation.IRadiationManager;
 import mekanism.client.render.MekanismRenderer;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.lib.radiation.RadiationManager;
 import mekanism.common.lib.radiation.RadiationManager.RadiationScale;
+import mekanism.common.lib.radiation.capability.DefaultRadiationEntity;
 import mekanism.common.util.MekanismUtils;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
-public class RadiationOverlay implements IGuiOverlay {
+public class RadiationOverlay {
 
     public static final RadiationOverlay INSTANCE = new RadiationOverlay();
 
@@ -25,29 +24,27 @@ public class RadiationOverlay implements IGuiOverlay {
         prevRadiation = 0;
     }
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTicks, int screenWidth, int screenHeight) {
-        Player player = gui.getMinecraft().player;
+    public void render(Gui gui, GuiGraphics guiGraphics, float partialTicks, int screenWidth, int screenHeight) {
+        Player player = gui.minecraft.player;
         if (player != null && IRadiationManager.INSTANCE.isRadiationEnabled() && MekanismUtils.isPlayingMode(player)) {
-            player.getCapability(Capabilities.RADIATION_ENTITY).ifPresent(c -> {
-                double radiation = c.getRadiation();
-                double severity = RadiationScale.getScaledDoseSeverity(radiation) * 0.8;
-                //Only update the previous radiation level at most once a tick
-                if (lastTick != player.level().getGameTime()) {
-                    lastTick = player.level().getGameTime();
-                    if (prevRadiation < severity) {
-                        prevRadiation = Math.min(severity, prevRadiation + 0.01);
-                    }
-                    if (prevRadiation > severity) {
-                        prevRadiation = Math.max(severity, prevRadiation - 0.01);
-                    }
+            DefaultRadiationEntity c = player.getAttachedOrCreate(DefaultRadiationEntity.ATTACHMENT_TYPE);
+            double radiation = c.getRadiation();
+            double severity = RadiationScale.getScaledDoseSeverity(radiation) * 0.8;
+            //Only update the previous radiation level at most once a tick
+            if (lastTick != player.level().getGameTime()) {
+                lastTick = player.level().getGameTime();
+                if (prevRadiation < severity) {
+                    prevRadiation = Math.min(severity, prevRadiation + 0.01);
                 }
-                if (severity > RadiationManager.BASELINE) {
-                    int effect = (int) (prevRadiation * 255);
-                    int color = (0x701E1E << 8) + effect;
-                    MekanismRenderer.renderColorOverlay(guiGraphics, 0, 0, color);
+                if (prevRadiation > severity) {
+                    prevRadiation = Math.max(severity, prevRadiation - 0.01);
                 }
-            });
+            }
+            if (severity > RadiationManager.BASELINE) {
+                int effect = (int) (prevRadiation * 255);
+                int color = (0x701E1E << 8) + effect;
+                MekanismRenderer.renderColorOverlay(guiGraphics, 0, 0, color);
+            }
         }
     }
 }

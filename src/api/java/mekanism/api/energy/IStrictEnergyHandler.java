@@ -4,10 +4,11 @@ import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.math.FloatingLong;
 import mekanism.api.math.FloatingLongTransferUtils;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
 @NothingNullByDefault
-@AutoRegisterCapability
+//@AutoRegisterCapability //TODO
 public interface IStrictEnergyHandler {
 
     /**
@@ -43,7 +44,16 @@ public interface IStrictEnergyHandler {
      *
      * @throws RuntimeException if the handler is called in a way that the handler was not expecting. Such as if it was not expecting this to be called at all.
      **/
-    void setEnergy(int container, FloatingLong energy);
+    void setEnergy(int container, long energy, TransactionContext t);
+
+    default void setEnergy(int container, long energy, Action action) {
+        try(Transaction t = Transaction.openOuter()) {
+            setEnergy(container, energy, t);
+            if(action.execute()) {
+                t.commit();
+            }
+        }
+    }
 
     /**
      * Retrieves the maximum amount of energy that can be stored in a given container.
@@ -96,7 +106,17 @@ public interface IStrictEnergyHandler {
      * @return The remaining energy that was not inserted (if the entire amount is accepted, then return {@link FloatingLong#ZERO}). The returned {@link FloatingLong} can
      * be safely modified afterwards.
      */
-    FloatingLong insertEnergy(int container, FloatingLong amount, Action action);
+    FloatingLong insertEnergy(int container, FloatingLong amount, TransactionContext t);
+
+    default FloatingLong insertEnergy(int container, FloatingLong amount, Action action) {
+        try(Transaction t = Transaction.openOuter()) {
+            FloatingLong inserted = insertEnergy(container, amount, t);
+            if(action.execute()) {
+                t.commit();
+            }
+            return inserted;
+        }
+    }
 
     /**
      * Extracts energy from a specific container in this handler.
@@ -111,7 +131,17 @@ public interface IStrictEnergyHandler {
      * @return Energy extracted from the container, must be {@link FloatingLong#ZERO} if no energy can be extracted. The returned {@link FloatingLong} can be safely
      * modified after, so the container should return a new or copied {@link FloatingLong}.
      */
-    FloatingLong extractEnergy(int container, FloatingLong amount, Action action);
+    FloatingLong extractEnergy(int container, FloatingLong amount, TransactionContext t);
+
+    default FloatingLong extractEnergy(int container, FloatingLong amount, Action action) {
+        try(Transaction t = Transaction.openOuter()) {
+            FloatingLong extracted = extractEnergy(container, amount, t);
+            if(action.execute()) {
+                t.commit();
+            }
+            return extracted;
+        }
+    }
 
     /**
      * <p>
@@ -132,8 +162,18 @@ public interface IStrictEnergyHandler {
      * inserting into any empty containers.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IStrictEnergyHandler} ends up distributing the insertion.
      */
+    default FloatingLong insertEnergy(FloatingLong amount, TransactionContext t) {
+        return FloatingLongTransferUtils.insert(amount, t, this::getEnergyContainerCount, this::getEnergy, this::insertEnergy);
+    }
+
     default FloatingLong insertEnergy(FloatingLong amount, Action action) {
-        return FloatingLongTransferUtils.insert(amount, action, this::getEnergyContainerCount, this::getEnergy, this::insertEnergy);
+        try(Transaction t = Transaction.openOuter()) {
+            FloatingLong inserted = insertEnergy(amount, t);
+            if(action.execute()) {
+                t.commit();
+            }
+            return inserted;
+        }
     }
 
     /**
@@ -151,7 +191,17 @@ public interface IStrictEnergyHandler {
      * @implNote The default implementation of this method, extracts across all containers to try and reach the desired amount to extract.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IStrictEnergyHandler} ends up distributing the extraction.
      */
+    default FloatingLong extractEnergy(FloatingLong amount, TransactionContext t) {
+        return FloatingLongTransferUtils.extract(amount, t, this::getEnergyContainerCount, this::extractEnergy);
+    }
+
     default FloatingLong extractEnergy(FloatingLong amount, Action action) {
-        return FloatingLongTransferUtils.extract(amount, action, this::getEnergyContainerCount, this::extractEnergy);
+        try(Transaction t = Transaction.openOuter()) {
+            FloatingLong extracted = extractEnergy(amount, t);
+            if(action.execute()) {
+                t.commit();
+            }
+            return extracted;
+        }
     }
 }

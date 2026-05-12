@@ -1,7 +1,5 @@
 package mekanism.client.model.robit;
 
-import java.util.List;
-import java.util.function.BiPredicate;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.robit.RobitSkin;
 import mekanism.client.RobitSpriteUploader;
@@ -10,7 +8,6 @@ import mekanism.client.model.baked.ExtensionOverrideBakedModel;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadTransformation.TextureFilteredTransformation;
 import mekanism.client.render.lib.QuadUtils;
-import mekanism.common.entity.EntityRobit;
 import mekanism.common.item.ItemRobit;
 import mekanism.common.registries.MekanismRobitSkins;
 import mekanism.common.registries.MekanismRobitSkins.SkinLookup;
@@ -24,8 +21,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.function.BiPredicate;
 
 @NothingNullByDefault
 public class RobitBakedModel extends ExtensionOverrideBakedModel<ResourceLocation> {
@@ -53,8 +52,8 @@ public class RobitBakedModel extends ExtensionOverrideBakedModel<ResourceLocatio
 
     @Nullable
     @Override
-    public QuadsKey<ResourceLocation> createKey(QuadsKey<ResourceLocation> key, ModelData data) {
-        ResourceLocation skinTexture = data.get(EntityRobit.SKIN_TEXTURE_PROPERTY);
+    public QuadsKey<ResourceLocation> createKey(QuadsKey<ResourceLocation> key, Object data) {
+        ResourceLocation skinTexture = ((ResourceKey<?>) data).location();
         if (skinTexture == null) {
             return null;
         }
@@ -103,8 +102,8 @@ public class RobitBakedModel extends ExtensionOverrideBakedModel<ResourceLocatio
                 List<ResourceLocation> textures = skin.textures();
                 if (!textures.isEmpty()) {
                     //Assuming the skin actually has textures (it should), grab the first texture as the model data
-                    ModelData modelData = ModelData.builder().with(EntityRobit.SKIN_TEXTURE_PROPERTY, textures.get(0)).build();
-                    return wrap(model, stack, world, entity, seed, modelData, RobitModelDataBakedModel::new);
+//                    ModelData modelData = ModelData.builder().with(EntityRobit.SKIN_TEXTURE_PROPERTY, textures.get(0)).build();
+//                    return wrap(model, stack, world, entity, seed, modelData, RobitModelDataBakedModel::new);
                 }
             }
             return original.resolve(model, stack, world, entity, seed);

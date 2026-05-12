@@ -1,17 +1,11 @@
 package mekanism.common.tile;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.List;
-import java.util.Map;
-import mekanism.api.IContentsListener;
-import mekanism.api.NBTConstants;
-import mekanism.api.RelativeSide;
+import mekanism.api.*;
 import mekanism.api.text.EnumColor;
 import mekanism.client.sound.SoundHandler;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.filter.SortableFilterManager;
 import mekanism.common.content.network.transmitter.LogisticalTransporterBase;
@@ -33,22 +27,20 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.ISustainedData;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
 import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
-import mekanism.common.util.InventoryUtils;
-import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.NBTUtils;
-import mekanism.common.util.TransporterUtils;
-import mekanism.common.util.WorldUtils;
+import mekanism.common.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TileEntityLogisticalSorter extends TileEntityMekanism implements ISustainedData, ITileFilterHolder<SorterFilter<?>> {
+import java.util.List;
+import java.util.Map;
+
+public class TileEntityLogisticalSorter extends TileEntityMekanism implements ISustainedData, ITileFilterHolder<SorterFilter<?>>, IConfigCardAccess {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private final SortableFilterManager<SorterFilter<?>> filterManager = new SortableFilterManager<SorterFilter<?>>((Class) SorterFilter.class, this::markForSave);
@@ -67,7 +59,6 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
     public TileEntityLogisticalSorter(BlockPos pos, BlockState state) {
         super(MekanismBlocks.LOGISTICAL_SORTER, pos, state);
         delaySupplier = () -> 3;
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIG_CARD, this));
     }
 
     @NotNull
@@ -91,7 +82,7 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
             BlockEntity back = WorldUtils.getTileEntity(getLevel(), worldPosition.relative(direction.getOpposite()));
             BlockEntity front = WorldUtils.getTileEntity(getLevel(), worldPosition.relative(direction));
             //If there is no tile to pull from or the push to, skip doing any checks
-            if (InventoryUtils.isItemHandler(back, direction) && front != null) {
+            if (InventoryUtils.isItemHandler(getLevel(), worldPosition.relative(direction.getOpposite()), direction) && front != null) {
                 boolean sentItems = false;
                 for (SorterFilter<?> filter : filterManager.getEnabledFilters()) {
                     TransitRequest request = filter.mapInventory(back, direction, singleItem);
@@ -110,7 +101,7 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
                 }
 
                 if (!sentItems && autoEject) {
-                    TransitRequest request = TransitRequest.definedItem(back, direction, singleItem ? 1 : 64, strictFinder);
+                    TransitRequest request = TransitRequest.definedItem(getLevel(), worldPosition.relative(direction.getOpposite()), direction, singleItem ? 1 : 64, strictFinder);
                     TransitResponse response = emitItemToTransporter(front, request, color, 0);
                     if (!response.isEmpty()) {
                         response.useAll();
@@ -129,9 +120,9 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
             if (roundRobin) {
                 return transporter.insertRR(this, request, filterColor, true, min);
             }
-            return transporter.insert(this, request, filterColor, true, min);
+            return transporter.insert(this.level, this.getBlockPos(), request, filterColor, true, min);
         }
-        return request.addToInventory(front, getDirection(), min, false);
+        return request.addToInventory(front.getLevel(), front.getBlockPos(), getDirection(), min, false);
     }
 
     @Override
@@ -158,7 +149,7 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
     @Override
     protected void onUpdateClient() {
         super.onUpdateClient();
-        if (MekanismConfig.client.enableMachineSounds.get() && getActive() && level.getGameTime() >= nextSound) {
+        if (MekanismConfig.client.enableMachineSounds && getActive() && level.getGameTime() >= nextSound) {
             if (!isFullyMuffled()) {
                 SoundHandler.startTileSound(soundEvent, getSoundCategory(), getInitialVolume(), level.getRandom(), getSoundPos(), false);
             }
@@ -204,7 +195,7 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
         }
     }
 
-    public boolean canSendHome(ItemStack stack) {
+    public boolean canSendHome(BigItemStack stack) {
         Direction oppositeDirection = getOppositeDirection();
         BlockEntity back = WorldUtils.getTileEntity(getLevel(), worldPosition.relative(oppositeDirection));
         return TransporterUtils.canInsert(back, null, stack, oppositeDirection, true);
@@ -219,8 +210,7 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
     @NotNull
     public TransitResponse sendHome(TransitRequest request) {
         Direction oppositeDirection = getOppositeDirection();
-        BlockEntity back = WorldUtils.getTileEntity(getLevel(), worldPosition.relative(oppositeDirection));
-        return request.addToInventory(back, oppositeDirection, 0, true);
+        return request.addToInventory(getLevel(), worldPosition.relative(oppositeDirection), oppositeDirection, 0, true);
     }
 
     @Override

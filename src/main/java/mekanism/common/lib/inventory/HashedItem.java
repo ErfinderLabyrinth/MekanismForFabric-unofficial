@@ -1,15 +1,17 @@
 package mekanism.common.lib.inventory;
 
-import java.util.Objects;
-import java.util.UUID;
+import mekanism.api.BigItemStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.inventory.IHashedItem;
 import mekanism.common.util.StackUtils;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * A wrapper of an ItemStack which tests equality and hashes based on item type and NBT data, ignoring stack size.
@@ -63,7 +65,11 @@ public class HashedItem implements IHashedItem {
 
     @Override
     public ItemStack createStack(int size) {
-        return StackUtils.size(itemStack, size);
+        return StackUtils.size(BigItemStack.of(itemStack), size).createStack();
+    }
+
+    public BigItemStack createPendingStack(long size) {
+        return StackUtils.size(BigItemStack.of(itemStack), size);
     }
 
     /**
@@ -79,7 +85,7 @@ public class HashedItem implements IHashedItem {
      */
     @NotNull
     public CompoundTag internalToNBT() {
-        return itemStack.serializeNBT();
+        return itemStack.save(new CompoundTag());
     }
 
     @Override
@@ -87,7 +93,7 @@ public class HashedItem implements IHashedItem {
         if (obj == this) {
             return true;
         }
-        return obj instanceof IHashedItem other && ItemHandlerHelper.canItemStacksStack(itemStack, other.getInternalStack());
+        return obj instanceof IHashedItem other && ItemEntity.areMergable(itemStack, other.getInternalStack());
     }
 
     @Override

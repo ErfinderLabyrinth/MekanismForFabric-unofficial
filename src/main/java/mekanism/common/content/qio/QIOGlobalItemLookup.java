@@ -2,16 +2,18 @@ package mekanism.common.content.qio;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import java.util.Map;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.common.Mekanism;
 import mekanism.common.lib.MekanismSavedData;
 import mekanism.common.lib.inventory.HashedItem;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.UUID;
 
 //TODO - 1.19: Keep track of UUIDs synced to a given player, and clear when they disconnect. How quickly does the memory impact grow for the user to cache them??
 // Maybe have the client send a thing like: No I can't cache them for if it only has a certain amount of ram?
@@ -69,11 +71,11 @@ public class QIOGlobalItemLookup {
     /**
      * Note: This should only be called from the server side
      */
-    public void createOrLoad() {
+    public void createOrLoad(MinecraftServer server) {
         //TODO - 1.19: Figure out if we need to call this on tick if it hasn't loaded yet??? I don't think so but the other ones do so maybe?
         if (dataHandler == null) {
             //Always associate the world with the overworld as the items are the same regardless of dimension
-            dataHandler = MekanismSavedData.createSavedData(QIOGlobalItemLookupDataHandler::new, DATA_HANDLER_NAME);
+            dataHandler = MekanismSavedData.createSavedData(QIOGlobalItemLookupDataHandler::new, DATA_HANDLER_NAME, server);
         }
     }
 

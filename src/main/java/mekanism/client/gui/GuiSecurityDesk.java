@@ -1,6 +1,5 @@
 package mekanism.client.gui;
 
-import java.util.Collections;
 import mekanism.api.security.SecurityMode;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.element.GuiElementHolder;
@@ -33,6 +32,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
 
 public class GuiSecurityDesk extends GuiMekanismTile<TileEntitySecurityDesk, MekanismTileContainer<TileEntitySecurityDesk>> {
 
@@ -115,7 +116,7 @@ public class GuiSecurityDesk extends GuiMekanismTile<TileEntitySecurityDesk, Mek
     }
 
     private boolean isOwner(@Nullable SecurityFrequency frequency) {
-        return frequency != null && tile.ownerMatches(getMinecraft().player);
+        return frequency != null && tile.ownerMatches(minecraft.player);
     }
 
     private void setTrusted() {

@@ -1,6 +1,5 @@
 package mekanism.common.tile.base;
 
-import java.util.Objects;
 import mekanism.api.Chunk3D;
 import mekanism.api.Coord4D;
 import mekanism.common.Mekanism;
@@ -11,14 +10,14 @@ import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Extension of TileEntity that adds various helpers we use across the majority of our Tiles even those that are not an instance of TileEntityMekanism. Additionally, we
@@ -105,12 +104,14 @@ public abstract class TileEntityUpdateable extends BlockEntity implements ITileW
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        //We don't want to do a full read from NBT so simply call the super's read method to let Forge do whatever
-        // it wants, but don't treat this as if it was the full saved NBT data as not everything has to be synced to the client
-        super.load(tag);
-    }
+//    @Override
+//    public void handleUpdateTag(@NotNull CompoundTag tagSupplier) {
+//        //We don't want to do a full read from NBT so simply call the super's read method to let Forge do whatever
+//        // it wants, but don't treat this as if it was the full saved NBT data as not everything has to be synced to the client
+//        super.load(tagSupplier);
+//    }
+
+
 
     @NotNull
     @Override
@@ -123,24 +124,20 @@ public abstract class TileEntityUpdateable extends BlockEntity implements ITileW
      */
     @NotNull
     public CompoundTag getReducedUpdateTag() {
-        //Add the base update tag information
+        //Add the base update tagSupplier information
         return super.getUpdateTag();
     }
 
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-        if (isRemote() && net.getDirection() == PacketFlow.CLIENTBOUND) {
-            //Handle the update tag when we are on the client
-            CompoundTag tag = pkt.getTag();
-            if (tag != null) {
-                handleUpdatePacket(tag);
-            }
-        }
-    }
-
-    public void handleUpdatePacket(@NotNull CompoundTag tag) {
-        handleUpdateTag(tag);
-    }
+//    @Override
+//    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+//        if (isRemote() && net.getDirection() == PacketFlow.CLIENTBOUND) {
+//            //Handle the update tagSupplier when we are on the client
+//            CompoundTag tagSupplier = pkt.getTag();
+//            if (tagSupplier != null) {
+//                handleUpdatePacket(tagSupplier);
+//            }
+//        }
+//    }
 
     public void sendUpdatePacket() {
         sendUpdatePacket(this);
@@ -160,7 +157,7 @@ public abstract class TileEntityUpdateable extends BlockEntity implements ITileW
     }
 
     protected void updateModelData() {
-        requestModelDataUpdate();
+        //requestModelDataUpdate();
         WorldUtils.updateBlock(getLevel(), getBlockPos(), getBlockState());
     }
 
@@ -204,5 +201,9 @@ public abstract class TileEntityUpdateable extends BlockEntity implements ITileW
         }
         BlockPos pos = getTilePos();
         return new Chunk3D(getTileWorld().dimension(), SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ()));
+    }
+
+    public void handleUpdatePacket(CompoundTag updateTag) {
+        load(updateTag);
     }
 }

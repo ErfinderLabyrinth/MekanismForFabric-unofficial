@@ -8,11 +8,11 @@ import mekanism.api.chemical.ChemicalTags;
 import mekanism.api.chemical.ChemicalUtils;
 import mekanism.api.providers.ISlurryProvider;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -57,7 +57,7 @@ public class Slurry extends Chemical<Slurry> implements ISlurryProvider {
     @SuppressWarnings("ConstantConditions")
     public final ResourceLocation getRegistryName() {
         //May be null if called before the object is registered
-        IForgeRegistry<Slurry> registry = MekanismAPI.slurryRegistry();
+        Registry<Slurry> registry = MekanismAPI.slurryRegistry();
         return registry == null ? null : registry.getKey(this);
     }
 
@@ -67,9 +67,9 @@ public class Slurry extends Chemical<Slurry> implements ISlurryProvider {
     }
 
     /**
-     * Gets the item tag representing the ore for this slurry.
+     * Gets the item tagSupplier representing the ore for this slurry.
      *
-     * @return The tag for the item the slurry goes with. May be null.
+     * @return The tagSupplier for the item the slurry goes with. May be null.
      */
     @Nullable
     public TagKey<Item> getOreTag() {

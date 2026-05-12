@@ -1,6 +1,5 @@
 package mekanism.common.content.gear.mekasuit;
 
-import java.util.function.Consumer;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IHUDElement;
@@ -8,6 +7,7 @@ import mekanism.api.gear.IHUDElement.HUDColor;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.radiation.IRadiationManager;
+import mekanism.api.radiation.capability.IRadiationEntity;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.config.MekanismConfig;
@@ -21,6 +21,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.function.Consumer;
+
 @ParametersAreNotNullByDefault
 public class ModuleDosimeterUnit implements ICustomModule<ModuleDosimeterUnit> {
 
@@ -29,10 +31,11 @@ public class ModuleDosimeterUnit implements ICustomModule<ModuleDosimeterUnit> {
     @Override
     public void addHUDElements(IModule<ModuleDosimeterUnit> module, Player player, Consumer<IHUDElement> hudElementAdder) {
         if (module.isEnabled()) {
-            player.getCapability(Capabilities.RADIATION_ENTITY).ifPresent(capability -> {
-                double radiation = IRadiationManager.INSTANCE.isRadiationEnabled() ? capability.getRadiation() : 0;
+            IRadiationEntity radiationEntity = player.getAttached(Capabilities.RADIATION_ENTITY);
+            if(radiationEntity != null) {
+                double radiation = IRadiationManager.INSTANCE.isRadiationEnabled() ? radiationEntity.getRadiation() : 0;
                 Component text = UnitDisplayUtils.getDisplayShort(radiation, RadiationUnit.SV, 2);
-                if (MekanismConfig.common.enableDecayTimers.get() && radiation > RadiationManager.MIN_MAGNITUDE) {
+                if (MekanismConfig.common.enableDecayTimers && radiation > RadiationManager.MIN_MAGNITUDE) {
                     text = MekanismLang.GENERIC_WITH_PARENTHESIS.translate(text, TextUtils.getHoursMinutes(RadiationManager.get().getDecayTime(radiation, false)));
                 }
                 HUDColor color;
@@ -42,7 +45,7 @@ public class ModuleDosimeterUnit implements ICustomModule<ModuleDosimeterUnit> {
                     color = radiation < 0.1 ? HUDColor.WARNING : HUDColor.DANGER;
                 }
                 hudElementAdder.accept(IModuleHelper.INSTANCE.hudElement(icon, text, color));
-            });
+            }
         }
     }
 }

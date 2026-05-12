@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.custom;
 
-import java.util.function.BooleanSupplier;
 import mekanism.api.functions.ByteSupplier;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.IGuiWrapper;
@@ -12,6 +11,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.BooleanSupplier;
 
 public class GuiTeleporterStatus extends GuiTexturedElement {
 

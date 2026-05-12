@@ -1,10 +1,5 @@
 package mekanism.client.model.baked;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.BiPredicate;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.inventory.IInventorySlot;
@@ -35,9 +30,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiPredicate;
 
 @NothingNullByDefault
 public class DriveArrayBakedModel extends ExtensionOverrideBakedModel<byte[]> {
@@ -66,7 +66,7 @@ public class DriveArrayBakedModel extends ExtensionOverrideBakedModel<byte[]> {
             if (status != DriveStatus.NONE) {
                 float[] translation = DRIVE_PLACEMENTS[i];
                 QuadTransformation transformation = QuadTransformation.translate(translation[0], translation[1], 0);
-                for (BakedQuad bakedQuad : MekanismModelCache.INSTANCE.QIO_DRIVES[status.ordinal()].getQuads(blockState, side, key.getRandom(), ModelData.EMPTY, renderType)) {
+                for (BakedQuad bakedQuad : MekanismModelCache.INSTANCE.QIO_DRIVES[status.ordinal()].getQuads(blockState, side, key.getRandom())) {
                     Quad quad = new Quad(bakedQuad);
                     if (quad.transform(transformation, rotation)) {
                         //Bake and add the quad if we transformed it
@@ -88,11 +88,11 @@ public class DriveArrayBakedModel extends ExtensionOverrideBakedModel<byte[]> {
 
     @Nullable
     @Override
-    public QuadsKey<byte[]> createKey(QuadsKey<byte[]> key, ModelData data) {
+    public QuadsKey<byte[]> createKey(QuadsKey<byte[]> key, Object object) {
         //Skip if we don't have a blockstate or we aren't for the null side (unculled)
         if (key.getBlockState() != null && key.getSide() == null) {
-            byte[] driveStatus = data.get(TileEntityQIODriveArray.DRIVE_STATUS_PROPERTY);
-            if (driveStatus != null) {
+//            byte[] driveStatus = data.get(TileEntityQIODriveArray.DRIVE_STATUS_PROPERTY);
+            if (object instanceof byte[] driveStatus) {
                 return key.data(driveStatus, Arrays.hashCode(driveStatus), DATA_EQUALITY_CHECK);
             }
         }
@@ -150,9 +150,9 @@ public class DriveArrayBakedModel extends ExtensionOverrideBakedModel<byte[]> {
                     driveStatus[i] = status.status();
                 }
                 if (!allEmpty) {//Only bother actually applying an override if there are some drives that aren't empty
-                    ModelData modelData = ModelData.builder().with(TileEntityQIODriveArray.DRIVE_STATUS_PROPERTY, driveStatus).build();
+//                    ModelData modelData = ModelData.builder().with(TileEntityQIODriveArray.DRIVE_STATUS_PROPERTY, driveStatus).build();
                     //TODO: At some point we may want to evaluate caching this
-                    return wrap(model, stack, world, entity, seed, modelData, DriveStatusBakedModel::new);
+                    return wrap(model, stack, world, entity, seed, DriveStatusBakedModel::new);
                 }
             }
             return original.resolve(model, stack, world, entity, seed);
@@ -174,15 +174,15 @@ public class DriveArrayBakedModel extends ExtensionOverrideBakedModel<byte[]> {
 
             private final BlockState targetState;
 
-            public DriveStatusBakedModel(BakedModel original, ModelData data) {
-                super(original, data);
+            public DriveStatusBakedModel(BakedModel original) {
+                super(original);
                 this.targetState = MekanismBlocks.QIO_DRIVE_ARRAY.getBlock().defaultBlockState();
             }
 
             @NotNull
             @Override
-            public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, ModelData data, @Nullable RenderType renderType) {
-                return super.getQuads(state == null ? targetState : state, side, rand, data, renderType);
+            public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
+                return super.getQuads(state == null ? targetState : state, side, rand);
             }
         }
     }

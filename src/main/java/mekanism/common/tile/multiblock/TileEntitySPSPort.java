@@ -1,9 +1,5 @@
 package mekanism.common.tile.multiblock;
 
-import java.util.Collections;
-import java.util.Set;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
@@ -21,12 +17,19 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.text.BooleanStateDisplay.InputOutput;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class TileEntitySPSPort extends TileEntitySPSCasing implements IMultiblockEjector {
 
@@ -43,10 +46,13 @@ public class TileEntitySPSPort extends TileEntitySPSCasing implements IMultibloc
         boolean needsPacket = super.onUpdateServer(multiblock);
         if (multiblock.isFormed()) {
             if (getActive()) {
-                ChemicalUtil.emit(outputDirections, multiblock.outputTank, this);
+                ChemicalUtil.emit(outputDirections, multiblock.outputTank, this.level, this.getBlockPos());
             }
             if (!energyContainer.isEmpty() && multiblock.canSupplyCoilEnergy(this)) {
-                multiblock.supplyCoilEnergy(this, energyContainer.extract(energyContainer.getEnergy(), Action.EXECUTE, AutomationType.INTERNAL));
+                try(Transaction t=Transaction.openOuter()) {
+                    multiblock.supplyCoilEnergy(this, energyContainer.extract(energyContainer.getEnergy(), t));
+                    t.commit();
+                }
             }
         }
         return needsPacket;
@@ -64,7 +70,17 @@ public class TileEntitySPSPort extends TileEntitySPSCasing implements IMultibloc
     @Override
     public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(IContentsListener listener) {
         //Note: We can just use a proxied holder as the input/output restrictions are done in the tanks themselves
-        return side -> getMultiblock().getGasTanks(side);
+        return new IChemicalTankHolder<Gas, GasStack, IGasTank>() {
+            @Override
+            public @NotNull Storage<Gas> getTanks(@Nullable Direction side) {
+                return getMultiblock().getGasStorage(side);
+            }
+
+            @Override
+            public List<IGasTank> getAll() {
+                return getMultiblock().getGasTanks();
+            }
+        };
     }
 
     @Override

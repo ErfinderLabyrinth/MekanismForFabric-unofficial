@@ -1,10 +1,11 @@
 package mekanism.common.item.block.machine;
 
-import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.common.block.prefab.BlockTile;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Predicate;
 
 public class ItemBlockLaserTractorBeam extends ItemBlockMachine {
 

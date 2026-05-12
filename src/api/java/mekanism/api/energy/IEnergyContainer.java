@@ -1,16 +1,15 @@
 package mekanism.api.energy;
 
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
-import mekanism.api.IContentsListener;
-import mekanism.api.NBTConstants;
+import mekanism.api.*;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.math.FloatingLong;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.util.INBTSerializable;
+import team.reborn.energy.api.EnergyStorage;
 
 @NothingNullByDefault
-public interface IEnergyContainer extends INBTSerializable<CompoundTag>, IContentsListener {
+public interface IEnergyContainer extends NBTSerializable<CompoundTag>, IContentsListener, EnergyStorage {
 
     /**
      * Returns the energy in this container.
@@ -26,7 +25,12 @@ public interface IEnergyContainer extends INBTSerializable<CompoundTag>, IConten
      *
      * @return Energy in this container. {@link FloatingLong#ZERO} if no energy is stored.
      */
-    FloatingLong getEnergy();
+    long getEnergy();
+
+    @Override
+    default long getAmount() {
+        return getEnergy();
+    }
 
     /**
      * Overrides the amount of energy in this {@link IEnergyContainer}.
@@ -36,7 +40,14 @@ public interface IEnergyContainer extends INBTSerializable<CompoundTag>, IConten
      * @throws RuntimeException if the handler is called in a way that the handler was not expecting. Such as if it was not expecting this to be called at all.
      * @implNote If the internal amount does get updated make sure to call {@link #onContentsChanged()}
      */
-    void setEnergy(FloatingLong energy);
+    void setEnergy(long energy, TransactionContext t);
+
+    default void setEnergy(long energy) {
+        try(Transaction t = Transaction.openOuter()) {
+            setEnergy(energy, t);
+            t.commit();
+        }
+    }
 
     /**
      * <p>
@@ -57,23 +68,57 @@ public interface IEnergyContainer extends INBTSerializable<CompoundTag>, IConten
      * {@link #onContentsChanged()}. It is also recommended to override this if your internal {@link FloatingLong} is mutable so that a copy does not have to be made
      * every run.
      */
-    default FloatingLong insert(FloatingLong amount, Action action, AutomationType automationType) {
-        if (amount.isZero()) {
+//    @Deprecated(forRemoval = true)
+//    default FloatingLong insert(FloatingLong amount, TransactionContext t, AutomationType automationType) {
+//        if (amount.isZero()) {
+//            //"Fail quick" if the given amount is empty
+//            return amount;
+//        }
+//        long needed = getNeeded();
+//        if (needed == 0) {
+//            //Fail if we are a full container
+//            return amount;
+//        }
+//        FloatingLong toAdd = amount.min(FloatingLong.create(needed));
+//        if (!toAdd.isZero()) {
+//            //If we want to actually insert the energy, then update the current energy
+//            // Note: this also will mark that the contents changed
+//            setEnergy(getEnergy() + toAdd.getValue(), t);
+//        }
+//        return amount.subtract(toAdd);
+//    }
+//
+//    @Deprecated(forRemoval = true)
+//    default FloatingLong insert(FloatingLong amount, Action action, AutomationType automationType) {
+//        try(Transaction t = Transaction.openOuter()) {
+//            long remainder = insert(amount.getValue(), t);
+//            if(action.execute()) {
+//                t.commit();
+//            }
+//            return FloatingLong.create(remainder);
+//        }
+//    }
+
+    void updateSnapshots(TransactionContext t);
+
+    default long insert(long amount, TransactionContext t) {
+        updateSnapshots(t);
+        if (amount == 0) {
             //"Fail quick" if the given amount is empty
             return amount;
         }
-        FloatingLong needed = getNeeded();
-        if (needed.isZero()) {
+        long needed = getNeeded();
+        if (needed == 0) {
             //Fail if we are a full container
             return amount;
         }
-        FloatingLong toAdd = amount.min(needed);
-        if (!toAdd.isZero() && action.execute()) {
+        long toAdd = amount - needed;
+        if (toAdd != 0) {
             //If we want to actually insert the energy, then update the current energy
             // Note: this also will mark that the contents changed
-            setEnergy(getEnergy().add(toAdd));
+            setEnergy(getEnergy() + toAdd, t);
         }
-        return amount.subtract(toAdd);
+        return toAdd;
     }
 
     /**
@@ -94,14 +139,40 @@ public interface IEnergyContainer extends INBTSerializable<CompoundTag>, IConten
      * get updated make sure to call {@link #onContentsChanged()}. It is also recommended to override this if your internal {@link FloatingLong} is mutable so that a copy
      * does not have to be made every run.
      */
-    default FloatingLong extract(FloatingLong amount, Action action, AutomationType automationType) {
+    @Deprecated(forRemoval = true)
+    default FloatingLong extract(FloatingLong amount, TransactionContext t, AutomationType automationType) {
         if (isEmpty() || amount.isZero()) {
             return FloatingLong.ZERO;
         }
-        FloatingLong ret = getEnergy().min(amount).copy();
-        if (!ret.isZero() && action.execute()) {
+        long ret = Math.min(getEnergy(), amount.longValue());
+        if (ret != 0) {
             // Note: this also will mark that the contents changed
-            setEnergy(getEnergy().subtract(ret));
+            setEnergy(getEnergy() - ret, t);
+        }
+        return FloatingLong.create(ret);
+    }
+
+    @Deprecated(forRemoval = true)
+    default FloatingLong extract(FloatingLong amount, Action action, AutomationType automationType) {
+        try(Transaction t = Transaction.openOuter()) {
+            long extracted = extract(amount.longValue(), t);
+            if(action.execute()) {
+                t.commit();
+            }
+            return FloatingLong.create(extracted);
+        }
+    }
+
+    @Override
+    default long extract(long amount, TransactionContext transaction) {
+        updateSnapshots(transaction);
+        if (isEmpty() || amount == 0) {
+            return 0;
+        }
+        long ret = getEnergy() - amount;
+        if (ret != 0) {
+            // Note: this also will mark that the contents changed
+            setEnergy(getEnergy() - ret, transaction);
         }
         return ret;
     }
@@ -120,7 +191,12 @@ public interface IEnergyContainer extends INBTSerializable<CompoundTag>, IConten
      *
      * @return The maximum amount of energy allowed in this {@link IEnergyContainer}.
      */
-    FloatingLong getMaxEnergy();
+    long getMaxEnergy();
+
+    @Override
+    default long getCapacity() {
+        return getMaxEnergy();
+    }
 
     /**
      * Convenience method for checking if this container is empty.
@@ -128,14 +204,21 @@ public interface IEnergyContainer extends INBTSerializable<CompoundTag>, IConten
      * @return True if the container is empty, false otherwise.
      */
     default boolean isEmpty() {
-        return getEnergy().isZero();
+        return getEnergy() == 0;
     }
 
     /**
      * Convenience method for emptying this {@link IEnergyContainer}.
      */
+    default void setEmpty(TransactionContext t) {
+        setEnergy(0, t);
+    }
+
     default void setEmpty() {
-        setEnergy(FloatingLong.ZERO);
+        try(Transaction t = Transaction.openOuter()) {
+            setEmpty(t);
+            t.commit();
+        }
     }
 
     /**
@@ -152,15 +235,15 @@ public interface IEnergyContainer extends INBTSerializable<CompoundTag>, IConten
      *
      * @return Amount of energy needed
      */
-    default FloatingLong getNeeded() {
-        return FloatingLong.ZERO.max(getMaxEnergy().subtract(getEnergy()));
+    default long getNeeded() {
+        return Math.max(getMaxEnergy() - getEnergy(), 0);
     }
 
     @Override
     default CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
         if (!isEmpty()) {
-            nbt.putString(NBTConstants.STORED, getEnergy().toString());
+            nbt.putString(NBTConstants.STORED, String.valueOf(getEnergy()));
         }
         return nbt;
     }

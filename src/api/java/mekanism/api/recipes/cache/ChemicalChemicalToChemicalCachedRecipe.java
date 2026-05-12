@@ -1,8 +1,5 @@
 package mekanism.api.recipes.cache;
 
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -12,6 +9,10 @@ import mekanism.api.recipes.inputs.IInputHandler;
 import mekanism.api.recipes.outputs.IOutputHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 /**
  * Base class to help implement handling of chemical chemical to chemical recipes.

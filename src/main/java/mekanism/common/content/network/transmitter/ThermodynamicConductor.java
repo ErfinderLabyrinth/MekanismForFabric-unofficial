@@ -1,9 +1,5 @@
 package mekanism.common.content.network.transmitter;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
 import mekanism.api.heat.IHeatCapacitor;
@@ -23,12 +19,20 @@ import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.upgrade.transmitter.ThermodynamicConductorUpgradeData;
 import mekanism.common.upgrade.transmitter.TransmitterUpgradeData;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 public class ThermodynamicConductor extends Transmitter<IHeatHandler, HeatNetwork, ThermodynamicConductor> implements ITileHeatHandler,
       IUpgradeableTransmitter<ThermodynamicConductorUpgradeData> {
@@ -45,6 +49,11 @@ public class ThermodynamicConductor extends Transmitter<IHeatHandler, HeatNetwor
         this.tier = Attribute.getTier(blockProvider, ConductorTier.class);
         buffer = VariableHeatCapacitor.create(tier.getHeatCapacity(), tier::getInverseConduction, tier::getInverseConductionInsulation, ambientTemperature, this);
         capacitors = Collections.singletonList(buffer);
+    }
+
+    @Override
+    protected BlockApiLookup<IHeatHandler, Direction> getAcceptorCacheLookup() {
+        return Capabilities.HEAT_HANDLER_BLOCK;
     }
 
     @Override
@@ -73,8 +82,8 @@ public class ThermodynamicConductor extends Transmitter<IHeatHandler, HeatNetwor
     }
 
     @Override
-    public boolean isValidAcceptor(BlockEntity tile, Direction side) {
-        return getAcceptorCache().isAcceptorAndListen(tile, side, Capabilities.HEAT_HANDLER);
+    public boolean isValidAcceptor(Level level, BlockPos pos, Direction side) {
+        return getAcceptorCache().isAcceptorAndListen(level, pos, side, Capabilities.HEAT_HANDLER_BLOCK);
     }
 
     @Nullable
@@ -158,7 +167,7 @@ public class ThermodynamicConductor extends Transmitter<IHeatHandler, HeatNetwor
         if (connectionMapContainsSide(getAllCurrentConnections(), side)) {
             //Note: We use the acceptor cache as the heat network is different and the transmitters count the other transmitters in the
             // network as valid acceptors
-            return getAcceptorCache().getConnectedAcceptor(side).resolve().orElse(null);
+            return getAcceptorCache().getConnectedAcceptor(side).orElse(null);
         }
         return null;
     }

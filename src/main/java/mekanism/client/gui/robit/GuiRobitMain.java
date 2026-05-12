@@ -1,6 +1,5 @@
 package mekanism.client.gui.robit;
 
-import java.util.function.Supplier;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.GuiElement;
@@ -25,6 +24,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Supplier;
 
 public class GuiRobitMain extends GuiMekanism<MainRobitContainer> {
 
@@ -54,7 +55,7 @@ public class GuiRobitMain extends GuiMekanism<MainRobitContainer> {
         addRenderableWidget(new GuiHorizontalPowerBar(this, robit.getEnergyContainer(), 27, 74, 120));
         addRenderableWidget(new MekanismImageButton(this, 6, 16, 18, getButtonLocation("home"), () -> {
             Mekanism.packetHandler().sendToServer(new PacketRobit(RobitPacketType.GO_HOME, robit));
-            getMinecraft().setScreen(null);
+            minecraft.setScreen(null);
         }, getOnHover(MekanismLang.ROBIT_TELEPORT)));
         renameButton = addRenderableWidget(new MekanismImageButton(this, 6, 35, 18, getButtonLocation("rename"),
               () -> openWindow(new GuiRobitRename(this, 27, 16, robit), () -> renameButton), getOnHover(MekanismLang.ROBIT_RENAME)));

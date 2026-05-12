@@ -12,7 +12,6 @@ import mekanism.common.tile.interfaces.IUpgradeTile;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -20,8 +19,6 @@ import net.minecraft.world.Nameable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,15 +73,15 @@ public class TileEntityBoundingBlock extends TileEntityUpdateable implements IUp
         return (IBoundingBlock) tile;
     }
 
-    @NotNull
-    @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side) {
-        IBoundingBlock main = getMain();
-        if (main == null) {
-            return super.getCapability(capability, side);
-        }
-        return main.getOffsetCapability(capability, side, worldPosition.subtract(getMainPos()));
-    }
+//    @NotNull
+//    @Override
+//    public <T> Optional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side) {
+//        IBoundingBlock main = getMain();
+//        if (main == null) {
+//            return super.getCapability(capability, side);
+//        }
+//        return main.getOffsetCapability(capability, side, worldPosition.subtract(getMainPos()));
+//    }
 
     @Override
     public boolean triggerEvent(int id, int param) {
@@ -168,8 +165,8 @@ public class TileEntityBoundingBlock extends TileEntityUpdateable implements IUp
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void handleUpdatePacket(CompoundTag tag) {
+        super.handleUpdatePacket(tag);
         NBTUtils.setBlockPosIfPresent(tag, NBTConstants.MAIN, pos -> mainPos = pos);
         currentRedstoneLevel = tag.getInt(NBTConstants.REDSTONE);
         receivedCoords = tag.getBoolean(NBTConstants.RECEIVED_COORDS);

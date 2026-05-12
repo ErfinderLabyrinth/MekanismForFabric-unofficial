@@ -1,7 +1,5 @@
 package mekanism.common.tile.factory;
 
-import java.util.List;
-import java.util.Set;
 import mekanism.api.IContentsListener;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.MathUtils;
@@ -33,11 +31,14 @@ import mekanism.common.upgrade.SawmillUpgradeData;
 import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Set;
 
 public class TileEntitySawingFactory extends TileEntityFactory<SawmillRecipe> implements ItemRecipeLookupHandler<SawmillRecipe> {
 
@@ -110,7 +111,7 @@ public class TileEntitySawingFactory extends TileEntityFactory<SawmillRecipe> im
                     return true;
                 }
                 ItemStack secondaryOutput = chanceOutput.getMaxSecondaryOutput();
-                return secondaryOutput.isEmpty() || ItemHandlerHelper.canItemStacksStack(secondaryOutput, extra);
+                return secondaryOutput.isEmpty() || ItemEntity.areMergable(secondaryOutput, extra);
             }
             return false;
         });

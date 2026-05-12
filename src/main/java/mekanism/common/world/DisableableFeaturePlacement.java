@@ -2,8 +2,6 @@ package mekanism.common.world;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.registries.MekanismPlacementModifiers;
 import mekanism.common.resource.ore.OreType.OreVeinType;
@@ -15,6 +13,9 @@ import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+import java.util.function.BooleanSupplier;
+
 public class DisableableFeaturePlacement extends PlacementFilter {
 
     public static final Codec<DisableableFeaturePlacement> CODEC = RecordCodecBuilder.create(builder -> builder.group(
@@ -23,9 +24,9 @@ public class DisableableFeaturePlacement extends PlacementFilter {
     ).apply(builder, (oreType, retroGen) -> {
         if (oreType.isPresent()) {
             OreVeinType type = oreType.get();
-            return new DisableableFeaturePlacement(type, MekanismConfig.world.getVeinConfig(type).shouldGenerate(), retroGen);
+            return new DisableableFeaturePlacement(type, () -> MekanismConfig.world.getOreConfig(type.type()).shouldGenerate(), retroGen);
         }
-        return new DisableableFeaturePlacement(null, MekanismConfig.world.salt.shouldGenerate, retroGen);
+        return new DisableableFeaturePlacement(null, () -> MekanismConfig.world.salt.shouldGenerate, retroGen);
     }));
 
     private final BooleanSupplier enabledSupplier;
@@ -43,7 +44,7 @@ public class DisableableFeaturePlacement extends PlacementFilter {
     protected boolean shouldPlace(@NotNull PlacementContext context, @NotNull RandomSource random, @NotNull BlockPos pos) {
         if (enabledSupplier.getAsBoolean()) {
             //If we are enabled, and we are either not a retrogen feature or retrogen is enabled, generate
-            return !retroGen || MekanismConfig.world.enableRegeneration.get();
+            return !retroGen || MekanismConfig.world.enableRegeneration;
         }
         return false;
     }

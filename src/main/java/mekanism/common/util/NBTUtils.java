@@ -5,12 +5,8 @@ import it.unimi.dsi.fastutil.bytes.ByteConsumer;
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.shorts.ShortConsumer;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
-import java.util.function.IntConsumer;
-import java.util.function.LongConsumer;
 import mekanism.api.Coord4D;
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
@@ -32,8 +28,12 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.IForgeRegistry;
+
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
 @ParametersAreNotNullByDefault
 public class NBTUtils {
@@ -257,9 +257,9 @@ public class NBTUtils {
         }
     }
 
-    public static <REG> void setRegistryEntryIfPresentElse(CompoundTag nbt, String key, IForgeRegistry<REG> registry, Consumer<REG> setter, Runnable notPresent) {
+    public static <REG> void setRegistryEntryIfPresentElse(CompoundTag nbt, String key, Registry<REG> registry, Consumer<REG> setter, Runnable notPresent) {
         setResourceLocationIfPresentElse(nbt, key, rl -> {
-            REG reg = registry.getValue(rl);
+            REG reg = registry.get(rl);
             if (reg == null) {
                 notPresent.run();
             } else {
@@ -283,11 +283,11 @@ public class NBTUtils {
         nbt.putInt(key, e.ordinal());
     }
 
-    public static <V> V readRegistryEntry(CompoundTag nbt, String key, IForgeRegistry<V> registry, V fallback) {
+    public static <V> V readRegistryEntry(CompoundTag nbt, String key, Registry<V> registry, V fallback) {
         if (nbt.contains(key, Tag.TAG_STRING)) {
             ResourceLocation rl = ResourceLocation.tryParse(nbt.getString(key));
             if (rl != null) {
-                V result = registry.getValue(rl);
+                V result = registry.get(rl);
                 if (result != null) {
                     return result;
                 }
@@ -296,7 +296,7 @@ public class NBTUtils {
         return fallback;
     }
 
-    public static <V> void writeRegistryEntry(CompoundTag nbt, String key, IForgeRegistry<V> registry, V entry) {
+    public static <V> void writeRegistryEntry(CompoundTag nbt, String key, Registry<V> registry, V entry) {
         ResourceLocation registryName = registry.getKey(entry);
         if (registryName != null) {//Should not be null but validate it
             nbt.putString(key, registryName.toString());

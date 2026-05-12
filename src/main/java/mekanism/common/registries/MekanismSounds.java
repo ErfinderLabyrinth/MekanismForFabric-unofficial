@@ -61,4 +61,8 @@ public final class MekanismSounds {
     public static final SoundEventRegistryObject<SoundEvent> CHRISTMAS3 = SOUND_EVENTS.register("tile.christmas.3");
     public static final SoundEventRegistryObject<SoundEvent> CHRISTMAS4 = SOUND_EVENTS.register("tile.christmas.4");
     public static final SoundEventRegistryObject<SoundEvent> CHRISTMAS5 = SOUND_EVENTS.register("tile.christmas.5");
+
+    public static void register() {
+
+    }
 }

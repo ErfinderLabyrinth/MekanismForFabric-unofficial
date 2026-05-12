@@ -1,7 +1,5 @@
 package mekanism.common.item.interfaces;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 import mekanism.api.IIncrementalEnum;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.math.MathUtils;
@@ -11,9 +9,10 @@ import mekanism.api.text.ILangEntry;
 import mekanism.common.CommonPlayerTickHandler;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
-import mekanism.common.integration.curios.CuriosIntegration;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.item.base.SingleStackStorage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -23,13 +22,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
+
 public interface IJetpackItem {
 
     boolean canUseJetpack(ItemStack stack);
 
     JetpackMode getJetpackMode(ItemStack stack);
 
-    void useJetpackFuel(ItemStack stack);
+    void useJetpackFuel(ContainerItemContext context);
 
     @NothingNullByDefault
     enum JetpackMode implements IIncrementalEnum<JetpackMode>, IHasTextComponent {
@@ -77,7 +79,7 @@ public interface IJetpackItem {
      * @return the jetpack stack if present, otherwise an empty stack
      */
     @NotNull
-    static ItemStack getActiveJetpack(LivingEntity entity) {
+    static ContainerItemContext getActiveJetpack(LivingEntity entity) {
         return getJetpack(entity, stack -> stack.getItem() instanceof IJetpackItem jetpackItem && jetpackItem.canUseJetpack(stack));
     }
 
@@ -91,18 +93,28 @@ public interface IJetpackItem {
      * @return the jetpack stack if present, otherwise an empty stack
      */
     @NotNull
-    static ItemStack getPrimaryJetpack(LivingEntity entity) {
+    static ContainerItemContext getPrimaryJetpack(LivingEntity entity) {
         return getJetpack(entity, stack -> stack.getItem() instanceof IJetpackItem);
     }
 
-    private static ItemStack getJetpack(LivingEntity entity, Predicate<ItemStack> matcher) {
+    private static ContainerItemContext getJetpack(LivingEntity entity, Predicate<ItemStack> matcher) {
         ItemStack chest = entity.getItemBySlot(EquipmentSlot.CHEST);
         if (matcher.test(chest)) {
-            return chest;
+            return ContainerItemContext.ofSingleSlot(new SingleStackStorage() {
+                @Override
+                protected ItemStack getStack() {
+                    return entity.getItemBySlot(EquipmentSlot.CHEST);
+                }
+
+                @Override
+                protected void setStack(ItemStack stack) {
+                    entity.setItemSlot(EquipmentSlot.CHEST, stack);
+                }
+            });
         } else if (Mekanism.hooks.CuriosLoaded) {
-            return CuriosIntegration.findFirstCurio(entity, matcher);
+//TODO            return CuriosIntegration.findFirstCurio(entity, matcher);
         }
-        return ItemStack.EMPTY;
+        return ContainerItemContext.withConstant(ItemStack.EMPTY);
     }
 
     /**

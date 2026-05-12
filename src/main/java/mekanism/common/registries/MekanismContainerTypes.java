@@ -7,18 +7,8 @@ import mekanism.common.inventory.container.entity.robit.CraftingRobitContainer;
 import mekanism.common.inventory.container.entity.robit.MainRobitContainer;
 import mekanism.common.inventory.container.entity.robit.RepairRobitContainer;
 import mekanism.common.inventory.container.entity.robit.RobitContainer;
-import mekanism.common.inventory.container.item.DictionaryContainer;
-import mekanism.common.inventory.container.item.PersonalStorageItemContainer;
-import mekanism.common.inventory.container.item.PortableQIODashboardContainer;
-import mekanism.common.inventory.container.item.PortableTeleporterContainer;
-import mekanism.common.inventory.container.item.QIOFrequencySelectItemContainer;
-import mekanism.common.inventory.container.item.SeismicReaderContainer;
-import mekanism.common.inventory.container.tile.DigitalMinerConfigContainer;
-import mekanism.common.inventory.container.tile.EmptyTileContainer;
-import mekanism.common.inventory.container.tile.FactoryContainer;
-import mekanism.common.inventory.container.tile.FormulaicAssemblicatorContainer;
-import mekanism.common.inventory.container.tile.MekanismTileContainer;
-import mekanism.common.inventory.container.tile.QIODashboardContainer;
+import mekanism.common.inventory.container.item.*;
+import mekanism.common.inventory.container.tile.*;
 import mekanism.common.inventory.container.type.MekanismContainerType;
 import mekanism.common.inventory.container.type.MekanismItemContainerType;
 import mekanism.common.item.ItemDictionary;
@@ -28,62 +18,13 @@ import mekanism.common.item.ItemSeismicReader;
 import mekanism.common.item.block.ItemBlockPersonalStorage;
 import mekanism.common.registration.impl.ContainerTypeDeferredRegister;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;
-import mekanism.common.tile.TileEntityChemicalTank;
-import mekanism.common.tile.TileEntityEnergyCube;
-import mekanism.common.tile.TileEntityFluidTank;
-import mekanism.common.tile.TileEntityLogisticalSorter;
-import mekanism.common.tile.TileEntityModificationStation;
-import mekanism.common.tile.TileEntityPersonalStorage;
-import mekanism.common.tile.TileEntityQuantumEntangloporter;
-import mekanism.common.tile.TileEntitySecurityDesk;
-import mekanism.common.tile.TileEntityTeleporter;
+import mekanism.common.tile.*;
 import mekanism.common.tile.factory.TileEntityFactory;
 import mekanism.common.tile.laser.TileEntityLaserAmplifier;
 import mekanism.common.tile.laser.TileEntityLaserTractorBeam;
-import mekanism.common.tile.machine.TileEntityAntiprotonicNucleosynthesizer;
-import mekanism.common.tile.machine.TileEntityChemicalCrystallizer;
-import mekanism.common.tile.machine.TileEntityChemicalDissolutionChamber;
-import mekanism.common.tile.machine.TileEntityChemicalInfuser;
-import mekanism.common.tile.machine.TileEntityChemicalInjectionChamber;
-import mekanism.common.tile.machine.TileEntityChemicalOxidizer;
-import mekanism.common.tile.machine.TileEntityChemicalWasher;
-import mekanism.common.tile.machine.TileEntityCombiner;
-import mekanism.common.tile.machine.TileEntityCrusher;
-import mekanism.common.tile.machine.TileEntityDigitalMiner;
-import mekanism.common.tile.machine.TileEntityDimensionalStabilizer;
-import mekanism.common.tile.machine.TileEntityElectricPump;
-import mekanism.common.tile.machine.TileEntityElectrolyticSeparator;
-import mekanism.common.tile.machine.TileEntityEnergizedSmelter;
-import mekanism.common.tile.machine.TileEntityEnrichmentChamber;
-import mekanism.common.tile.machine.TileEntityFluidicPlenisher;
-import mekanism.common.tile.machine.TileEntityFormulaicAssemblicator;
-import mekanism.common.tile.machine.TileEntityFuelwoodHeater;
-import mekanism.common.tile.machine.TileEntityIsotopicCentrifuge;
-import mekanism.common.tile.machine.TileEntityMetallurgicInfuser;
-import mekanism.common.tile.machine.TileEntityNutritionalLiquifier;
-import mekanism.common.tile.machine.TileEntityOredictionificator;
-import mekanism.common.tile.machine.TileEntityOsmiumCompressor;
-import mekanism.common.tile.machine.TileEntityPaintingMachine;
-import mekanism.common.tile.machine.TileEntityPigmentExtractor;
-import mekanism.common.tile.machine.TileEntityPigmentMixer;
-import mekanism.common.tile.machine.TileEntityPrecisionSawmill;
-import mekanism.common.tile.machine.TileEntityPressurizedReactionChamber;
-import mekanism.common.tile.machine.TileEntityPurificationChamber;
-import mekanism.common.tile.machine.TileEntityResistiveHeater;
-import mekanism.common.tile.machine.TileEntityRotaryCondensentrator;
-import mekanism.common.tile.machine.TileEntitySeismicVibrator;
-import mekanism.common.tile.machine.TileEntitySolarNeutronActivator;
-import mekanism.common.tile.multiblock.TileEntityBoilerCasing;
-import mekanism.common.tile.multiblock.TileEntityDynamicTank;
-import mekanism.common.tile.multiblock.TileEntityInductionCasing;
-import mekanism.common.tile.multiblock.TileEntitySPSCasing;
-import mekanism.common.tile.multiblock.TileEntityThermalEvaporationController;
-import mekanism.common.tile.qio.TileEntityQIOComponent;
-import mekanism.common.tile.qio.TileEntityQIODashboard;
-import mekanism.common.tile.qio.TileEntityQIODriveArray;
-import mekanism.common.tile.qio.TileEntityQIOExporter;
-import mekanism.common.tile.qio.TileEntityQIOImporter;
-import mekanism.common.tile.qio.TileEntityQIORedstoneAdapter;
+import mekanism.common.tile.machine.*;
+import mekanism.common.tile.multiblock.*;
+import mekanism.common.tile.qio.*;
 
 public class MekanismContainerTypes {
 
@@ -178,5 +119,9 @@ public class MekanismContainerTypes {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static Class<TileEntityFactory<?>> factoryClass() {
         return (Class) TileEntityFactory.class;
+    }
+
+    public static void register() {
+
     }
 }

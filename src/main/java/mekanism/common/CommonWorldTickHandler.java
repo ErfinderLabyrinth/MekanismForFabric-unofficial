@@ -4,10 +4,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.function.Predicate;
 import mekanism.api.NBTConstants;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.common.config.MekanismConfig;
@@ -19,30 +15,31 @@ import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.lib.radiation.RadiationManager;
 import mekanism.common.util.WorldUtils;
 import mekanism.common.world.GenHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.TickEvent.LevelTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.ServerTickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ChunkDataEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.ProtoChunk;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.function.Predicate;
 
 public class CommonWorldTickHandler {
 
@@ -79,71 +76,65 @@ public class CommonWorldTickHandler {
         chunkVersions = null;
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onEntitySpawn(EntityJoinLevelEvent event) {
+    public boolean onEntitySpawn(Entity entity) {
         //If we are in the middle of breaking a block using a cardboard box, cancel any items
         // that are dropped, we do this at highest priority to ensure we cancel it the same tick
         // before forge replaces items with custom item entities with a tick delay
         // We also cancel any experience orbs from spawning as things like the furnace will store
         // how much xp they have but also try to drop it on replace
         if (monitoringCardboardBox) {
-            Entity entity = event.getEntity();
             if (entity instanceof ItemEntity || entity instanceof ExperienceOrb) {
                 entity.discard();
-                event.setCanceled(true);
+                return true;
             }
-        } else if (fallbackItemCollector != null && event.getEntity() instanceof ItemEntity entity && fallbackItemCollector.test(entity.getItem())) {
+        } else if (fallbackItemCollector != null && entity instanceof ItemEntity itemEntity && fallbackItemCollector.test(itemEntity.getItem())) {
             //If we have a fallback item collector active and the entity that is being added is an item,
             // try to let our fallback collector handle the item and keep track of it instead of actually adding it to the world
             entity.discard();
-            event.setCanceled(true);
+            return true;
         }
+        return false;
     }
 
-    @SubscribeEvent
-    public void onBlockBreak(BlockEvent.BreakEvent event) {
-        BlockState state = event.getState();
+    public boolean onBlockBreak(Level level, Player player, BlockPos blockPos, BlockState state, @Nullable BlockEntity blockEntity) {
         //Skip empty block, shouldn't be a null state but the BreakEvent still handles that as the empty block,
         // so we need to skip handling it that way, AND skip and blocks that can never have a block entity
         if (state != null && !state.isAir() && state.hasBlockEntity()) {
             //If the block might have a block entity, look it up from the world and see if the player has access to destroy it
-            BlockEntity blockEntity = WorldUtils.getTileEntity(event.getLevel(), event.getPos());
-            if (!ISecurityUtils.INSTANCE.canAccess(event.getPlayer(), blockEntity)) {
+            if (!ISecurityUtils.INSTANCE.canAccess(player, blockEntity)) {
                 //If they don't because it is something that is locked, then cancel the event
-                event.setCanceled(true);
+                return false;
             }
         }
+        return true;
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public synchronized void chunkSave(ChunkDataEvent.Save event) {
-        LevelAccessor world = event.getLevel();
-        if (!world.isClientSide() && world instanceof Level level) {
-            int chunkVersion = MekanismConfig.world.userGenVersion.get();
+    public synchronized void chunkSave(Level level, ChunkAccess chunk, CompoundTag data) {
+        if (!level.isClientSide()) {
+            int chunkVersion = MekanismConfig.world.userGenVersion;
             if (chunkVersions != null) {
                 chunkVersion = chunkVersions.getOrDefault(level.dimension().location(), Object2IntMaps.emptyMap())
-                      .getOrDefault(event.getChunk().getPos(), chunkVersion);
+                      .getOrDefault(chunk.getPos(), chunkVersion);
             }
-            event.getData().putInt(NBTConstants.WORLD_GEN_VERSION, chunkVersion);
+            data.putInt(NBTConstants.WORLD_GEN_VERSION, chunkVersion);
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public synchronized void onChunkDataLoad(ChunkDataEvent.Load event) {
-        if (event.getLevel() instanceof Level level && !level.isClientSide()) {
-            int version = event.getData().getInt(NBTConstants.WORLD_GEN_VERSION);
+    public synchronized void onChunkDataLoad(Level level, ProtoChunk chunk, CompoundTag data) {
+        if (!level.isClientSide()) {
+            int version = data.getInt(NBTConstants.WORLD_GEN_VERSION);
             //When a chunk is loaded, if it has an older version than the latest one
-            if (version < MekanismConfig.world.userGenVersion.get()) {
+            if (version < MekanismConfig.world.userGenVersion) {
                 //Track what version it has so that when we save it, if we haven't gotten a chance to update
                 // the chunk yet, then we are able to properly save that we still will need to update it
                 if (chunkVersions == null) {
                     chunkVersions = new Object2ObjectArrayMap<>();
                 }
-                ChunkPos chunkCoord = event.getChunk().getPos();
+                ChunkPos chunkCoord = chunk.getPos();
                 ResourceKey<Level> dimension = level.dimension();
                 chunkVersions.computeIfAbsent(dimension.location(), dim -> new Object2IntOpenHashMap<>())
                       .put(chunkCoord, version);
-                if (MekanismConfig.world.enableRegeneration.get()) {
+                if (MekanismConfig.world.enableRegeneration) {
                     //If retrogen is enabled, then we also need to mark the chunk as needing retrogen
                     addRegenChunk(dimension, chunkCoord);
                 }
@@ -151,54 +142,34 @@ public class CommonWorldTickHandler {
         }
     }
 
-    @SubscribeEvent
-    public void chunkUnloadEvent(ChunkEvent.Unload event) {
-        if (event.getLevel() instanceof Level level && !level.isClientSide() && chunkVersions != null) {
+    public void chunkUnloadEvent(ServerLevel level, LevelChunk chunk) {
+        if (!level.isClientSide() && chunkVersions != null) {
             //When a chunk unloads, free up the memory tracking what version it has
             chunkVersions.getOrDefault(level.dimension().location(), Object2IntMaps.emptyMap())
-                  .removeInt(event.getChunk().getPos());
+                  .removeInt(chunk.getPos());
         }
     }
 
-    @SubscribeEvent
-    public void worldUnloadEvent(LevelEvent.Unload event) {
-        LevelAccessor world = event.getLevel();
-        if (!world.isClientSide() && world instanceof Level level && chunkVersions != null) {
+    public void worldUnloadEvent(MinecraftServer server, ServerLevel world) {
+        if (!world.isClientSide() && world instanceof Level && chunkVersions != null) {
             //When a world unloads, free up memory tracking the versions of the chunks in it
-            chunkVersions.remove(level.dimension().location());
+            chunkVersions.remove(world.dimension().location());
         }
     }
 
-    @SubscribeEvent
-    public void worldLoadEvent(LevelEvent.Load event) {
-        if (!event.getLevel().isClientSide()) {
-            FrequencyManager.load();
-            MultiblockManager.createOrLoadAll();
-            QIOGlobalItemLookup.INSTANCE.createOrLoad();
-            RadiationManager.get().createOrLoad();
-        }
+    public void worldLoadEvent(MinecraftServer server, ServerLevel world) {
+        FrequencyManager.load(server);
+        MultiblockManager.createOrLoadAll(server);
+        QIOGlobalItemLookup.INSTANCE.createOrLoad(server);
+        RadiationManager.get().createOrLoad(server);
     }
 
-    @SubscribeEvent
-    public void onTick(ServerTickEvent event) {
-        if (event.side.isServer() && event.phase == Phase.END) {
-            serverTick();
-        }
+    public void serverTick(MinecraftServer server) {
+        FrequencyManager.tick(server);
+        RadiationManager.get().tickServer(server);
     }
 
-    @SubscribeEvent
-    public void onTick(LevelTickEvent event) {
-        if (event.side.isServer() && event.phase == Phase.END) {
-            tickEnd((ServerLevel) event.level);
-        }
-    }
-
-    private void serverTick() {
-        FrequencyManager.tick();
-        RadiationManager.get().tickServer();
-    }
-
-    private void tickEnd(ServerLevel world) {
+    public void tickEnd(ServerLevel world) {
         if (!world.isClientSide) {
             RadiationManager.get().tickServerWorld(world);
             if (flushTagAndRecipeCaches) {
@@ -213,7 +184,7 @@ public class CommonWorldTickHandler {
                 flushTagAndRecipeCaches = false;
             }
 
-            if (chunkRegenMap == null || !MekanismConfig.world.enableRegeneration.get()) {
+            if (chunkRegenMap == null || !MekanismConfig.world.enableRegeneration) {
                 return;
             }
             ResourceLocation dimensionName = world.dimension().location();

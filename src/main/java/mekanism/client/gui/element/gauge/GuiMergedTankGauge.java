@@ -1,17 +1,11 @@
 package mekanism.client.gui.element.gauge;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
-import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.jei.interfaces.IJEIIngredientHelper;
-import mekanism.common.capabilities.chemical.dynamic.IGasTracker;
-import mekanism.common.capabilities.chemical.dynamic.IInfusionTracker;
-import mekanism.common.capabilities.chemical.dynamic.IPigmentTracker;
-import mekanism.common.capabilities.chemical.dynamic.ISlurryTracker;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.capabilities.merged.MergedTank;
+import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.lib.transmitter.TransmissionType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
@@ -19,7 +13,11 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-public class GuiMergedTankGauge<HANDLER extends IMekanismFluidHandler & IGasTracker & IInfusionTracker & IPigmentTracker & ISlurryTracker> extends GuiGauge<Void>
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+public class GuiMergedTankGauge<HANDLER extends MultiblockData> extends GuiGauge<Void>
       implements IJEIIngredientHelper {
 
     private final Supplier<MergedTank> mergedTankSupplier;
@@ -38,11 +36,11 @@ public class GuiMergedTankGauge<HANDLER extends IMekanismFluidHandler & IGasTrac
         super(type, gui, x, y, width, height);
         this.mergedTankSupplier = mergedTankSupplier;
         this.handlerSupplier = handlerSupplier;
-        fluidGauge = addPositionOnlyChild(new GuiFluidGauge(() -> this.mergedTankSupplier.get().getFluidTank(), () -> this.handlerSupplier.get().getFluidTanks(null), type, gui, x, y, width, height));
-        gasGauge = addPositionOnlyChild(new GuiGasGauge(() -> this.mergedTankSupplier.get().getGasTank(), () -> this.handlerSupplier.get().getGasTanks(null), type, gui, x, y, width, height));
-        infusionGauge = addPositionOnlyChild(new GuiInfusionGauge(() -> this.mergedTankSupplier.get().getInfusionTank(), () -> this.handlerSupplier.get().getInfusionTanks(null), type, gui, x, y, width, height));
-        pigmentGauge = addPositionOnlyChild(new GuiPigmentGauge(() -> this.mergedTankSupplier.get().getPigmentTank(), () -> this.handlerSupplier.get().getPigmentTanks(null), type, gui, x, y, width, height));
-        slurryGauge = addPositionOnlyChild(new GuiSlurryGauge(() -> this.mergedTankSupplier.get().getSlurryTank(), () -> this.handlerSupplier.get().getSlurryTanks(null), type, gui, x, y, width, height));
+        fluidGauge = addPositionOnlyChild(new GuiFluidGauge(() -> this.mergedTankSupplier.get().getFluidTank(), () -> new ListHolder<>(this.handlerSupplier.get().getFluidTanks()), type, gui, x, y, width, height));
+        gasGauge = addPositionOnlyChild(new GuiGasGauge(() -> this.mergedTankSupplier.get().getGasTank(), () -> new ListHolder<>(this.handlerSupplier.get().getGasTanks()), type, gui, x, y, width, height));
+        infusionGauge = addPositionOnlyChild(new GuiInfusionGauge(() -> this.mergedTankSupplier.get().getInfusionTank(), () -> new ListHolder<>(this.handlerSupplier.get().getInfusionTanks()), type, gui, x, y, width, height));
+        pigmentGauge = addPositionOnlyChild(new GuiPigmentGauge(() -> this.mergedTankSupplier.get().getPigmentTank(), () -> new ListHolder<>(this.handlerSupplier.get().getPigmentTanks()), type, gui, x, y, width, height));
+        slurryGauge = addPositionOnlyChild(new GuiSlurryGauge(() -> this.mergedTankSupplier.get().getSlurryTank(), () -> new ListHolder<>(this.handlerSupplier.get().getSlurryTanks()), type, gui, x, y, width, height));
     }
 
     public GuiMergedTankGauge<HANDLER> setLabel(Component label) {

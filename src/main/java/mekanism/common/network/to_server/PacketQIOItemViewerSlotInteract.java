@@ -1,6 +1,6 @@
 package mekanism.common.network.to_server;
 
-import java.util.UUID;
+import mekanism.api.MekanismAPI;
 import mekanism.common.Mekanism;
 import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.content.qio.QIOGlobalItemLookup;
@@ -8,13 +8,18 @@ import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.InventoryUtils;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+
+import java.util.UUID;
 
 public class PacketQIOItemViewerSlotInteract implements IMekanismPacket {
+    public static final PacketType<PacketQIOItemViewerSlotInteract> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "qiu_item_viewer_slot_interact"), PacketQIOItemViewerSlotInteract::decode);
 
     private final Type type;
     private final UUID typeUUID;
@@ -39,8 +44,7 @@ public class PacketQIOItemViewerSlotInteract implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        ServerPlayer player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null && player.containerMenu instanceof QIOItemViewerContainer container) {
             QIOFrequency freq = container.getFrequency();
             if (freq != null) {
@@ -60,7 +64,7 @@ public class PacketQIOItemViewerSlotInteract implements IMekanismPacket {
                         if (placed > 0) {
                             //If we added any from the held stack, shrink the held stack and update it on the client
                             curStack.shrink(placed);
-                            updateCarried(player, container);
+                            updateCarried(responseSender, player, container);
                         }
                     }
                 } else {
@@ -78,14 +82,14 @@ public class PacketQIOItemViewerSlotInteract implements IMekanismPacket {
                             // before processing our response to the first one, but we need to validate it to make sure it can actually stack
                             // so that we can avoid accidentally voiding any items
                             if (toRemove > 0 && InventoryUtils.areItemsStackable(curStack, itemType.getInternalStack())) {
-                                ItemStack extracted = freq.removeByType(itemType, toRemove);
+                                ItemStack extracted = freq.removeByType(itemType, toRemove).createStack();
                                 if (!extracted.isEmpty()) {
                                     if (curStack.isEmpty()) {
                                         player.containerMenu.setCarried(extracted);
                                     } else {
                                         curStack.grow(extracted.getCount());
                                     }
-                                    updateCarried(player, container);
+                                    updateCarried(responseSender, player, container);
                                 }
                             }
                         } else if (type == Type.SHIFT_TAKE) {
@@ -93,7 +97,7 @@ public class PacketQIOItemViewerSlotInteract implements IMekanismPacket {
                             //Simulate how much room we have in the player's inventory before trying to extract anything from the frequency
                             ItemStack simulatedExcess = container.simulateInsertIntoPlayerInventory(player.getUUID(), maxExtract);
                             //Extract a stack, or as much as the inventory has room for if it can't fit a full stack
-                            ItemStack extracted = freq.removeByType(itemType, maxExtract.getCount() - simulatedExcess.getCount());
+                            ItemStack extracted = freq.removeByType(itemType, maxExtract.getCount() - simulatedExcess.getCount()).createStack();
                             if (!extracted.isEmpty()) {
                                 ItemStack remainder = container.insertIntoPlayerInventory(player.getUUID(), extracted);
                                 //In theory this should never fail as we simulate above to make sure we don't try moving more than we can
@@ -115,8 +119,8 @@ public class PacketQIOItemViewerSlotInteract implements IMekanismPacket {
         }
     }
 
-    private void updateCarried(ServerPlayer player, QIOItemViewerContainer container) {
-        player.connection.send(new ClientboundContainerSetSlotPacket(-1, container.incrementStateId(), -1, player.containerMenu.getCarried()));
+    private void updateCarried(PacketSender responseSender, Player player, QIOItemViewerContainer container) {
+        responseSender.sendPacket(new ClientboundContainerSetSlotPacket(-1, container.incrementStateId(), -1, player.containerMenu.getCarried()));
     }
 
     @Override
@@ -145,6 +149,11 @@ public class PacketQIOItemViewerSlotInteract implements IMekanismPacket {
             case PUT -> count = buffer.readVarInt();
         }
         return new PacketQIOItemViewerSlotInteract(type, typeUUID, count);
+    }
+
+    @Override
+    public PacketType<PacketQIOItemViewerSlotInteract> getType() {
+        return TYPE;
     }
 
     public enum Type {

@@ -3,7 +3,6 @@ package mekanism.client.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import java.util.function.Predicate;
 import mekanism.api.gear.IHUDElement;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.text.ILangEntry;
@@ -29,6 +28,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import java.util.function.Predicate;
+
 //TODO - 1.20: Decide if we want font rendering in this to support GuiUtils#drawBackdrop and if so how to best go about it
 public class HUDRenderer {
 
@@ -50,7 +51,7 @@ public class HUDRenderer {
           boolean reverseHud) {
         Player player = minecraft.player;
         update(minecraft.level, player);
-        if (MekanismConfig.client.hudOpacity.get() < 0.05F) {
+        if (MekanismConfig.client.hudOpacity < 0.05F) {
             return;
         }
         int color = HUDColor.REGULAR.getColorARGB();
@@ -59,7 +60,7 @@ public class HUDRenderer {
         float yawJitter = -absSqrt(player.yHeadRot - prevRotationYaw);
         float pitchJitter = -absSqrt(player.getXRot() - prevRotationPitch);
         pose.translate(yawJitter, pitchJitter, 0);
-        if (MekanismConfig.client.hudCompassEnabled.get()) {
+        if (MekanismConfig.client.hudCompassEnabled) {
             renderCompass(player, font, guiGraphics, partialTick, screenWidth, screenHeight, maxTextHeight, reverseHud, color);
         }
 
@@ -78,7 +79,7 @@ public class HUDRenderer {
         lastTick = level.getGameTime();
         float yawDiff = player.yHeadRot - prevRotationYaw;
         float pitchDiff = player.getXRot() - prevRotationPitch;
-        float jitter = MekanismConfig.client.hudJitter.get();
+        float jitter = MekanismConfig.client.hudJitter;
         prevRotationYaw += yawDiff / jitter;
         prevRotationPitch += pitchDiff / jitter;
     }

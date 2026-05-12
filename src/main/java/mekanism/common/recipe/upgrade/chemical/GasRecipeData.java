@@ -1,7 +1,5 @@
 package mekanism.common.recipe.upgrade.chemical;
 
-import java.util.List;
-import java.util.function.Predicate;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTankBuilder;
 import mekanism.api.chemical.gas.Gas;
@@ -12,11 +10,16 @@ import mekanism.api.chemical.gas.IGasTank;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.ListTag;
-import net.minecraftforge.common.capabilities.Capability;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 @NothingNullByDefault
 public class GasRecipeData extends ChemicalRecipeData<Gas, GasStack, IGasTank, IGasHandler> {
@@ -47,6 +50,10 @@ public class GasRecipeData extends ChemicalRecipeData<Gas, GasStack, IGasTank, I
     @Override
     protected IGasHandler getOutputHandler(List<IGasTank> tanks) {
         return new IMekanismGasHandler() {
+            @Override
+            public void updateSnapshots(TransactionContext t) {
+            }
+
             @NotNull
             @Override
             public List<IGasTank> getChemicalTanks(@Nullable Direction side) {
@@ -60,17 +67,17 @@ public class GasRecipeData extends ChemicalRecipeData<Gas, GasStack, IGasTank, I
     }
 
     @Override
-    protected Capability<IGasHandler> getCapability() {
-        return Capabilities.GAS_HANDLER;
+    protected ItemApiLookup<IGasHandler, ContainerItemContext> getItemLookup() {
+        return Capabilities.GAS_HANDLER_ITEM;
     }
 
-    @Override
-    protected Predicate<Gas> cloneValidator(IGasHandler handler, int tank) {
-        return type -> handler.isValid(tank, new GasStack(type, 1));
-    }
+//    @Override
+//    protected Predicate<Gas> cloneValidator(IGasHandler handler, int tank) {
+//        return type -> handler.isValid(tank, new GasStack(type, 1));
+//    }
 
     @Override
-    protected IGasHandler getHandlerFromTile(TileEntityMekanism tile) {
-        return tile.getGasManager().getInternal();
+    protected Storage<Gas> getHandlerFromTile(TileEntityMekanism tile) {
+        return tile.getGasManager().getContainers(null);
     }
 }

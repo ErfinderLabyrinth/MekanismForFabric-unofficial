@@ -1,56 +1,57 @@
 package mekanism.client.render.item;
 
+import com.google.common.collect.Iterators;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import java.util.List;
-import java.util.Optional;
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.IChemicalHandler;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.GenericTankSpec;
 import mekanism.common.capabilities.chemical.item.ChemicalTankSpec;
 import mekanism.common.capabilities.fluid.item.RateLimitMultiTankFluidHandler.FluidTankSpec;
 import mekanism.common.item.gear.ItemMekaSuitArmor;
 import mekanism.common.util.FluidUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IItemDecorator;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import org.apache.commons.compress.utils.Lists;
 
-public class MekaSuitBarDecorator implements IItemDecorator {
+import java.util.List;
+
+public class MekaSuitBarDecorator {
 
     public static final MekaSuitBarDecorator INSTANCE = new MekaSuitBarDecorator();
 
     private MekaSuitBarDecorator() {
     }
 
-    @Override
     public boolean render(GuiGraphics guiGraphics, Font font, ItemStack stack, int xOffset, int yOffset) {
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemMekaSuitArmor armor)) {
             return false;
         }
         yOffset += 12;
 
-        if (tryRender(guiGraphics, stack, Capabilities.GAS_HANDLER, xOffset, yOffset, armor.getGasTankSpecs())) {
+        if (tryRenderGas(guiGraphics, stack, xOffset, yOffset, armor.getGasTankSpecs())) {
             yOffset--;
         }
         //TODO: Other chemical types as they get added to different meka suit pieces
 
         List<FluidTankSpec> fluidTankSpecs = armor.getFluidTankSpecs();
         if (!fluidTankSpecs.isEmpty()) {
-            Optional<IFluidHandlerItem> capabilityInstance = FluidUtil.getFluidHandler(stack).resolve();
-            if (capabilityInstance.isPresent()) {
-                IFluidHandlerItem fluidHandler = capabilityInstance.get();
-                int tank = getDisplayTank(fluidTankSpecs, stack, fluidHandler.getTanks());
-                if (tank != -1) {
-                    FluidStack fluidInTank = fluidHandler.getFluidInTank(tank);
-                    ChemicalFluidBarDecorator.renderBar(guiGraphics, xOffset, yOffset, fluidInTank.getAmount(), fluidHandler.getTankCapacity(tank),
+            ContainerItemContext context = ContainerItemContext.withConstant(stack);
+            Storage<FluidVariant> fluidStorage = context.find(FluidStorage.ITEM);
+            if (fluidStorage != null) {
+                StorageView<FluidVariant> view = getDisplayTank(fluidTankSpecs, stack, fluidStorage);
+                FluidStack fluidInTank = new FluidStack(view.getResource(), view.getAmount());
+                if (fluidInTank != null) {
+                    ChemicalFluidBarDecorator.renderBar(guiGraphics, xOffset, yOffset, fluidInTank.amount(), view.getCapacity(),
                           FluidUtils.getRGBDurabilityForDisplay(stack).orElse(0xFFFFFFFF));
                 }
             }
@@ -58,17 +59,16 @@ public class MekaSuitBarDecorator implements IItemDecorator {
         return true;
     }
 
-    private <CHEMICAL extends Chemical<CHEMICAL>> boolean tryRender(GuiGraphics guiGraphics, ItemStack stack, Capability<? extends IChemicalHandler<CHEMICAL, ?>> capability,
+    private <CHEMICAL extends Chemical<CHEMICAL>> boolean tryRenderGas(GuiGraphics guiGraphics, ItemStack stack,
           int xOffset, int yOffset, List<ChemicalTankSpec<CHEMICAL>> chemicalTankSpecs) {
         if (!chemicalTankSpecs.isEmpty() && chemicalTankSpecs.stream().anyMatch(spec -> spec.supportsStack(stack))) {
-            Optional<? extends IChemicalHandler<CHEMICAL, ?>> capabilityInstance = stack.getCapability(capability).resolve();
-            if (capabilityInstance.isPresent()) {
-                IChemicalHandler<CHEMICAL, ?> chemicalHandler = capabilityInstance.get();
-                int tank = getDisplayTank(chemicalTankSpecs, stack, chemicalHandler.getTanks());
+            Storage<Gas> storage = ContainerItemContext.withConstant(stack).find(Capabilities.GAS_HANDLER_ITEM);
+            if (storage != null) {
+                int tank = getDisplayTank(chemicalTankSpecs, stack, Iterators.size(storage.iterator()));
                 if (tank != -1) {
-                    ChemicalStack<CHEMICAL> chemicalInTank = chemicalHandler.getChemicalInTank(tank);
-                    ChemicalFluidBarDecorator.renderBar(guiGraphics, xOffset, yOffset, chemicalInTank.getAmount(), chemicalHandler.getTankCapacity(tank),
-                          chemicalInTank.getChemicalColorRepresentation());
+                    StorageView<Gas> chemicalInTank = Iterators.get(storage.iterator(), tank);
+                    ChemicalFluidBarDecorator.renderBar(guiGraphics, xOffset, yOffset, chemicalInTank.getAmount(), chemicalInTank.getCapacity(),
+                          chemicalInTank.getResource().getColorRepresentation());
                     return true;
                 }
             }
@@ -100,5 +100,11 @@ public class MekaSuitBarDecorator implements IItemDecorator {
             }
         }
         return -1;
+    }
+
+    private static <TYPE> StorageView<FluidVariant> getDisplayTank(List<? extends GenericTankSpec<TYPE>> tankSpecs, ItemStack stack, Storage<FluidVariant> storage) {
+        List<StorageView<FluidVariant>> views = Lists.newArrayList(storage.iterator());
+        int index = getDisplayTank(tankSpecs, stack, views.size());
+        return views.get(index);
     }
 }

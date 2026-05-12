@@ -15,7 +15,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 
 @ParametersAreNotNullByDefault
 public class MekanismArmorLayer<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>> extends HumanoidArmorLayer<T, M, A> {
@@ -36,7 +35,7 @@ public class MekanismArmorLayer<T extends LivingEntity, M extends HumanoidModel<
     private void renderArmorPart(PoseStack matrix, MultiBufferSource renderer, T entity, EquipmentSlot slot, int light, float partialTicks) {
         ItemStack stack = entity.getItemBySlot(slot);
         Item item = stack.getItem();
-        if (item instanceof ArmorItem armorItem && armorItem.getEquipmentSlot() == slot && IClientItemExtensions.of(item) instanceof ISpecialGear specialGear) {
+        if (item instanceof ArmorItem armorItem && armorItem.getEquipmentSlot() == slot && item instanceof ISpecialGear specialGear) {
             ICustomArmor model = specialGear.getGearModel(armorItem.getType());
             A coreModel = slot == EquipmentSlot.LEGS ? innerModel : outerModel;
             getParentModel().copyPropertiesTo(coreModel);

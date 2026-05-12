@@ -1,9 +1,6 @@
 package mekanism.client.gui.qio;
 
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.GuiDigitalIconToggle;
@@ -30,6 +27,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer> extends GuiMekanism<CONTAINER> {
 
     private static final Set<Character> ALLOWED_SPECIAL_CHARS = Sets.newHashSet('_', ' ', '-', '/', '.', '\"', '\'', '|', '(', ')', ':');
@@ -46,8 +47,8 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
     protected GuiQIOItemViewer(CONTAINER container, Inventory inv, Component title) {
         super(container, inv, title);
         this.inv = inv;
-        imageWidth = 16 + MekanismConfig.client.qioItemViewerSlotsX.get() * 18 + 18;
-        imageHeight = QIOItemViewerContainer.SLOTS_START_Y + MekanismConfig.client.qioItemViewerSlotsY.get() * 18 + 96;
+        imageWidth = 16 + MekanismConfig.client.qioItemViewerSlotsX * 18 + 18;
+        imageHeight = QIOItemViewerContainer.SLOTS_START_Y + MekanismConfig.client.qioItemViewerSlotsY * 18 + 96;
         inventoryLabelY = imageHeight - 94;
         titleLabelY = 5;
         dynamicSlots = true;
@@ -56,7 +57,7 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
     @Override
     protected void addGuiElements() {
         super.addGuiElements();
-        int slotsY = MekanismConfig.client.qioItemViewerSlotsY.get();
+        int slotsY = MekanismConfig.client.qioItemViewerSlotsY;
         addRenderableWidget(new GuiInnerScreen(this, 7, 15, imageWidth - 16, 12, () -> {
             FrequencyIdentity freq = getFrequency();
             if (freq == null) {
@@ -83,13 +84,13 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
         searchField.setVisible(true);
         searchField.setTextColor(0xFFFFFF);
         searchField.setFocused(true);
-        addRenderableWidget(new GuiSlotScroll(this, 7, QIOItemViewerContainer.SLOTS_START_Y, MekanismConfig.client.qioItemViewerSlotsX.get(), slotsY,
+        addRenderableWidget(new GuiSlotScroll(this, 7, QIOItemViewerContainer.SLOTS_START_Y, MekanismConfig.client.qioItemViewerSlotsX, slotsY,
               menu::getQIOItemList, menu));
         addRenderableWidget(new GuiDropdown<>(this, imageWidth - 9 - 54, QIOItemViewerContainer.SLOTS_START_Y + slotsY * 18 + 1,
               41, ListSortType.class, menu::getSortType, menu::setSortType));
         addRenderableWidget(new GuiDigitalIconToggle<>(this, imageWidth - 9 - 12, QIOItemViewerContainer.SLOTS_START_Y + slotsY * 18 + 1,
               12, 12, SortDirection.class, menu::getSortDirection, menu::setSortDirection));
-        addRenderableWidget(new GuiResizeControls(this, (getMinecraft().getWindow().getGuiScaledHeight() / 2) - 20 - topPos, this::resize));
+        addRenderableWidget(new GuiResizeControls(this, (minecraft.getWindow().getGuiScaledHeight() / 2) - 20 - topPos, this::resize));
         craftingWindowTab = addRenderableWidget(new GuiCraftingWindowTab(this, () -> craftingWindowTab, menu));
     }
 
@@ -108,11 +109,11 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
         super.repositionElements();
         //Validate the height is still valid, and if it isn't recreate it
         int maxY = QIOItemViewerContainer.getSlotsYMax();
-        if (MekanismConfig.client.qioItemViewerSlotsY.get() > maxY) {
+        if (MekanismConfig.client.qioItemViewerSlotsY > maxY) {
             //Note: We need to update it here to ensure that it refreshes when recreating the viewer on the client when connected to a server
-            MekanismConfig.client.qioItemViewerSlotsY.set(maxY);
+            MekanismConfig.client.qioItemViewerSlotsY = maxY;
             // save the updated config info
-            MekanismConfig.client.save();
+            //MekanismConfig.client.save();
             recreateViewer();
         }
     }
@@ -124,24 +125,24 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
     public abstract FrequencyIdentity getFrequency();
 
     private void resize(ResizeType type) {
-        int sizeX = MekanismConfig.client.qioItemViewerSlotsX.get(), sizeY = MekanismConfig.client.qioItemViewerSlotsY.get();
+        int sizeX = MekanismConfig.client.qioItemViewerSlotsX, sizeY = MekanismConfig.client.qioItemViewerSlotsY;
         boolean changed = false;
         if (type == ResizeType.EXPAND_X && sizeX < QIOItemViewerContainer.SLOTS_X_MAX) {
-            MekanismConfig.client.qioItemViewerSlotsX.set(sizeX + 1);
+            MekanismConfig.client.qioItemViewerSlotsX = sizeX + 1;
             changed = true;
         } else if (type == ResizeType.EXPAND_Y && sizeY < QIOItemViewerContainer.getSlotsYMax()) {
-            MekanismConfig.client.qioItemViewerSlotsY.set(sizeY + 1);
+            MekanismConfig.client.qioItemViewerSlotsY = sizeY + 1;
             changed = true;
         } else if (type == ResizeType.SHRINK_X && sizeX > QIOItemViewerContainer.SLOTS_X_MIN) {
-            MekanismConfig.client.qioItemViewerSlotsX.set(sizeX - 1);
+            MekanismConfig.client.qioItemViewerSlotsX = sizeX - 1;
             changed = true;
         } else if (type == ResizeType.SHRINK_Y && sizeY > QIOItemViewerContainer.SLOTS_Y_MIN) {
-            MekanismConfig.client.qioItemViewerSlotsY.set(sizeY - 1);
+            MekanismConfig.client.qioItemViewerSlotsY = sizeY - 1;
             changed = true;
         }
         if (changed) {
             // save the updated config info
-            MekanismConfig.client.save();
+//            MekanismConfig.client.save();
             // And recreate the viewer
             recreateViewer();
         }
@@ -152,9 +153,9 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
         @SuppressWarnings("unchecked")
         CONTAINER c = (CONTAINER) menu.recreate();
         GuiQIOItemViewer<CONTAINER> s = recreate(c);
-        getMinecraft().screen = null;
-        getMinecraft().player.containerMenu = s.getMenu();
-        getMinecraft().setScreen(s);
+        minecraft.screen = null;
+        minecraft.player.containerMenu = s.getMenu();
+        minecraft.setScreen(s);
         s.searchField.setText(searchField.getText());
         c.updateSearch(searchField.getText());
         //Transfer all the windows to the new GUI

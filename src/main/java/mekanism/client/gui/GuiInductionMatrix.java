@@ -1,7 +1,5 @@
 package mekanism.client.gui;
 
-import java.util.List;
-import mekanism.api.math.FloatingLong;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.GuiInnerScreen;
@@ -23,6 +21,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class GuiInductionMatrix extends GuiMekanismTile<TileEntityInductionCasing, MekanismTileContainer<TileEntityInductionCasing>> {
 
@@ -50,12 +50,12 @@ public class GuiInductionMatrix extends GuiMekanismTile<TileEntityInductionCasin
         addRenderableWidget(new GuiMatrixTab(this, tile, MatrixTab.STAT));
         addRenderableWidget(new GuiEnergyGauge(new IEnergyInfoHandler() {
             @Override
-            public FloatingLong getEnergy() {
+            public long getEnergy() {
                 return tile.getMultiblock().getEnergy();
             }
 
             @Override
-            public FloatingLong getMaxEnergy() {
+            public long getMaxEnergy() {
                 return tile.getMultiblock().getStorageCap();
             }
         }, GaugeType.MEDIUM, this, 7, 16, 34, 56));

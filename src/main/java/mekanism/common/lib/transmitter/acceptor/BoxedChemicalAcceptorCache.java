@@ -1,8 +1,5 @@
 package mekanism.common.lib.transmitter.acceptor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.infuse.IInfusionHandler;
@@ -13,11 +10,16 @@ import mekanism.common.capabilities.chemical.BoxedChemicalHandler;
 import mekanism.common.content.network.transmitter.BoxedPressurizedTube;
 import mekanism.common.lib.transmitter.acceptor.BoxedChemicalAcceptorCache.BoxedChemicalAcceptorInfo;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
-import mekanism.common.util.CapabilityUtils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 //TODO - V11: Improve this so it only invalidates the types needed instead of doing all chemical types at once
 @NothingNullByDefault
@@ -31,9 +33,9 @@ public class BoxedChemicalAcceptorCache extends AbstractAcceptorCache<BoxedChemi
         boolean dirtyAcceptor = false;
         if (cachedAcceptors.containsKey(side)) {
             BoxedChemicalAcceptorInfo acceptorInfo = cachedAcceptors.get(side);
-            if (acceptorTile != acceptorInfo.getTile()) {
+            if (acceptorTile.getLevel() != acceptorInfo.getLevel() || !acceptorTile.getBlockPos().equals(acceptorInfo.getPos())) {
                 //The tile changed, fully invalidate it
-                cachedAcceptors.put(side, new BoxedChemicalAcceptorInfo(acceptorTile, acceptor));
+                cachedAcceptors.put(side, new BoxedChemicalAcceptorInfo(acceptorTile.getLevel(), acceptorTile.getBlockPos(), acceptor));
                 dirtyAcceptor = true;
             } else if (!acceptor.sameHandlers(acceptorInfo.boxedHandler)) {
                 //The source acceptor is different, make sure we update it and the actual acceptor
@@ -43,7 +45,7 @@ public class BoxedChemicalAcceptorCache extends AbstractAcceptorCache<BoxedChemi
                 dirtyAcceptor = true;
             }
         } else {
-            cachedAcceptors.put(side, new BoxedChemicalAcceptorInfo(acceptorTile, acceptor));
+            cachedAcceptors.put(side, new BoxedChemicalAcceptorInfo(acceptorTile.getLevel(), acceptorTile.getBlockPos(), acceptor));
             dirtyAcceptor = true;
         }
         if (dirtyAcceptor) {
@@ -57,23 +59,23 @@ public class BoxedChemicalAcceptorCache extends AbstractAcceptorCache<BoxedChemi
     public boolean isChemicalAcceptorAndListen(@Nullable BlockEntity tile, Direction side) {
         //TODO: Improve this to make it easier to add more chemical types
         Direction opposite = side.getOpposite();
-        LazyOptional<IGasHandler> gasAcceptor = CapabilityUtils.getCapability(tile, Capabilities.GAS_HANDLER, opposite);
-        LazyOptional<IInfusionHandler> infusionAcceptor = CapabilityUtils.getCapability(tile, Capabilities.INFUSION_HANDLER, opposite);
-        LazyOptional<IPigmentHandler> pigmentAcceptor = CapabilityUtils.getCapability(tile, Capabilities.PIGMENT_HANDLER, opposite);
-        LazyOptional<ISlurryHandler> slurryAcceptor = CapabilityUtils.getCapability(tile, Capabilities.SLURRY_HANDLER, opposite);
-        if (gasAcceptor.isPresent() || infusionAcceptor.isPresent() || pigmentAcceptor.isPresent() || slurryAcceptor.isPresent()) {
+        IGasHandler gasAcceptor = Capabilities.GAS_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+        IInfusionHandler infusionAcceptor = Capabilities.INFUSION_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+        IPigmentHandler pigmentAcceptor = Capabilities.PIGMENT_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+        ISlurryHandler slurryAcceptor = Capabilities.SLURRY_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+        if (gasAcceptor != null || infusionAcceptor != null || pigmentAcceptor != null || slurryAcceptor != null) {
             BoxedChemicalHandler chemicalHandler = new BoxedChemicalHandler();
-            if (gasAcceptor.isPresent()) {
-                chemicalHandler.addGasHandler(gasAcceptor);
+            if (gasAcceptor != null) {
+                chemicalHandler.addGasHandler(Optional.of(gasAcceptor));
             }
-            if (infusionAcceptor.isPresent()) {
-                chemicalHandler.addInfusionHandler(infusionAcceptor);
+            if (infusionAcceptor != null) {
+                chemicalHandler.addInfusionHandler(Optional.of(infusionAcceptor));
             }
-            if (pigmentAcceptor.isPresent()) {
-                chemicalHandler.addPigmentHandler(pigmentAcceptor);
+            if (pigmentAcceptor != null) {
+                chemicalHandler.addPigmentHandler(Optional.of(pigmentAcceptor));
             }
-            if (slurryAcceptor.isPresent()) {
-                chemicalHandler.addSlurryHandler(slurryAcceptor);
+            if (slurryAcceptor != null) {
+                chemicalHandler.addSlurryHandler(Optional.of(slurryAcceptor));
             }
             //Update the cached acceptor and if it changed, add a listener to it to listen for invalidation
             updateCachedAcceptorAndListen(side, tile, chemicalHandler);
@@ -93,7 +95,8 @@ public class BoxedChemicalAcceptorCache extends AbstractAcceptorCache<BoxedChemi
         for (Direction side : sides) {
             if (cachedAcceptors.containsKey(side)) {
                 BoxedChemicalAcceptorInfo acceptorInfo = cachedAcceptors.get(side);
-                if (!acceptorInfo.getTile().isRemoved()) {
+                BlockEntity tile = acceptorInfo.getLevel().getBlockEntity(acceptorInfo.getPos());
+                if (tile != null && isChemicalAcceptorAndListen(tile, side)) {
                     acceptors.add(acceptorInfo.boxedHandler);
                 }
             }
@@ -102,38 +105,39 @@ public class BoxedChemicalAcceptorCache extends AbstractAcceptorCache<BoxedChemi
     }
 
     @Override
-    public LazyOptional<BoxedChemicalHandler> getConnectedAcceptor(Direction side) {
+    public Optional<BoxedChemicalHandler> getConnectedAcceptor(Direction side) {
         if (cachedAcceptors.containsKey(side)) {
             BoxedChemicalAcceptorInfo acceptorInfo = cachedAcceptors.get(side);
-            if (!acceptorInfo.getTile().isRemoved()) {
-                return acceptorInfo.getAsLazy();
+            BlockEntity tile = acceptorInfo.getLevel().getBlockEntity(acceptorInfo.getPos());
+            if (tile != null && isChemicalAcceptorAndListen(tile, side)) {
+                return acceptorInfo.getAsOptional();
             }
         }
-        return LazyOptional.empty();
+        return Optional.empty();
     }
 
     public static class BoxedChemicalAcceptorInfo extends AbstractAcceptorInfo {
 
         private BoxedChemicalHandler boxedHandler;
         @Nullable
-        private LazyOptional<BoxedChemicalHandler> asLazy;
+        private Optional<BoxedChemicalHandler> asOptional;
 
-        private BoxedChemicalAcceptorInfo(BlockEntity tile, BoxedChemicalHandler boxedHandler) {
-            super(tile);
+        private BoxedChemicalAcceptorInfo(Level level, BlockPos pos, BoxedChemicalHandler boxedHandler) {
+            super(level, pos);
             this.boxedHandler = boxedHandler;
         }
 
         public void updateAcceptor(BoxedChemicalHandler acceptor) {
             boxedHandler = acceptor;
-            asLazy = null;
+            asOptional = null;
         }
 
-        private LazyOptional<BoxedChemicalHandler> getAsLazy() {
-            if (asLazy == null) {
+        private Optional<BoxedChemicalHandler> getAsOptional() {
+            if (asOptional == null) {
                 //Lazily calculate the lazy optional value of the boxed chemical handler
-                asLazy = LazyOptional.of(() -> boxedHandler);
+                asOptional = Optional.of(boxedHandler);
             }
-            return asLazy;
+            return asOptional;
         }
 
         @Override

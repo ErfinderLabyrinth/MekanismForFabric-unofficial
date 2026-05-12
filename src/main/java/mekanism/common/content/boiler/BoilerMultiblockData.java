@@ -2,10 +2,6 @@ package mekanism.common.content.boiler;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import java.util.Collections;
-import java.util.UUID;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.NBTConstants;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
@@ -23,7 +19,9 @@ import mekanism.common.integration.computer.SpecialComputerMethodWrapper.Compute
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.integration.computer.annotation.SyntheticComputerMethod;
 import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
-import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
+import mekanism.common.inventory.container.sync.*;
+import mekanism.common.inventory.container.sync.chemical.SyncableGasStack;
+import mekanism.common.inventory.container.sync.dynamic.IContainerSyncable;
 import mekanism.common.lib.multiblock.IValveHandler;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.registries.MekanismGases;
@@ -32,12 +30,17 @@ import mekanism.common.tile.multiblock.TileEntityBoilerCasing;
 import mekanism.common.util.HeatUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.Level;
 
-public class BoilerMultiblockData extends MultiblockData implements IValveHandler {
+import java.util.Collections;
+import java.util.UUID;
+import java.util.function.Consumer;
+
+public class BoilerMultiblockData extends MultiblockData implements IValveHandler, IContainerSyncable {
 
     public static final Object2BooleanMap<UUID> hotMap = new Object2BooleanOpenHashMap<>();
 
@@ -47,42 +50,38 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
 
     private static final double COOLANT_COOLING_EFFICIENCY = 0.4;
 
-    @ContainerSync
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getHeatedCoolant", "getHeatedCoolantCapacity", "getHeatedCoolantNeeded",
                                                                                         "getHeatedCoolantFilledPercentage"}, docPlaceholder = "heated coolant tank")
     public IGasTank superheatedCoolantTank;
-    @ContainerSync
+
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getCooledCoolant", "getCooledCoolantCapacity", "getCooledCoolantNeeded",
                                                                                         "getCooledCoolantFilledPercentage"}, docPlaceholder = "cooled coolant tank")
     public IGasTank cooledCoolantTank;
-    @ContainerSync
+
     @WrappingComputerMethod(wrapper = ComputerFluidTankWrapper.class, methodNames = {"getWater", "getWaterCapacity", "getWaterNeeded", "getWaterFilledPercentage"}, docPlaceholder = "water tank")
     public VariableCapacityFluidTank waterTank;
-    @ContainerSync
+
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getSteam", "getSteamCapacity", "getSteamNeeded", "getSteamFilledPercentage"}, docPlaceholder = "steam tank")
     public IGasTank steamTank;
-    @ContainerSync
+
     @WrappingComputerMethod(wrapper = ComputerHeatCapacitorWrapper.class, methodNames = "getTemperature", docPlaceholder = "boiler")
     public VariableHeatCapacitor heatCapacitor;
 
     private double biomeAmbientTemp;
-    @ContainerSync
+
     @SyntheticComputerMethod(getter = "getEnvironmentalLoss", getterDescription = "Get the amount of heat lost to the environment in the last tick (Kelvin)")
     public double lastEnvironmentLoss;
-    @ContainerSync
+
     @SyntheticComputerMethod(getter = "getBoilRate", getterDescription = "Get the rate of boiling (mB/t)")
-    public int lastBoilRate;
-    @ContainerSync
+    public long lastBoilRate;
+
     @SyntheticComputerMethod(getter = "getMaxBoilRate", getterDescription = "Get the maximum rate of boiling seen (mB/t)")
     public int lastMaxBoil;
 
-    @ContainerSync
     @SyntheticComputerMethod(getter = "getSuperheaters", getterDescription = "How many superheaters this Boiler has")
     public int superheatingElements;
 
-    @ContainerSync(setter = "setWaterVolume")
     private int waterVolume;
-    @ContainerSync(setter = "setSteamVolume")
     private int steamVolume;
 
     private int waterTankCapacity;
@@ -100,7 +99,10 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
         superheatedCoolantTank = MultiblockChemicalTankBuilder.GAS.input(this, () -> superheatedCoolantCapacity, gas -> gas.has(HeatedCoolant.class), this);
         waterTank = VariableCapacityFluidTank.input(this, () -> waterTankCapacity, fluid -> MekanismTags.Fluids.WATER_LOOKUP.contains(fluid.getFluid()),
               createSaveAndComparator());
-        fluidTanks.add(waterTank);
+        try(Transaction t = Transaction.openOuter()) {
+            getFluidStorage(null).insert(waterTank.getResource(), waterTank.getAmount(), t);
+            t.commit();
+        }
         steamTank = MultiblockChemicalTankBuilder.GAS.output(this, () -> steamTankCapacity, gas -> gas == MekanismGases.STEAM.getChemical(), this);
         cooledCoolantTank = MultiblockChemicalTankBuilder.GAS.output(this, () -> cooledCoolantCapacity, gas -> gas.has(CooledCoolant.class), this);
         Collections.addAll(gasTanks, steamTank, superheatedCoolantTank, cooledCoolantTank);
@@ -137,11 +139,14 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
                 long toCool = Math.round(BoilerMultiblockData.COOLANT_COOLING_EFFICIENCY * superheatedCoolantTank.getStored());
                 toCool = MathUtils.clampToLong(toCool * (1 - heatCapacitor.getTemperature() / HeatUtils.HEATED_COOLANT_TEMP));
                 GasStack cooledCoolant = coolantType.getCooledGas().getStack(toCool);
-                toCool = Math.min(toCool, toCool - cooledCoolantTank.insert(cooledCoolant, Action.EXECUTE, AutomationType.INTERNAL).getAmount());
+                try(Transaction t=Transaction.openOuter()) {
+                    toCool = Math.min(toCool, toCool - cooledCoolantTank.insert(cooledCoolant.getType(), cooledCoolant.getAmount(), t));
+                    t.commit();
+                }
                 if (toCool > 0) {
                     double heatEnergy = toCool * coolantType.getThermalEnthalpy();
                     heatCapacitor.handleHeat(heatEnergy);
-                    superheatedCoolantTank.shrinkStack(toCool, Action.EXECUTE);
+                    superheatedCoolantTank.shrinkStack(toCool);
                 }
             });
         }
@@ -150,15 +155,15 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
             double heatAvailable = getHeatAvailable();
             lastMaxBoil = (int) Math.floor(HeatUtils.getSteamEnergyEfficiency() * heatAvailable / HeatUtils.getWaterThermalEnthalpy());
 
-            int amountToBoil = Math.min(lastMaxBoil, waterTank.getFluidAmount());
+            long amountToBoil = Math.min(lastMaxBoil, waterTank.getAmount());
             amountToBoil = Math.min(amountToBoil, MathUtils.clampToInt(steamTank.getNeeded()));
             if (!waterTank.isEmpty()) {
-                waterTank.shrinkStack(amountToBoil, Action.EXECUTE);
+                waterTank.shrinkStack(amountToBoil);
             }
             if (steamTank.isEmpty()) {
                 steamTank.setStack(MekanismGases.STEAM.getStack(amountToBoil));
             } else {
-                steamTank.growStack(amountToBoil, Action.EXECUTE);
+                steamTank.growStack(amountToBoil);
             }
 
             heatCapacitor.handleHeat(-amountToBoil * HeatUtils.getWaterThermalEnthalpy() / HeatUtils.getSteamEnergyEfficiency());
@@ -208,12 +213,12 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
 
     @Override
     protected int getMultiblockRedstoneLevel() {
-        return MekanismUtils.redstoneLevelFromContents(waterTank.getFluidAmount(), waterTank.getCapacity());
+        return MekanismUtils.redstoneLevelFromContents(waterTank.getAmount(), waterTank.getCapacity());
     }
 
     private double getHeatAvailable() {
-        double heatAvailable = (heatCapacitor.getTemperature() - HeatUtils.BASE_BOIL_TEMP) * (heatCapacitor.getHeatCapacity() * MekanismConfig.general.boilerWaterConductivity.get());
-        return Math.min(heatAvailable, MekanismConfig.general.superheatingHeatTransfer.get() * superheatingElements);
+        double heatAvailable = (heatCapacitor.getTemperature() - HeatUtils.BASE_BOIL_TEMP) * (heatCapacitor.getHeatCapacity() * MekanismConfig.general.boilerWaterConductivity);
+        return Math.min(heatAvailable, MekanismConfig.general.superheatingHeatTransfer * superheatingElements);
     }
 
     @Override
@@ -231,8 +236,8 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
     public void setWaterVolume(int volume) {
         if (waterVolume != volume) {
             waterVolume = volume;
-            waterTankCapacity = volume * MekanismConfig.general.boilerWaterPerTank.get();
-            superheatedCoolantCapacity = volume * MekanismConfig.general.boilerHeatedCoolantPerTank.get();
+            waterTankCapacity = volume * MekanismConfig.general.boilerWaterPerTank;
+            superheatedCoolantCapacity = volume * MekanismConfig.general.boilerHeatedCoolantPerTank;
         }
     }
 
@@ -243,14 +248,43 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
     public void setSteamVolume(int volume) {
         if (steamVolume != volume) {
             steamVolume = volume;
-            steamTankCapacity = volume * MekanismConfig.general.boilerSteamPerTank.get();
-            cooledCoolantCapacity = volume * MekanismConfig.general.boilerCooledCoolantPerTank.get();
+            steamTankCapacity = volume * MekanismConfig.general.boilerSteamPerTank;
+            cooledCoolantCapacity = volume * MekanismConfig.general.boilerCooledCoolantPerTank;
         }
     }
 
     @ComputerMethod(methodDescription = "Get the maximum possible boil rate for this Boiler, based on the number of Superheating Elements")
     public long getBoilCapacity() {
-        double boilCapacity = MekanismConfig.general.superheatingHeatTransfer.get() * superheatingElements / HeatUtils.getWaterThermalEnthalpy();
+        double boilCapacity = MekanismConfig.general.superheatingHeatTransfer * superheatingElements / HeatUtils.getWaterThermalEnthalpy();
         return MathUtils.clampToLong(boilCapacity * HeatUtils.getSteamEnergyEfficiency());
+    }
+
+    @Override
+    public void addSyncables(Consumer<ISyncableData> acceptor, String tag) {
+        if (!"default".equals(tag)) return;
+
+        // superheatedCoolantTank
+        acceptor.accept(SyncableGasStack.create(superheatedCoolantTank));
+        // cooledCoolantTank
+        acceptor.accept(SyncableGasStack.create(cooledCoolantTank));
+        // waterTank
+        acceptor.accept(SyncableFluidStack.create(waterTank));
+        // steamTank
+        acceptor.accept(SyncableGasStack.create(steamTank));
+        // heatCapacitor
+        acceptor.accept(SyncableDouble.create(heatCapacitor::getHeatCapacity, heatCapacitor::setHeatCapacityFromPacket));
+        acceptor.accept(SyncableDouble.create(heatCapacitor::getHeat, heatCapacitor::setHeat));
+        // lastEnvironmentLoss
+        acceptor.accept(SyncableDouble.create(() ->lastEnvironmentLoss, newValue -> lastEnvironmentLoss = newValue));
+        // lastBoilRate
+        acceptor.accept(SyncableLong.create(() ->lastBoilRate, newValue -> lastBoilRate = newValue));
+        // lastMaxBoil
+        acceptor.accept(SyncableInt.create(() ->lastMaxBoil, newValue -> lastMaxBoil = newValue));
+        // superheatingElements
+        acceptor.accept(SyncableInt.create(() ->superheatingElements, newValue -> superheatingElements = newValue));
+        // waterVolume
+        acceptor.accept(SyncableInt.create(() ->waterVolume, this::setWaterVolume));
+        // steamVolume
+        acceptor.accept(SyncableInt.create(() ->steamVolume, this::setSteamVolume));
     }
 }

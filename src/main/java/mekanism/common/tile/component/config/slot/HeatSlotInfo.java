@@ -1,7 +1,8 @@
 package mekanism.common.tile.component.config.slot;
 
-import java.util.List;
 import mekanism.api.heat.IHeatCapacitor;
+
+import java.util.List;
 
 public class HeatSlotInfo extends BaseSlotInfo {
 

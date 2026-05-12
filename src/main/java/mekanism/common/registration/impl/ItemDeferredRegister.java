@@ -1,47 +1,49 @@
 package mekanism.common.registration.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import mekanism.api.providers.IItemProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.common.content.gear.ModuleHelper;
 import mekanism.common.item.ItemModule;
 import mekanism.common.registration.WrappedDeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.item.SpawnEggItem;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ItemDeferredRegister extends WrappedDeferredRegister<Item> {
 
-    private final List<IItemProvider> allItems = new ArrayList<>();
+    private final List<ItemRegistryObject<? extends Item>> allItems = new ArrayList<>();
 
     public ItemDeferredRegister(String modid) {
-        super(modid, ForgeRegistries.ITEMS);
+        super(BuiltInRegistries.ITEM);
     }
 
-    public ItemRegistryObject<Item> register(String name) {
-        return register(name, Item::new);
+    public ItemRegistryObject<Item> register(ResourceLocation id) {
+        return register(id, Item::new);
     }
 
-    public ItemRegistryObject<Item> registerUnburnable(String name) {
-        return registerUnburnable(name, Item::new);
+    public ItemRegistryObject<Item> registerUnburnable(ResourceLocation id) {
+        return registerUnburnable(id, Item::new);
     }
 
-    public ItemRegistryObject<Item> register(String name, Rarity rarity) {
-        return register(name, properties -> new Item(properties.rarity(rarity)));
+    public ItemRegistryObject<Item> register(ResourceLocation id, Rarity rarity) {
+        return register(id, properties -> new Item(properties.rarity(rarity)));
     }
 
-    public ItemRegistryObject<Item> register(String name, EnumColor color) {
-        return register(name, properties -> new Item(properties) {
+    public ItemRegistryObject<Item> register(ResourceLocation id, EnumColor color) {
+        return register(id, properties -> new Item(properties) {
             @NotNull
             @Override
             public Component getName(@NotNull ItemStack stack) {
@@ -50,32 +52,32 @@ public class ItemDeferredRegister extends WrappedDeferredRegister<Item> {
         });
     }
 
-    public ItemRegistryObject<ItemModule> registerModule(ModuleRegistryObject<?> moduleDataSupplier) {
+    public ItemRegistryObject<ItemModule> registerModule(ResourceLocation id, ModuleRegistryObject<?> moduleDataSupplier) {
         //Note: We use the internal helper just in case we end up needing to know it is an ItemModule instead of just an Item somewhere
-        return register("module_" + moduleDataSupplier.getInternalRegistryName(), () -> ModuleHelper.get().createModuleItem(moduleDataSupplier, new Item.Properties()));
+        return register(id, () -> ModuleHelper.get().createModuleItem(moduleDataSupplier, new Item.Properties()));
     }
 
-    public <ITEM extends Item> ItemRegistryObject<ITEM> register(String name, Function<Item.Properties, ITEM> sup) {
-        return register(name, () -> sup.apply(new Item.Properties()));
+    public <ITEM extends Item> ItemRegistryObject<ITEM> register(ResourceLocation id, Function<Item.Properties, ITEM> sup) {
+        return register(id, () -> sup.apply(new Item.Properties()));
     }
 
-    public <ITEM extends Item> ItemRegistryObject<ITEM> registerUnburnable(String name, Function<Item.Properties, ITEM> sup) {
-        return register(name, () -> sup.apply(new Item.Properties().fireResistant()));
+    public <ITEM extends Item> ItemRegistryObject<ITEM> registerUnburnable(ResourceLocation id, Function<Item.Properties, ITEM> sup) {
+        return register(id, () -> sup.apply(new Item.Properties().fireResistant()));
     }
 
-    public <ITEM extends Item> ItemRegistryObject<ITEM> register(String name, Supplier<? extends ITEM> sup) {
-        ItemRegistryObject<ITEM> registeredItem = register(name, sup, ItemRegistryObject::new);
+    public <ITEM extends Item> ItemRegistryObject<ITEM> register(ResourceLocation id, Supplier<ITEM> sup) {
+        ItemRegistryObject<ITEM> registeredItem = register(id, sup, ItemRegistryObject::new);
         allItems.add(registeredItem);
         return registeredItem;
     }
 
-    public <ENTITY extends Mob> ItemRegistryObject<ForgeSpawnEggItem> registerSpawnEgg(EntityTypeRegistryObject<ENTITY> entityTypeProvider,
-          int primaryColor, int secondaryColor) {
-        return register(entityTypeProvider.getInternalRegistryName() + "_spawn_egg", props -> new ForgeSpawnEggItem(entityTypeProvider, primaryColor,
+    public <ENTITY extends Mob> ItemRegistryObject<SpawnEggItem> registerSpawnEgg(ResourceLocation id, EntityType<ENTITY> entityType,
+                                                                                  int primaryColor, int secondaryColor) {
+        return register(id, props -> new SpawnEggItem(entityType, primaryColor,
               secondaryColor, props));
     }
 
-    public List<IItemProvider> getAllItems() {
+    public List<ItemRegistryObject<? extends Item>> getAllItems() {
         return Collections.unmodifiableList(allItems);
     }
 }

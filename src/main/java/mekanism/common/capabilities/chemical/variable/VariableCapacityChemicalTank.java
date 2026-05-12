@@ -1,21 +1,22 @@
 package mekanism.common.capabilities.chemical.variable;
 
-import java.util.function.BiPredicate;
-import java.util.function.LongSupplier;
-import java.util.function.Predicate;
-import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.BasicChemicalTank;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiPredicate;
+import java.util.function.LongSupplier;
+import java.util.function.Predicate;
+
 @NothingNullByDefault
-public abstract class VariableCapacityChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends BasicChemicalTank<CHEMICAL, STACK> {
+public abstract class VariableCapacityChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>> extends BasicChemicalTank<CHEMICAL, STACK, TANK> {
 
     private final LongSupplier capacity;
 
@@ -32,13 +33,11 @@ public abstract class VariableCapacityChemicalTank<CHEMICAL extends Chemical<CHE
     }
 
     @Override
-    public long setStackSize(long amount, @NotNull Action action) {
+    public long setStackSize(long amount) {
         if (isEmpty()) {
             return 0;
         } else if (amount <= 0) {
-            if (action.execute()) {
-                setEmpty();
-            }
+            setEmpty();
             return 0;
         }
         long maxStackSize = getCapacity();
@@ -48,7 +47,7 @@ public abstract class VariableCapacityChemicalTank<CHEMICAL extends Chemical<CHE
         if (maxStackSize > 0 && amount > maxStackSize) {
             amount = maxStackSize;
         }
-        if (getStored() == amount || action.simulate()) {
+        if (getStored() == amount) {
             //If our size is not changing, or we are only simulating the change, don't do anything
             return amount;
         }

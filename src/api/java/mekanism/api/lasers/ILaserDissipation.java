@@ -1,6 +1,6 @@
 package mekanism.api.lasers;
 
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Expose as a capability on armor items to allow lasers to be dissipated and/or refracted through entities wearing your armor.
@@ -13,7 +13,7 @@ import net.minecraftforge.common.capabilities.AutoRegisterCapability;
  * </ol>
  * Any damage that isn't blocked, dissipated, or refracted through the entity will be applied to the entity as normal.
  */
-@AutoRegisterCapability
+//@AutoRegisterCapability //TODO
 public interface ILaserDissipation {
 
     /**
@@ -24,7 +24,7 @@ public interface ILaserDissipation {
      * @implNote This value should be between zero and one, but values greater than one will work as well as the total percentage across the worn armor gets capped at
      * one.
      */
-    double getDissipationPercent();
+    double getDissipationPercent(ItemStack data);
 
     /**
      * Gets the percentage for how much of a laser's energy this piece of armor will be refracted through it.
@@ -34,5 +34,5 @@ public interface ILaserDissipation {
      * @implNote This value should be between zero and one, but values greater than one will work as well as the total percentage across the worn armor gets capped at
      * one.
      */
-    double getRefractionPercent();
+    double getRefractionPercent(ItemStack data);
 }

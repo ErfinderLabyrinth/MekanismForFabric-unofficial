@@ -1,19 +1,21 @@
 package mekanism.client.gui.element.gauge;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.jei.interfaces.IJEIIngredientHelper;
+import mekanism.common.capabilities.holder.IHolder;
 import mekanism.common.lib.transmitter.TransmissionType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class GuiHybridGauge extends GuiGauge<Void> implements IJEIIngredientHelper {
 
@@ -24,20 +26,20 @@ public class GuiHybridGauge extends GuiGauge<Void> implements IJEIIngredientHelp
 
     private Component label;
 
-    public GuiHybridGauge(Supplier<IGasTank> gasTankSupplier, Supplier<List<IGasTank>> gasTanksSupplier,
-          Supplier<IExtendedFluidTank> fluidTankSupplier, Supplier<List<IExtendedFluidTank>> fluidTanksSupplier, GaugeType type,
+    public GuiHybridGauge(Supplier<IGasTank> gasTankSupplier, Supplier<IHolder<IGasTank>> gasHolderSupplier,
+          Supplier<IExtendedFluidTank> fluidTankSupplier, Supplier<IHolder<IExtendedFluidTank>> fluidHolderSupplier, GaugeType type,
           IGuiWrapper gui, int x, int y) {
-        this(gasTankSupplier, gasTanksSupplier, fluidTankSupplier, fluidTanksSupplier, type, gui, x, y,
+        this(gasTankSupplier, gasHolderSupplier, fluidTankSupplier, fluidHolderSupplier, type, gui, x, y,
               type.getGaugeOverlay().getWidth() + 2, type.getGaugeOverlay().getHeight() + 2);
     }
 
-    public GuiHybridGauge(Supplier<IGasTank> gasTankSupplier, Supplier<List<IGasTank>> gasTanksSupplier,
-          Supplier<IExtendedFluidTank> fluidTankSupplier, Supplier<List<IExtendedFluidTank>> fluidTanksSupplier, GaugeType type,
+    public GuiHybridGauge(Supplier<IGasTank> gasTankSupplier, Supplier<IHolder<IGasTank>> gasHolderSupplier,
+          Supplier<IExtendedFluidTank> fluidTankSupplier, Supplier<IHolder<IExtendedFluidTank>> fluidHolderSupplier, GaugeType type,
           IGuiWrapper gui, int x, int y, int width, int height) {
         super(type, gui, x, y, width, height);
         this.gasTankSupplier = gasTankSupplier;
-        gasGauge = addPositionOnlyChild(new GuiGasGauge(gasTankSupplier, gasTanksSupplier, type, gui, x, y, width, height));
-        fluidGauge = addPositionOnlyChild(new GuiFluidGauge(fluidTankSupplier, fluidTanksSupplier, type, gui, x, y, width, height));
+        gasGauge = addPositionOnlyChild(new GuiGasGauge(gasTankSupplier, gasHolderSupplier, type, gui, x, y, width, height));
+        fluidGauge = addPositionOnlyChild(new GuiFluidGauge(fluidTankSupplier, fluidHolderSupplier, type, gui, x, y, width, height));
     }
 
     public GuiHybridGauge setLabel(Component label) {

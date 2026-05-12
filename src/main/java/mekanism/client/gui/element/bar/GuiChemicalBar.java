@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.bar;
 
-import java.util.List;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
@@ -11,6 +10,7 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.MekanismLang;
+import mekanism.common.capabilities.holder.IHolder;
 import mekanism.common.network.to_server.PacketDropperUse.TankType;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.text.TextUtils;
@@ -20,6 +20,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends GuiTankBar<STACK> {
 
@@ -65,7 +67,7 @@ public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends C
         return MekanismRenderer.getChemicalTexture(stack.getType());
     }
 
-    public static <STACK extends ChemicalStack<?>, TANK extends IChemicalTank<?, STACK>> TankInfoProvider<STACK> getProvider(TANK tank, List<TANK> tanks) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>> TankInfoProvider<STACK> getProvider(TANK tank, IHolder<TANK> holder) {
         return new TankInfoProvider<>() {
             @NotNull
             @Override
@@ -75,7 +77,7 @@ public class GuiChemicalBar<CHEMICAL extends Chemical<CHEMICAL>, STACK extends C
 
             @Override
             public int getTankIndex() {
-                return tanks.indexOf(tank);
+                return holder == null ? -1 : holder.indexOf(tank);
             }
 
             @Override

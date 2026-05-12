@@ -3,11 +3,6 @@ package mekanism.client.sound;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 import mekanism.api.Upgrade;
 import mekanism.client.sound.PlayerSound.SoundType;
 import mekanism.common.Mekanism;
@@ -22,7 +17,6 @@ import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -31,13 +25,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.event.sound.PlaySoundEvent;
-import net.minecraftforge.client.event.sound.SoundEngineLoadEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 /**
  * SoundHandler is the central point for sounds on Mek client side. There are roughly three classes of sounds to deal with:
@@ -56,7 +50,6 @@ import org.jetbrains.annotations.NotNull;
  *
  * @apiNote Only used by client
  */
-@Mod.EventBusSubscriber(modid = Mekanism.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SoundHandler {
 
     private SoundHandler() {
@@ -70,7 +63,6 @@ public class SoundHandler {
 
     private static final Long2ObjectMap<SoundInstance> soundMap = new Long2ObjectOpenHashMap<>();
     private static boolean IN_MUFFLED_CHECK = false;
-    private static SoundEngine soundEngine;
     private static boolean hadPlayerSounds;
 
     public static void clearPlayerSounds() {
@@ -150,7 +142,7 @@ public class SoundHandler {
 
     private static void restartSounds(PlayerSound... sounds) {
         for (PlayerSound sound : sounds) {
-            if (!sound.isStopped() && soundEngine != null && !soundEngine.instanceToChannel.containsKey(sound)) {
+            if (!sound.isStopped() && Minecraft.getInstance().getSoundManager().soundEngine != null && !Minecraft.getInstance().getSoundManager().soundEngine.instanceToChannel.containsKey(sound)) {
                 //Note: We need to directly check the instanceToChannel, because isActive will give wrong results as it doesn't
                 // get cleared out of the soundDeleteTime map. We also don't restart sounds if they marked themselves as stopped
                 // as the cases we have that is if the player is no longer present or the player died, in which case the sound will
@@ -173,7 +165,7 @@ public class SoundHandler {
     }
 
     public static void playSound(SoundEvent sound) {
-        playSound(SimpleSoundInstance.forUI(sound, 1, MekanismConfig.client.baseSoundVolume.get()));
+        playSound(SimpleSoundInstance.forUI(sound, 1, MekanismConfig.client.baseSoundVolume));
     }
 
     public static void playSound(SoundInstance sound) {
@@ -242,47 +234,36 @@ public class SoundHandler {
         return player.position().distanceToSqr(sound.getX(), sound.getY(), sound.getZ()) < scaledDistance * scaledDistance;
     }
 
-    @SubscribeEvent
-    public static void onSoundEngineSetup(SoundEngineLoadEvent event) {
-        //Grab the sound engine, so that we are able to play sounds. We use this event rather than requiring the use of an AT
-        if (soundEngine == null) {
-            //Note: We include a null check as the constructor for SoundEngine is public and calls this event
-            // And we do not want to end up grabbing a modders variant of this
-            soundEngine = event.getEngine();
-        }
-    }
-
-    public static void onTilePlaySound(PlaySoundEvent event) {
+    public static SoundInstance onTilePlaySound(SoundInstance sound, String name) {
         // Ignore any sound event which is null or is happening in a muffled check
-        SoundInstance resultSound = event.getSound();
-        if (resultSound == null || IN_MUFFLED_CHECK) {
-            return;
+        if (sound == null || IN_MUFFLED_CHECK) {
+            return sound;
         }
 
         // Ignore any sound event outside this mod namespace
-        ResourceLocation soundLoc = event.getOriginalSound().getLocation();
+        ResourceLocation soundLoc = sound.getLocation();
         //If it is mekanism or one of the submodules let continue
         if (!soundLoc.getNamespace().startsWith(Mekanism.MODID)) {
-            return;
+            return sound;
         }
 
         // If this is a Mek player sound, unwrap any muffling that other mods may have attempted. I haven't
         // sorted out a good way to deal with long-lived, non-repeating, dynamic volume sounds -- something
         // to investigate in the future.
-        if (event.getOriginalSound() instanceof PlayerSound sound) {
-            event.setSound(sound);
-            return;
+        if (sound instanceof PlayerSound sound2) {
+            return sound2;
         }
 
         //Ignore any non-tile Mek sounds
-        if (event.getName().startsWith("tile.")) {
+        if (name.startsWith("tile.")) {
             //At this point, we've got a known block Mekanism sound.
             // Update our soundMap so that we can actually have a shot at stopping this sound; note that we also
             // need to "unoffset" the sound position so that we build the correct key for the sound map
             // Aside: I really, really, wish Forge returned the final result sound as part of playSound :/
-            BlockPos pos = BlockPos.containing(resultSound.getX() - 0.5, resultSound.getY() - 0.5, resultSound.getZ() - 0.5);
-            soundMap.put(pos.asLong(), resultSound);
+            BlockPos pos = BlockPos.containing(sound.getX() - 0.5, sound.getY() - 0.5, sound.getZ() - 0.5);
+            soundMap.put(pos.asLong(), sound);
         }
+        return sound;
     }
 
     private static class TileTickableSound extends AbstractTickableSoundInstance {
@@ -297,7 +278,7 @@ public class SoundHandler {
         TileTickableSound(SoundEvent soundEvent, SoundSource category, RandomSource random, BlockPos pos, float volume, boolean looping) {
             super(soundEvent, category, random);
             //Keep track of our original volume
-            this.originalVolume = volume * MekanismConfig.client.baseSoundVolume.get();
+            this.originalVolume = volume * MekanismConfig.client.baseSoundVolume;
             this.x = pos.getX() + 0.5F;
             this.y = pos.getY() + 0.5F;
             this.z = pos.getZ() + 0.5F;
@@ -324,7 +305,8 @@ public class SoundHandler {
                 //Make sure we set our volume back to what it actually would be for purposes of letting other mods know
                 // what volume to use
                 volume = originalVolume;
-                SoundInstance s = ForgeHooksClient.playSound(soundEngine, this);
+                //Minecraft.getInstance().getSoundManager().play(this);
+                SoundInstance s = onTilePlaySound(this, getLocation().getPath());
                 IN_MUFFLED_CHECK = false;
 
                 if (s == this) {

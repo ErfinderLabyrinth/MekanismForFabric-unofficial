@@ -1,27 +1,28 @@
 package mekanism.api.gear;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.function.Consumer;
 import mekanism.api.MekanismAPI;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.gear.config.ModuleConfigItemCreator;
 import mekanism.api.providers.IItemProvider;
 import mekanism.api.providers.IModuleDataProvider;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.common.util.NonNullSupplier;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @NothingNullByDefault
 public class ModuleData<MODULE extends ICustomModule<MODULE>> implements IModuleDataProvider<MODULE> {
 
-    private final NonNullSupplier<MODULE> supplier;
+    private final Supplier<MODULE> supplier;
     private final IItemProvider itemProvider;
     private final int maxStackSize;
     private final Rarity rarity;
@@ -179,7 +180,7 @@ public class ModuleData<MODULE extends ICustomModule<MODULE>> implements IModule
     @SuppressWarnings("ConstantConditions")
     public final ResourceLocation getRegistryName() {
         //May be null if called before the object is registered
-        IForgeRegistry<ModuleData<?>> registry = MekanismAPI.moduleRegistry();
+        Registry<ModuleData<?>> registry = MekanismAPI.moduleRegistry();
         return registry == null ? null : registry.getKey(this);
     }
 
@@ -191,7 +192,7 @@ public class ModuleData<MODULE extends ICustomModule<MODULE>> implements IModule
         @SuppressWarnings("rawtypes")
         private static final ICustomModule<?> MARKER_MODULE = new ICustomModule() {
         };
-        private static final NonNullSupplier<ICustomModule<?>> MARKER_MODULE_SUPPLIER = () -> MARKER_MODULE;
+        private static final Supplier<ICustomModule<?>> MARKER_MODULE_SUPPLIER = () -> MARKER_MODULE;
 
         /**
          * Helper creator for creating a module that has no special implementation details and is only used mainly as a marker for if it is installed and how many are
@@ -215,11 +216,11 @@ public class ModuleData<MODULE extends ICustomModule<MODULE>> implements IModule
          * creates no config items so there is no unique data, but it is easier to just return a new instance each time unless you are using
          * {@link #marker(IItemProvider)}.
          */
-        public static <MODULE extends ICustomModule<MODULE>> ModuleDataBuilder<MODULE> custom(NonNullSupplier<MODULE> customModule, IItemProvider itemProvider) {
+        public static <MODULE extends ICustomModule<MODULE>> ModuleDataBuilder<MODULE> custom(Supplier<MODULE> customModule, IItemProvider itemProvider) {
             return new ModuleDataBuilder<>(customModule, itemProvider);
         }
 
-        private final NonNullSupplier<MODULE> supplier;
+        private final Supplier<MODULE> supplier;
         private final IItemProvider itemProvider;
         private Rarity rarity = Rarity.COMMON;
         private int maxStackSize = 1;
@@ -230,7 +231,7 @@ public class ModuleData<MODULE extends ICustomModule<MODULE>> implements IModule
         private boolean noDisable;
         private boolean disabledByDefault;
 
-        private ModuleDataBuilder(NonNullSupplier<MODULE> supplier, IItemProvider itemProvider) {
+        private ModuleDataBuilder(Supplier<MODULE> supplier, IItemProvider itemProvider) {
             this.supplier = Objects.requireNonNull(supplier, "Supplier cannot be null.");
             this.itemProvider = Objects.requireNonNull(itemProvider, "Item provider cannot be null.");
         }

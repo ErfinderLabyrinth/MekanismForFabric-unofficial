@@ -1,12 +1,13 @@
 package mekanism.common.lib.radiation;
 
-import java.util.Objects;
 import mekanism.api.Coord4D;
 import mekanism.api.NBTConstants;
 import mekanism.api.radiation.IRadiationSource;
 import mekanism.common.config.MekanismConfig;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class RadiationSource implements IRadiationSource {
 
@@ -37,7 +38,7 @@ public class RadiationSource implements IRadiationSource {
 
     @Override
     public boolean decay() {
-        magnitude *= MekanismConfig.general.radiationSourceDecayRate.get();
+        magnitude *= MekanismConfig.general.radiationSourceDecayRate;
         return magnitude < RadiationManager.MIN_MAGNITUDE;
     }
 

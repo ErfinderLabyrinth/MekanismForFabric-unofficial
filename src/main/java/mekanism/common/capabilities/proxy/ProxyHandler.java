@@ -1,10 +1,12 @@
 package mekanism.common.capabilities.proxy;
 
-import java.util.function.BooleanSupplier;
 import mekanism.api.annotations.FieldsAreNotNullByDefault;
 import mekanism.common.capabilities.holder.IHolder;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BooleanSupplier;
 
 @FieldsAreNotNullByDefault
 public class ProxyHandler {
@@ -23,4 +25,10 @@ public class ProxyHandler {
         this.readOnlyInsert = holder == null ? alwaysFalse : () -> !holder.canInsert(side);
         this.readOnlyExtract = holder == null ? alwaysFalse : () -> !holder.canExtract(side);
     }
+
+    public void updateSnapshots(TransactionContext t) {
+
+    }
+
+
 }

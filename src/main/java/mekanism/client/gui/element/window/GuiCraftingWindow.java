@@ -1,7 +1,5 @@
 package mekanism.client.gui.element.window;
 
-import java.util.ArrayList;
-import java.util.List;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiRightArrow;
 import mekanism.client.gui.element.button.MekanismImageButton;
@@ -15,6 +13,9 @@ import mekanism.common.inventory.container.SelectedWindowData.WindowType;
 import mekanism.common.network.to_server.PacketQIOClearCraftingWindow;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiCraftingWindow extends GuiWindow {
 

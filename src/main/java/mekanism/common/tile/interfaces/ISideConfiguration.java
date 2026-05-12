@@ -1,6 +1,5 @@
 package mekanism.common.tile.interfaces;
 
-import java.util.List;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.infuse.IInfusionTank;
 import mekanism.api.chemical.pigment.IPigmentTank;
@@ -14,6 +13,8 @@ import mekanism.common.tile.component.config.ConfigInfo;
 import mekanism.common.tile.component.config.DataType;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Implement this if your TileEntity is capable of being modified by a Configurator in it's 'modify' mode.

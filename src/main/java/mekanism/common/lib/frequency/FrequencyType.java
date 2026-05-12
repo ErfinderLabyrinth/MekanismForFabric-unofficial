@@ -1,10 +1,5 @@
 package mekanism.common.lib.frequency;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import mekanism.api.NBTConstants;
 import mekanism.common.content.entangloporter.InventoryFrequency;
 import mekanism.common.content.qio.QIOFrequency;
@@ -14,8 +9,15 @@ import mekanism.common.lib.security.SecurityFrequency;
 import mekanism.common.network.BasePacketHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class FrequencyType<FREQ extends Frequency> {
 
@@ -91,27 +93,27 @@ public class FrequencyType<FREQ extends Frequency> {
         return managerWrapper;
     }
 
-    public FrequencyManager<FREQ> getManager(@Nullable UUID owner) {
-        return owner == null ? getManagerWrapper().getPublicManager() : getManagerWrapper().getPrivateManager(owner);
+    public FrequencyManager<FREQ> getManager(@Nullable UUID owner, @Nullable MinecraftServer server) {
+        return owner == null || server == null ? getManagerWrapper().getPublicManager() : getManagerWrapper().getPrivateManager(owner, server);
     }
 
     @Nullable
     @Contract("null -> null")
-    public FrequencyManager<FREQ> getFrequencyManager(@Nullable FREQ freq) {
+    public FrequencyManager<FREQ> getFrequencyManager(@Nullable FREQ freq, MinecraftServer server) {
         if (freq == null) {
             return null;
         } else if (freq.isPublic()) {
             return getManagerWrapper().getPublicManager();
         }
-        return getManagerWrapper().getPrivateManager(freq.getOwner());
+        return getManagerWrapper().getPrivateManager(freq.getOwner(), server);
     }
 
-    public FrequencyManager<FREQ> getManager(FrequencyIdentity identity, UUID owner) {
-        return identity.isPublic() ? getManagerWrapper().getPublicManager() : getManagerWrapper().getPrivateManager(owner);
+    public FrequencyManager<FREQ> getManager(FrequencyIdentity identity, UUID owner, MinecraftServer server) {
+        return identity.isPublic() ? getManagerWrapper().getPublicManager() : getManagerWrapper().getPrivateManager(owner, server);
     }
 
-    public FREQ getFrequency(FrequencyIdentity identity, UUID owner) {
-        return getManager(identity, owner).getFrequency(identity.key());
+    public FREQ getFrequency(FrequencyIdentity identity, UUID owner, MinecraftServer server) {
+        return getManager(identity, owner, server).getFrequency(identity.key());
     }
 
     public IdentitySerializer getIdentitySerializer() {

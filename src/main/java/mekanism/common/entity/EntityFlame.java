@@ -1,6 +1,5 @@
 package mekanism.common.entity;
 
-import java.util.Optional;
 import mekanism.api.NBTConstants;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.gear.ItemFlamethrower;
@@ -13,16 +12,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -33,27 +28,19 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseFireBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.LevelEvent;
-import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class EntityFlame extends Projectile implements IEntityAdditionalSpawnData {
+import java.util.Optional;
+
+public class EntityFlame extends Projectile {
 
     public static final int LIFESPAN = 80;
     private static final int DAMAGE = 10;
@@ -160,7 +147,7 @@ public class EntityFlame extends Projectile implements IEntityAdditionalSpawnDat
         Direction hitSide = blockRayTrace.getDirection();
         BlockState hitState = level().getBlockState(hitPos);
         boolean hitFluid = !hitState.getFluidState().isEmpty();
-        if (!level().isClientSide && MekanismConfig.general.aestheticWorldDamage.get() && !hitFluid) {
+        if (!level().isClientSide && MekanismConfig.general.aestheticWorldDamage && !hitFluid) {
             if (mode == FlamethrowerMode.HEAT) {
                 Entity owner = getOwner();
                 if (owner instanceof Player player) {
@@ -173,12 +160,9 @@ public class EntityFlame extends Projectile implements IEntityAdditionalSpawnDat
                     tryPlace(owner, hitPos, hitSide, hitState.setValue(BlockStateProperties.LIT, true));
                 } else if (BaseFireBlock.canBePlacedAt(level(), sidePos, hitSide)) {
                     tryPlace(owner, sidePos, hitSide, BaseFireBlock.getState(level(), sidePos));
-                } else if (hitState.isFlammable(level(), hitPos, hitSide)) {
-                    //TODO: Is there some event we should/can be firing here?
-                    hitState.onCaughtFire(level(), hitPos, hitSide, owner instanceof LivingEntity livingEntity ? livingEntity : null);
-                    if (hitState.getBlock() instanceof TntBlock) {
-                        level().removeBlock(hitPos, false);
-                    }
+                } else if (hitState.getBlock() instanceof TntBlock tnt) {
+                    TntBlock.explode(level(), hitPos);
+                    level().removeBlock(hitPos, false);
                 }
             }
         }
@@ -190,14 +174,14 @@ public class EntityFlame extends Projectile implements IEntityAdditionalSpawnDat
     }
 
     private boolean tryPlace(@Nullable Entity shooter, BlockPos pos, Direction hitSide, BlockState newState) {
-        BlockSnapshot blockSnapshot = BlockSnapshot.create(level().dimension(), level(), pos);
+//        BlockSnapshot blockSnapshot = BlockSnapshot.create(level().dimension(), level(), pos);
         level().setBlockAndUpdate(pos, newState);
-        if (ForgeEventFactory.onBlockPlace(shooter, blockSnapshot, hitSide)) {
-            level().restoringBlockSnapshots = true;
-            blockSnapshot.restore(true, false);
-            level().restoringBlockSnapshots = false;
-            return false;
-        }
+//        if (ForgeEventFactory.onBlockPlace(shooter, blockSnapshot, hitSide)) {
+//            level().restoringBlockSnapshots = true;
+//            blockSnapshot.restore(true, false);
+//            level().restoringBlockSnapshots = false;
+//            return false;
+//        }
         return true;
     }
 
@@ -234,10 +218,10 @@ public class EntityFlame extends Projectile implements IEntityAdditionalSpawnDat
         }
         if (recipe.isPresent()) {
             if (!level().isClientSide) {
-                if (MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level(), blockPos, hitState, shooter))) {
-                    //We can't break the block exit
-                    return;
-                }
+//                if (MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level(), blockPos, hitState, shooter))) {
+//                    //We can't break the block exit
+//                    return;
+//                }
                 ItemStack result = recipe.get().getResultItem(level().registryAccess());
                 if (!(result.getItem() instanceof BlockItem) || !tryPlace(shooter, blockPos, hitSide, Block.byItem(result.getItem()).defaultBlockState())) {
                     level().removeBlock(blockPos, false);
@@ -252,7 +236,7 @@ public class EntityFlame extends Projectile implements IEntityAdditionalSpawnDat
     }
 
     private void burn(Entity entity) {
-        if (!(entity instanceof ItemEntity) || MekanismConfig.gear.flamethrowerDestroyItems.get()) {
+        if (!(entity instanceof ItemEntity) || MekanismConfig.gear.flamethrowerDestroyItems) {
             //Only actually burn the entity if it is not an item, or we allow destroying items
             entity.setSecondsOnFire(20);
             entity.hurt(damageSources().thrown(this, getOwner()), DAMAGE);
@@ -289,19 +273,13 @@ public class EntityFlame extends Projectile implements IEntityAdditionalSpawnDat
         NBTUtils.writeEnum(nbtTags, NBTConstants.MODE, mode);
     }
 
-    @NotNull
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-
-    @Override
-    public void writeSpawnData(FriendlyByteBuf dataStream) {
-        dataStream.writeEnum(mode);
-    }
-
-    @Override
-    public void readSpawnData(FriendlyByteBuf dataStream) {
-        mode = dataStream.readEnum(FlamethrowerMode.class);
-    }
+//    @Override
+//    public void writeSpawnData(FriendlyByteBuf dataStream) {
+//        dataStream.writeEnum(mode);
+//    }
+//
+//    @Override
+//    public void readSpawnData(FriendlyByteBuf dataStream) {
+//        mode = dataStream.readEnum(FlamethrowerMode.class);
+//    }
 }

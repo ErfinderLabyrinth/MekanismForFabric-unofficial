@@ -36,6 +36,7 @@ public class RenderEnergyCube extends ModelTileEntityRenderer<TileEntityEnergyCu
         RenderTickHandler.addTransparentRenderer(ModelEnergyCore.BATCHED_RENDER_TYPE, new LazyRender() {
             @Override
             public void render(Camera camera, VertexConsumer buffer, PoseStack poseStack, int renderTick, float partialTick, ProfilerFiller profiler) {
+//                if (model instanceof EnergyCubeBakedModel energyCubeBakedModel) {
                 float ticks = renderTick + partialTick;
                 float scaledTicks = 4 * ticks;
                 poseStack.pushPose();

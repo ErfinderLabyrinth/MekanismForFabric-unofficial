@@ -1,30 +1,13 @@
 package mekanism.common.network.to_client.container.property;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.ChemicalUtils;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.api.math.FloatingLong;
-import mekanism.common.inventory.container.sync.ISyncableData;
-import mekanism.common.inventory.container.sync.SyncableBlockPos;
-import mekanism.common.inventory.container.sync.SyncableBoolean;
-import mekanism.common.inventory.container.sync.SyncableByte;
-import mekanism.common.inventory.container.sync.SyncableDouble;
-import mekanism.common.inventory.container.sync.SyncableFloat;
-import mekanism.common.inventory.container.sync.SyncableFloatingLong;
-import mekanism.common.inventory.container.sync.SyncableFluidStack;
-import mekanism.common.inventory.container.sync.SyncableFrequency;
-import mekanism.common.inventory.container.sync.SyncableInt;
-import mekanism.common.inventory.container.sync.SyncableItemStack;
-import mekanism.common.inventory.container.sync.SyncableLong;
-import mekanism.common.inventory.container.sync.SyncableRegistryEntry;
-import mekanism.common.inventory.container.sync.SyncableShort;
+import mekanism.common.inventory.container.sync.*;
 import mekanism.common.inventory.container.sync.chemical.SyncableGasStack;
 import mekanism.common.inventory.container.sync.chemical.SyncableInfusionStack;
 import mekanism.common.inventory.container.sync.chemical.SyncablePigmentStack;
@@ -37,10 +20,15 @@ import mekanism.common.network.to_client.container.property.chemical.PigmentStac
 import mekanism.common.network.to_client.container.property.chemical.SlurryStackPropertyData;
 import mekanism.common.network.to_client.container.property.list.ListPropertyData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.IForgeRegistry;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public enum PropertyType {
     BOOLEAN(Boolean.TYPE, false, (getter, setter) -> SyncableBoolean.create(() -> (boolean) getter.get(), setter::accept),
@@ -61,7 +49,7 @@ public enum PropertyType {
     ITEM_STACK(ItemStack.class, ItemStack.EMPTY, (getter, setter) -> SyncableItemStack.create(() -> (ItemStack) getter.get(), setter::accept),
           (property, buffer) -> new ItemStackPropertyData(property, buffer.readItem())),
     FLUID_STACK(FluidStack.class, FluidStack.EMPTY, (getter, setter) -> SyncableFluidStack.create(() -> (FluidStack) getter.get(), setter::accept),
-          (property, buffer) -> new FluidStackPropertyData(property, buffer.readFluidStack())),
+          (property, buffer) -> new FluidStackPropertyData(property, FluidStack.readFromBuffer(buffer))),
     GAS_STACK(GasStack.class, GasStack.EMPTY, (getter, setter) -> SyncableGasStack.create(() -> (GasStack) getter.get(), setter::accept),
           (property, buffer) -> new GasStackPropertyData(property, ChemicalUtils.readGasStack(buffer))),
     INFUSION_STACK(InfusionStack.class, InfusionStack.EMPTY, (getter, setter) -> SyncableInfusionStack.create(() -> (InfusionStack) getter.get(), setter::accept),
@@ -91,7 +79,7 @@ public enum PropertyType {
 
     //For use by any specific registry types we might at some point need the annotation for
     // potentially should have a better solution done than this
-    <V> PropertyType(Class<V> type, IForgeRegistry<V> registry, BiFunction<Short, FriendlyByteBuf, PropertyData> dataCreatorFunction) {
+    <V> PropertyType(Class<V> type, Registry<V> registry, BiFunction<Short, FriendlyByteBuf, PropertyData> dataCreatorFunction) {
         this(type, null, (supplier, consumer) -> SyncableRegistryEntry.create(registry, (Supplier<V>) supplier, (Consumer<V>) consumer), dataCreatorFunction);
     }
 

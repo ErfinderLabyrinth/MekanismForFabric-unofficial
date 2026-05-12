@@ -1,15 +1,19 @@
 package mekanism.api;
 
 import java.util.List;
+import java.util.function.Function;
+
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
+import mekanism.api.fluid.IExtendedFluidHandler;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.inventory.IInventorySlot;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fluids.IFluidTank;
+import net.minecraft.nbt.Tag;
 
 @NothingNullByDefault
 public class DataHandlerUtils {
@@ -20,21 +24,28 @@ public class DataHandlerUtils {
     /**
      * Helper to read and load a list of containers from a {@link ListTag}
      */
-    public static void readContainers(List<? extends INBTSerializable<CompoundTag>> containers, ListTag storedContainers) {
+    public static void readContainers(List<? extends NBTSerializable> containers, ListTag storedContainers) {
         readContents(containers, storedContainers, getTagByType(containers));
     }
 
     /**
      * Helper to read and load a list of containers to a {@link ListTag}
      */
-    public static ListTag writeContainers(List<? extends INBTSerializable<CompoundTag>> containers) {
-        return writeContents(containers, getTagByType(containers));
+    public static ListTag writeContainers(List<? extends NBTSerializable<CompoundTag>> containers) {
+        return writeContainers(containers, NBTSerializable::serializeNBT);
+    }
+
+    /**
+     * Helper to read and load a list of containers to a {@link ListTag}
+     */
+    public static <T> ListTag writeContainers(List<T> containers, Function<T, CompoundTag> mapper) {
+        return writeContents(containers, mapper, getTagByType(containers));
     }
 
     /**
      * Helper to read and load a list of handler contents from a {@link ListTag}
      */
-    public static void readContents(List<? extends INBTSerializable<CompoundTag>> contents, ListTag storedContents, String key) {
+    public static void readContents(List<? extends NBTSerializable> contents, ListTag storedContents, String key) {
         int size = contents.size();
         for (int tagCount = 0; tagCount < storedContents.size(); tagCount++) {
             CompoundTag tagCompound = storedContents.getCompound(tagCount);
@@ -48,10 +59,10 @@ public class DataHandlerUtils {
     /**
      * Helper to read and load a list of handler contents to a {@link ListTag}
      */
-    public static ListTag writeContents(List<? extends INBTSerializable<CompoundTag>> contents, String key) {
+    public static <T> ListTag writeContents(List<T> contents, Function<T, CompoundTag> mapper, String key) {
         ListTag storedContents = new ListTag();
         for (int tank = 0; tank < contents.size(); tank++) {
-            CompoundTag tagCompound = contents.get(tank).serializeNBT();
+            CompoundTag tagCompound = mapper.apply(contents.get(tank));
             if (!tagCompound.isEmpty()) {
                 tagCompound.putByte(key, (byte) tank);
                 storedContents.add(tagCompound);
@@ -61,12 +72,12 @@ public class DataHandlerUtils {
     }
 
     // keep this only for backwards compat
-    private static String getTagByType(List<? extends INBTSerializable<CompoundTag>> containers) {
+    private static String getTagByType(List<?> containers) {
         if (containers.isEmpty()) {
             return NBTConstants.CONTAINER;
         }
-        INBTSerializable<CompoundTag> obj = containers.get(0);
-        if (obj instanceof IChemicalTank || obj instanceof IFluidTank) {
+        Object obj = containers.get(0);
+        if (obj instanceof IChemicalTank || obj instanceof IExtendedFluidHandler) {
             return NBTConstants.TANK;
         } else if (obj instanceof IHeatCapacitor || obj instanceof IEnergyContainer) {
             return NBTConstants.CONTAINER;

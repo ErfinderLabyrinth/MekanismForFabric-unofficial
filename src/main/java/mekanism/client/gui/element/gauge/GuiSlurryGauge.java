@@ -1,13 +1,14 @@
 package mekanism.client.gui.element.gauge;
 
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.chemical.slurry.ISlurryTank;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.client.gui.IGuiWrapper;
+import mekanism.common.capabilities.holder.IHolder;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.network.to_server.PacketDropperUse.TankType;
+
+import java.util.function.Supplier;
 
 public class GuiSlurryGauge extends GuiChemicalGauge<Slurry, SlurryStack, ISlurryTank> {
 
@@ -15,12 +16,12 @@ public class GuiSlurryGauge extends GuiChemicalGauge<Slurry, SlurryStack, ISlurr
         super(handler, type, gui, x, y, sizeX, sizeY, TankType.SLURRY_TANK);
     }
 
-    public GuiSlurryGauge(Supplier<ISlurryTank> tankSupplier, Supplier<List<ISlurryTank>> tanksSupplier, GaugeType type, IGuiWrapper gui, int x, int y) {
-        super(tankSupplier, tanksSupplier, type, gui, x, y, TankType.SLURRY_TANK);
+    public GuiSlurryGauge(Supplier<ISlurryTank> tankSupplier, Supplier<IHolder<ISlurryTank>> holderSupplier, GaugeType type, IGuiWrapper gui, int x, int y) {
+        super(tankSupplier, holderSupplier, type, gui, x, y, TankType.SLURRY_TANK);
     }
 
-    public GuiSlurryGauge(Supplier<ISlurryTank> tankSupplier, Supplier<List<ISlurryTank>> tanksSupplier, GaugeType type, IGuiWrapper gui, int x, int y, int sizeX, int sizeY) {
-        super(tankSupplier, tanksSupplier, type, gui, x, y, sizeX, sizeY, TankType.SLURRY_TANK);
+    public GuiSlurryGauge(Supplier<ISlurryTank> tankSupplier, Supplier<IHolder<ISlurryTank>> holderSupplier, GaugeType type, IGuiWrapper gui, int x, int y, int sizeX, int sizeY) {
+        super(tankSupplier, holderSupplier, type, gui, x, y, sizeX, sizeY, TankType.SLURRY_TANK);
     }
 
     public static GuiSlurryGauge getDummy(GaugeType type, IGuiWrapper gui, int x, int y) {

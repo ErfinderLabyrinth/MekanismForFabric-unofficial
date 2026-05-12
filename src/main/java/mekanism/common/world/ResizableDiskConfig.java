@@ -2,13 +2,14 @@ package mekanism.common.world;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.function.IntSupplier;
 import mekanism.common.config.MekanismConfig;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedBlockStateProvider;
+
+import java.util.function.IntSupplier;
 
 public record ResizableDiskConfig(RuleBasedBlockStateProvider stateProvider, BlockPredicate target, IntProvider radius, IntSupplier halfHeight) implements FeatureConfiguration {
 
@@ -19,7 +20,7 @@ public record ResizableDiskConfig(RuleBasedBlockStateProvider stateProvider, Blo
     ).apply(builder, ResizableDiskConfig::new));
 
     public ResizableDiskConfig(RuleBasedBlockStateProvider stateProvider, BlockPredicate target, IntProvider radius) {
-        this(stateProvider, target, radius, MekanismConfig.world.salt.halfHeight);
+        this(stateProvider, target, radius, () -> MekanismConfig.world.salt.halfHeight);
     }
 
     public DiskConfiguration asVanillaConfig() {

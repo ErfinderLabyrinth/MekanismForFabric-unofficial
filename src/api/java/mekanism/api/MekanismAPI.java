@@ -14,10 +14,10 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.gear.ModuleData;
 import mekanism.api.robit.RobitSkin;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ public class MekanismAPI {
      * {@link ResourceKey}.
      * @since 10.4.0
      */
-    public static final ResourceKey<Registry<Slurry>> SLURRY_REGISTRY_NAME = registryKey(Slurry.class, "slurry");
+    public static final ResourceKey<? extends Registry<Slurry>> SLURRY_REGISTRY_NAME = registryKey(Slurry.class, "slurry");
     /**
      * Gets the {@link ResourceKey} representing the name of the Forge Registry for {@link ModuleData modules}.
      *
@@ -110,17 +110,17 @@ public class MekanismAPI {
     public static final ResourceKey<Registry<Codec<? extends RobitSkin>>> ROBIT_SKIN_SERIALIZER_REGISTRY_NAME = codecRegistryKey(RobitSkin.class, "robit_skin_serializer");
 
     @Nullable
-    private static IForgeRegistry<Gas> GAS_REGISTRY;
+    private static Registry<Gas> GAS_REGISTRY;
     @Nullable
-    private static IForgeRegistry<InfuseType> INFUSE_TYPE_REGISTRY;
+    private static Registry<InfuseType> INFUSE_TYPE_REGISTRY;
     @Nullable
-    private static IForgeRegistry<Pigment> PIGMENT_REGISTRY;
+    private static Registry<Pigment> PIGMENT_REGISTRY;
     @Nullable
-    private static IForgeRegistry<Slurry> SLURRY_REGISTRY;
+    private static Registry<Slurry> SLURRY_REGISTRY;
     @Nullable
-    private static IForgeRegistry<ModuleData<?>> MODULE_REGISTRY;
+    private static Registry<ModuleData<?>> MODULE_REGISTRY;
     @Nullable
-    private static IForgeRegistry<Codec<? extends RobitSkin>> ROBIT_SKIN_SERIALIZER_REGISTRY;
+    private static Registry<Codec<? extends RobitSkin>> ROBIT_SKIN_SERIALIZER_REGISTRY;
 
     //Note: None of the empty variants support registry replacement
     //TODO: Potentially define these with ObjectHolder for purposes of fully defining them outside of the API
@@ -151,9 +151,9 @@ public class MekanismAPI {
      * have been fired. This method is marked as {@link NotNull} just because except for when this is being called super early it is never {@code null}.
      * @see #GAS_REGISTRY_NAME
      */
-    public static IForgeRegistry<Gas> gasRegistry() {
+    public static Registry<Gas> gasRegistry() {
         if (GAS_REGISTRY == null) {
-            GAS_REGISTRY = RegistryManager.ACTIVE.getRegistry(GAS_REGISTRY_NAME);
+            GAS_REGISTRY = (Registry<Gas>) BuiltInRegistries.REGISTRY.get(GAS_REGISTRY_NAME.location());
         }
         return GAS_REGISTRY;
     }
@@ -168,9 +168,9 @@ public class MekanismAPI {
      * called super early it is never {@code null}.
      * @see #INFUSE_TYPE_REGISTRY_NAME
      */
-    public static IForgeRegistry<InfuseType> infuseTypeRegistry() {
+    public static Registry<InfuseType> infuseTypeRegistry() {
         if (INFUSE_TYPE_REGISTRY == null) {
-            INFUSE_TYPE_REGISTRY = RegistryManager.ACTIVE.getRegistry(INFUSE_TYPE_REGISTRY_NAME);
+            INFUSE_TYPE_REGISTRY = (Registry<InfuseType>) BuiltInRegistries.REGISTRY.get(INFUSE_TYPE_REGISTRY_NAME.location());
         }
         return INFUSE_TYPE_REGISTRY;
     }
@@ -184,9 +184,9 @@ public class MekanismAPI {
      * have been fired. This method is marked as {@link NotNull} just because except for when this is being called super early it is never {@code null}.
      * @see #PIGMENT_REGISTRY_NAME
      */
-    public static IForgeRegistry<Pigment> pigmentRegistry() {
+    public static Registry<Pigment> pigmentRegistry() {
         if (PIGMENT_REGISTRY == null) {
-            PIGMENT_REGISTRY = RegistryManager.ACTIVE.getRegistry(PIGMENT_REGISTRY_NAME);
+            PIGMENT_REGISTRY = (Registry<Pigment>) BuiltInRegistries.REGISTRY.get(PIGMENT_REGISTRY_NAME.location());
         }
         return PIGMENT_REGISTRY;
     }
@@ -200,9 +200,9 @@ public class MekanismAPI {
      * have been fired. This method is marked as {@link NotNull} just because except for when this is being called super early it is never {@code null}.
      * @see #SLURRY_REGISTRY_NAME
      */
-    public static IForgeRegistry<Slurry> slurryRegistry() {
+    public static Registry<Slurry> slurryRegistry() {
         if (SLURRY_REGISTRY == null) {
-            SLURRY_REGISTRY = RegistryManager.ACTIVE.getRegistry(SLURRY_REGISTRY_NAME);
+            SLURRY_REGISTRY = (Registry<Slurry>)  BuiltInRegistries.REGISTRY.get(SLURRY_REGISTRY_NAME.location());
         }
         return SLURRY_REGISTRY;
     }
@@ -217,9 +217,9 @@ public class MekanismAPI {
      * called super early it is never {@code null}.
      * @see #MODULE_REGISTRY_NAME
      */
-    public static IForgeRegistry<ModuleData<?>> moduleRegistry() {
+    public static Registry<ModuleData<?>> moduleRegistry() {
         if (MODULE_REGISTRY == null) {
-            MODULE_REGISTRY = RegistryManager.ACTIVE.getRegistry(MODULE_REGISTRY_NAME);
+            MODULE_REGISTRY = (Registry<ModuleData<?>>) BuiltInRegistries.REGISTRY.get(MODULE_REGISTRY_NAME.location());
         }
         return MODULE_REGISTRY;
     }
@@ -235,9 +235,9 @@ public class MekanismAPI {
      * @see #ROBIT_SKIN_SERIALIZER_REGISTRY_NAME
      * @since 10.4.0
      */
-    public static IForgeRegistry<Codec<? extends RobitSkin>> robitSkinSerializerRegistry() {
+    public static Registry<Codec<? extends RobitSkin>> robitSkinSerializerRegistry() {
         if (ROBIT_SKIN_SERIALIZER_REGISTRY == null) {
-            ROBIT_SKIN_SERIALIZER_REGISTRY = RegistryManager.ACTIVE.getRegistry(ROBIT_SKIN_SERIALIZER_REGISTRY_NAME);
+            ROBIT_SKIN_SERIALIZER_REGISTRY = (Registry<Codec<? extends RobitSkin>>) BuiltInRegistries.REGISTRY.get(ROBIT_SKIN_SERIALIZER_REGISTRY_NAME.location());
         }
         return ROBIT_SKIN_SERIALIZER_REGISTRY;
     }

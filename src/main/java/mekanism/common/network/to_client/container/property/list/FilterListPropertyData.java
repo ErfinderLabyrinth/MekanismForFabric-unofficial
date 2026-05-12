@@ -1,10 +1,11 @@
 package mekanism.common.network.to_client.container.property.list;
 
-import java.util.List;
 import mekanism.common.content.filter.BaseFilter;
 import mekanism.common.content.filter.IFilter;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class FilterListPropertyData<FILTER extends IFilter<?>> extends ListPropertyData<FILTER> {
 

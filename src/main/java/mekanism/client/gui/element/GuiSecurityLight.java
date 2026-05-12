@@ -1,12 +1,13 @@
 package mekanism.client.gui.element;
 
-import java.util.function.IntSupplier;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.IntSupplier;
 
 public class GuiSecurityLight extends GuiTexturedElement {
 

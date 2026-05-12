@@ -1,7 +1,5 @@
 package mekanism.api.recipes.cache;
 
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.merged.BoxedChemicalStack;
 import mekanism.api.recipes.ChemicalCrystallizerRecipe;
@@ -9,6 +7,9 @@ import mekanism.api.recipes.inputs.BoxedChemicalInputHandler;
 import mekanism.api.recipes.outputs.IOutputHandler;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 /**
  * Base class to help implement handling of crystallizing recipes.

@@ -1,6 +1,5 @@
 package mekanism.client.sound;
 
-import java.lang.ref.WeakReference;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.registration.impl.SoundEventRegistryObject;
 import net.minecraft.client.Minecraft;
@@ -13,6 +12,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.ref.WeakReference;
 
 public abstract class PlayerSound extends AbstractTickableSoundInstance {
 
@@ -125,7 +126,7 @@ public abstract class PlayerSound extends AbstractTickableSoundInstance {
 
     @Override
     public float getVolume() {
-        return super.getVolume() * MekanismConfig.client.baseSoundVolume.get();
+        return super.getVolume() * MekanismConfig.client.baseSoundVolume;
     }
 
     @Override

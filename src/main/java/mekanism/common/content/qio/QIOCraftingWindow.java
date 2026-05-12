@@ -1,19 +1,13 @@
 package mekanism.common.content.qio;
 
-import com.blamejared.recipestages.RecipeStagesUtil;
-import com.blamejared.recipestages.recipes.IStagedRecipe;
+//import com.blamejared.recipestages.RecipeStagesUtil;
+//import com.blamejared.recipestages.recipes.IStagedRecipe;
+
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.IntFunction;
-import java.util.function.UnaryOperator;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import mekanism.api.BigItemStack;
 import mekanism.api.IContentsListener;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.Mekanism;
@@ -29,11 +23,14 @@ import mekanism.common.inventory.slot.CraftingWindowOutputInventorySlot;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -43,15 +40,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.crafting.IShapedRecipe;
-import net.minecraftforge.common.util.RecipeMatcher;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.IntFunction;
+import java.util.function.UnaryOperator;
 
 public class QIOCraftingWindow implements IContentsListener {
 
@@ -110,7 +111,7 @@ public class QIOCraftingWindow implements IContentsListener {
      * Checks if the stack is equivalent to the current output.
      */
     public boolean isOutput(@NotNull ItemStack stack) {
-        return ItemHandlerHelper.canItemStacksStack(outputSlot.getStack(), stack);
+        return ItemEntity.areMergable(outputSlot.getStack(), stack);
     }
 
     @Override
@@ -181,10 +182,11 @@ public class QIOCraftingWindow implements IContentsListener {
 
     private ItemStack assembleRecipe(CraftingRecipe recipe, RegistryAccess registryAccess) {
         if (Mekanism.hooks.RecipeStagesLoaded) {
-            if (recipe instanceof IStagedRecipe stagedRecipe) {
-                //Force assemble it as we handle validating if specific players can see/grab the output ourselves
-                return stagedRecipe.forceAssemble(craftingInventory, registryAccess);
-            }
+            //TODO add support
+//            if (recipe instanceof IStagedRecipe stagedRecipe) {
+//                //Force assemble it as we handle validating if specific players can see/grab the output ourselves
+//                return stagedRecipe.forceAssemble(craftingInventory, registryAccess);
+//            }
         }
         return recipe.assemble(craftingInventory, registryAccess);
     }
@@ -198,9 +200,10 @@ public class QIOCraftingWindow implements IContentsListener {
         }
         if (Mekanism.hooks.RecipeStagesLoaded) {
             //If recipe stages is loaded check if the player has access to the recipe
-            if (!RecipeStagesUtil.hasStageForRecipe(lastRecipe, player)) {
-                return false;
-            }
+            //TODO add support
+//            if (!RecipeStagesUtil.hasStageForRecipe(lastRecipe, player)) {
+//                return false;
+//            }
         }
         //If the recipe is dynamic, doLimitedCrafting is disabled, or the recipe is unlocked
         // allow viewing the recipe
@@ -228,11 +231,11 @@ public class QIOCraftingWindow implements IContentsListener {
 
     private void craftingStarted(@NotNull Player player) {
         isCrafting = true;
-        ForgeHooks.setCraftingPlayer(player);
+//        ForgeHooks.setCraftingPlayer(player);
     }
 
     private void craftingFinished(@NotNull Level world) {
-        ForgeHooks.setCraftingPlayer(null);
+//        ForgeHooks.setCraftingPlayer(null);
         isCrafting = false;
         if (changedWhileCrafting) {
             //If our inputs changed while crafting then update the output slot
@@ -279,7 +282,7 @@ public class QIOCraftingWindow implements IContentsListener {
     }
 
     private void useInput(IInventorySlot inputSlot) {
-        MekanismUtils.logMismatchedStackSize(inputSlot.shrinkStack(1, Action.EXECUTE), 1);
+        MekanismUtils.logMismatchedStackSize(inputSlot.shrinkStack(1), 1);
     }
 
     /**
@@ -308,10 +311,18 @@ public class QIOCraftingWindow implements IContentsListener {
     private void emptyTo(UnaryOperator<ItemStack> inserter) {
         for (CraftingWindowInventorySlot inputSlot : inputSlots) {
             if (!inputSlot.isEmpty()) {
-                ItemStack toTransfer = inputSlot.extractItem(inputSlot.getCount(), Action.SIMULATE, AutomationType.INTERNAL);
+                ItemVariant variant = inputSlot.getResource();
+                long extracted;
+                try(Transaction t=Transaction.openOuter()) {
+                    extracted = inputSlot.extract(variant, inputSlot.getCount(), t);
+                }
+                ItemStack toTransfer = variant.toStack((int)extracted);
                 if (!toTransfer.isEmpty()) {
                     ItemStack remainder = inserter.apply(toTransfer);
-                    inputSlot.extractItem(toTransfer.getCount() - remainder.getCount(), Action.EXECUTE, AutomationType.INTERNAL);
+                    try(Transaction t=Transaction.openOuter()) {
+                        inputSlot.extract(variant, toTransfer.getCount() - remainder.getCount(), t);
+                        t.commit();
+                    }
                 }
             }
         }
@@ -389,8 +400,11 @@ public class QIOCraftingWindow implements IContentsListener {
             // the secondary checks afterwards while working on actually inserting into it
             // The reason this is needed is that if we only have space for two more items, but our crafting recipe will
             // produce three more, then we won't have room for that singular extra item and need to exit
-            ItemStack simulatedRemainder = MekanismContainer.insertItemCheckAll(hotBarSlots, result, windowData, Action.SIMULATE);
-            simulatedRemainder = MekanismContainer.insertItemCheckAll(mainInventorySlots, simulatedRemainder, windowData, Action.SIMULATE);
+            ItemStack simulatedRemainder;
+            try(Transaction t=Transaction.openOuter()) {
+                simulatedRemainder = MekanismContainer.insertItemCheckAll(hotBarSlots, result, windowData, t);
+                simulatedRemainder = MekanismContainer.insertItemCheckAll(mainInventorySlots, simulatedRemainder, windowData, t);
+            }
             if (!simulatedRemainder.isEmpty()) {
                 //Note: If we aren't able to fit all the items we are crafting into the player's inventory we exit
                 // instead of attempting to insert the overflow into the QIO as it is easy enough if the player is trying
@@ -427,7 +441,7 @@ public class QIOCraftingWindow implements IContentsListener {
                     } else {
                         //Otherwise, try and remove the stack from the QIO frequency
                         ItemStack current = inputSlot.getStack();
-                        ItemStack removed = frequency.removeItem(current, 1);
+                        BigItemStack removed = frequency.removeItem(current, 1);
                         if (removed.isEmpty()) {
                             //If we were not able to remove any from the frequency, remove it from the crafting grid
                             useInput(inputSlot);
@@ -513,7 +527,7 @@ public class QIOCraftingWindow implements IContentsListener {
                 } else {
                     //Otherwise, try and remove the stack from the QIO frequency
                     ItemStack current = inputSlot.getStack();
-                    ItemStack removed = frequency.removeItem(current, 1);
+                    BigItemStack removed = frequency.removeItem(current, 1);
                     if (removed.isEmpty()) {
                         //If we were not able to remove any from the frequency, remove it from the crafting grid
                         useInput(inputSlot);
@@ -545,7 +559,10 @@ public class QIOCraftingWindow implements IContentsListener {
         int toInsert = remainder.getCount();
         //Try inserting the item back into the slot it came from, this should only be able to actually insert it if it
         // is still valid for the recipe and the rest of the stack has been used completely
-        remainder = slot.insertItem(remainder, Action.EXECUTE, AutomationType.INTERNAL);
+        try(Transaction t=Transaction.openOuter()) {
+            remainder = remainder.copyWithCount(remainder.getCount() - (int)slot.insert(ItemVariant.of(remainder), remainder.getCount(), t));
+            t.commit();
+        }
         if (!remainder.isEmpty()) {
             if (copyIfNeeded && toInsert == remainder.getCount()) {
                 //If we plan on reusing the same stack of the remainder, and we didn't insert part of it into the slot,
@@ -616,7 +633,10 @@ public class QIOCraftingWindow implements IContentsListener {
                     // or if the slot doesn't "exist" for the current window configuration
                     continue;
                 }
-                stack = slot.insertItem(stack, Action.EXECUTE);
+                try(Transaction t=Transaction.openOuter()) {
+                    stack = stack.copyWithCount(stack.getCount() - (int)slot.insert(ItemVariant.of(stack), stack.getCount(), t));
+                    t.commit();
+                }
                 if (stack.isEmpty()) {
                     //We finished inserting, update where we last targeted
                     wasHotBar = isHotBar;
@@ -684,7 +704,10 @@ public class QIOCraftingWindow implements IContentsListener {
         @Override
         public ItemStack removeItem(int index, int count) {
             if (index >= 0 && index < getContainerSize()) {
-                return getInputSlot(index).extractItem(count, Action.EXECUTE, AutomationType.INTERNAL);
+                ItemVariant resource = getInputSlot(index).getResource();
+                try(Transaction t=Transaction.openOuter()) {
+                    return resource.toStack((int)getInputSlot(index).extract(resource, count, t));
+                }
             }
             return ItemStack.EMPTY;
         }
@@ -824,7 +847,7 @@ public class QIOCraftingWindow implements IContentsListener {
                     }
                     //If the ingredient is not vanilla, we start by checking against the exact stack it has stored as an item
                     // Note: We can use a raw hashed item here as we don't store it anywhere, and just use it as a lookup
-                    if (!usedIngredient.isVanilla() && testEquivalentItem(world, frequency, slot, index, usedIngredient, HashedItem.raw(item))) {
+                    if (!(usedIngredient.getClass() == Ingredient.class) && testEquivalentItem(world, frequency, slot, index, usedIngredient, HashedItem.raw(item))) {
                         //Match found, we can exit
                         return;
                     }
@@ -845,7 +868,7 @@ public class QIOCraftingWindow implements IContentsListener {
         }
 
         private boolean testEquivalentItem(Level world, @NotNull QIOFrequency frequency, CraftingWindowInventorySlot slot, int index, Ingredient usedIngredient,
-              HashedItem replacementType) {
+                                           HashedItem replacementType) {
             if (!frequency.isStoring(replacementType) || !usedIngredient.test(replacementType.getInternalStack())) {
                 //Our frequency doesn't actually have the item stored we are trying to use or the type we are trying
                 // doesn't actually match the ingredient we have for that slot
@@ -861,13 +884,22 @@ public class QIOCraftingWindow implements IContentsListener {
                 // Then we test if our replacement will work properly in our recipe, and if it does, and we are able to
                 // insert it into the slot (which we should be able to), then we try removing the found item from the
                 // frequency and adding it to the slot
-                if (slot.insertItem(replacement, Action.SIMULATE, AutomationType.INTERNAL).isEmpty()) {
-                    ItemStack removed = frequency.removeByType(replacementType, 1);
+                boolean canFullyInsert;
+                try(Transaction t=Transaction.openOuter()) {
+                    canFullyInsert = slot.insert(ItemVariant.of(replacement), replacement.getCount(), t) == replacement.getCount();
+                }
+                if (canFullyInsert) {
+                    BigItemStack removed = frequency.removeByType(replacementType, 1);
                     if (!removed.isEmpty()) {
-                        ItemStack stack = slot.insertItem(removed, Action.EXECUTE, AutomationType.INTERNAL);
-                        if (!stack.isEmpty()) {
+                        //TODO switch to storage insert
+                        long amountInserted;
+                        try(Transaction t=Transaction.openOuter()) {
+                            amountInserted = slot.insert(removed.getResource(), removed.getAmount(), t);
+                            t.commit();
+                        }
+                        if (amountInserted != removed.getAmount()) {
                             //Note: This should never happen as we pre-validate attempting to insert, but in case it does, log it
-                            Mekanism.logger.error("Failed to insert item ({} with NBT: {}) into crafting window: {}.", removed.getItem(), removed.getTag(),
+                            Mekanism.logger.error("Failed to insert item ({} with NBT: {}) into crafting window: {}.", removed.getResource().getItem(), removed.getResource().getNbt(),
                                   windowIndex);
                         }
                         //TODO - 1.18: Debate potentially briefly highlighting the slot to make it more evident to the player
@@ -910,7 +942,7 @@ public class QIOCraftingWindow implements IContentsListener {
                     }
                     return ItemStack.EMPTY;
                 };
-                if (lastRecipe instanceof IShapedRecipe<?> shapedRecipe) {
+                if (lastRecipe instanceof ShapedRecipe shapedRecipe) {
                     //It is a shaped recipe, make use of this information to attempt to find the proper match
                     mapShapedRecipe(shapedRecipe, ingredients, itemGetter);
                 } else {
@@ -919,9 +951,9 @@ public class QIOCraftingWindow implements IContentsListener {
             }
         }
 
-        private void mapShapedRecipe(IShapedRecipe<?> shapedRecipe, NonNullList<Ingredient> ingredients, IntFunction<ItemStack> itemGetter) {
-            int recipeWidth = shapedRecipe.getRecipeWidth();
-            int recipeHeight = shapedRecipe.getRecipeHeight();
+        private void mapShapedRecipe(ShapedRecipe shapedRecipe, NonNullList<Ingredient> ingredients, IntFunction<ItemStack> itemGetter) {
+            int recipeWidth = shapedRecipe.getWidth();
+            int recipeHeight = shapedRecipe.getHeight();
             for (int columnStart = 0; columnStart <= 3 - recipeWidth; columnStart++) {
                 for (int rowStart = 0; rowStart <= 3 - recipeHeight; rowStart++) {
                     //Note: Even though some shaped recipe implementations might not support a mirrored recipe as a match
@@ -983,7 +1015,7 @@ public class QIOCraftingWindow implements IContentsListener {
                     inputs.add(stack);
                 }
             }
-            int[] matches = RecipeMatcher.findMatches(inputs, ingredients);
+            int[] matches = findMatches(inputs, ingredients);
             if (matches != null) {
                 for (int ingredientIndex = 0; ingredientIndex < matches.length; ingredientIndex++) {
                     int actualSlot = actualLookup.getOrDefault(matches[ingredientIndex], -1);
@@ -998,5 +1030,39 @@ public class QIOCraftingWindow implements IContentsListener {
                 invalid = true;
             }
         }
+    }
+
+    private static int[] findMatches(List<ItemStack> inputs, List<Ingredient> ingredients) {
+        if(ingredients.size() != inputs.size()) {
+            return null;
+        }
+
+        int[] res = new int[ingredients.size()];
+        Arrays.fill(res, -1);
+
+        boolean[] used = new boolean[inputs.size()];
+
+        for (int i = 0; i < ingredients.size(); i++) {
+            for (int j = 0; j < inputs.size(); j++) {
+                if (!used[j] && ingredients.get(i).test(inputs.get(j))) {
+                    res[i] = j;
+                    used[j] = true;
+                }
+            }
+        }
+
+        for (int i = 0; i < res.length; i++) {
+            if (res[i] == -1) {
+                return null;
+            }
+        }
+
+        for (int i = 0; i < used.length; i++) {
+            if (!used[i]) {
+                return null;
+            }
+        }
+
+        return res;
     }
 }

@@ -7,11 +7,14 @@ import mekanism.api.Chunk3D;
 import mekanism.api.Coord4D;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.gas.IGasTank;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
@@ -107,14 +110,14 @@ public interface IRadiationManager {
      *
      * @param chunk Chunk to clear radiation sources of.
      */
-    void removeRadiationSources(Chunk3D chunk);
+    void removeRadiationSources(Chunk3D chunk, MinecraftServer server);
 
     /**
      * Removes the radiation source at the given location.
      *
      * @param coord Location.
      */
-    void removeRadiationSource(Coord4D coord);
+    void removeRadiationSource(Coord4D coord, MinecraftServer server);
 
     /**
      * Applies a radiation source (Sv) of the given magnitude to a given location.
@@ -122,7 +125,7 @@ public interface IRadiationManager {
      * @param coord     Location to release radiation.
      * @param magnitude Amount of radiation to apply (Sv).
      */
-    void radiate(Coord4D coord, double magnitude);
+    void radiate(Coord4D coord, double magnitude, MinecraftServer server);
 
     /**
      * Applies an additional magnitude of radiation (Sv) to the given entity after taking into account the radiation resistance provided to the entity by its armor.
@@ -144,7 +147,7 @@ public interface IRadiationManager {
      * @throws RuntimeException if {@code clearRadioactive = true} and the passed in handler does not expect to have
      *                          {@link IGasHandler#setChemicalInTank(int, ChemicalStack)} called wth an empty stack.
      */
-    void dumpRadiation(Coord4D coord, IGasHandler gasHandler, boolean clearRadioactive);
+//    void dumpRadiation(Coord4D coord, IGasHandler gasHandler, boolean clearRadioactive, MinecraftServer server);
 
     /**
      * Helper to "dump" any radioactive gases stored in the given gas tanks.
@@ -153,7 +156,7 @@ public interface IRadiationManager {
      * @param gasTanks         Tanks to process.
      * @param clearRadioactive {@code true} to clear any gas tanks that have radioactive substances.
      */
-    void dumpRadiation(Coord4D coord, List<IGasTank> gasTanks, boolean clearRadioactive);
+    void dumpRadiation(Coord4D coord, Storage<Gas> gasTanks, boolean clearRadioactive, MinecraftServer server);
 
     /**
      * Checks if the given {@link GasStack} is radioactive and if it is dumps a proportionate amount of radiation at the given location.
@@ -165,5 +168,5 @@ public interface IRadiationManager {
      *
      * @apiNote If radiation is disabled this may still return {@code true}.
      */
-    boolean dumpRadiation(Coord4D coord, GasStack stack);
+    boolean dumpRadiation(Coord4D coord, GasStack stack, MinecraftServer server);
 }

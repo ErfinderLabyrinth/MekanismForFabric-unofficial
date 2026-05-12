@@ -1,9 +1,10 @@
 package mekanism.common.lib.effect;
 
-import java.util.Random;
 import mekanism.common.lib.Color;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Random;
 
 public class CustomEffect {
 

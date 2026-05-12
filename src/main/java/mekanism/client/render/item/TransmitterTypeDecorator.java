@@ -8,24 +8,15 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IItemDecorator;
-import net.minecraftforge.client.event.RegisterItemDecorationsEvent;
 
-public class TransmitterTypeDecorator implements IItemDecorator {
-
-    public static void registerDecorators(RegisterItemDecorationsEvent event, IBlockProvider... blocks) {
-        for (IBlockProvider block : blocks) {
-            event.register(block, new TransmitterTypeDecorator(block));
-        }
-    }
+public class TransmitterTypeDecorator {
 
     private final ResourceLocation texture;
 
-    private TransmitterTypeDecorator(IBlockProvider block) {
+    public TransmitterTypeDecorator(IBlockProvider block) {
         this.texture = MekanismUtils.getResource(ResourceType.GUI_ICONS, block.getRegistryName().getPath() + ".png");
     }
 
-    @Override
     public boolean render(GuiGraphics guiGraphics, Font font, ItemStack stack, int xOffset, int yOffset) {
         if (stack.isEmpty()) {
             return false;

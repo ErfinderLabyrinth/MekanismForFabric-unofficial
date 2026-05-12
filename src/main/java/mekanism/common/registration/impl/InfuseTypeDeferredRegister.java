@@ -1,6 +1,5 @@
 package mekanism.common.registration.impl;
 
-import java.util.function.Supplier;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfuseTypeBuilder;
@@ -8,10 +7,13 @@ import mekanism.common.registration.WrappedDeferredRegister;
 import mekanism.common.util.ChemicalUtil;
 import net.minecraft.resources.ResourceLocation;
 
-public class InfuseTypeDeferredRegister extends WrappedDeferredRegister<InfuseType> {
+import java.util.function.Supplier;
 
+public class InfuseTypeDeferredRegister extends WrappedDeferredRegister<InfuseType> {
+    String modid;
     public InfuseTypeDeferredRegister(String modid) {
-        super(modid, MekanismAPI.INFUSE_TYPE_REGISTRY_NAME);
+        super(MekanismAPI.INFUSE_TYPE_REGISTRY_NAME);
+        this.modid = modid;
     }
 
     public InfuseTypeRegistryObject<InfuseType> register(String name, int tint) {
@@ -22,7 +24,7 @@ public class InfuseTypeDeferredRegister extends WrappedDeferredRegister<InfuseTy
         return register(name, () -> ChemicalUtil.infuseType(InfuseTypeBuilder.builder(texture), barColor));
     }
 
-    public <INFUSE_TYPE extends InfuseType> InfuseTypeRegistryObject<INFUSE_TYPE> register(String name, Supplier<? extends INFUSE_TYPE> sup) {
-        return register(name, sup, InfuseTypeRegistryObject::new);
+    public <INFUSE_TYPE extends InfuseType> InfuseTypeRegistryObject<INFUSE_TYPE> register(String name, Supplier<INFUSE_TYPE> sup) {
+        return register(new ResourceLocation(modid, name), sup, InfuseTypeRegistryObject::new);
     }
 }

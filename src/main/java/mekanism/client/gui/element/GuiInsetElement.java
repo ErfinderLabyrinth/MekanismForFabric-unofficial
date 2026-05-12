@@ -22,7 +22,7 @@ public abstract class GuiInsetElement<DATA_SOURCE> extends GuiSideHolder {
         this.innerHeight = innerSize;
         //TODO: decide what to do if this doesn't divide nicely
         this.border = (width - innerWidth) / 2;
-        this.clickSound = SoundEvents.UI_BUTTON_CLICK;
+        this.clickSound = SoundEvents.UI_BUTTON_CLICK::value;
         active = true;
     }
 

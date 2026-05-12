@@ -1,14 +1,15 @@
 package mekanism.common.capabilities.energy;
 
-import java.util.Objects;
-import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.math.FloatingLong;
-import mekanism.api.math.FloatingLongSupplier;
 import mekanism.common.tier.EnergyCubeTier;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.LongSupplier;
 
 @NothingNullByDefault
 public class EnergyCubeEnergyContainer extends BasicEnergyContainer {
@@ -19,7 +20,7 @@ public class EnergyCubeEnergyContainer extends BasicEnergyContainer {
     }
 
     private final boolean isCreative;
-    private final FloatingLongSupplier rate;
+    private final LongSupplier rate;
 
     private EnergyCubeEnergyContainer(EnergyCubeTier tier, @Nullable IContentsListener listener) {
         super(tier.getMaxEnergy(), alwaysTrue, alwaysTrue, listener);
@@ -28,19 +29,22 @@ public class EnergyCubeEnergyContainer extends BasicEnergyContainer {
     }
 
     @Override
-    protected FloatingLong getRate(@Nullable AutomationType automationType) {
+    protected long getRate(@Nullable AutomationType automationType) {
         //Only limit the internal rate to change the speed at which this can be filled from an item
-        return automationType == AutomationType.INTERNAL ? rate.get() : super.getRate(automationType);
+        return automationType == AutomationType.INTERNAL ? rate.getAsLong() : super.getRate(automationType);
     }
 
     @Override
-    public FloatingLong insert(FloatingLong amount, Action action, AutomationType automationType) {
-        //Note: Unlike other creative items, the creative energy cube does not allow changing it to always full
-        return super.insert(amount, action.combine(!isCreative), automationType);
+    public long insert(long amount, TransactionContext t) {
+        try(Transaction t2=Transaction.openOuter()) {
+            return super.insert(amount, t2);
+        }
     }
 
     @Override
-    public FloatingLong extract(FloatingLong amount, Action action, AutomationType automationType) {
-        return super.extract(amount, action.combine(!isCreative), automationType);
+    public long extract(long amount, TransactionContext t) {
+        try(Transaction t2=Transaction.openOuter()) {
+            return super.extract(amount, t2);
+        }
     }
 }

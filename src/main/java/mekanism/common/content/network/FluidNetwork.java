@@ -1,11 +1,6 @@
 package mekanism.common.content.network;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import mekanism.api.Action;
+import mekanism.api.FluidStack;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.fluid.IMekanismFluidHandler;
 import mekanism.api.math.MathUtils;
@@ -20,22 +15,23 @@ import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.FluidUtils;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNetwork, FluidStack, MechanicalPipe> implements IMekanismFluidHandler {
+import java.util.*;
+
+public class FluidNetwork extends DynamicBufferedNetwork<Storage<FluidVariant>, FluidNetwork, FluidStack, MechanicalPipe> implements IMekanismFluidHandler {
 
     private final List<IExtendedFluidTank> fluidTanks;
     public final VariableCapacityFluidTank fluidTank;
     @NotNull
     public FluidStack lastFluid = FluidStack.EMPTY;
-    private int prevTransferAmount;
+    private long prevTransferAmount;
 
     //TODO: Make fluid storage support storing as longs?
     private int intCapacity;
@@ -54,7 +50,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
     @Override
     protected void forceScaleUpdate() {
         if (!fluidTank.isEmpty() && fluidTank.getCapacity() > 0) {
-            currentScale = Math.min(1, (float) fluidTank.getFluidAmount() / fluidTank.getCapacity());
+            currentScale = Math.min(1, (float) fluidTank.getAmount() / fluidTank.getCapacity());
         } else {
             currentScale = 0;
         }
@@ -78,8 +74,8 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
                 if (fluidTank.isEmpty()) {
                     fluidTank.setStack(net.getBuffer());
                 } else if (fluidTank.isFluidEqual(net.fluidTank.getFluid())) {
-                    int amount = net.fluidTank.getFluidAmount();
-                    MekanismUtils.logMismatchedStackSize(fluidTank.growStack(amount, Action.EXECUTE), amount);
+                    long amount = net.fluidTank.getAmount();
+                    MekanismUtils.logMismatchedStackSize(fluidTank.growStack(amount), amount);
                 } else {
                     Mekanism.logger.error("Incompatible fluid networks merged.");
                 }
@@ -106,8 +102,8 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
             if (fluidTank.isEmpty()) {
                 fluidTank.setStack(fluid.copy());
             } else if (fluidTank.isFluidEqual(fluid)) {
-                int amount = fluid.getAmount();
-                MekanismUtils.logMismatchedStackSize(fluidTank.growStack(amount, Action.EXECUTE), amount);
+                long amount = fluid.amount();
+                MekanismUtils.logMismatchedStackSize(fluidTank.growStack(amount), amount);
             }
         }
     }
@@ -116,8 +112,8 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
     public void clampBuffer() {
         if (!fluidTank.isEmpty()) {
             int capacity = getCapacityAsInt();
-            if (fluidTank.getFluidAmount() > capacity) {
-                MekanismUtils.logMismatchedStackSize(fluidTank.setStackSize(capacity, Action.EXECUTE), capacity);
+            if (fluidTank.getAmount() > capacity) {
+                MekanismUtils.logMismatchedStackSize(fluidTank.setStackSize(capacity), capacity);
             }
         }
     }
@@ -144,44 +140,44 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
         if (!isEmpty()) {
             FluidStack fluidType = fluidTank.getFluid();
             FluidTransmitterSaveTarget saveTarget = new FluidTransmitterSaveTarget(fluidType, transmitters);
-            EmitUtils.sendToAcceptors(saveTarget, fluidType.getAmount(), fluidType);
+            EmitUtils.sendToAcceptors(saveTarget, fluidType.amount(), fluidType);
             saveTarget.saveShare();
         }
     }
 
-    private int tickEmit(@NotNull FluidStack fluidToSend) {
-        Collection<Map<Direction, LazyOptional<IFluidHandler>>> acceptorValues = acceptorCache.getAcceptorValues();
+    private long tickEmit(@NotNull FluidStack fluidToSend) {
+        Collection<Map<Direction, Optional<Storage<FluidVariant>>>> acceptorValues = acceptorCache.getAcceptorValues();
         FluidHandlerTarget target = new FluidHandlerTarget(fluidToSend, acceptorValues.size() * 2);
-        for (Map<Direction, LazyOptional<IFluidHandler>> acceptors : acceptorValues) {
-            for (LazyOptional<IFluidHandler> lazyAcceptor : acceptors.values()) {
-                lazyAcceptor.ifPresent(acceptor -> {
+        for (Map<Direction, Optional<Storage<FluidVariant>>> acceptors : acceptorValues) {
+            for (Optional<Storage<FluidVariant>> acceptorOpt : acceptors.values()) {
+                acceptorOpt.ifPresent(acceptor -> {
                     if (FluidUtils.canFill(acceptor, fluidToSend)) {
                         target.addHandler(acceptor);
                     }
                 });
             }
         }
-        return EmitUtils.sendToAcceptors(target, fluidToSend.getAmount(), fluidToSend);
+        return EmitUtils.sendToAcceptors(target, fluidToSend.amount(), fluidToSend);
     }
 
     @Override
     public void onUpdate() {
         super.onUpdate();
         if (needsUpdate) {
-            MinecraftForge.EVENT_BUS.post(new FluidTransferEvent(this, lastFluid));
+            Mekanism.instance.onLiquidTransferred(new FluidTransferEvent(this, lastFluid));
             needsUpdate = false;
         }
         if (fluidTank.isEmpty()) {
             prevTransferAmount = 0;
         } else {
             prevTransferAmount = tickEmit(fluidTank.getFluid());
-            MekanismUtils.logMismatchedStackSize(fluidTank.shrinkStack(prevTransferAmount, Action.EXECUTE), prevTransferAmount);
+            MekanismUtils.logMismatchedStackSize(fluidTank.shrinkStack(prevTransferAmount), prevTransferAmount);
         }
     }
 
     @Override
     protected float computeContentScale() {
-        float scale = fluidTank.getFluidAmount() / (float) fluidTank.getCapacity();
+        float scale = fluidTank.getAmount() / (float) fluidTank.getCapacity();
         float ret = Math.max(currentScale, scale);
         if (prevTransferAmount > 0 && ret < 1) {
             ret = Math.min(1, ret + 0.02F);
@@ -191,7 +187,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
         return ret;
     }
 
-    public int getPrevTransferAmount() {
+    public long getPrevTransferAmount() {
         return prevTransferAmount;
     }
 
@@ -210,7 +206,7 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
         if (fluidTank.isEmpty()) {
             return MekanismLang.NONE.translate();
         }
-        return MekanismLang.NETWORK_MB_STORED.translate(fluidTank.getFluid(), fluidTank.getFluidAmount());
+        return MekanismLang.NETWORK_MB_STORED.translate(fluidTank.getFluid(), fluidTank.getAmount());
     }
 
     @Override
@@ -229,17 +225,16 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
         return MekanismLang.NETWORK_DESCRIPTION.translate(MekanismLang.FLUID_NETWORK, transmittersSize(), getAcceptorCount());
     }
 
-    @NotNull
     @Override
-    public List<IExtendedFluidTank> getFluidTanks(@Nullable Direction side) {
-        return fluidTanks;
+    public Storage<FluidVariant> getFluidTanks(@Nullable Direction side) {
+        return new CombinedStorage<>(fluidTanks);
     }
 
     @Override
     public void onContentsChanged() {
         markDirty();
         FluidStack type = fluidTank.getFluid();
-        if (!lastFluid.isFluidEqual(type)) {
+        if (!lastFluid.equals(type)) {
             //If the fluid type does not match update it, and mark that we need an update
             if (!type.isEmpty()) {
                 lastFluid = new FluidStack(type, 1);
@@ -256,6 +251,21 @@ public class FluidNetwork extends DynamicBufferedNetwork<IFluidHandler, FluidNet
             fluidTank.setStack(new FluidStack(fluid, 1));
         }
     }
+
+//    @Override
+//    public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+//        return 0;
+//    }
+//
+//    @Override
+//    public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+//        return 0;
+//    }
+//
+//    @Override
+//    public Iterator<StorageView<FluidVariant>> iterator() {
+//        return null;
+//    }
 
     public static class FluidTransferEvent extends TransferEvent<FluidNetwork> {
 

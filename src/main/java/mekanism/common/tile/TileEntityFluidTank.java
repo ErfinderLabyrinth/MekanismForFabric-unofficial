@@ -1,21 +1,17 @@
 package mekanism.common.tile;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Collections;
-import java.util.Map;
-import mekanism.api.Action;
+import mekanism.api.FluidStack;
 import mekanism.api.IConfigurable;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.block.attribute.Attribute;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.fluid.FluidTankFluidTank;
 import mekanism.common.capabilities.holder.fluid.FluidTankHelper;
 import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerFluidTankWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
@@ -47,9 +43,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.Map;
 
 public class TileEntityFluidTank extends TileEntityMekanism implements IConfigurable, IFluidContainerManager, ISustainedData {
 
@@ -62,7 +60,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
 
     public int valve;
     @NotNull
-    public FluidStack valveFluid = FluidStack.EMPTY;
+    public mekanism.api.FluidStack valveFluid = FluidStack.EMPTY;
 
     public float prevScale;
 
@@ -77,8 +75,6 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
 
     public TileEntityFluidTank(IBlockProvider blockProvider, BlockPos pos, BlockState state) {
         super(blockProvider, pos, state);
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIGURABLE, this));
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIG_CARD, this));
     }
 
     @Override
@@ -165,7 +161,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
 
     @Override
     public int getRedstoneLevel() {
-        return MekanismUtils.redstoneLevelFromContents(fluidTank.getFluidAmount(), fluidTank.getCapacity());
+        return MekanismUtils.redstoneLevelFromContents(fluidTank.getAmount(), fluidTank.getCapacity());
     }
 
     @Override
@@ -173,19 +169,19 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
         return type == SubstanceType.FLUID;
     }
 
-    @NotNull
-    @Override
-    public FluidStack insertFluid(int tank, @NotNull FluidStack stack, @Nullable Direction side, @NotNull Action action) {
-        FluidStack remainder = super.insertFluid(tank, stack, side, action);
-        if (side == Direction.UP && action.execute() && remainder.getAmount() < stack.getAmount() && !isRemote()) {
-            if (valve == 0) {
-                needsPacket = true;
-            }
-            valve = 20;
-            valveFluid = new FluidStack(stack, 1);
-        }
-        return remainder;
-    }
+//    @NotNull
+//    @Override
+//    public FluidStack insertFluid(int tank, @NotNull FluidStack stack, @Nullable Direction side, @NotNull Action action) {
+//        FluidStack remainder = super.insertFluid(tank, stack, side, action);
+//        if (side == Direction.UP && action.execute() && remainder.amount() < stack.amount() && !isRemote()) {
+//            if (valve == 0) {
+//                needsPacket = true;
+//            }
+//            valve = 20;
+//            valveFluid = new FluidStack(stack, 1);
+//        }
+//        return remainder;
+//    }
 
     @Override
     public InteractionResult onSneakRightClick(Player player) {
@@ -193,7 +189,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
             setActive(!getActive());
             Level world = getLevel();
             if (world != null) {
-                world.playSound(null, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), SoundEvents.UI_BUTTON_CLICK.get(), SoundSource.BLOCKS, 0.3F, 1);
+                world.playSound(null, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.3F, 1);
             }
         }
         return InteractionResult.SUCCESS;
@@ -261,8 +257,8 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void load(@NotNull CompoundTag tag) {
+        super.load(tag);
         NBTUtils.setFluidStackIfPresent(tag, NBTConstants.FLUID_STORED, fluid -> fluidTank.setStack(fluid));
         NBTUtils.setFluidStackIfPresent(tag, NBTConstants.VALVE, fluid -> valveFluid = fluid);
         NBTUtils.setFloatIfPresent(tag, NBTConstants.SCALE, scale -> {

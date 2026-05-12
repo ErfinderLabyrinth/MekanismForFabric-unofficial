@@ -1,12 +1,13 @@
 package mekanism.common.content.gear;
 
-import java.util.function.IntSupplier;
 import mekanism.api.gear.IHUDElement;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.Color;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.IntSupplier;
 
 public class HUDElement implements IHUDElement {
 
@@ -42,10 +43,10 @@ public class HUDElement implements IHUDElement {
     }
 
     public enum HUDColor {
-        REGULAR(MekanismConfig.client.hudColor),
+        REGULAR(() -> MekanismConfig.client.hudColor),
         FADED(() -> REGULAR.getColor().darken(0.5).rgb()),
-        WARNING(MekanismConfig.client.hudWarningColor),
-        DANGER(MekanismConfig.client.hudDangerColor);
+        WARNING(() -> MekanismConfig.client.hudWarningColor),
+        DANGER(() -> MekanismConfig.client.hudDangerColor);
 
         private final IntSupplier color;
 
@@ -54,7 +55,7 @@ public class HUDElement implements IHUDElement {
         }
 
         public Color getColor() {
-            return Color.rgb(color.getAsInt()).alpha(MekanismConfig.client.hudOpacity.get());
+            return Color.rgb(color.getAsInt()).alpha(MekanismConfig.client.hudOpacity);
         }
 
         public int getColorARGB() {

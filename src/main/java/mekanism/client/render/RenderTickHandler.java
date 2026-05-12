@@ -2,21 +2,12 @@ package mekanism.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.function.Consumer;
 import mekanism.api.RelativeSide;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.GuiRadialSelector;
 import mekanism.client.render.MekanismRenderer.Model3D;
 import mekanism.client.render.RenderResizableCuboid.FaceDisplay;
-import mekanism.client.render.armor.ISpecialGear;
+import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.client.render.armor.MekaSuitArmor;
 import mekanism.client.render.hud.RadiationOverlay;
 import mekanism.client.render.lib.Quad;
@@ -33,7 +24,6 @@ import mekanism.common.content.gear.IBlastingItem;
 import mekanism.common.item.ItemConfigurator;
 import mekanism.common.item.ItemConfigurator.ConfiguratorMode;
 import mekanism.common.item.gear.ItemFlamethrower;
-import mekanism.common.item.gear.ItemMekaSuitArmor;
 import mekanism.common.lib.effect.BoltEffect;
 import mekanism.common.lib.math.Pos3D;
 import mekanism.common.lib.transmitter.TransmissionType;
@@ -46,16 +36,14 @@ import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.WorldUtils;
 import mezz.jei.api.runtime.IRecipesGui;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.model.HumanoidModel.ArmPose;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -75,25 +63,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.event.RenderArmEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.TickEvent.RenderTickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 public class RenderTickHandler {
 
@@ -121,11 +99,11 @@ public class RenderTickHandler {
     }
 
     //Note: This listener is only registered if JEI is loaded
-    public static void guiOpening(ScreenEvent.Opening event) {
-        if (event.getCurrentScreen() instanceof GuiMekanism<?> screen) {
+    public static void guiOpening(Screen old, Screen newScreen) {
+        if (old instanceof GuiMekanism<?> screen) {
             //If JEI is loaded and our current screen is a mekanism gui,
             // check if the new screen is a JEI recipe screen
-            if (event.getNewScreen() instanceof IRecipesGui) {
+            if (newScreen instanceof IRecipesGui) {
                 //If it is mark on our current screen that we are switching to JEI
                 screen.switchingToJEI = true;
             }
@@ -136,102 +114,99 @@ public class RenderTickHandler {
         transparentRenderers.computeIfAbsent(renderType, r -> new ArrayList<>()).add(render);
     }
 
-    @SubscribeEvent
-    public void renderWorld(RenderLevelStageEvent event) {
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
-            //Only do matrix transforms and mess with buffers if we actually have any renders to render
-            renderStage(event, !transparentRenderers.isEmpty(), (camera, renderer, poseStack, renderTick, partialTick) -> {
-                ProfilerFiller profiler = minecraft.getProfiler();
-                profiler.push(ProfilerConstants.DELAYED);
-                record TransparentRenderInfo(RenderType renderType, List<LazyRender> renders, double closest) {
-                }
-                Consumer<TransparentRenderInfo> renderInfoConsumer = info -> {
-                    //Batch all renders for a single render type into a single buffer addition
-                    VertexConsumer buffer = renderer.getBuffer(info.renderType);
-                    for (LazyRender transparentRender : info.renders) {
-                        String profilerSection = transparentRender.getProfilerSection();
-                        if (profilerSection != null) {
-                            profiler.push(profilerSection);
-                        }
-                        //Note: We don't bother sorting renders in a specific render type as we assume the render type has sortOnUpload as true
-                        transparentRender.render(camera, buffer, poseStack, renderTick, partialTick, profiler);
-                        if (profilerSection != null) {
-                            profiler.pop();
-                        }
+    public void renderAfterTranslucentBlocks(Camera camera, PoseStack matrix, int ticks) {
+        //Only do matrix transforms and mess with buffers if we actually have any renders to render
+        renderStage(camera, matrix, !transparentRenderers.isEmpty(), (camera2, renderer, poseStack, renderTick, partialTick) -> {
+            ProfilerFiller profiler = minecraft.getProfiler();
+            profiler.push(ProfilerConstants.DELAYED);
+            record TransparentRenderInfo(RenderType renderType, List<LazyRender> renders, double closest) {
+            }
+            Consumer<TransparentRenderInfo> renderInfoConsumer = info -> {
+                //Batch all renders for a single render type into a single buffer addition
+                VertexConsumer buffer = renderer.getBuffer(info.renderType);
+                for (LazyRender transparentRender : info.renders) {
+                    String profilerSection = transparentRender.getProfilerSection();
+                    if (profilerSection != null) {
+                        profiler.push(profilerSection);
                     }
-                    renderer.endBatch(info.renderType);
-                };
-                if (transparentRenderers.size() == 1) {
-                    //If we only have one render type we don't need to bother calculating any distances
-                    for (Map.Entry<RenderType, List<LazyRender>> entry : transparentRenderers.entrySet()) {
-                        renderInfoConsumer.accept(new TransparentRenderInfo(entry.getKey(), entry.getValue(), 0));
+                    //Note: We don't bother sorting renders in a specific render type as we assume the render type has sortOnUpload as true
+                    transparentRender.render(camera2, buffer, poseStack, renderTick, partialTick, profiler);
+                    if (profilerSection != null) {
+                        profiler.pop();
                     }
-                } else {
-                    transparentRenderers.entrySet().stream()
-                          .map(entry -> {
-                              List<LazyRender> renders = entry.getValue();
-                              double closest = Double.MAX_VALUE;
-                              for (LazyRender render : renders) {
-                                  Vec3 renderPos = render.getCenterPos(partialTick);
-                                  if (renderPos != null) {
-                                      //Note: We can just use the distance sqr as we use it for both things, so they compare the same anyway
-                                      double distanceSqr = camera.getPosition().distanceToSqr(renderPos);
-                                      if (distanceSqr < closest) {
-                                          closest = distanceSqr;
-                                      }
-                                  }
-                              }
-                              //Note: we remap it in order to keep track of the closest distance so that we only have to calculate it once
-                              return new TransparentRenderInfo(entry.getKey(), renders, closest);
-                          })
-                          //Sort in the order of furthest to closest (reverse of by closest)
-                          .sorted(Comparator.comparingDouble(info -> -info.closest))
-                          .forEachOrdered(renderInfoConsumer);
                 }
-                transparentRenderers.clear();
-                profiler.pop();
-            });
-        } else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES && boltRenderer.hasBoltsToRender()) {
+                renderer.endBatch(info.renderType);
+            };
+            if (transparentRenderers.size() == 1) {
+                //If we only have one render type we don't need to bother calculating any distances
+                for (Map.Entry<RenderType, List<LazyRender>> entry : transparentRenderers.entrySet()) {
+                    renderInfoConsumer.accept(new TransparentRenderInfo(entry.getKey(), entry.getValue(), 0));
+                }
+            } else {
+                transparentRenderers.entrySet().stream()
+                        .map(entry -> {
+                            List<LazyRender> renders = entry.getValue();
+                            double closest = Double.MAX_VALUE;
+                            for (LazyRender render : renders) {
+                                Vec3 renderPos = render.getCenterPos(partialTick);
+                                if (renderPos != null) {
+                                    //Note: We can just use the distance sqr as we use it for both things, so they compare the same anyway
+                                    double distanceSqr = camera2.getPosition().distanceToSqr(renderPos);
+                                    if (distanceSqr < closest) {
+                                        closest = distanceSqr;
+                                    }
+                                }
+                            }
+                            //Note: we remap it in order to keep track of the closest distance so that we only have to calculate it once
+                            return new TransparentRenderInfo(entry.getKey(), renders, closest);
+                        })
+                        //Sort in the order of furthest to closest (reverse of by closest)
+                        .sorted(Comparator.comparingDouble(info -> -info.closest))
+                        .forEachOrdered(renderInfoConsumer);
+            }
+            transparentRenderers.clear();
+            profiler.pop();
+        }, ticks);
+    }
+
+    public void renderAfterParticles(Camera camera, PoseStack matrix, int ticks) {
+        if (boltRenderer.hasBoltsToRender()) {
             //Only do matrix transforms and mess with buffers if we actually have any bolts to render
-            renderStage(event, boltRenderer.hasBoltsToRender(), (camera, renderer, poseStack, renderTick, partialTick) -> {
+            renderStage(camera, matrix, boltRenderer.hasBoltsToRender(), (camera2, renderer, poseStack, renderTick, partialTick) -> {
                 boltRenderer.render(partialTick, poseStack, renderer);
                 renderer.endBatch(MekanismRenderType.MEK_LIGHTNING);
-            });
+            }, ticks);
         }
     }
 
-    private void renderStage(RenderLevelStageEvent event, boolean shouldRender, StageRenderer renderer) {
+    private void renderStage(Camera camera, PoseStack matrix, boolean shouldRender, StageRenderer renderer, int ticks) {
         if (shouldRender) {
-            Camera camera = event.getCamera();
-            PoseStack matrix = event.getPoseStack();
             matrix.pushPose();
             // here we translate based on the inverse position of the client viewing camera to get back to 0, 0, 0
             Vec3 camVec = camera.getPosition();
             matrix.translate(-camVec.x, -camVec.y, -camVec.z);
-            renderer.render(camera, minecraft.renderBuffers().bufferSource(), matrix, event.getRenderTick(), event.getPartialTick());
+            renderer.render(camera, minecraft.renderBuffers().bufferSource(), matrix, ticks, minecraft.getDeltaFrameTime());
             matrix.popPose();
         }
     }
 
-    @SubscribeEvent
-    public void renderCrosshair(RenderGuiOverlayEvent.Pre event) {
-        if (event.getOverlay() == VanillaGuiOverlay.CROSSHAIR.type() && minecraft.screen instanceof GuiRadialSelector screen && screen.shouldHideCrosshair()) {
+    public boolean renderCrosshair() {
+        if (minecraft.screen instanceof GuiRadialSelector screen && screen.shouldHideCrosshair()) {
             //Hide the crosshair if we have a radial menu open and are drawing the back button
-            event.setCanceled(true);
+            return true;
         }
+        return false;
     }
 
-    @SubscribeEvent
-    public void renderArm(RenderArmEvent event) {
-        AbstractClientPlayer player = event.getPlayer();
+    public boolean renderArm(AbstractClientPlayer player, HumanoidArm arm, PoseStack poseStack, MultiBufferSource multiBufferSource, int packetLight) {
         ItemStack chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
-        if (chestStack.getItem() instanceof ItemMekaSuitArmor armorItem) {
-            MekaSuitArmor armor = (MekaSuitArmor) ((ISpecialGear) IClientItemExtensions.of(armorItem)).getGearModel(ArmorItem.Type.CHESTPLATE);
+        if (chestStack.getItem() instanceof ISpecialGearGetter armorItem) {
+            MekaSuitArmor armor = (MekaSuitArmor) armorItem.getSpecialGear().getGearModel(ArmorItem.Type.CHESTPLATE);
             PlayerRenderer renderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
             PlayerModel<AbstractClientPlayer> model = renderer.getModel();
             model.setAllVisible(true);
             //Note: We just want it to act as empty even if there is a map as it looks a lot better
-            boolean rightHand = event.getArm() == HumanoidArm.RIGHT;
+            boolean rightHand = arm == HumanoidArm.RIGHT;
             if (rightHand) {
                 model.rightArmPose = ArmPose.EMPTY;
             } else {
@@ -241,94 +216,92 @@ public class RenderTickHandler {
             model.crouching = false;
             model.swimAmount = 0.0F;
             model.setupAnim(player, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-            armor.renderArm(model, event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight(), OverlayTexture.NO_OVERLAY, player, chestStack, rightHand);
-            event.setCanceled(true);
+            armor.renderArm(model, poseStack, multiBufferSource, packetLight, OverlayTexture.NO_OVERLAY, player, chestStack, rightHand);
+            return true;
         }
+        return false;
     }
 
-    @SubscribeEvent
-    public void tickEnd(RenderTickEvent event) {
-        if (event.phase == Phase.END) {
-            Level world;
-            Player player = minecraft.player;
-            //Note: We check that the game mode is not null as if it is that means the world is unloading, and we don't actually want to be rendering
-            // as our data may be out of date or invalid. For example configs could unload while it is still unloading
-            //noinspection ConstantValue
-            if (player != null && (world = player.level()) != null && !minecraft.isPaused() && minecraft.gameMode != null) {
-                for (Player p : world.players()) {
-                    //Check active jetpack and do animations
-                    if (Mekanism.playerState.isJetpackOn(p)) {
-                        Pos3D playerPos = new Pos3D(p).translate(0, p.getEyeHeight(), 0);
-                        Vec3 playerMotion = p.getDeltaMovement();
-                        float random = (world.random.nextFloat() - 0.5F) * 0.1F;
-                        //This positioning code is somewhat cursed, but it seems to be mostly working and entity pose code seems cursed in general
-                        float xRot;
-                        if (p.isCrouching()) {
-                            xRot = 20;
-                            playerPos = playerPos.translate(0, 0.125, 0);
+    public void tickEnd(WorldRenderContext context) {
+        Level world;
+        Player player = minecraft.player;
+        //Note: We check that the game mode is not null as if it is that means the world is unloading, and we don't actually want to be rendering
+        // as our data may be out of date or invalid. For example configs could unload while it is still unloading
+        //noinspection ConstantValue
+        if (player != null && (world = context.world()) != null && !minecraft.isPaused() && minecraft.gameMode != null) {
+            for (Player p : world.players()) {
+                //Check active jetpack and do animations
+                if (Mekanism.playerState.isJetpackOn(p)) {
+                    Pos3D playerPos = new Pos3D(p).translate(0, p.getEyeHeight(), 0);
+                    Vec3 playerMotion = p.getDeltaMovement();
+                    float random = (world.random.nextFloat() - 0.5F) * 0.1F;
+                    //This positioning code is somewhat cursed, but it seems to be mostly working and entity pose code seems cursed in general
+                    float xRot;
+                    if (p.isCrouching()) {
+                        xRot = 20;
+                        playerPos = playerPos.translate(0, 0.125, 0);
+                    } else {
+                        float f = p.getSwimAmount(context.tickDelta());
+                        if (p.isFallFlying()) {
+                            float f1 = (float) p.getFallFlyingTicks() + context.tickDelta();
+                            float f2 = Mth.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
+                            xRot = f2 * (-90.0F - p.getXRot());
                         } else {
-                            float f = p.getSwimAmount(event.renderTickTime);
-                            if (p.isFallFlying()) {
-                                float f1 = (float) p.getFallFlyingTicks() + event.renderTickTime;
-                                float f2 = Mth.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
-                                xRot = f2 * (-90.0F - p.getXRot());
-                            } else {
-                                float f3 = p.isInWater() ? -90.0F - p.getXRot() : -90.0F;
-                                xRot = Mth.lerp(f, 0.0F, f3);
-                            }
-                            xRot = -xRot;
-                            Pos3D eyeAdjustments;
-                            if (p.isFallFlying() && (p != player || !minecraft.options.getCameraType().isFirstPerson())) {
-                                eyeAdjustments = new Pos3D(0, p.getEyeHeight(Pose.STANDING), 0).xRot(xRot).yRot(p.yBodyRot);
-                            } else if (p.isVisuallySwimming()) {
-                                eyeAdjustments = new Pos3D(0, p.getEyeHeight(), 0).xRot(xRot).yRot(p.yBodyRot).translate(0, 0.5, 0);
-                            } else {
-                                eyeAdjustments = new Pos3D(0, p.getEyeHeight(), 0).xRot(xRot).yRot(p.yBodyRot);
-                            }
-                            playerPos = new Pos3D(p.getX() + eyeAdjustments.x, p.getY() + eyeAdjustments.y, p.getZ() + eyeAdjustments.z);
+                            float f3 = p.isInWater() ? -90.0F - p.getXRot() : -90.0F;
+                            xRot = Mth.lerp(f, 0.0F, f3);
                         }
-                        Pos3D vLeft = new Pos3D(-0.43, -0.55, -0.54).xRot(xRot).yRot(p.yBodyRot);
-                        renderJetpackSmoke(world, playerPos.translate(vLeft, playerMotion), vLeft.scale(0.2).translate(playerMotion, vLeft.scale(random)));
-                        Pos3D vRight = new Pos3D(0.43, -0.55, -0.54).xRot(xRot).yRot(p.yBodyRot);
-                        renderJetpackSmoke(world, playerPos.translate(vRight, playerMotion), vRight.scale(0.2).translate(playerMotion, vRight.scale(random)));
-                        Pos3D vCenter = new Pos3D((world.random.nextFloat() - 0.5) * 0.4, -0.86, -0.30).xRot(xRot).yRot(p.yBodyRot);
-                        renderJetpackSmoke(world, playerPos.translate(vCenter, playerMotion), vCenter.scale(0.2).translate(playerMotion));
+                        xRot = -xRot;
+                        Pos3D eyeAdjustments;
+                        if (p.isFallFlying() && (p != player || !minecraft.options.getCameraType().isFirstPerson())) {
+                            eyeAdjustments = new Pos3D(0, p.getEyeHeight(Pose.STANDING), 0).xRot(xRot).yRot(p.yBodyRot);
+                        } else if (p.isVisuallySwimming()) {
+                            eyeAdjustments = new Pos3D(0, p.getEyeHeight(), 0).xRot(xRot).yRot(p.yBodyRot).translate(0, 0.5, 0);
+                        } else {
+                            eyeAdjustments = new Pos3D(0, p.getEyeHeight(), 0).xRot(xRot).yRot(p.yBodyRot);
+                        }
+                        playerPos = new Pos3D(p.getX() + eyeAdjustments.x, p.getY() + eyeAdjustments.y, p.getZ() + eyeAdjustments.z);
                     }
+                    Pos3D vLeft = new Pos3D(-0.43, -0.55, -0.54).xRot(xRot).yRot(p.yBodyRot);
+                    renderJetpackSmoke(world, playerPos.translate(vLeft, playerMotion), vLeft.scale(0.2).translate(playerMotion, vLeft.scale(random)));
+                    Pos3D vRight = new Pos3D(0.43, -0.55, -0.54).xRot(xRot).yRot(p.yBodyRot);
+                    renderJetpackSmoke(world, playerPos.translate(vRight, playerMotion), vRight.scale(0.2).translate(playerMotion, vRight.scale(random)));
+                    Pos3D vCenter = new Pos3D((world.random.nextFloat() - 0.5) * 0.4, -0.86, -0.30).xRot(xRot).yRot(p.yBodyRot);
+                    renderJetpackSmoke(world, playerPos.translate(vCenter, playerMotion), vCenter.scale(0.2).translate(playerMotion));
+                }
 
-                    //check players and do animations for idle flame throwers & scuba
-                    if (world.getGameTime() % 4 == 0) {
-                        if (p.isInWater() && Mekanism.playerState.isScubaMaskOn(p)) {
-                            Pos3D vec = new Pos3D(0.4, 0.4, 0.4).multiply(p.getViewVector(1)).translate(0, -0.2, 0);
-                            Pos3D motion = vec.scale(0.2).translate(p.getDeltaMovement());
-                            Pos3D v = new Pos3D(p).translate(0, p.getEyeHeight(), 0).translate(vec);
-                            world.addParticle(MekanismParticleTypes.SCUBA_BUBBLE.get(), v.x, v.y, v.z, motion.x, motion.y + 0.2, motion.z);
-                        }
-                        if (!p.swinging && !Mekanism.playerState.isFlamethrowerOn(p)) {
-                            ItemStack currentItem = p.getMainHandItem();
-                            if (!currentItem.isEmpty() && currentItem.getItem() instanceof ItemFlamethrower && ChemicalUtil.hasGas(currentItem)) {
-                                Pos3D flameVec;
-                                boolean rightHanded = p.getMainArm() == HumanoidArm.RIGHT;
-                                if (player == p && minecraft.options.getCameraType().isFirstPerson()) {
-                                    flameVec = new Pos3D(1, 1, 1)
-                                          .multiply(p.getViewVector(event.renderTickTime))
-                                          .yRot(rightHanded ? 15 : -15)
-                                          .translate(0, p.getEyeHeight() - 0.1, 0);
-                                } else {
-                                    double flameXCoord = rightHanded ? -0.2 : 0.2;
-                                    double flameYCoord = 1;
-                                    double flameZCoord = 1.2;
-                                    if (p.isCrouching()) {
-                                        flameYCoord -= 0.65;
-                                        flameZCoord -= 0.15;
-                                    }
-                                    flameVec = new Pos3D(flameXCoord, flameYCoord, flameZCoord).yRot(p.yBodyRot);
+                //check players and do animations for idle flame throwers & scuba
+                if (world.getGameTime() % 4 == 0) {
+                    if (p.isInWater() && Mekanism.playerState.isScubaMaskOn(p)) {
+                        Pos3D vec = new Pos3D(0.4, 0.4, 0.4).multiply(p.getViewVector(1)).translate(0, -0.2, 0);
+                        Pos3D motion = vec.scale(0.2).translate(p.getDeltaMovement());
+                        Pos3D v = new Pos3D(p).translate(0, p.getEyeHeight(), 0).translate(vec);
+                        world.addParticle(MekanismParticleTypes.SCUBA_BUBBLE.get(), v.x, v.y, v.z, motion.x, motion.y + 0.2, motion.z);
+                    }
+                    if (!p.swinging && !Mekanism.playerState.isFlamethrowerOn(p)) {
+                        ItemStack currentItem = p.getMainHandItem();
+                        if (!currentItem.isEmpty() && currentItem.getItem() instanceof ItemFlamethrower && ChemicalUtil.hasGas(currentItem)) {
+                            Pos3D flameVec;
+                            boolean rightHanded = p.getMainArm() == HumanoidArm.RIGHT;
+                            if (player == p && minecraft.options.getCameraType().isFirstPerson()) {
+                                flameVec = new Pos3D(1, 1, 1)
+                                      .multiply(p.getViewVector(context.tickDelta()))
+                                      .yRot(rightHanded ? 15 : -15)
+                                      .translate(0, p.getEyeHeight() - 0.1, 0);
+                            } else {
+                                double flameXCoord = rightHanded ? -0.2 : 0.2;
+                                double flameYCoord = 1;
+                                double flameZCoord = 1.2;
+                                if (p.isCrouching()) {
+                                    flameYCoord -= 0.65;
+                                    flameZCoord -= 0.15;
                                 }
-                                Vec3 motion = p.getDeltaMovement();
-                                Vec3 flameMotion = new Vec3(motion.x(), p.onGround() ? 0 : motion.y(), motion.z());
-                                Vec3 mergedVec = p.position().add(flameVec);
-                                world.addParticle(MekanismParticleTypes.JETPACK_FLAME.get(), mergedVec.x, mergedVec.y, mergedVec.z, flameMotion.x,
-                                      flameMotion.y, flameMotion.z);
+                                flameVec = new Pos3D(flameXCoord, flameYCoord, flameZCoord).yRot(p.yBodyRot);
                             }
+                            Vec3 motion = p.getDeltaMovement();
+                            Vec3 flameMotion = new Vec3(motion.x(), p.onGround() ? 0 : motion.y(), motion.z());
+                            Vec3 mergedVec = p.position().add(flameVec);
+                            world.addParticle(MekanismParticleTypes.JETPACK_FLAME.get(), mergedVec.x, mergedVec.y, mergedVec.z, flameMotion.x,
+                                  flameMotion.y, flameMotion.z);
                         }
                     }
                 }
@@ -336,142 +309,131 @@ public class RenderTickHandler {
         }
     }
 
-    @SubscribeEvent
-    @SuppressWarnings("UnstableApiUsage")
-    public void onBlockHover(RenderHighlightEvent.Block event) {
+    public boolean onBlockHover(WorldRenderContext worldRenderContext, WorldRenderContext.BlockOutlineContext blockOutlineContext) {
         Player player = minecraft.player;
         if (player == null) {
-            return;
+            return true;
         }
-        BlockHitResult rayTraceResult = event.getTarget();
-        if (rayTraceResult.getType() != Type.MISS) {
-            Level world = player.level();
-            BlockPos pos = rayTraceResult.getBlockPos();
-            MultiBufferSource renderer = event.getMultiBufferSource();
-            Camera info = event.getCamera();
-            PoseStack matrix = event.getPoseStack();
-            ProfilerFiller profiler = world.getProfiler();
-            BlockState blockState = world.getBlockState(pos);
+        Level world = player.level();
+        BlockPos pos = blockOutlineContext.blockPos();
+        MultiBufferSource renderer = worldRenderContext.consumers();
+        Camera info = worldRenderContext.camera();
+        PoseStack matrix = worldRenderContext.matrixStack();
+        ProfilerFiller profiler = world.getProfiler();
+        BlockState blockState = world.getBlockState(pos);
 
-            profiler.push(ProfilerConstants.AREA_MINE_OUTLINE);
-            // Draw outlines for area mining blocks
-            if (!outliningArea) {
-                ItemStack stack = player.getMainHandItem();
-                if (!stack.isEmpty() && stack.getItem() instanceof IBlastingItem tool) {
-                    Map<BlockPos, BlockState> blocks = tool.getBlastedBlocks(world, player, stack, pos, blockState);
-                    if (!blocks.isEmpty()) {
-                        outliningArea = true;
-                        Vec3 renderView = info.getPosition();
-                        LevelRenderer levelRenderer = event.getLevelRenderer();
-                        for (Entry<BlockPos, BlockState> block : blocks.entrySet()) {
-                            BlockPos blastingTarget = block.getKey();
-                            if (!pos.equals(blastingTarget) && !ForgeHooksClient.onDrawHighlight(levelRenderer, info, rayTraceResult, event.getPartialTick(), matrix, renderer)) {
-                                levelRenderer.renderHitOutline(matrix, renderer.getBuffer(RenderType.lines()), player, renderView.x, renderView.y, renderView.z, blastingTarget, block.getValue());
-                            }
-                        }
-                        outliningArea = false;
-                    }
-                }
-            }
-            profiler.pop();
-
-            boolean shouldCancel = false;
-            profiler.push(ProfilerConstants.MEKANISM_OUTLINE);
-            if (!blockState.isAir() && world.getWorldBorder().isWithinBounds(pos)) {
-                BlockPos actualPos = pos;
-                BlockState actualState = blockState;
-                if (blockState.getBlock() instanceof BlockBounding) {
-                    TileEntityBoundingBlock tile = WorldUtils.getTileEntity(TileEntityBoundingBlock.class, world, pos);
-                    if (tile != null && tile.hasReceivedCoords()) {
-                        actualPos = tile.getMainPos();
-                        actualState = world.getBlockState(actualPos);
-                    }
-                }
-                AttributeCustomSelectionBox customSelectionBox = Attribute.get(actualState, AttributeCustomSelectionBox.class);
-                if (customSelectionBox != null) {
-                    WireFrameRenderer renderWireFrame = null;
-                    if (customSelectionBox.isJavaModel()) {
-                        //If we use a TER to render the wire frame, grab the tile
-                        BlockEntity tile = WorldUtils.getTileEntity(world, actualPos);
-                        if (tile != null) {
-                            BlockEntityRenderer<BlockEntity> tileRenderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(tile);
-                            if (tileRenderer instanceof IWireFrameRenderer wireFrameRenderer && wireFrameRenderer.hasSelectionBox(actualState)) {
-                                renderWireFrame = (buffer, matrixStack, state, red, green, blue, alpha) -> {
-                                    if (wireFrameRenderer.isCombined()) {
-                                        renderQuadsWireFrame(state, buffer, matrixStack.last().pose(), world.random, red, green, blue, alpha);
-                                    }
-                                    wireFrameRenderer.renderWireFrame(tile, event.getPartialTick(), matrixStack, buffer, red, green, blue, alpha);
-                                };
-                            }
-                        }
-                    } else {
-                        //Otherwise, skip getting the tile and just grab the model
-                        renderWireFrame = (buffer, matrixStack, state, red, green, blue, alpha) ->
-                              renderQuadsWireFrame(state, buffer, matrixStack.last().pose(), world.random, red, green, blue, alpha);
-                    }
-                    if (renderWireFrame != null) {
-                        matrix.pushPose();
-                        Vec3 viewPosition = info.getPosition();
-                        matrix.translate(actualPos.getX() - viewPosition.x, actualPos.getY() - viewPosition.y, actualPos.getZ() - viewPosition.z);
-                        //0.4 Alpha
-                        renderWireFrame.render(renderer.getBuffer(RenderType.lines()), matrix, actualState, 0, 0, 0, 0x66);
-                        matrix.popPose();
-                        shouldCancel = true;
-                    }
-                }
-            }
-            profiler.pop();
-
+        profiler.push(ProfilerConstants.AREA_MINE_OUTLINE);
+        // Draw outlines for area mining blocks
+        if (!outliningArea) {
             ItemStack stack = player.getMainHandItem();
-            if (stack.isEmpty() || !(stack.getItem() instanceof ItemConfigurator)) {
-                //If we are not holding a configurator, look if we are in the offhand
-                stack = player.getOffhandItem();
-                if (stack.isEmpty() || !(stack.getItem() instanceof ItemConfigurator)) {
-                    if (shouldCancel) {
-                        event.setCanceled(true);
-                    }
-                    return;
-                }
-            }
-            profiler.push(ProfilerConstants.CONFIGURABLE_MACHINE);
-            ConfiguratorMode state = ((ItemConfigurator) stack.getItem()).getMode(stack);
-            if (state.isConfigurating()) {
-                TransmissionType type = Objects.requireNonNull(state.getTransmission(), "Configurating state requires transmission type");
-                BlockEntity tile = WorldUtils.getTileEntity(world, pos);
-                if (tile instanceof ISideConfiguration configurable) {
-                    TileComponentConfig config = configurable.getConfig();
-                    if (config.supports(type)) {
-                        Direction face = rayTraceResult.getDirection();
-                        DataType dataType = config.getDataType(type, RelativeSide.fromDirections(configurable.getDirection(), face));
-                        if (dataType != null) {
-                            Vec3 viewPosition = info.getPosition();
-                            matrix.pushPose();
-                            matrix.translate(pos.getX() - viewPosition.x, pos.getY() - viewPosition.y, pos.getZ() - viewPosition.z);
-                            MekanismRenderer.renderObject(getOverlayModel(face, type), matrix, renderer.getBuffer(Sheets.translucentCullBlockSheet()),
-                                  MekanismRenderer.getColorARGB(dataType.getColor(), 0.6F), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FaceDisplay.FRONT,
-                                  info);
-                            matrix.popPose();
+            if (!stack.isEmpty() && stack.getItem() instanceof IBlastingItem tool) {
+                Map<BlockPos, BlockState> blocks = tool.getBlastedBlocks(world, player, stack, pos, blockState);
+                if (!blocks.isEmpty()) {
+                    outliningArea = true;
+                    Vec3 renderView = info.getPosition();
+                    LevelRenderer levelRenderer = worldRenderContext.worldRenderer();
+                    for (Entry<BlockPos, BlockState> block : blocks.entrySet()) {
+                        BlockPos blastingTarget = block.getKey();
+                        if (!pos.equals(blastingTarget)) {
+                            levelRenderer.renderHitOutline(matrix, renderer.getBuffer(RenderType.lines()), player, renderView.x, renderView.y, renderView.z, blastingTarget, block.getValue());
                         }
                     }
+                    outliningArea = false;
                 }
             }
-            profiler.pop();
-            if (shouldCancel) {
-                event.setCanceled(true);
+        }
+        profiler.pop();
+
+        boolean shouldCancel = false;
+        profiler.push(ProfilerConstants.MEKANISM_OUTLINE);
+        if (!blockState.isAir() && world.getWorldBorder().isWithinBounds(pos)) {
+            BlockPos actualPos = pos;
+            BlockState actualState = blockState;
+            if (blockState.getBlock() instanceof BlockBounding) {
+                TileEntityBoundingBlock tile = WorldUtils.getTileEntity(TileEntityBoundingBlock.class, world, pos);
+                if (tile != null && tile.hasReceivedCoords()) {
+                    actualPos = tile.getMainPos();
+                    actualState = world.getBlockState(actualPos);
+                }
+            }
+            AttributeCustomSelectionBox customSelectionBox = Attribute.get(actualState, AttributeCustomSelectionBox.class);
+            if (customSelectionBox != null) {
+                WireFrameRenderer renderWireFrame = null;
+                if (customSelectionBox.isJavaModel()) {
+                    //If we use a TER to render the wire frame, grab the tile
+                    BlockEntity tile = WorldUtils.getTileEntity(world, actualPos);
+                    if (tile != null) {
+                        BlockEntityRenderer<BlockEntity> tileRenderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(tile);
+                        if (tileRenderer instanceof IWireFrameRenderer wireFrameRenderer && wireFrameRenderer.hasSelectionBox(actualState)) {
+                            renderWireFrame = (buffer, matrixStack, state, red, green, blue, alpha) -> {
+                                if (wireFrameRenderer.isCombined()) {
+                                    renderQuadsWireFrame(state, buffer, matrixStack.last().pose(), world.random, red, green, blue, alpha);
+                                }
+                                wireFrameRenderer.renderWireFrame(tile, worldRenderContext.tickDelta(), matrixStack, buffer, red, green, blue, alpha);
+                            };
+                        }
+                    }
+                } else {
+                    //Otherwise, skip getting the tile and just grab the model
+                    renderWireFrame = (buffer, matrixStack, state, red, green, blue, alpha) ->
+                          renderQuadsWireFrame(state, buffer, matrixStack.last().pose(), world.random, red, green, blue, alpha);
+                }
+                if (renderWireFrame != null) {
+                    matrix.pushPose();
+                    Vec3 viewPosition = info.getPosition();
+                    matrix.translate(actualPos.getX() - viewPosition.x, actualPos.getY() - viewPosition.y, actualPos.getZ() - viewPosition.z);
+                    //0.4 Alpha
+                    renderWireFrame.render(renderer.getBuffer(RenderType.lines()), matrix, actualState, 0, 0, 0, 0x66);
+                    matrix.popPose();
+                    shouldCancel = true;
+                }
             }
         }
+        profiler.pop();
+
+        ItemStack stack = player.getMainHandItem();
+        if (stack.isEmpty() || !(stack.getItem() instanceof ItemConfigurator)) {
+            //If we are not holding a configurator, look if we are in the offhand
+            stack = player.getOffhandItem();
+            if (stack.isEmpty() || !(stack.getItem() instanceof ItemConfigurator)) {
+                return !shouldCancel;
+            }
+        }
+        profiler.push(ProfilerConstants.CONFIGURABLE_MACHINE);
+        ConfiguratorMode state = ((ItemConfigurator) stack.getItem()).getMode(stack);
+        if (state.isConfigurating()) {
+            TransmissionType type = Objects.requireNonNull(state.getTransmission(), "Configurating state requires transmission type");
+            BlockEntity tile = WorldUtils.getTileEntity(world, pos);
+            if (tile instanceof ISideConfiguration configurable) {
+                TileComponentConfig config = configurable.getConfig();
+                if (config.supports(type)) {
+                    Direction face = ((BlockHitResult)minecraft.hitResult).getDirection();
+                    DataType dataType = config.getDataType(type, RelativeSide.fromDirections(configurable.getDirection(), face));
+                    if (dataType != null) {
+                        Vec3 viewPosition = info.getPosition();
+                        matrix.pushPose();
+                        matrix.translate(pos.getX() - viewPosition.x, pos.getY() - viewPosition.y, pos.getZ() - viewPosition.z);
+                        MekanismRenderer.renderObject(getOverlayModel(face, type), matrix, renderer.getBuffer(Sheets.translucentCullBlockSheet()),
+                              MekanismRenderer.getColorARGB(dataType.getColor(), 0.6F), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, FaceDisplay.FRONT,
+                              info);
+                        matrix.popPose();
+                    }
+                }
+            }
+        }
+        profiler.pop();
+        return !shouldCancel;
     }
 
     private void renderQuadsWireFrame(BlockState state, VertexConsumer buffer, Matrix4f matrix, RandomSource rand, int red, int green, int blue, int alpha) {
         List<Vertex[]> allVertices = cachedWireFrames.computeIfAbsent(state, s -> {
             BakedModel bakedModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(s);
             //TODO: Eventually we may want to add support for Model data and maybe render type
-            ModelData modelData = ModelData.EMPTY;
             List<Vertex[]> vertices = new ArrayList<>();
             for (Direction direction : EnumUtils.DIRECTIONS) {
-                QuadUtils.unpack(bakedModel.getQuads(s, direction, rand, modelData, null)).stream().map(Quad::getVertices).forEach(vertices::add);
+                QuadUtils.unpack(bakedModel.getQuads(s, direction, rand)).stream().map(Quad::getVertices).forEach(vertices::add);
             }
-            QuadUtils.unpack(bakedModel.getQuads(s, null, rand, modelData, null)).stream().map(Quad::getVertices).forEach(vertices::add);
+            QuadUtils.unpack(bakedModel.getQuads(s, null, rand)).stream().map(Quad::getVertices).forEach(vertices::add);
             return vertices;
         });
         renderVertexWireFrame(allVertices, buffer, matrix, red, green, blue, alpha);

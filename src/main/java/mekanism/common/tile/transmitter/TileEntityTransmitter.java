@@ -1,7 +1,5 @@
 package mekanism.common.tile.transmitter;
 
-import java.util.ArrayList;
-import java.util.List;
 import mekanism.api.IAlloyInteraction;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.text.EnumColor;
@@ -16,12 +14,8 @@ import mekanism.common.block.states.TransmitterType;
 import mekanism.common.block.states.TransmitterType.Size;
 import mekanism.common.block.transmitter.BlockLargeTransmitter;
 import mekanism.common.block.transmitter.BlockSmallTransmitter;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.DynamicHandler.InteractPredicate;
-import mekanism.common.capabilities.proxy.ProxyConfigurable;
 import mekanism.common.capabilities.proxy.ProxyConfigurable.ISidedConfigurable;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
-import mekanism.common.capabilities.resolver.BasicSidedCapabilityResolver;
 import mekanism.common.content.network.transmitter.BufferedTransmitter;
 import mekanism.common.content.network.transmitter.IUpgradeableTransmitter;
 import mekanism.common.content.network.transmitter.Transmitter;
@@ -29,12 +23,13 @@ import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
-import mekanism.common.tile.base.CapabilityTileEntity;
+import mekanism.common.tile.base.TileEntityUpdateable;
 import mekanism.common.upgrade.transmitter.TransmitterUpgradeData;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MultipartUtils;
 import mekanism.common.util.MultipartUtils.AdvancedRayTraceResult;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -44,16 +39,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class TileEntityTransmitter extends CapabilityTileEntity implements ISidedConfigurable, IAlloyInteraction {
+import java.util.ArrayList;
+import java.util.List;
 
-    public static final ModelProperty<TransmitterModelData> TRANSMITTER_PROPERTY = new ModelProperty<>();
+public abstract class TileEntityTransmitter extends TileEntityUpdateable implements ISidedConfigurable, IAlloyInteraction, RenderDataBlockEntity {
+
+//    public static final ModelProperty<TransmitterModelData> TRANSMITTER_PROPERTY = new ModelProperty<>();
 
     private final Transmitter<?, ?, ?> transmitter;
     private boolean forceUpdate = true;
@@ -63,8 +58,6 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
         super(((IHasTileEntity<? extends TileEntityTransmitter>) blockProvider.getBlock()).getTileType(), pos, state);
         this.transmitter = createTransmitter(blockProvider);
         cacheCoord();
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.ALLOY_INTERACTION, this));
-        addCapabilityResolver(new BasicSidedCapabilityResolver<>(this, Capabilities.CONFIGURABLE, ProxyConfigurable::new));
     }
 
     protected abstract Transmitter<?, ?, ?> createTransmitter(IBlockProvider blockProvider);
@@ -96,16 +89,16 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
         return getTransmitter().getReducedUpdateTag(super.getReducedUpdateTag());
     }
 
-    @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
-        getTransmitter().handleUpdateTag(tag);
-    }
+//    @Override
+//    public void handleUpdateTag(@NotNull CompoundTag tagSupplier) {
+//        super.handleUpdateTag(tagSupplier);
+//        getTransmitter().handleUpdateTag(tagSupplier);
+//    }
 
     @Override
     public void handleUpdatePacket(@NotNull CompoundTag tag) {
         super.handleUpdatePacket(tag);
-        //Delay requesting the model data update and actually updating the packet until we have finished parsing the update tag
+        //Delay requesting the model data update and actually updating the packet until we have finished parsing the update tagSupplier
         updateModelData();
     }
 
@@ -135,13 +128,11 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
         onWorldJoin(false);
     }
 
-    @Override
     public void onChunkUnloaded() {
         if (!isRemote()) {
             //Only take the transmitter's share if it was unloaded and not if we are being removed
             getTransmitter().takeShare();
         }
-        super.onChunkUnloaded();
     }
 
     @Override
@@ -283,19 +274,19 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
         return list;
     }
 
-    @NotNull
-    @Override
-    public AABB getRenderBoundingBox() {
-        //If any of the block is in view, then allow rendering the contents
-        return new AABB(worldPosition, worldPosition.offset(1, 1, 1));
-    }
+//    @NotNull
+//    @Override
+//    public AABB getRenderBoundingBox() {
+//        //If any of the block is in view, then allow rendering the contents
+//        return new AABB(worldPosition, worldPosition.offset(1, 1, 1));
+//    }
 
     @NotNull
     @Override
-    public ModelData getModelData() {
+    public TransmitterModelData getRenderData() {
         TransmitterModelData data = initModelData();
         updateModelData(data);
-        return ModelData.builder().with(TRANSMITTER_PROPERTY, data).build();
+        return data;
     }
 
     protected void updateModelData(TransmitterModelData modelData) {
@@ -402,7 +393,7 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
     }
 
     protected InteractPredicate getExtractPredicate() {
-        return (tank, side) -> {
+        return (side) -> {
             if (side == null) {
                 //Note: We return true here, but extraction isn't actually allowed and gets blocked by the read only handler
                 return true;
@@ -414,7 +405,7 @@ public abstract class TileEntityTransmitter extends CapabilityTileEntity impleme
     }
 
     protected InteractPredicate getInsertPredicate() {
-        return (tank, side) -> {
+        return (side) -> {
             if (side == null) {
                 //Note: We return true here, but insertion isn't actually allowed and gets blocked by the read only handler
                 return true;

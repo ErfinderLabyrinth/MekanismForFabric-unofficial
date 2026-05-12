@@ -4,7 +4,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Locale;
 import mekanism.common.registries.MekanismParticleTypes;
 import mekanism.common.util.RegistryUtils;
 import net.minecraft.core.Direction;
@@ -12,6 +11,8 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 public record LaserParticleData(Direction direction, double distance, float energyScale) implements ParticleOptions {
 

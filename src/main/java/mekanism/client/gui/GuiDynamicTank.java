@@ -1,8 +1,6 @@
 package mekanism.client.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.ToLongFunction;
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.client.gui.element.GuiDownArrow;
@@ -22,8 +20,11 @@ import mekanism.common.util.text.TextUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.ToLongFunction;
 
 public class GuiDynamicTank extends GuiMekanismTile<TileEntityDynamicTank, MekanismTileContainer<TileEntityDynamicTank>> {
 
@@ -48,7 +49,7 @@ public class GuiDynamicTank extends GuiMekanismTile<TileEntityDynamicTank, Mekan
             switch (multiblock.mergedTank.getCurrentType()) {
                 case EMPTY -> ret.add(MekanismLang.EMPTY.translate());
                 case FLUID -> {
-                    addStored(ret, multiblock.getFluidTank().getFluid(), FluidStack::getAmount);
+                    addStored(ret, multiblock.getFluidTank().getFluid(), FluidStack::amount);
                     capacity = multiblock.getTankCapacity();
                 }
                 case GAS -> addStored(ret, multiblock.getGasTank());

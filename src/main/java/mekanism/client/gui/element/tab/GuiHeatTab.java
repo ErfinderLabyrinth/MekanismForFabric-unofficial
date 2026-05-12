@@ -1,10 +1,5 @@
 package mekanism.client.gui.element.tab;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.UnaryOperator;
 import mekanism.api.IIncrementalEnum;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiTexturedElement;
@@ -18,6 +13,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.UnaryOperator;
 
 public class GuiHeatTab extends GuiTexturedElement {
 
@@ -39,13 +40,13 @@ public class GuiHeatTab extends GuiTexturedElement {
     public void renderToolTip(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY) {
         super.renderToolTip(guiGraphics, mouseX, mouseY);
         List<Component> info = new ArrayList<>(infoHandler.getInfo());
-        info.add(MekanismLang.UNIT.translate(MekanismConfig.common.tempUnit.get()));
+        info.add(MekanismLang.UNIT.translate(MekanismConfig.common.tempUnit));
         displayTooltips(guiGraphics, mouseX, mouseY, info);
     }
 
     @Override
     protected ResourceLocation getResource() {
-        return ICONS.computeIfAbsent(MekanismConfig.common.tempUnit.get(), type -> MekanismUtils.getResource(ResourceType.GUI_TAB,
+        return ICONS.computeIfAbsent(MekanismConfig.common.tempUnit, type -> MekanismUtils.getResource(ResourceType.GUI_TAB,
               "heat_info_" + type.getTabName() + ".png"));
     }
 
@@ -64,11 +65,11 @@ public class GuiHeatTab extends GuiTexturedElement {
     }
 
     private void updateTemperatureUnit(UnaryOperator<TemperatureUnit> converter) {
-        TemperatureUnit current = MekanismConfig.common.tempUnit.get();
+        TemperatureUnit current = MekanismConfig.common.tempUnit;
         TemperatureUnit updated = converter.apply(current);
         if (current != updated) {//Should always be true but validate it
-            MekanismConfig.common.tempUnit.set(updated);
-            MekanismConfig.common.save();
+            MekanismConfig.common.tempUnit = updated;
+//            MekanismConfig.common.save();
         }
     }
 }

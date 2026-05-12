@@ -1,21 +1,10 @@
 package mekanism.common.tile.component;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.IntSupplier;
-import java.util.function.LongSupplier;
-import java.util.function.Predicate;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.fluid.IExtendedFluidTank;
-import mekanism.api.math.FloatingLongSupplier;
 import mekanism.api.text.EnumColor;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.integration.computer.ComputerException;
@@ -30,25 +19,19 @@ import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.component.config.ConfigInfo;
 import mekanism.common.tile.component.config.DataType;
-import mekanism.common.tile.component.config.slot.ChemicalSlotInfo;
-import mekanism.common.tile.component.config.slot.EnergySlotInfo;
-import mekanism.common.tile.component.config.slot.FluidSlotInfo;
-import mekanism.common.tile.component.config.slot.ISlotInfo;
-import mekanism.common.tile.component.config.slot.InventorySlotInfo;
+import mekanism.common.tile.component.config.slot.*;
 import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
-import mekanism.common.util.CableUtils;
-import mekanism.common.util.ChemicalUtil;
-import mekanism.common.util.EnumUtils;
-import mekanism.common.util.FluidUtils;
-import mekanism.common.util.InventoryUtils;
-import mekanism.common.util.NBTUtils;
-import mekanism.common.util.TransporterUtils;
-import mekanism.common.util.WorldUtils;
+import mekanism.common.util.*;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 
 public class TileComponentEjector implements ITileComponent, ISpecificContainerTracker {
 
@@ -58,7 +41,7 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
     private final LongSupplier chemicalEjectRate;
     private final IntSupplier fluidEjectRate;
     @Nullable
-    private final FloatingLongSupplier energyEjectRate;
+    private final LongSupplier energyEjectRate;
     @Nullable
     private Predicate<TransmissionType> canEject;
     @Nullable//TODO: At some point it would be nice to be able to generify this further
@@ -68,22 +51,22 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
     private int tickDelay = 0;
 
     public TileComponentEjector(TileEntityMekanism tile) {
-        this(tile, MekanismConfig.general.chemicalAutoEjectRate);
+        this(tile, () -> MekanismConfig.general.chemicalAutoEjectRate, () -> MekanismConfig.general.fluidAutoEjectRate);
     }
 
-    public TileComponentEjector(TileEntityMekanism tile, LongSupplier chemicalEjectRate) {
-        this(tile, chemicalEjectRate, MekanismConfig.general.fluidAutoEjectRate);
-    }
+//    public TileComponentEjector(TileEntityMekanism tile, LongSupplier chemicalEjectRate) {
+//        this(tile, chemicalEjectRate, () -> MekanismConfig.general.fluidAutoEjectRate);
+//    }
 
     public TileComponentEjector(TileEntityMekanism tile, LongSupplier chemicalEjectRate, IntSupplier fluidEjectRate) {
         this(tile, chemicalEjectRate, fluidEjectRate, null);
     }
 
-    public TileComponentEjector(TileEntityMekanism tile, FloatingLongSupplier energyEjectRate) {
-        this(tile, MekanismConfig.general.chemicalAutoEjectRate, MekanismConfig.general.fluidAutoEjectRate, energyEjectRate);
-    }
+//    public TileComponentEjector(TileEntityMekanism tile, FloatingLongSupplier energyEjectRate) {
+//        this(tile, () -> MekanismConfig.general.chemicalAutoEjectRate, () -> MekanismConfig.general.fluidAutoEjectRate, energyEjectRate);
+//    }
 
-    public TileComponentEjector(TileEntityMekanism tile, LongSupplier chemicalEjectRate, IntSupplier fluidEjectRate, @Nullable FloatingLongSupplier energyEjectRate) {
+    public TileComponentEjector(TileEntityMekanism tile, LongSupplier chemicalEjectRate, IntSupplier fluidEjectRate, @Nullable LongSupplier energyEjectRate) {
         this.tile = tile;
         this.chemicalEjectRate = chemicalEjectRate;
         this.fluidEjectRate = fluidEjectRate;
@@ -175,12 +158,12 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
         if (outputData != null && !outputData.isEmpty()) {
             for (Map.Entry<Object, Set<Direction>> entry : outputData.entrySet()) {
                 if (type.isChemical()) {
-                    ChemicalUtil.emit(entry.getValue(), (IChemicalTank<?, ?>) entry.getKey(), tile, chemicalEjectRate.getAsLong());
+                    ChemicalUtil.emit(entry.getValue(), (IChemicalTank<?, ?>) entry.getKey(), tile.getLevel(), tile.getBlockPos(), chemicalEjectRate.getAsLong());
                 } else if (type == TransmissionType.FLUID) {
                     FluidUtils.emit(entry.getValue(), (IExtendedFluidTank) entry.getKey(), tile, fluidEjectRate.getAsInt());
                 } else if (type == TransmissionType.ENERGY) {
                     IEnergyContainer container = (IEnergyContainer) entry.getKey();
-                    CableUtils.emit(entry.getValue(), container, tile, energyEjectRate == null ? container.getMaxEnergy() : energyEjectRate.get());
+                    CableUtils.emit(entry.getValue(), container, tile, energyEjectRate == null ? container.getMaxEnergy() : energyEjectRate.getAsLong());
                 }
             }
         }
@@ -209,9 +192,9 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
                                 //If the spot is not loaded just skip trying to eject to it
                                 TransitResponse response;
                                 if (target instanceof TileEntityLogisticalTransporterBase transporter) {
-                                    response = transporter.getTransmitter().insert(tile, ejectMap, outputColor, true, 0);
+                                    response = transporter.getTransmitter().insert(tile.getLevel(), tile.getBlockPos(), ejectMap, outputColor, true, 0);
                                 } else {
-                                    response = ejectMap.addToInventory(target, side, 0, false);
+                                    response = ejectMap.addToInventory(target.getLevel(), target.getBlockPos(), side, 0, false);
                                 }
                                 if (!response.isEmpty()) {
                                     // use the items returned by the TransitResponse; will be visible next loop
@@ -397,7 +380,7 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
         public Direction side;
 
         public EjectTransitRequest(BlockEntity tile, Direction side) {
-            super(tile, side);
+            super(tile.getLevel(), tile.getBlockPos(), side);
             this.side = side;
         }
 

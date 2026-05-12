@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.button;
 
-import java.util.function.Supplier;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.Mekanism;
 import mekanism.common.network.to_server.PacketGuiInteract;
@@ -12,6 +11,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.function.Supplier;
 
 public class GuiGasMode extends MekanismImageButton {
 

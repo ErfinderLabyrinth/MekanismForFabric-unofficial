@@ -1,6 +1,5 @@
 package mekanism.common.item.block.machine;
 
-import java.util.List;
 import mekanism.api.NBTConstants;
 import mekanism.api.text.EnumColor;
 import mekanism.common.block.prefab.BlockTile;
@@ -16,11 +15,14 @@ import mekanism.common.util.MekanismUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ItemBlockQIOComponent extends ItemBlockTooltip<BlockTile<?, ?>> implements IColoredItem {
 
@@ -37,7 +39,7 @@ public class ItemBlockQIOComponent extends ItemBlockTooltip<BlockTile<?, ?>> imp
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         if (!level.isClientSide && level.getGameTime() % 100 == 0) {
-            EnumColor frequencyColor = getFrequency(stack) instanceof QIOFrequency frequency ? frequency.getColor() : null;
+            EnumColor frequencyColor = getFrequency(stack, level.getServer()) instanceof QIOFrequency frequency ? frequency.getColor() : null;
             EnumColor color = getColor(stack);
             if (color != frequencyColor) {
                 setColor(stack, frequencyColor);
@@ -45,14 +47,14 @@ public class ItemBlockQIOComponent extends ItemBlockTooltip<BlockTile<?, ?>> imp
         }
     }
 
-    private Frequency getFrequency(ItemStack stack) {
+    private Frequency getFrequency(ItemStack stack, MinecraftServer server) {
         if (ItemDataUtils.hasData(stack, NBTConstants.COMPONENT_FREQUENCY, Tag.TAG_COMPOUND)) {
             CompoundTag frequencyComponent = ItemDataUtils.getCompound(stack, NBTConstants.COMPONENT_FREQUENCY);
             if (frequencyComponent.contains(FrequencyType.QIO.getName(), Tag.TAG_COMPOUND)) {
                 CompoundTag frequencyCompound = frequencyComponent.getCompound(FrequencyType.QIO.getName());
                 FrequencyIdentity identity = FrequencyIdentity.load(FrequencyType.QIO, frequencyCompound);
                 if (identity != null && frequencyCompound.hasUUID(NBTConstants.OWNER_UUID)) {
-                    return FrequencyType.QIO.getManager(identity, frequencyCompound.getUUID(NBTConstants.OWNER_UUID)).getFrequency(identity.key());
+                    return FrequencyType.QIO.getManager(identity, frequencyCompound.getUUID(NBTConstants.OWNER_UUID), server).getFrequency(identity.key());
                 }
             }
         }

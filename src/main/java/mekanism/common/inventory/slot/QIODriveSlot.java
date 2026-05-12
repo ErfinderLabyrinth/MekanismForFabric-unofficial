@@ -1,14 +1,13 @@
 package mekanism.common.inventory.slot;
 
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.inventory.IMekanismInventory;
 import mekanism.common.content.qio.IQIODriveHolder;
 import mekanism.common.content.qio.IQIODriveItem;
 import mekanism.common.content.qio.QIODriveData.QIODriveKey;
 import mekanism.common.content.qio.QIOFrequency;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -20,7 +19,7 @@ public class QIODriveSlot extends BasicInventorySlot {
     private final IQIODriveHolder driveHolder;
     private final QIODriveKey key;
 
-    public <TILE extends IMekanismInventory & IQIODriveHolder> QIODriveSlot(TILE inventory, int slot, @Nullable IContentsListener listener, int x, int y) {
+    public <TILE extends IQIODriveHolder> QIODriveSlot(TILE inventory, int slot, @Nullable IContentsListener listener, int x, int y) {
         super(notExternal, notExternal, stack -> stack.getItem() instanceof IQIODriveItem, listener, x, y);
         key = new QIODriveKey(inventory, slot);
         driveHolder = inventory;
@@ -57,23 +56,21 @@ public class QIODriveSlot extends BasicInventorySlot {
     }
 
     @Override
-    public ItemStack insertItem(ItemStack stack, Action action, AutomationType automationType) {
-        ItemStack ret = super.insertItem(stack, action, automationType);
-        if (!isRemote() && action.execute() && ret.isEmpty()) {
-            addDrive(stack);
+    public long insert(ItemVariant resource, long amount, TransactionContext transaction) {
+        long amountInserted = super.insert(resource, amount, transaction);
+        if (!isRemote() && amountInserted != 0) {
+            addDrive(resource.toStack((int)amount));
         }
-        return ret;
+        return amountInserted;
     }
 
     @Override
-    public ItemStack extractItem(int amount, Action action, AutomationType automationType) {
-        if (!isRemote() && action.execute()) {
-            ItemStack ret = super.extractItem(amount, Action.SIMULATE, automationType);
-            if (!ret.isEmpty()) {
-                removeDrive();
-            }
+    public long extract(ItemVariant resource, long amount, TransactionContext transaction) {
+        long amountExtracted = super.extract(resource, amount, transaction);
+        if (!isRemote() && amountExtracted != 0) {
+            removeDrive();
         }
-        return super.extractItem(amount, action, automationType);
+        return amountExtracted;
     }
 
     public QIODriveKey getKey() {

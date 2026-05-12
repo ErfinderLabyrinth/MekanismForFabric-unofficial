@@ -21,12 +21,7 @@ import mekanism.api.recipes.ingredients.creator.IItemStackIngredientCreator;
 import mekanism.api.robit.RobitSkin;
 import mekanism.client.jei.MekanismJEIHelper;
 import mekanism.common.Mekanism;
-import mekanism.common.recipe.ingredient.creator.FluidStackIngredientCreator;
-import mekanism.common.recipe.ingredient.creator.GasStackIngredientCreator;
-import mekanism.common.recipe.ingredient.creator.InfusionStackIngredientCreator;
-import mekanism.common.recipe.ingredient.creator.ItemStackIngredientCreator;
-import mekanism.common.recipe.ingredient.creator.PigmentStackIngredientCreator;
-import mekanism.common.recipe.ingredient.creator.SlurryStackIngredientCreator;
+import mekanism.common.recipe.ingredient.creator.*;
 import mekanism.common.registries.MekanismRobitSkins;
 
 /**

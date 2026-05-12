@@ -1,6 +1,5 @@
 package mekanism.common.content.gear.mekatool;
 
-import java.util.function.Consumer;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.gear.ICustomModule;
@@ -14,6 +13,8 @@ import mekanism.api.text.TextComponentUtil;
 import mekanism.common.MekanismLang;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.function.Consumer;
 
 @ParametersAreNotNullByDefault
 public class ModuleAttackAmplificationUnit implements ICustomModule<ModuleAttackAmplificationUnit> {

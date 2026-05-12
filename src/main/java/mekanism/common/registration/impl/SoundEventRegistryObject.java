@@ -4,17 +4,17 @@ import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.registration.WrappedRegistryObject;
 import net.minecraft.Util;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraftforge.registries.RegistryObject;
 
 @NothingNullByDefault
 public class SoundEventRegistryObject<SOUND extends SoundEvent> extends WrappedRegistryObject<SOUND> implements ILangEntry {
 
     private final String translationKey;
 
-    public SoundEventRegistryObject(RegistryObject<SOUND> registryObject) {
+    public SoundEventRegistryObject(SOUND registryObject, ResourceLocation rl) {
         super(registryObject);
-        translationKey = Util.makeDescriptionId("sound_event", this.registryObject.getId());
+        translationKey = Util.makeDescriptionId("sound_event", rl);
     }
 
     @Override

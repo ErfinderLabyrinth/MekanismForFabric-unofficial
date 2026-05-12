@@ -1,38 +1,36 @@
 package mekanism.common.tile;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.RelativeSide;
-import mekanism.api.energy.IStrictEnergyHandler;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.capabilities.holder.energy.EnergyContainerHelper;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
 import mekanism.common.entity.EntityRobit;
-import mekanism.common.integration.curios.CuriosIntegration;
-import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.List;
+import java.util.function.Predicate;
 
 public class TileEntityChargepad extends TileEntityMekanism {
 
@@ -65,12 +63,13 @@ public class TileEntityChargepad extends TileEntityMekanism {
                 //If we run out of energy, stop checking the remaining entities
                 break;
             } else if (entity instanceof EntityRobit robit) {
-                provideEnergy(robit);
-            } else if (entity instanceof Player) {
-                Optional<IItemHandler> itemHandlerCap = entity.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
-                if (!chargeHandler(itemHandlerCap) && Mekanism.hooks.CuriosLoaded) {
+                provideEnergy(robit.getEnergyContainer());
+            } else if (entity instanceof Player player) {
+                Inventory inventory = player.getInventory();
+                //Optional<IItemHandler> itemHandlerCap = entity.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
+                if (!chargeHandler(inventory) && Mekanism.hooks.CuriosLoaded) {
                     //If we didn't charge anything in the inventory and curios is loaded try charging things in the curios slots
-                    chargeHandler(CuriosIntegration.getCuriosInventory(entity));
+//                    chargeHandler(CuriosIntegration.getCuriosInventory(entity));
                 }
             }
         }
@@ -79,34 +78,41 @@ public class TileEntityChargepad extends TileEntityMekanism {
         }
     }
 
-    private boolean chargeHandler(Optional<? extends IItemHandler> itemHandlerCap) {
+    private boolean chargeHandler(Inventory inventory) {
         //Ensure that we have an item handler capability, because if for example the player is dead we will not
-        if (itemHandlerCap.isPresent()) {
-            IItemHandler itemHandler = itemHandlerCap.get();
-            int slots = itemHandler.getSlots();
-            for (int slot = 0; slot < slots; slot++) {
-                ItemStack stack = itemHandler.getStackInSlot(slot);
-                if (!stack.isEmpty() && provideEnergy(EnergyCompatUtils.getStrictEnergyHandler(stack))) {
-                    //Only allow charging one item per player each check
-                    return true;
-                }
+        PlayerInventoryStorage storage = PlayerInventoryStorage.of(inventory);
+        for (SingleSlotStorage<ItemVariant> slot:storage.getSlots()) {
+            EnergyStorage energyStorage = ContainerItemContext.ofPlayerSlot(inventory.player, slot).find(EnergyStorage.ITEM);
+            if (!slot.isResourceBlank() && slot.getAmount() != 0 && provideEnergy(energyStorage)) {
+                //Only allow charging one item per player each check
+                return true;
             }
         }
         return false;
     }
 
-    private boolean provideEnergy(@Nullable IStrictEnergyHandler energyHandler) {
+    private boolean provideEnergy(@Nullable EnergyStorage energyHandler) {
         if (energyHandler == null) {
             return false;
         }
-        FloatingLong energyToGive = energyContainer.getEnergyPerTick();
-        FloatingLong simulatedRemainder = energyHandler.insertEnergy(energyToGive, Action.SIMULATE);
-        if (simulatedRemainder.smallerThan(energyToGive)) {
+        long energyToGive = energyContainer.getEnergyPerTick();
+        long simulatedRemainder;
+        try(Transaction t=Transaction.openOuter()) {
+            simulatedRemainder = energyHandler.insert(energyToGive, t);
+        }
+        if (simulatedRemainder < energyToGive) {
             //We are able to fit at least some energy from our container into the item
-            FloatingLong extractedEnergy = energyContainer.extract(energyToGive.subtract(simulatedRemainder), Action.EXECUTE, AutomationType.INTERNAL);
-            if (!extractedEnergy.isZero()) {
+            long extractedEnergy;
+            try(Transaction t=Transaction.openOuter()) {
+                extractedEnergy = energyContainer.extract(energyToGive - simulatedRemainder, t);
+                t.commit();
+            }
+            if (extractedEnergy != 0) {
                 //If we were able to actually extract it from our energy container, then insert it into the item
-                MekanismUtils.logExpectedZero(energyHandler.insertEnergy(extractedEnergy, Action.EXECUTE));
+                try(Transaction t=Transaction.openOuter()) {
+                    MekanismUtils.logExpectedZero(energyHandler.insert(extractedEnergy, t));
+                    t.commit();
+                }
                 return true;
             }
         }

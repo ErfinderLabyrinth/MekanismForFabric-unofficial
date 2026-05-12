@@ -2,8 +2,9 @@ package mekanism.common.tier;
 
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedIntValue;
 import mekanism.common.util.EnumUtils;
+
+import java.util.function.IntSupplier;
 
 public enum PipeTier implements ITier {
     BASIC(BaseTier.BASIC, 2_000, 250),
@@ -14,8 +15,8 @@ public enum PipeTier implements ITier {
     private final int baseCapacity;
     private final int basePull;
     private final BaseTier baseTier;
-    private CachedIntValue capacityReference;
-    private CachedIntValue pullReference;
+    private IntSupplier capacityReference;
+    private IntSupplier pullReference;
 
     PipeTier(BaseTier tier, int capacity, int pullAmount) {
         baseCapacity = capacity;
@@ -38,11 +39,11 @@ public enum PipeTier implements ITier {
     }
 
     public int getPipeCapacity() {
-        return capacityReference == null ? getBaseCapacity() : capacityReference.getOrDefault();
+        return capacityReference == null ? getBaseCapacity() : capacityReference.getAsInt();
     }
 
     public int getPipePullAmount() {
-        return pullReference == null ? getBasePull() : pullReference.getOrDefault();
+        return pullReference == null ? getBasePull() : pullReference.getAsInt();
     }
 
     public int getBaseCapacity() {
@@ -56,7 +57,7 @@ public enum PipeTier implements ITier {
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the PipeTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedIntValue capacityReference, CachedIntValue pullReference) {
+    public void setConfigReference(IntSupplier capacityReference, IntSupplier pullReference) {
         this.capacityReference = capacityReference;
         this.pullReference = pullReference;
     }

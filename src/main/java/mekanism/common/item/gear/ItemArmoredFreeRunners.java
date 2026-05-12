@@ -2,10 +2,10 @@ package mekanism.common.item.gear;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import java.util.UUID;
-import java.util.function.Consumer;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.RenderPropertiesProvider;
+import mekanism.client.render.armor.ISpecialGear;
+import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.attribute.AttributeCache;
@@ -17,10 +17,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
 
-public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttributeRefresher {
+import java.util.UUID;
+
+public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttributeRefresher, ISpecialGearGetter {
 
     private static final ArmoredFreeRunnerMaterial ARMORED_FREE_RUNNER_MATERIAL = new ArmoredFreeRunnerMaterial();
 
@@ -28,13 +29,13 @@ public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttribut
 
     public ItemArmoredFreeRunners(Properties properties) {
         super(ARMORED_FREE_RUNNER_MATERIAL, properties);
-        this.attributeCache = new AttributeCache(this, MekanismConfig.gear.armoredFreeRunnerArmor, MekanismConfig.gear.armoredFreeRunnerToughness,
-              MekanismConfig.gear.armoredFreeRunnerKnockbackResistance);
+        this.attributeCache = new AttributeCache(this, () -> MekanismConfig.gear.armoredFreeRunnerArmor, () -> MekanismConfig.gear.armoredFreeRunnerToughness,
+                () -> MekanismConfig.gear.armoredFreeRunnerKnockbackResistance);
     }
 
     @Override
-    public void initializeClient(@NotNull Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(RenderPropertiesProvider.armoredFreeRunners());
+    public ISpecialGear getSpecialGear() {
+        return RenderPropertiesProvider.armoredFreeRunners();
     }
 
     @Override
@@ -49,7 +50,7 @@ public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttribut
 
     @NotNull
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(@NotNull EquipmentSlot slot, @NotNull ItemStack stack) {
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(@NotNull ItemStack stack, @NotNull EquipmentSlot slot) {
         return slot == getEquipmentSlot() ? attributeCache.get() : ImmutableMultimap.of();
     }
 
@@ -67,7 +68,7 @@ public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttribut
 
         @Override
         public int getDefenseForType(ArmorItem.Type armorType) {
-            return armorType == ArmorItem.Type.BOOTS ? MekanismConfig.gear.armoredFreeRunnerArmor.getOrDefault() : 0;
+            return armorType == ArmorItem.Type.BOOTS ? MekanismConfig.gear.armoredFreeRunnerArmor : 0;
         }
 
         @Override
@@ -77,12 +78,12 @@ public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttribut
 
         @Override
         public float getToughness() {
-            return MekanismConfig.gear.armoredFreeRunnerToughness.getOrDefault();
+            return MekanismConfig.gear.armoredFreeRunnerToughness;
         }
 
         @Override
         public float getKnockbackResistance() {
-            return MekanismConfig.gear.armoredFreeRunnerKnockbackResistance.getOrDefault();
+            return MekanismConfig.gear.armoredFreeRunnerKnockbackResistance;
         }
     }
 }

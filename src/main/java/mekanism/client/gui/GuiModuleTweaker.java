@@ -2,10 +2,6 @@ package mekanism.client.gui;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.function.ObjIntConsumer;
-import java.util.function.Supplier;
 import mekanism.api.gear.IModule;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.button.TranslationButton;
@@ -38,6 +34,11 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.ObjIntConsumer;
+import java.util.function.Supplier;
+
 public class GuiModuleTweaker extends GuiMekanism<ModuleTweakerContainer> {
 
     private final ArmorPreview armorPreview = new ArmorPreview();
@@ -55,7 +56,7 @@ public class GuiModuleTweaker extends GuiMekanism<ModuleTweakerContainer> {
             if (moduleScreen != null) {
                 IModule<?> module = moduleScreen.getCurrentModule();
                 if (module != null && selected != -1) {//Shouldn't be null but validate just in case
-                    int slotIndex = menu.slots.get(selected).getSlotIndex();
+                    int slotIndex = menu.slots.get(selected).index;
                     Mekanism.packetHandler().sendToServer(PacketUpdateModuleSettings.create(slotIndex, module.getData(), dataIndex, configItem.getData()));
                 }
             }

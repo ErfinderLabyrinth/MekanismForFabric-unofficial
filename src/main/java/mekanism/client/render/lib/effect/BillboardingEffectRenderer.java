@@ -2,7 +2,6 @@ package mekanism.client.render.lib.effect;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.function.Supplier;
 import mekanism.client.render.MekanismRenderType;
 import mekanism.client.render.RenderTickHandler;
 import mekanism.client.render.RenderTickHandler.LazyRender;
@@ -14,6 +13,8 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+
+import java.util.function.Supplier;
 
 public class BillboardingEffectRenderer {
 

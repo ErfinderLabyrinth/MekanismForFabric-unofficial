@@ -1,16 +1,20 @@
 package mekanism.common.network.to_client.container;
 
-import java.util.ArrayList;
-import java.util.List;
+import mekanism.api.MekanismAPI;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.network.to_client.container.property.PropertyData;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PacketUpdateContainer implements IMekanismPacket {
+    public static final PacketType<PacketUpdateContainer> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "update_container"), PacketUpdateContainer::decode);
 
     //Note: windowId gets transferred over the network as an unsigned byte
     private final short windowId;
@@ -22,8 +26,7 @@ public class PacketUpdateContainer implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        LocalPlayer player = Minecraft.getInstance().player;
+    public void handle(Player player, PacketSender responseSender) {
         //Ensure that the container is one of ours and that the window id is the same as we expect it to be
         if (player != null && player.containerMenu instanceof MekanismContainer container && container.containerId == windowId) {
             //If so then handle the packet
@@ -48,5 +51,10 @@ public class PacketUpdateContainer implements IMekanismPacket {
             }
         }
         return new PacketUpdateContainer(windowId, data);
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 }

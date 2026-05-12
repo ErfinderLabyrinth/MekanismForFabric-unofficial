@@ -2,7 +2,6 @@ package mekanism.client.render.tileentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.Set;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.MekanismRenderer.Model3D;
@@ -26,6 +25,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 @NothingNullByDefault
 public abstract class MekanismTileEntityRenderer<TILE extends BlockEntity> implements BlockEntityRenderer<TILE> {
 
@@ -38,7 +39,7 @@ public abstract class MekanismTileEntityRenderer<TILE extends BlockEntity> imple
     @Override
     public int getViewDistance() {
         //Override and change the default range for TERs for mekanism tiles to the value defined in the config
-        return MekanismConfig.client.terRange.get();
+        return MekanismConfig.client.terRange;
     }
 
     @Override

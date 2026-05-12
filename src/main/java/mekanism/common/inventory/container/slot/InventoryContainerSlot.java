@@ -1,11 +1,12 @@
 package mekanism.common.inventory.container.slot;
 
-import java.util.function.Consumer;
-import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.inventory.slot.BasicInventorySlot;
 import mekanism.common.inventory.warning.ISupportsWarning;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
@@ -13,6 +14,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 //Like net.minecraftforge.items.SlotItemHandler, except directly interacts with the IInventorySlot instead
 public class InventoryContainerSlot extends Slot implements IInsertableSlot {
@@ -46,15 +49,26 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
         }
     }
 
-    @NotNull
     @Override
-    public ItemStack insertItem(@NotNull ItemStack stack, Action action) {
-        ItemStack remainder = slot.insertItem(stack, action, AutomationType.MANUAL);
-        if (action.execute() && stack.getCount() != remainder.getCount()) {
-            setChanged();
+    public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
+        long inserted = slot.insert(resource, maxAmount, transaction);
+        if (inserted != 0) {
+            transaction.addOuterCloseCallback(e -> {
+                setChanged(); //TODO does we need that and is this correct
+            });
         }
-        return remainder;
+        return inserted;
     }
+
+    //    @NotNull
+//    @Override
+//    public ItemStack insertItem(@NotNull ItemStack stack, Action action) {
+//        ItemStack remainder = slot.insertItem(stack, action, AutomationType.MANUAL);
+//        if (action.execute() && stack.getCount() != remainder.getCount()) {
+//            setChanged();
+//        }
+//        return remainder;
+//    }
 
     @Override
     public boolean mayPlace(@NotNull ItemStack stack) {
@@ -63,12 +77,16 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
         }
         if (slot.isEmpty()) {
             //If the slot is currently empty, just try simulating the insertion
-            return insertItem(stack, Action.SIMULATE).getCount() < stack.getCount();
+            try(Transaction t=Transaction.openOuter()) {
+                return slot.insert(ItemVariant.of(stack), stack.getCount(), t) > 0;
+            }
         }
         //Otherwise, we need to check if we can extract the current item
-        if (slot.extractItem(1, Action.SIMULATE, AutomationType.MANUAL).isEmpty()) {
-            //If we can't, fail
-            return false;
+        try(Transaction t=Transaction.openOuter()) {
+            if (slot.extract(slot.getResource(), 1, t) == 0) {
+                //If we can't, fail
+                return false;
+            }
         }
         //If we can check if we can insert the item ignoring the current contents
         return slot.isItemValidForInsertion(stack, AutomationType.MANUAL);
@@ -77,7 +95,7 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
     @NotNull
     @Override
     public ItemStack getItem() {
-        return slot.getStack();
+        return slot.getStack().copy();
     }
 
     @Override
@@ -115,13 +133,25 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
 
     @Override
     public boolean mayPickup(@NotNull Player player) {
-        return !slot.extractItem(1, Action.SIMULATE, AutomationType.MANUAL).isEmpty();
+        try(Transaction t=Transaction.openOuter()) {
+            return slot.extract(slot.getResource(), 1, t) != 0;
+        }
+    }
+
+    @Override
+    public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
+        return slot.extract(resource, maxAmount, transaction);
     }
 
     @NotNull
     @Override
     public ItemStack remove(int amount) {
-        return slot.extractItem(amount, Action.EXECUTE, AutomationType.MANUAL);
+        try(Transaction t=Transaction.openOuter()) {
+            ItemVariant resource = slot.getResource();
+            long amountExtracted = slot.extract(resource, amount, t);
+            t.commit();
+            return resource.toStack((int)amountExtracted);
+        }
     }
 
     //TODO: Forge has a TODO for implementing isSameInventory.
@@ -138,5 +168,25 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
     @Nullable
     public SlotOverlay getSlotOverlay() {
         return slotOverlay;
+    }
+
+    @Override
+    public boolean isResourceBlank() {
+        return slot.isResourceBlank();
+    }
+
+    @Override
+    public ItemVariant getResource() {
+        return slot.getResource();
+    }
+
+    @Override
+    public long getAmount() {
+        return slot.getAmount();
+    }
+
+    @Override
+    public long getCapacity() {
+        return slot.getCapacity();
     }
 }

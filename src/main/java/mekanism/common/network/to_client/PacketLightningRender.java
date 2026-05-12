@@ -1,6 +1,6 @@
 package mekanism.common.network.to_client;
 
-import java.util.function.BooleanSupplier;
+import mekanism.api.MekanismAPI;
 import mekanism.client.render.RenderTickHandler;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.effect.BoltEffect;
@@ -8,11 +8,17 @@ import mekanism.common.lib.effect.BoltEffect.BoltRenderInfo;
 import mekanism.common.lib.effect.BoltEffect.SpawnFunction;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.BooleanSupplier;
 
 public class PacketLightningRender implements IMekanismPacket {
+    public static final PacketType<PacketLightningRender> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "lightning_render"), PacketLightningRender::decode);
 
     private final LightningPreset preset;
     private final Vec3 start;
@@ -29,7 +35,7 @@ public class PacketLightningRender implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
+    public void handle(Player player, PacketSender responseSender) {
         if (preset.shouldAdd.getAsBoolean()) {
             RenderTickHandler.renderBolt(renderer, preset.boltCreator.create(start, end, segments));
         }
@@ -59,10 +65,15 @@ public class PacketLightningRender implements IMekanismPacket {
         BoltEffect create(Vec3 start, Vec3 end, int segments);
     }
 
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
+    }
+
     public enum LightningPreset {
-        MAGNETIC_ATTRACTION(MekanismConfig.client.renderMagneticAttractionParticles, (start, end, segments) ->
+        MAGNETIC_ATTRACTION(() -> MekanismConfig.client.renderMagneticAttractionParticles, (start, end, segments) ->
               new BoltEffect(BoltRenderInfo.ELECTRICITY, start, end, segments).size(0.04F).lifespan(8).spawn(SpawnFunction.noise(8, 4))),
-        TOOL_AOE(MekanismConfig.client.renderToolAOEParticles, (start, end, segments) ->
+        TOOL_AOE(() -> MekanismConfig.client.renderToolAOEParticles, (start, end, segments) ->
               new BoltEffect(BoltRenderInfo.ELECTRICITY, start, end, segments).size(0.015F).lifespan(12).spawn(SpawnFunction.NO_DELAY));
 
         private final BooleanSupplier shouldAdd;

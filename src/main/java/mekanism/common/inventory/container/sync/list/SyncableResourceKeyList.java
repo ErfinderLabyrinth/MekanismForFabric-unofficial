@@ -1,13 +1,14 @@
 package mekanism.common.inventory.container.sync.list;
 
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import mekanism.common.network.to_client.container.property.list.ListPropertyData;
 import mekanism.common.network.to_client.container.property.list.ResourceKeyListPropertyData;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Version of {@link net.minecraft.world.inventory.DataSlot} for handling registry entry based lists

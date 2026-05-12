@@ -1,5 +1,6 @@
 package mekanism.common.network.to_server;
 
+import mekanism.api.MekanismAPI;
 import mekanism.api.Upgrade;
 import mekanism.api.functions.TriConsumer;
 import mekanism.api.security.SecurityMode;
@@ -11,13 +12,8 @@ import mekanism.common.tile.TileEntityLogisticalSorter;
 import mekanism.common.tile.TileEntitySecurityDesk;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.factory.TileEntityFactory;
-import mekanism.common.tile.interfaces.IHasDumpButton;
-import mekanism.common.tile.interfaces.IHasGasMode;
-import mekanism.common.tile.interfaces.IHasMode;
+import mekanism.common.tile.interfaces.*;
 import mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl;
-import mekanism.common.tile.interfaces.ISideConfiguration;
-import mekanism.common.tile.interfaces.ITileFilterHolder;
-import mekanism.common.tile.interfaces.IUpgradeTile;
 import mekanism.common.tile.laser.TileEntityLaserAmplifier;
 import mekanism.common.tile.machine.TileEntityDigitalMiner;
 import mekanism.common.tile.machine.TileEntityDimensionalStabilizer;
@@ -28,18 +24,21 @@ import mekanism.common.tile.qio.TileEntityQIORedstoneAdapter;
 import mekanism.common.util.SecurityUtils;
 import mekanism.common.util.TransporterUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
 
 /**
  * Used for informing the server that an action happened in a GUI
  */
 public class PacketGuiInteract implements IMekanismPacket {
+    public static final PacketType<PacketGuiInteract> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "gui_interaction"), PacketGuiInteract::decode);
 
     private final Type interactionType;
 
@@ -97,8 +96,7 @@ public class PacketGuiInteract implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        Player player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null) {
             if (interactionType == Type.ENTITY) {
                 Entity entity = player.level().getEntity(entityID);
@@ -147,6 +145,11 @@ public class PacketGuiInteract implements IMekanismPacket {
             case INT -> new PacketGuiInteract(buffer.readEnum(GuiInteraction.class), buffer.readBlockPos(), buffer.readVarInt());
             case ITEM -> new PacketGuiInteract(buffer.readEnum(GuiInteractionItem.class), buffer.readBlockPos(), buffer.readItem());
         };
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 
     public enum GuiInteractionItem {

@@ -1,15 +1,16 @@
 package mekanism.api.fluid;
 
 import mekanism.api.Action;
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 
 /**
  * Extended version of {@link IFluidHandler} to make it easier to integrate with Mekanism
  */
 @NothingNullByDefault
-public interface IExtendedFluidHandler extends IFluidHandler {
+public interface IExtendedFluidHandler extends Storage<FluidVariant> {
 
     /**
      * Overrides the stack in the given tank. This method may throw an error if it is called unexpectedly.
@@ -19,7 +20,7 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      *
      * @throws RuntimeException if the handler is called in a way that the handler was not expecting.
      **/
-    void setFluidInTank(int tank, FluidStack stack);
+    //void setFluidInTank(int tank, FluidStack stack);
 
     /**
      * <p>
@@ -34,7 +35,7 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * @return The remaining {@link FluidStack} that was not inserted (if the entire stack is accepted, then return an empty {@link FluidStack}). May be the same as the
      * input {@link FluidStack} if unchanged, otherwise a new {@link FluidStack}. The returned {@link FluidStack} can be safely modified after
      */
-    FluidStack insertFluid(int tank, FluidStack stack, Action action);
+    //FluidStack insertFluid(int tank, FluidStack stack, Action action);
 
     /**
      * Extracts a {@link FluidStack} from a specific tank in this handler.
@@ -49,7 +50,7 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * @return {@link FluidStack} extracted from the tank, must be empty if nothing can be extracted. The returned {@link FluidStack} can be safely modified after, so the
      * tank should return a new or copied stack.
      */
-    FluidStack extractFluid(int tank, int amount, Action action);
+    //FluidStack extractFluid(int tank, long amount, Action action);
 
     /**
      * <p>
@@ -68,9 +69,9 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * fit, falls back to inserting into any empty tanks.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IExtendedFluidHandler} ends up distributing the insertion.
      */
-    default FluidStack insertFluid(FluidStack stack, Action action) {
-        return ExtendedFluidHandlerUtils.insert(stack, action, this::getTanks, this::getFluidInTank, this::insertFluid);
-    }
+//    default FluidStack insertFluid(FluidStack stack, Action action) {
+//        return ExtendedFluidHandlerUtils.insert(stack, action, this::getTanks, this::getFluidInTank, this::insertFluid);
+//    }
 
     /**
      * Extracts a {@link FluidStack} from this handler, distribution is left <strong>entirely</strong> to this {@link IExtendedFluidHandler}.
@@ -88,9 +89,9 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * extracted is found, all future extractions will make sure to also make sure they are for the same type of fluid.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IExtendedFluidHandler} ends up distributing the extraction.
      */
-    default FluidStack extractFluid(int amount, Action action) {
-        return ExtendedFluidHandlerUtils.extract(amount, action, this::getTanks, this::getFluidInTank, this::extractFluid);
-    }
+//    default FluidStack extractFluid(long amount, Action action) {
+//        return ExtendedFluidHandlerUtils.extract(amount, action, this::getTanks, this::getFluidInTank, this::extractFluid);
+//    }
 
     /**
      * Extracts a {@link FluidStack} from this handler, distribution is left <strong>entirely</strong> to this {@link IExtendedFluidHandler}.
@@ -107,40 +108,48 @@ public interface IExtendedFluidHandler extends IFluidHandler {
      * @implNote The default implementation of this method, extracts across all tanks that contents match the type of fluid passed into this method.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IExtendedFluidHandler} ends up distributing the extraction.
      */
-    default FluidStack extractFluid(FluidStack stack, Action action) {
-        return ExtendedFluidHandlerUtils.extract(stack, action, this::getTanks, this::getFluidInTank, this::extractFluid);
-    }
+//    default FluidStack extractFluid(FluidStack stack, Action action) {
+//        return ExtendedFluidHandlerUtils.extract(stack, action, this::getTanks, this::getFluidInTank, this::extractFluid);
+//    }
 
     /**
      * {@inheritDoc}
      *
      * Wrapped to properly use our method declarations
      */
-    @Override
-    @Deprecated
-    default int fill(FluidStack stack, FluidAction action) {
-        return stack.getAmount() - insertFluid(stack, Action.fromFluidAction(action)).getAmount();
-    }
+//    @Override
+//    @Deprecated
+//    default int fill(FluidStack stack, FluidAction action) {
+//        return stack.getAmount() - insertFluid(stack, Action.fromFluidAction(action)).getAmount();
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     *
+//     * Wrapped to properly use our method declarations
+//     */
+//    @Override
+//    @Deprecated
+//    default FluidStack drain(FluidStack stack, FluidAction action) {
+//        return extractFluid(stack, Action.fromFluidAction(action));
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     *
+//     * Wrapped to properly use our method declarations
+//     */
+//    @Override
+//    @Deprecated
+//    default FluidStack drain(int amount, FluidAction action) {
+//        return extractFluid(amount, Action.fromFluidAction(action));
+//    }
 
-    /**
-     * {@inheritDoc}
-     *
-     * Wrapped to properly use our method declarations
-     */
-    @Override
-    @Deprecated
-    default FluidStack drain(FluidStack stack, FluidAction action) {
-        return extractFluid(stack, Action.fromFluidAction(action));
-    }
+    //int getTanks();
 
-    /**
-     * {@inheritDoc}
-     *
-     * Wrapped to properly use our method declarations
-     */
-    @Override
-    @Deprecated
-    default FluidStack drain(int amount, FluidAction action) {
-        return extractFluid(amount, Action.fromFluidAction(action));
-    }
+    //FluidStack getFluidInTank(int tank);
+
+    //long getTankCapacity(int tank);
+
+    //boolean isFluidValid(int tank, FluidStack stack);
 }

@@ -1,7 +1,8 @@
 package mekanism.common.tile.interfaces;
 
-import java.util.Map;
 import net.minecraft.nbt.CompoundTag;
+
+import java.util.Map;
 
 public interface ISustainedData {
 

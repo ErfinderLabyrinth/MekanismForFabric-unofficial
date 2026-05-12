@@ -2,17 +2,18 @@ package mekanism.api.inventory;
 
 import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * A sided variant of {@link IItemHandlerModifiable}
  */
 @NothingNullByDefault
-public interface ISidedItemHandler extends IItemHandlerModifiable {
+public interface ISidedItemHandler {
 
     /**
      * The side this {@link ISidedItemHandler} is for. This defaults to null, which is for internal use.
@@ -23,6 +24,8 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
     default Direction getInventorySideFor() {
         return null;
     }
+
+    Storage<ItemVariant> getContainers(@Nullable Direction side);
 
     /**
      * A sided variant of {@link IItemHandlerModifiable#setStackInSlot(int, ItemStack)}, docs copied for convenience.
@@ -38,7 +41,6 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     void setStackInSlot(int slot, ItemStack stack, @Nullable Direction side);
 
-    @Override
     default void setStackInSlot(int slot, ItemStack stack) {
         setStackInSlot(slot, stack, getInventorySideFor());
     }
@@ -54,7 +56,6 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     int getSlots(@Nullable Direction side);
 
-    @Override
     default int getSlots() {
         return getSlots(getInventorySideFor());
     }
@@ -85,7 +86,6 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     ItemStack getStackInSlot(int slot, @Nullable Direction side);
 
-    @Override
     default ItemStack getStackInSlot(int slot) {
         return getStackInSlot(slot, getInventorySideFor());
     }
@@ -110,12 +110,11 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      *
      * @implNote The {@link ItemStack} <em>should not</em> be modified in this function!
      */
-    ItemStack insertItem(int slot, ItemStack stack, @Nullable Direction side, Action action);
-
-    @Override
-    default ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        return insertItem(slot, stack, getInventorySideFor(), Action.get(!simulate));
-    }
+//    ItemStack insertItem(int slot, ItemStack stack, @Nullable Direction side, Action action);
+//
+//    default ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+//        return insertItem(slot, stack, getInventorySideFor(), Action.get(!simulate));
+//    }
 
     /**
      * A sided variant of {@link IItemHandler#extractItem(int, int, boolean)}, docs copied for convenience.
@@ -136,12 +135,11 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      *
      * @implNote The returned {@link ItemStack} can be safely modified after, so a new or copied stack should be returned.
      */
-    ItemStack extractItem(int slot, int amount, @Nullable Direction side, Action action);
-
-    @Override
-    default ItemStack extractItem(int slot, int amount, boolean simulate) {
-        return extractItem(slot, amount, getInventorySideFor(), Action.get(!simulate));
-    }
+//    ItemStack extractItem(int slot, int amount, @Nullable Direction side, Action action);
+//
+//    default ItemStack extractItem(int slot, int amount, boolean simulate) {
+//        return extractItem(slot, amount, getInventorySideFor(), Action.get(!simulate));
+//    }
 
     /**
      * A sided variant of {@link IItemHandler#getSlotLimit(int)}, docs copied for convenience.
@@ -153,10 +151,9 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      *
      * @return The maximum stack size allowed in the slot.
      */
-    int getSlotLimit(int slot, @Nullable Direction side);
+    long getSlotLimit(int slot, @Nullable Direction side);
 
-    @Override
-    default int getSlotLimit(int slot) {
+    default long getSlotLimit(int slot) {
         return getSlotLimit(slot, getInventorySideFor());
     }
 
@@ -183,7 +180,6 @@ public interface ISidedItemHandler extends IItemHandlerModifiable {
      */
     boolean isItemValid(int slot, ItemStack stack, @Nullable Direction side);
 
-    @Override
     default boolean isItemValid(int slot, ItemStack stack) {
         return isItemValid(slot, stack, getInventorySideFor());
     }

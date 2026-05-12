@@ -20,10 +20,10 @@ import mekanism.common.inventory.container.sync.SyncableInt;
 import mekanism.common.inventory.slot.FuelInventorySlot;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
 
 public class TileEntityFuelwoodHeater extends TileEntityMekanism {
@@ -47,7 +47,7 @@ public class TileEntityFuelwoodHeater extends TileEntityMekanism {
     @Override
     protected IInventorySlotHolder getInitialInventory(IContentsListener listener) {
         InventorySlotHelper builder = InventorySlotHelper.forSide(this::getDirection);
-        builder.addSlot(fuelSlot = FuelInventorySlot.forFuel(stack -> ForgeHooks.getBurnTime(stack, null), listener, 15, 29));
+        builder.addSlot(fuelSlot = FuelInventorySlot.forFuel(stack -> FuelRegistry.INSTANCE.get(stack.getItem()), listener, 15, 29));
         return builder.build();
     }
 
@@ -66,9 +66,9 @@ public class TileEntityFuelwoodHeater extends TileEntityMekanism {
             maxBurnTime = burnTime = fuelSlot.burn();
         }
         if (burnTime > 0) {
-            int ticks = Math.min(burnTime, MekanismConfig.general.fuelwoodTickMultiplier.get());
+            int ticks = Math.min(burnTime, MekanismConfig.general.fuelwoodTickMultiplier);
             burnTime -= ticks;
-            heatCapacitor.handleHeat(MekanismConfig.general.heatPerFuelTick.get() * ticks);
+            heatCapacitor.handleHeat(MekanismConfig.general.heatPerFuelTick * ticks);
             setActive(true);
         } else {
             setActive(false);

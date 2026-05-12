@@ -1,12 +1,10 @@
 package mekanism.common.tile.machine;
 
-import java.util.Collections;
-import java.util.List;
+import mekanism.api.FluidStack;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
 import mekanism.api.fluid.IExtendedFluidTank;
-import mekanism.api.math.FloatingLong;
 import mekanism.api.recipes.ItemStackToFluidRecipe;
 import mekanism.api.recipes.cache.CachedRecipe;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
@@ -48,6 +46,7 @@ import mekanism.common.tile.prefab.TileEntityProgressMachine;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
@@ -56,10 +55,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 public class TileEntityNutritionalLiquifier extends TileEntityProgressMachine<ItemStackToFluidRecipe> {
 
@@ -127,7 +127,7 @@ public class TileEntityNutritionalLiquifier extends TileEntityProgressMachine<It
         InventorySlotHelper builder = InventorySlotHelper.forSideWithConfig(this::getDirection, this::getConfig);
         builder.addSlot(inputSlot = InputInventorySlot.at(stack -> {
                   if (stack.getItem().isEdible()) {//Double-check the stack is food
-                      FoodProperties food = stack.getFoodProperties(null);
+                      FoodProperties food = stack.getItem().getFoodProperties();
                       //And only allow inserting foods that actually would provide paste
                       return food != null && food.getNutrition() > 0;
                   }
@@ -184,7 +184,7 @@ public class TileEntityNutritionalLiquifier extends TileEntityProgressMachine<It
         if (stack.isEmpty() || !stack.getItem().isEdible()) {
             return null;
         }
-        FoodProperties food = stack.getFoodProperties(null);
+        FoodProperties food = stack.getItem().getFoodProperties();
         if (food == null || food.getNutrition() == 0) {
             //If the food provides no healing don't allow consuming it as it won't provide any paste
             return null;
@@ -227,7 +227,7 @@ public class TileEntityNutritionalLiquifier extends TileEntityProgressMachine<It
         updateTag.put(NBTConstants.FLUID_STORED, fluidTank.serializeNBT());
         CompoundTag item = new CompoundTag();
         if (lastPasteItem != null) {
-            NBTUtils.writeRegistryEntry(item, NBTConstants.ID, ForgeRegistries.ITEMS, lastPasteItem.getItem());
+            NBTUtils.writeRegistryEntry(item, NBTConstants.ID, BuiltInRegistries.ITEM, lastPasteItem.getItem());
             CompoundTag tag = lastPasteItem.getInternalTag();
             if (tag != null) {
                 item.put(NBTConstants.TAG, tag.copy());
@@ -238,8 +238,8 @@ public class TileEntityNutritionalLiquifier extends TileEntityProgressMachine<It
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void load(@NotNull CompoundTag tag) {
+        super.load(tag);
         NBTUtils.setCompoundIfPresent(tag, NBTConstants.FLUID_STORED, nbt -> fluidTank.deserializeNBT(nbt));
         NBTUtils.setCompoundIfPresent(tag, NBTConstants.ITEM, nbt -> {
             if (nbt.isEmpty()) {
@@ -247,7 +247,7 @@ public class TileEntityNutritionalLiquifier extends TileEntityProgressMachine<It
             } else if (nbt.contains(NBTConstants.ID, Tag.TAG_STRING)) {
                 ResourceLocation id = ResourceLocation.tryParse(nbt.getString(NBTConstants.ID));
                 if (id != null) {
-                    Item item = ForgeRegistries.ITEMS.getValue(id);
+                    Item item = BuiltInRegistries.ITEM.get(id);
                     if (item != null && item != Items.AIR) {
                         ItemStack stack = new ItemStack(item);
                         if (nbt.contains(NBTConstants.TAG, Tag.TAG_COMPOUND)) {
@@ -263,8 +263,8 @@ public class TileEntityNutritionalLiquifier extends TileEntityProgressMachine<It
 
     //Methods relating to IComputerTile
     @ComputerMethod(methodDescription = ComputerConstants.DESCRIPTION_GET_ENERGY_USAGE)
-    public FloatingLong getEnergyUsage() {
-        return getActive() ? energyContainer.getEnergyPerTick() : FloatingLong.ZERO;
+    public long getEnergyUsage() {
+        return getActive() ? energyContainer.getEnergyPerTick() : 0;
     }
     //End methods IComputerTile
 }

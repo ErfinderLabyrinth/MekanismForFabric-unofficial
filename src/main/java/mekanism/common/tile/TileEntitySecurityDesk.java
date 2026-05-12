@@ -1,11 +1,9 @@
 package mekanism.common.tile;
 
-import java.util.UUID;
 import mekanism.api.IContentsListener;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.security.SecurityMode;
 import mekanism.common.Mekanism;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
 import mekanism.common.inventory.container.ISecurityContainer;
@@ -17,16 +15,13 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.IBoundingBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public class TileEntitySecurityDesk extends TileEntityMekanism implements IBoundingBlock {
 
@@ -38,7 +33,7 @@ public class TileEntitySecurityDesk extends TileEntityMekanism implements IBound
         //Even though there are inventory slots make this return none as accessible by automation, as then people could lock items to other
         // people unintentionally. We also disable the security object capability so that we only provide access to the security desk as an
         // "owner object" which means that all access checks will be handled as requiring the owner
-        addDisabledCapabilities(ForgeCapabilities.ITEM_HANDLER, Capabilities.SECURITY_OBJECT);
+//        addDisabledCapabilities(ForgeCapabilities.ITEM_HANDLER, Capabilities.SECURITY_OBJECT);
     }
 
     @NotNull
@@ -70,7 +65,7 @@ public class TileEntitySecurityDesk extends TileEntityMekanism implements IBound
             frequency.setOverridden(!frequency.isOverridden());
             markForSave();
             // send the security update to other players; this change will be visible on machine security tabs
-            Mekanism.packetHandler().sendToAll(new PacketSecurityUpdate(frequency));
+            Mekanism.packetHandler().sendToAll(new PacketSecurityUpdate(frequency), level.getServer());
             validateAccess();
         }
     }
@@ -120,7 +115,7 @@ public class TileEntitySecurityDesk extends TileEntityMekanism implements IBound
                 frequency.setSecurityMode(mode);
                 markForSave();
                 // send the security update to other players; this change will be visible on machine security tabs
-                Mekanism.packetHandler().sendToAll(new PacketSecurityUpdate(frequency));
+                Mekanism.packetHandler().sendToAll(new PacketSecurityUpdate(frequency), level.getServer());
                 if (ISecurityUtils.INSTANCE.moreRestrictive(old, mode)) {
                     validateAccess();
                 }
@@ -131,7 +126,7 @@ public class TileEntitySecurityDesk extends TileEntityMekanism implements IBound
     public void addTrusted(String name) {
         SecurityFrequency frequency = getFreq();
         if (frequency != null) {
-            ServerLifecycleHooks.getCurrentServer().getProfileCache().get(name).ifPresent(profile -> frequency.addTrusted(profile.getId(), profile.getName()));
+            level.getServer().getProfileCache().get(name).ifPresent(profile -> frequency.addTrusted(profile.getId(), profile.getName()));
         }
     }
 
@@ -139,9 +134,9 @@ public class TileEntitySecurityDesk extends TileEntityMekanism implements IBound
         return getFrequency(FrequencyType.SECURITY);
     }
 
-    @Override
-    public boolean isOffsetCapabilityDisabled(@NotNull Capability<?> capability, Direction side, @NotNull Vec3i offset) {
-        //Don't allow proxying any capabilities by marking them all as disabled
-        return true;
-    }
+//    @Override
+//    public boolean isOffsetCapabilityDisabled(@NotNull Capability<?> capability, Direction side, @NotNull Vec3i offset) {
+//        //Don't allow proxying any capabilities by marking them all as disabled
+//        return true;
+//    }
 }

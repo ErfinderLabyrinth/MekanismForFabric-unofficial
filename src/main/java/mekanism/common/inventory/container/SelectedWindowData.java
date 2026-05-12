@@ -1,14 +1,14 @@
 package mekanism.common.inventory.container;
 
+import mekanism.common.config.MekanismConfig;
+import mekanism.common.content.qio.IQIOCraftingWindowHolder;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import mekanism.common.config.MekanismConfig;
-import mekanism.common.config.value.CachedIntValue;
-import mekanism.common.content.qio.IQIOCraftingWindowHolder;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class SelectedWindowData {
 
@@ -55,18 +55,18 @@ public class SelectedWindowData {
             CachedWindowPosition cachedPosition = MekanismConfig.client.lastWindowPositions.get(saveName);
             if (cachedPosition != null) {
                 boolean changed = false;
-                CachedIntValue cachedX = cachedPosition.x();
-                if (cachedX.get() != x) {
-                    cachedX.set(x);
+                int cachedX = cachedPosition.x();
+                if (cachedX != x) {
+                    cachedX = x;
                     changed = true;
                 }
-                CachedIntValue cachedY = cachedPosition.y();
-                if (cachedY.get() != y) {
-                    cachedY.set(y);
+                int cachedY = cachedPosition.y();
+                if (cachedY != y) {
+                    cachedY = y;
                     changed = true;
                 }
                 if (changed) {
-                    MekanismConfig.client.save();
+//                    MekanismConfig.client.save();
                 }
             }
         }
@@ -80,13 +80,13 @@ public class SelectedWindowData {
         if (saveName != null) {
             CachedWindowPosition cachedPosition = MekanismConfig.client.lastWindowPositions.get(saveName);
             if (cachedPosition != null) {
-                return new WindowPosition(cachedPosition.x().get(), cachedPosition.y().get());
+                return new WindowPosition(cachedPosition.x(), cachedPosition.y());
             }
         }
         return new WindowPosition(Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
-    public record CachedWindowPosition(CachedIntValue x, CachedIntValue y) {
+    public record CachedWindowPosition(int x, int y) {
     }
 
     public record WindowPosition(int x, int y) {

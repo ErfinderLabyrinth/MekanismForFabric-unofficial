@@ -1,9 +1,5 @@
 package mekanism.common.inventory.slot.chemical;
 
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.IChemicalHandler;
@@ -14,17 +10,23 @@ import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.recipes.ItemStackToInfuseTypeRecipe;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.recipe.MekanismRecipeType;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
 @NothingNullByDefault
 public class InfusionInventorySlot extends ChemicalInventorySlot<InfuseType, InfusionStack> {
 
     @Nullable
-    public static IInfusionHandler getCapability(ItemStack stack) {
-        return getCapability(stack, Capabilities.INFUSION_HANDLER);
+    public static IInfusionHandler getCapability(ContainerItemContext stack) {
+        return stack.find(Capabilities.INFUSION_HANDLER_ITEM);
     }
 
     /**
@@ -43,7 +45,7 @@ public class InfusionInventorySlot extends ChemicalInventorySlot<InfuseType, Inf
         Function<ItemStack, InfusionStack> potentialConversionSupplier = stack -> getPotentialConversion(worldSupplier.get(), stack);
         return new InfusionInventorySlot(infusionTank, worldSupplier, getFillOrConvertExtractPredicate(infusionTank, InfusionInventorySlot::getCapability, potentialConversionSupplier),
               getFillOrConvertInsertPredicate(infusionTank, InfusionInventorySlot::getCapability, potentialConversionSupplier), stack -> {
-            if (stack.getCapability(Capabilities.INFUSION_HANDLER).isPresent()) {
+            if (ContainerItemContext.withConstant(stack).find(Capabilities.INFUSION_HANDLER_ITEM) != null) {
                 //Note: we mark all infusion items as valid and have a more restrictive insert check so that we allow full tanks when they are done being filled
                 return true;
             }
@@ -60,8 +62,8 @@ public class InfusionInventorySlot extends ChemicalInventorySlot<InfuseType, Inf
 
     @Nullable
     @Override
-    protected IChemicalHandler<InfuseType, InfusionStack> getCapability() {
-        return getCapability(current);
+    protected IChemicalHandler<InfuseType, InfusionStack, IInfusionTank> getCapability() {
+        return getCapability(ContainerItemContext.ofSingleSlot(current));
     }
 
     @Nullable

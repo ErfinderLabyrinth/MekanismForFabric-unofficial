@@ -1,9 +1,8 @@
 package mekanism.api.recipes.outputs;
 
-import java.util.Objects;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.gas.IGasTank;
@@ -15,9 +14,12 @@ import mekanism.api.recipes.PressurizedReactionRecipe.PressurizedReactionRecipeO
 import mekanism.api.recipes.SawmillRecipe.ChanceOutput;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker;
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 @NothingNullByDefault
 public class OutputHelper {
@@ -31,7 +33,7 @@ public class OutputHelper {
      * @param tank                Tank to wrap.
      * @param notEnoughSpaceError The error to apply if the output causes the recipe to not be able to perform any operations.
      */
-    public static <STACK extends ChemicalStack<?>> IOutputHandler<@NotNull STACK> getOutputHandler(IChemicalTank<?, STACK> tank, RecipeError notEnoughSpaceError) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> IOutputHandler<@NotNull STACK> getOutputHandler(IChemicalTank<CHEMICAL, STACK> tank, RecipeError notEnoughSpaceError) {
         Objects.requireNonNull(tank, "Tank cannot be null.");
         Objects.requireNonNull(notEnoughSpaceError, "Not enough space error cannot be null.");
         return new IOutputHandler<>() {
@@ -204,13 +206,15 @@ public class OutputHelper {
      * @param toOutput   Output result.
      * @param operations Operations to perform.
      */
-    static <STACK extends ChemicalStack<?>> void handleOutput(IChemicalTank<?, STACK> tank, STACK toOutput, int operations) {
+    static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> void handleOutput(IChemicalTank<CHEMICAL, STACK> tank, STACK toOutput, int operations) {
         if (operations == 0) {
             //This should not happen
             return;
         }
-        STACK output = tank.createStack(toOutput, toOutput.getAmount() * operations);
-        tank.insert(output, Action.EXECUTE, AutomationType.INTERNAL);
+        try(Transaction t=Transaction.openOuter()) {
+            tank.insert(toOutput.getType(), toOutput.getAmount() * operations, t);
+            t.commit();
+        }
     }
 
     private static void handleOutput(IExtendedFluidTank fluidTank, FluidStack toOutput, int operations) {
@@ -218,7 +222,10 @@ public class OutputHelper {
             //This should not happen
             return;
         }
-        fluidTank.insert(new FluidStack(toOutput, toOutput.getAmount() * operations), Action.EXECUTE, AutomationType.INTERNAL);
+        try(Transaction t=Transaction.openOuter()) {
+            fluidTank.insert(toOutput.variant(), toOutput.amount() * operations, t);
+            t.commit();
+        }
     }
 
     private static void handleOutput(IInventorySlot inventorySlot, ItemStack toOutput, int operations) {
@@ -231,7 +238,10 @@ public class OutputHelper {
             // that we are using the fill the tank with
             output.setCount(output.getCount() * operations);
         }
-        inventorySlot.insertItem(output, Action.EXECUTE, AutomationType.INTERNAL);
+        try(Transaction t=Transaction.openOuter()) {
+            inventorySlot.insert(ItemVariant.of(output), output.getCount(), t);
+            t.commit();
+        }
     }
 
     /**
@@ -242,15 +252,17 @@ public class OutputHelper {
      * @param toOutput       Output result.
      * @param notEnoughSpace The error to apply if the output causes the recipe to not be able to perform any operations.
      */
-    static <STACK extends ChemicalStack<?>> void calculateOperationsCanSupport(OperationTracker tracker, RecipeError notEnoughSpace, IChemicalTank<?, STACK> tank,
+    static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> void calculateOperationsCanSupport(OperationTracker tracker, RecipeError notEnoughSpace, IChemicalTank<CHEMICAL, STACK> tank,
           STACK toOutput) {
         //If our output is empty, we have nothing to add, so we treat it as being able to fit all
         if (!toOutput.isEmpty()) {
             //Copy the stack and make it be max size
             STACK maxOutput = tank.createStack(toOutput, Long.MAX_VALUE);
             //Divide the amount we can actually use by the amount one output operation is equal to, capping it at the max we were told about
-            STACK remainder = tank.insert(maxOutput, Action.SIMULATE, AutomationType.INTERNAL);
-            long amountUsed = maxOutput.getAmount() - remainder.getAmount();
+            long amountUsed;
+            try(Transaction t=Transaction.openOuter()) {
+                amountUsed = tank.insert(toOutput.getType(), Long.MAX_VALUE, t);
+            }
             //Divide the amount we can actually use by the amount one output operation is equal to, capping it at the max we were told about
             int operations = MathUtils.clampToInt(amountUsed / toOutput.getAmount());
             tracker.updateOperations(operations);
@@ -268,12 +280,13 @@ public class OutputHelper {
         //If our output is empty, we have nothing to add, so we treat it as being able to fit all
         if (!toOutput.isEmpty()) {
             //Copy the stack and make it be max size
-            FluidStack maxOutput = new FluidStack(toOutput, Integer.MAX_VALUE);
             //Then simulate filling the fluid tank, so we can see how much actually can fit
-            FluidStack remainder = tank.insert(maxOutput, Action.SIMULATE, AutomationType.INTERNAL);
-            int amountUsed = maxOutput.getAmount() - remainder.getAmount();
+            long amountUsed;
+            try(Transaction t=Transaction.openOuter()) {
+                amountUsed = tank.insert(toOutput.variant(), Integer.MAX_VALUE, t);
+            }
             //Divide the amount we can actually use by the amount one output operation is equal to, capping it at the max we were told about
-            int operations = amountUsed / toOutput.getAmount();
+            int operations = (int)(amountUsed / toOutput.amount());
             tracker.updateOperations(operations);
             if (operations == 0) {
                 if (amountUsed == 0 && tank.getNeeded() > 0) {
@@ -290,8 +303,11 @@ public class OutputHelper {
         if (!toOutput.isEmpty()) {
             //Make a copy of the stack we are outputting with its maximum size
             ItemStack output = toOutput.copyWithCount(toOutput.getMaxStackSize());
-            ItemStack remainder = slot.insertItem(output, Action.SIMULATE, AutomationType.INTERNAL);
-            int amountUsed = output.getCount() - remainder.getCount();
+            long remainder;
+            try(Transaction t=Transaction.openOuter()) {
+                remainder = slot.insert(ItemVariant.of(output), output.getCount(), t);
+            }
+            int amountUsed = output.getCount() - (int)remainder;
             //Divide the amount we can actually use by the amount one output operation is equal to, capping it at the max we were told about
             int operations = amountUsed / toOutput.getCount();
             tracker.updateOperations(operations);

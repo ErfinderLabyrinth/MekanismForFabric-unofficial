@@ -1,7 +1,8 @@
 package mekanism.common.lib.multiblock;
 
-import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 public interface IMultiblock<T extends MultiblockData> extends IMultiblockBase {
 

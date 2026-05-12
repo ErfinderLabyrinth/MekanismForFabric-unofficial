@@ -1,8 +1,7 @@
 package mekanism.client;
 
-import java.util.Collections;
-import java.util.List;
 import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -11,7 +10,10 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class RobitSpriteUploader extends TextureAtlasHolder {
+import java.util.Collections;
+import java.util.List;
+
+public class RobitSpriteUploader extends TextureAtlasHolder implements IdentifiableResourceReloadListener {
 
     public static final ResourceLocation ATLAS_LOCATION = Mekanism.rl("textures/atlas/robit.png");
     public static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(ATLAS_LOCATION);
@@ -28,5 +30,10 @@ public class RobitSpriteUploader extends TextureAtlasHolder {
     @Override
     public TextureAtlasSprite getSprite(@NotNull ResourceLocation location) {
         return super.getSprite(location);
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return null;
     }
 }

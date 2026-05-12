@@ -1,20 +1,18 @@
 package mekanism.api.text;
 
-import java.util.ArrayList;
-import java.util.List;
+import mekanism.api.FluidStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TextComponentUtil {
 
@@ -78,9 +76,9 @@ public class TextComponentUtil {
             } else if (component instanceof ItemStack stack) {
                 current = stack.getHoverName().copy();
             } else if (component instanceof FluidStack stack) {
-                current = stack.getDisplayName().copy();
+                current = Component.literal("COMING SOON (mekanism.api.text.TextComponentUtil)"); //stack.getDisplayName().copy();
             } else if (component instanceof Fluid fluid) {
-                current = translate(fluid.getFluidType().getDescriptionId());
+                current = Component.literal("COMING SOON (mekanism.api.text.TextComponentUtil)"); //translate(fluid.getFluidType().getDescriptionId());
             } else if (component instanceof Direction direction) {
                 current = getTranslatedDirection(direction);
             } else if (component instanceof Boolean bool) {
@@ -197,9 +195,10 @@ public class TextComponentUtil {
             } else if (component instanceof ItemStack stack) {
                 current = stack.getHoverName().copy();
             } else if (component instanceof FluidStack stack) {
-                current = stack.getDisplayName().copy();
+                current = translate(Util.makeDescriptionId("block", BuiltInRegistries.FLUID.getKey(stack.getFluid())));
+//                current = Component.literal("COMING SOON (mekanism.api.text.TextComponentUtil)"); //stack.getDisplayName().copy();
             } else if (component instanceof Fluid fluid) {
-                current = translate(fluid.getFluidType().getDescriptionId());
+                current = Component.literal("COMING SOON (mekanism.api.text.TextComponentUtil)"); //translate(fluid.getFluidType().getDescriptionId());
             } else if (component instanceof Direction direction) {
                 current = getTranslatedDirection(direction);
             } else if (component instanceof Boolean bool) {

@@ -2,21 +2,21 @@ package mekanism.client.render.lib;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
-import java.util.Arrays;
-import java.util.function.Consumer;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.lib.Color;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.pipeline.QuadBakingVertexConsumer;
 import org.joml.Vector3f;
+
+import java.util.function.Consumer;
 
 public class Quad {
 
@@ -46,8 +46,8 @@ public class Quad {
         sprite = quad.getSprite();
         tintIndex = quad.getTintIndex();
         shade = quad.isShade();
-        hasAmbientOcclusion = quad.hasAmbientOcclusion();
-        new BakedQuadUnpacker().putBulkData(new PoseStack().last(), quad, 1, 1, 1, 1, 0, OverlayTexture.NO_OVERLAY, true);
+        //hasAmbientOcclusion = quad.hasAmbientOcclusion();
+        new BakedQuadUnpacker().putBulkData(new PoseStack().last(), quad, 1, 1, 1, 1, 0);
     }
 
     public TextureAtlasSprite getTexture() {
@@ -109,16 +109,17 @@ public class Quad {
     }
 
     public BakedQuad bake() {
-        QuadBakingVertexConsumer.Buffered quadBaker = new QuadBakingVertexConsumer.Buffered();
-        quadBaker.setSprite(sprite);
-        quadBaker.setDirection(side);
-        quadBaker.setTintIndex(tintIndex);
-        quadBaker.setShade(shade);
-        quadBaker.setHasAmbientOcclusion(hasAmbientOcclusion);
-        for (Vertex vertex : vertices) {
-            vertex.write(quadBaker);
-        }
-        return quadBaker.getQuad();
+//        QuadBakingVertexConsumer.Buffered quadBaker = new QuadBakingVertexConsumer.Buffered();
+//        quadBaker.setSprite(sprite);
+//        quadBaker.setDirection(side);
+//        quadBaker.setTintIndex(tintIndex);
+//        quadBaker.setShade(shade);
+//        quadBaker.setHasAmbientOcclusion(hasAmbientOcclusion);
+//        for (Vertex vertex : vertices) {
+//            vertex.write(quadBaker);
+//        }
+//        return quadBaker.getQuad();
+        return new BakedQuad(new int[0], 0, Direction.NORTH, Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(TextureManager.INTENTIONAL_MISSING_TEXTURE), false);
     }
 
     public Quad copy() {
@@ -197,11 +198,11 @@ public class Quad {
             //We don't support having a default color
         }
 
-        @Override
-        public VertexConsumer misc(VertexFormatElement element, int... rawData) {
-            vertex.misc(element, Arrays.copyOf(rawData, rawData.length));
-            return this;
-        }
+//        @Override
+//        public VertexConsumer misc(VertexFormatElement element, int... rawData) {
+//            vertex.misc(element, Arrays.copyOf(rawData, rawData.length));
+//            return this;
+//        }
     }
 
     public static class Builder {
