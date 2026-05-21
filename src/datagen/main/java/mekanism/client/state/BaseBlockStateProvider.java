@@ -9,6 +9,8 @@ import mekanism.common.DataGenJsonConstants;
 import mekanism.common.registration.impl.FluidDeferredRegister.MekanismFluidType;
 import mekanism.common.registration.impl.FluidRegistryObject;
 import mekanism.common.util.RegistryUtils;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
@@ -22,16 +24,15 @@ import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class BaseBlockStateProvider<PROVIDER extends BaseBlockModelProvider> extends BlockStateProvider {
+public abstract class BaseBlockStateProvider<PROVIDER extends BaseBlockModelProvider> extends FabricModelProvider {
 
     private final String modid;
     private final PROVIDER modelProvider;
 
-    public BaseBlockStateProvider(PackOutput output, String modid, ExistingFileHelper existingFileHelper,
-          BiFunction<PackOutput, ExistingFileHelper, PROVIDER> providerCreator) {
-        super(output, modid, existingFileHelper);
+    public BaseBlockStateProvider(FabricDataOutput output, String modid, Function<PackOutput, PROVIDER> providerCreator) {
+        super(output);
         this.modid = modid;
-        modelProvider = providerCreator.apply(output, existingFileHelper);
+        modelProvider = providerCreator.apply(output);
     }
 
     @NotNull
@@ -49,8 +50,8 @@ public abstract class BaseBlockStateProvider<PROVIDER extends BaseBlockModelProv
         return getVariantBuilder(blockProvider.getBlock());
     }
 
-    protected void registerFluidBlockStates(List<FluidRegistryObject<? extends MekanismFluidType, ?, ?, ?, ?>> fluidROs) {
-        for (FluidRegistryObject<? extends MekanismFluidType, ?, ?, ?, ?> fluidRO : fluidROs) {
+    protected void registerFluidBlockStates(List<FluidRegistryObject<?, ?, ?, ?>> fluidROs) {
+        for (FluidRegistryObject<?, ?, ?, ?> fluidRO : fluidROs) {
             simpleBlock(fluidRO.getBlock(), models().getBuilder(RegistryUtils.getPath(fluidRO.getBlock())).texture(DataGenJsonConstants.PARTICLE,
                   fluidRO.getFluidType().stillTexture));
         }

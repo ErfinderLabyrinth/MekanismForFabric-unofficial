@@ -9,12 +9,12 @@ import mekanism.common.registries.MekanismGases;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.resource.ResourceType;
 import mekanism.common.tags.MekanismTags;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 
 class NucleosynthesizingRecipeProvider implements ISubRecipeProvider {
 
@@ -28,7 +28,7 @@ class NucleosynthesizingRecipeProvider implements ISubRecipeProvider {
               1_250
         ).build(consumer, Mekanism.rl(basePath + "wither_skeleton_skull"));
         NucleosynthesizingRecipeBuilder.nucleosynthesizing(
-              IngredientCreatorAccess.item().from(Tags.Items.NETHER_STARS),
+              IngredientCreatorAccess.item().from(Items.NETHER_STAR),
               IngredientCreatorAccess.gas().from(MekanismGases.ANTIMATTER, 5),
               new ItemStack(Items.HEART_OF_THE_SEA),
               1_250
@@ -86,7 +86,7 @@ class NucleosynthesizingRecipeProvider implements ISubRecipeProvider {
               750
         ).build(consumer, Mekanism.rl(basePath + "enchanted_golden_apple"));
         NucleosynthesizingRecipeBuilder.nucleosynthesizing(
-              IngredientCreatorAccess.item().from(Tags.Items.LEATHER),
+              IngredientCreatorAccess.item().from(Items.LEATHER),
               IngredientCreatorAccess.gas().from(MekanismGases.ANTIMATTER, 3),
               new ItemStack(Items.PHANTOM_MEMBRANE),
               750
@@ -123,7 +123,7 @@ class NucleosynthesizingRecipeProvider implements ISubRecipeProvider {
               500
         ).build(consumer, Mekanism.rl(basePath + "chorus_flower"));
         NucleosynthesizingRecipeBuilder.nucleosynthesizing(
-              IngredientCreatorAccess.item().from(Tags.Items.CHESTS_WOODEN),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.CHESTS),
               IngredientCreatorAccess.gas().from(MekanismGases.ANTIMATTER, 2),
               new ItemStack(Blocks.ENDER_CHEST),
               500
@@ -136,7 +136,7 @@ class NucleosynthesizingRecipeProvider implements ISubRecipeProvider {
               200
         ).build(consumer, Mekanism.rl(basePath + "iron"));
         NucleosynthesizingRecipeBuilder.nucleosynthesizing(
-              IngredientCreatorAccess.item().from(Tags.Items.OBSIDIAN),
+              IngredientCreatorAccess.item().from(Items.OBSIDIAN),
               IngredientCreatorAccess.gas().from(MekanismGases.ANTIMATTER, 1),
               new ItemStack(Blocks.CRYING_OBSIDIAN),
               200

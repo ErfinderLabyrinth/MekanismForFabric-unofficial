@@ -13,7 +13,7 @@ public class AdditionsSpriteSourceProvider extends BaseSpriteSourceProvider {
 
     @Override
     protected void addSources() {
-        SourceList atlas = atlas(BLOCKS_ATLAS);
+        List<SpriteSource> atlas = atlas(BLOCKS_ATLAS);
         addFiles(atlas, MekanismAdditions.rl("entity/balloon"), MekanismAdditions.rl("entity/balloon_string"));
     }
 }

@@ -6,7 +6,7 @@ import mekanism.generators.common.registries.GeneratorsBlocks;
 public class GeneratorsBlockLootTables extends BaseBlockLootTables {
 
     @Override
-    protected void generate() {
+    public void generate() {
         dropSelfWithContents(GeneratorsBlocks.BLOCKS.getAllBlocks());
     }
 }

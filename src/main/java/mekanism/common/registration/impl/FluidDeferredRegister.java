@@ -184,10 +184,10 @@ public class FluidDeferredRegister {
 
     public static class FluidTypeRenderProperties {
 
-        private ResourceLocation stillTexture = LIQUID;
-        private ResourceLocation flowingTexture = LIQUID_FLOW;
+        public ResourceLocation stillTexture = LIQUID;
+        public ResourceLocation flowingTexture = LIQUID_FLOW;
         //For now all our fluids use the same "overlay" for being against glass as vanilla water.
-        private ResourceLocation overlayTexture = OVERLAY;
+        public ResourceLocation overlayTexture = OVERLAY;
         private ResourceLocation renderOverlayTexture = RENDER_OVERLAY;
         private int color = 0xFFFFFFFF;
 

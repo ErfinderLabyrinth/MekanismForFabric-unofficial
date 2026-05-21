@@ -18,7 +18,6 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WeatheringCopper;
-import net.minecraftforge.common.Tags;
 
 class ChemicalInjectorRecipeProvider implements ISubRecipeProvider {
 
@@ -27,7 +26,7 @@ class ChemicalInjectorRecipeProvider implements ISubRecipeProvider {
         String basePath = "injecting/";
         //Brick -> clay ball
         ItemStackChemicalToItemStackRecipeBuilder.injecting(
-              IngredientCreatorAccess.item().from(Tags.Items.INGOTS_BRICK),
+              IngredientCreatorAccess.item().from(Items.BRICK),
               IngredientCreatorAccess.gas().from(MekanismTags.Gases.WATER_VAPOR, 1),
               new ItemStack(Items.CLAY_BALL)
         ).build(consumer, Mekanism.rl(basePath + "brick_to_clay_ball"));
@@ -39,7 +38,7 @@ class ChemicalInjectorRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "dirt_to_mud"));
         //Gunpowder -> sulfur
         ItemStackChemicalToItemStackRecipeBuilder.injecting(
-              IngredientCreatorAccess.item().from(Tags.Items.GUNPOWDER),
+              IngredientCreatorAccess.item().from(Items.GUNPOWDER),
               IngredientCreatorAccess.gas().from(MekanismGases.HYDROGEN_CHLORIDE, 1),
               MekanismItems.SULFUR_DUST.getItemStack()
         ).build(consumer, Mekanism.rl(basePath + "gunpowder_to_sulfur"));

@@ -332,35 +332,6 @@ loom {
             /*setupRunConfig(it, true)*/
             server()
         }
-        gameTestServer {
-            /*setupRunConfig(it, true, "runGameTests")*/
-            server()
-        }
-        datagen {
-            client()
-            //setupRunConfig(it, false)
-            //environment 'target', 'fmluserdevdata'
-
-            //args '--all', '--output', file('src/datagen/generated/'),
-            //        '--mod', 'mekanism', '--existing', file('src/main/resources/')
-
-            /*mods.named("mekanism").configure { source((SourceSet) sourceSets.datagenMain) }
-            for (String name : secondaryModules) {
-                def modName = "mekanism${name}"
-                def extra = getExtraSourceSet(name, 'datagen')
-                mods.named(modName).configure { source(extra) }
-                args '--mod', modName, '--existing', file("src/${name}/resources/")
-            }*/
-
-            source sourceSets.datagenMain
-
-            project.afterEvaluate {
-                //After the project has been evaluated so our dependencies has been populated,
-                // add all the extra non-mod files to runData's minecraft classpath so that they can be
-                // access from the game module layer at runtime
-                //lazyToken("minecraft_classpath", datagenExtraClasspath)
-            }
-        }
     }
 
     mods {

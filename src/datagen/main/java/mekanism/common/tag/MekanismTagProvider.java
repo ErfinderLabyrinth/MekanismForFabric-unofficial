@@ -1,6 +1,8 @@
 package mekanism.common.tag;
 
 import com.google.common.collect.Table.Cell;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -33,7 +35,10 @@ import mekanism.common.resource.ore.OreBlockType;
 import mekanism.common.resource.ore.OreType;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.tags.TagUtils;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -55,18 +60,14 @@ import net.minecraft.world.level.block.BannerBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 
 public class MekanismTagProvider extends BaseTagProvider {
 
-    public static final TagKey<EntityType<?>> PVI_COMPAT = TagUtils.createKey(ForgeRegistries.ENTITY_TYPES, new ResourceLocation("per-viam-invenire", "replace_vanilla_navigator"));
-    public static final TagKey<Fluid> CREATE_NO_INFINITE_FLUID = FluidTags.create(new ResourceLocation("create", "no_infinite_draining"));
+    public static final TagKey<EntityType<?>> PVI_COMPAT = TagUtils.createKey(Registries.ENTITY_TYPE, new ResourceLocation("per-viam-invenire", "replace_vanilla_navigator"));
+    public static final TagKey<Fluid> CREATE_NO_INFINITE_FLUID = TagKey.create(Registries.FLUID, new ResourceLocation("create", "no_infinite_draining"));
 
-    public MekanismTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
-        super(output, lookupProvider, Mekanism.MODID, existingFileHelper);
+    public MekanismTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, lookupProvider, Mekanism.MODID);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class MekanismTagProvider extends BaseTagProvider {
         addInfuseTags();
         addPellets();
         addColorableItems();
-        getBlockBuilder(MekanismTags.Blocks.ATOMIC_DISASSEMBLER_ORE).add(Tags.Blocks.ORES, BlockTags.LOGS);
+        getBlockBuilder(MekanismTags.Blocks.ATOMIC_DISASSEMBLER_ORE).add(ConventionalBlockTags.ORES, BlockTags.LOGS);
         addToTag(BlockTags.GUARDED_BY_PIGLINS, MekanismBlocks.REFINED_GLOWSTONE_BLOCK, MekanismBlocks.PERSONAL_BARREL, MekanismBlocks.PERSONAL_CHEST);
         addToTag(BlockTags.HOGLIN_REPELLENTS, MekanismBlocks.TELEPORTER, MekanismBlocks.QUANTUM_ENTANGLOPORTER);
         getItemBuilder(ItemTags.PIGLIN_LOVED).add(
@@ -149,12 +150,12 @@ public class MekanismTagProvider extends BaseTagProvider {
             getItemBuilder(switch (item.getRowKey()) {
                 case SHARD -> MekanismTags.Items.SHARDS;
                 case CRYSTAL -> MekanismTags.Items.CRYSTALS;
-                case DUST -> Tags.Items.DUSTS;
+                case DUST -> ConventionalItemTags.DUSTS;
                 case DIRTY_DUST -> MekanismTags.Items.DIRTY_DUSTS;
                 case CLUMP -> MekanismTags.Items.CLUMPS;
-                case INGOT -> Tags.Items.INGOTS;
-                case RAW -> Tags.Items.RAW_MATERIALS;
-                case NUGGET -> Tags.Items.NUGGETS;
+                case INGOT -> ConventionalItemTags.INGOTS;
+                case RAW -> ConventionalItemTags.RAW_ORES;
+                case NUGGET -> ConventionalItemTags.NUGGETS;
                 default -> throw new IllegalStateException("Unexpected resource type for primary resource.");
             }).add(tag);
         }
@@ -255,7 +256,7 @@ public class MekanismTagProvider extends BaseTagProvider {
               MekanismTileEntityTypes.ELITE_UNIVERSAL_CABLE,
               MekanismTileEntityTypes.ULTIMATE_UNIVERSAL_CABLE
         };
-        addToTag(MekanismTags.TileEntityTypes.IMMOVABLE, tilesToBlacklist);
+        addToTag(MekanismTags.TileEntityTypes.IMMOVABLE, Arrays.stream(tilesToBlacklist).map(type -> type.get()).toArray());
         addToTag(MekanismTags.TileEntityTypes.RELOCATION_NOT_SUPPORTED, tilesToBlacklist);
         getTileEntityTypeBuilder(MekanismTags.TileEntityTypes.CARDBOARD_BLACKLIST)
               .add(MekanismTags.TileEntityTypes.IMMOVABLE, MekanismTags.TileEntityTypes.RELOCATION_NOT_SUPPORTED);
@@ -263,7 +264,7 @@ public class MekanismTagProvider extends BaseTagProvider {
 
     private void addTools() {
         addWrenches();
-        addToTag(Tags.Items.TOOLS_BOWS, MekanismItems.ELECTRIC_BOW);
+        addToTag(ConventionalItemTags.BOWS, MekanismItems.ELECTRIC_BOW);
     }
 
     private void addWrenches() {

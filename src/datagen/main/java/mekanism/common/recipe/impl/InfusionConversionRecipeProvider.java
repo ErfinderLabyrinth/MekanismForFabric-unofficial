@@ -10,10 +10,11 @@ import mekanism.common.registries.MekanismInfuseTypes;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.resource.ResourceType;
 import mekanism.common.tags.MekanismTags;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 
 //TODO: Try to cleanup some of the duplicate code in this class?
 class InfusionConversionRecipeProvider implements ISubRecipeProvider {
@@ -56,7 +57,7 @@ class InfusionConversionRecipeProvider implements ISubRecipeProvider {
 
         //Coal Block
         ItemStackToChemicalRecipeBuilder.infusionConversion(
-              IngredientCreatorAccess.item().from(Tags.Items.STORAGE_BLOCKS_COAL),
+              IngredientCreatorAccess.item().from(Items.COAL_BLOCK),
               MekanismInfuseTypes.CARBON.getStack(90)
         ).build(consumer, Mekanism.rl(basePath + "from_coal_block"));
         //Coal
@@ -91,8 +92,9 @@ class InfusionConversionRecipeProvider implements ISubRecipeProvider {
     private void addInfusionConversionFungiRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //Mushrooms
         ItemStackToChemicalRecipeBuilder.infusionConversion(
-              IngredientCreatorAccess.item().from(BaseRecipeProvider.createIngredient(
-                    Tags.Items.MUSHROOMS,
+              IngredientCreatorAccess.item().from(Ingredient.of(
+                    Blocks.BROWN_MUSHROOM,
+                    Blocks.RED_MUSHROOM,
                     //TODO: If these get added to the mushroom tag then we can remove them from here
                     Blocks.WARPED_FUNGUS,
                     Blocks.CRIMSON_FUNGUS
@@ -104,12 +106,12 @@ class InfusionConversionRecipeProvider implements ISubRecipeProvider {
     private void addInfusionConversionRedstoneRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //Block
         ItemStackToChemicalRecipeBuilder.infusionConversion(
-              IngredientCreatorAccess.item().from(Tags.Items.STORAGE_BLOCKS_REDSTONE),
+              IngredientCreatorAccess.item().from(Items.REDSTONE_BLOCK),
               MekanismInfuseTypes.REDSTONE.getStack(90)
         ).build(consumer, Mekanism.rl(basePath + "from_block"));
         //Dust
         ItemStackToChemicalRecipeBuilder.infusionConversion(
-              IngredientCreatorAccess.item().from(Tags.Items.DUSTS_REDSTONE),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.REDSTONE_DUSTS),
               MekanismInfuseTypes.REDSTONE.getStack(10)
         ).build(consumer, Mekanism.rl(basePath + "from_dust"));
         //Enriched

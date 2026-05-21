@@ -39,9 +39,4 @@ public class IntrinsicMekanismTagBuilder<TYPE> extends MekanismTagBuilder<TYPE, 
     public final IntrinsicMekanismTagBuilder<TYPE> addOptional(TYPE... elements) {
         return addOptional(this::getKey, elements);
     }
-
-    @SafeVarargs
-    public final IntrinsicMekanismTagBuilder<TYPE> remove(TYPE... elements) {
-        return remove(this::getKey, elements);
-    }
 }

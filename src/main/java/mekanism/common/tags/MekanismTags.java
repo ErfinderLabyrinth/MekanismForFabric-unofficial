@@ -387,11 +387,11 @@ public class MekanismTags {
         private MobEffects() {
         }
 
-        public static final HolderSet.Named<MobEffect> SPEED_UP_BLACKLIST = tag("speed_up_blacklist");
+        public static final TagKey<MobEffect> SPEED_UP_BLACKLIST = tag("speed_up_blacklist");
         public static final LazyTagLookup<MobEffect> SPEED_UP_BLACKLIST_LOOKUP = LazyTagLookup.create(BuiltInRegistries.MOB_EFFECT, SPEED_UP_BLACKLIST);
 
-        private static HolderSet.Named<MobEffect> tag(String name) {
-            return TagUtils.createKey(BuiltInRegistries.MOB_EFFECT, Mekanism.rl(name));
+        private static TagKey<MobEffect> tag(String name) {
+            return TagUtils.createKey(Registries.MOB_EFFECT, Mekanism.rl(name));
         }
     }
 

@@ -8,13 +8,13 @@ import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import mekanism.common.Mekanism;
 import mekanism.common.recipe.ISubRecipeProvider;
 import mekanism.common.tags.MekanismTags;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 
 class CombinerRecipeProvider implements ISubRecipeProvider {
 
@@ -27,13 +27,13 @@ class CombinerRecipeProvider implements ISubRecipeProvider {
         //Gravel
         CombinerRecipeBuilder.combining(
               IngredientCreatorAccess.item().from(Items.FLINT),
-              IngredientCreatorAccess.item().from(Tags.Items.COBBLESTONE_NORMAL),
+              IngredientCreatorAccess.item().from(Items.COBBLESTONE),
               new ItemStack(Blocks.GRAVEL)
         ).build(consumer, Mekanism.rl(basePath + "gravel"));
         //Obsidian
         CombinerRecipeBuilder.combining(
               IngredientCreatorAccess.item().from(MekanismTags.Items.DUSTS_OBSIDIAN, 4),
-              IngredientCreatorAccess.item().from(Tags.Items.COBBLESTONE_DEEPSLATE),
+              IngredientCreatorAccess.item().from(Items.COBBLED_DEEPSLATE),
               new ItemStack(Blocks.OBSIDIAN)
         ).build(consumer, Mekanism.rl(basePath + "obsidian"));
         //Rooted Dirt
@@ -44,7 +44,7 @@ class CombinerRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "rooted_dirt"));
         //Packed mud
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.CROPS_WHEAT),
+              IngredientCreatorAccess.item().from(Items.WHEAT),
               IngredientCreatorAccess.item().from(Blocks.MUD),
               new ItemStack(Blocks.PACKED_MUD)
         ).build(consumer, Mekanism.rl(basePath + "packed_mud"));
@@ -59,62 +59,62 @@ class CombinerRecipeProvider implements ISubRecipeProvider {
     private void addCombinerDyeRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //Black + white -> light gray
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_BLACK),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_WHITE, 2),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.BLACK_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.WHITE_DYES, 2),
               new ItemStack(Items.LIGHT_GRAY_DYE, 6)
         ).build(consumer, Mekanism.rl(basePath + "black_to_light_gray"));
         //Blue + green -> cyan
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_BLUE),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_GREEN),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.BLUE_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.GREEN_DYES),
               new ItemStack(Items.CYAN_DYE, 4)
         ).build(consumer, Mekanism.rl(basePath + "cyan"));
         //Gray + white -> light gray
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_GRAY),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_WHITE),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.GRAY_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.WHITE_DYES),
               new ItemStack(Items.LIGHT_GRAY_DYE, 4)
         ).build(consumer, Mekanism.rl(basePath + "gray_to_light_gray"));
         //Blue + white -> light blue
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_BLUE),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_WHITE),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.BLUE_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.WHITE_DYES),
               new ItemStack(Items.LIGHT_BLUE_DYE, 4)
         ).build(consumer, Mekanism.rl(basePath + "light_blue"));
         //Green + white -> lime
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_GREEN),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_WHITE),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.GREEN_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.WHITE_DYES),
               new ItemStack(Items.LIME_DYE, 4)
         ).build(consumer, Mekanism.rl(basePath + "lime"));
         //Purple + pink -> magenta
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_PURPLE),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_PINK),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.PURPLE_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.PINK_DYES),
               new ItemStack(Items.MAGENTA_DYE, 4)
         ).build(consumer, Mekanism.rl(basePath + "magenta"));
         //Red + yellow -> orange
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_RED),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_YELLOW),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.RED_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.YELLOW_DYES),
               new ItemStack(Items.ORANGE_DYE, 4)
         ).build(consumer, Mekanism.rl(basePath + "orange"));
         //Red + white -> pink
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_RED),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_WHITE),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.RED_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.WHITE_DYES),
               new ItemStack(Items.PINK_DYE, 4)
         ).build(consumer, Mekanism.rl(basePath + "pink"));
         //Blue + red -> purple
         CombinerRecipeBuilder.combining(
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_BLUE),
-              IngredientCreatorAccess.item().from(Tags.Items.DYES_RED),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.BLUE_DYES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.RED_DYES),
               new ItemStack(Items.PURPLE_DYE, 4)
         ).build(consumer, Mekanism.rl(basePath + "purple"));
     }
 
     private void addCombinerGlowRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
-        ItemStackIngredient glow = IngredientCreatorAccess.item().from(Tags.Items.DUSTS_GLOWSTONE);
+        ItemStackIngredient glow = IngredientCreatorAccess.item().from(Items.GLOWSTONE);
         //Sweet Berries -> Glow Berries
         CombinerRecipeBuilder.combining(
               IngredientCreatorAccess.item().from(Items.SWEET_BERRIES),

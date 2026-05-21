@@ -14,7 +14,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 public class AdditionsBlockLootTables extends BaseBlockLootTables {
 
     @Override
-    protected void generate() {
+    public void generate() {
         //Obsidian TNT
         registerObsidianTNT();
         //Plastic slabs

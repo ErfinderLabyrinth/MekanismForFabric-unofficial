@@ -62,14 +62,6 @@ public abstract class BaseDatapackRegistryProvider extends FabricDynamicRegistry
         return ResourceKey.create(Registries.PLACED_FEATURE, name);
     }
 
-    protected static ResourceKey<BiomeModifier> biomeModifier(ResourceLocation name) {
-        return ResourceKey.create(ForgeRegistries.Keys.BIOME_MODIFIERS, name);
-    }
-
-    protected static ResourceKey<StructureModifier> structureModifier(ResourceLocation name) {
-        return ResourceKey.create(ForgeRegistries.Keys.STRUCTURE_MODIFIERS, name);
-    }
-
     protected record PlacedFeaturesHolder(Holder<PlacedFeature> feature, Holder<PlacedFeature> retrogen) {
 
     }

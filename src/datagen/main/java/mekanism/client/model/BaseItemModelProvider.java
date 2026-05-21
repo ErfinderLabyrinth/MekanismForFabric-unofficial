@@ -17,8 +17,10 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.model.ModelLocationUtils;
 import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.data.models.model.ModelTemplates;
+import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ArmorItem;
@@ -52,7 +54,7 @@ public abstract class BaseItemModelProvider extends FabricModelProvider {
     }
 
     public boolean textureExists(ResourceLocation texture) {
-        return existingFileHelper.exists(texture, PackType.CLIENT_RESOURCES, ".png", "textures");
+        return output.exists(texture, PackType.CLIENT_RESOURCES, ".png", "textures");
     }
 
     protected ResourceLocation itemTexture(IItemProvider itemProvider) {
@@ -88,10 +90,11 @@ public abstract class BaseItemModelProvider extends FabricModelProvider {
 //        return generators.generateFlatItem(item, ModelTemplates.FLAT_ITEM);withExistingParent(itemProvider.getName(), "item/generated").texture("layer0", texture);
 //    }
 
-    protected ItemModelBuilder resource(IItemProvider itemProvider, String type) {
+    protected void resource(ItemModelGenerators generators, IItemProvider itemProvider, String type) {
         //TODO: Try to come up with a better solution to this. Currently we have an empty texture for layer zero so that we can set
         // the tint only on layer one so that we only end up having the tint show for this fallback texture
-        ItemModelBuilder modelBuilder = generated(itemProvider, modLoc("item/empty")).texture("layer1", modLoc("item/" + type));
+        ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(itemProvider.asItem()), TextureMapping.layered())
+        generators.generateFlatItem(, new ResourceLocation(modid, "item/empty")).texture("layer1", modLoc("item/" + type));
         ResourceLocation overlay = modLoc("item/" + type + "_overlay");
         if (textureExists(overlay)) {
             //If we have an overlay type for that resource type then add that as another layer

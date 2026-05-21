@@ -30,12 +30,10 @@ import org.jetbrains.annotations.NotNull;
 public abstract class BaseAdvancementProvider implements DataProvider {
 
     private final PackOutput.PathProvider pathProvider;
-    private final ExistingFileHelper existingFileHelper;
     private final String modid;
 
-    public BaseAdvancementProvider(PackOutput output, ExistingFileHelper existingFileHelper, String modid) {
+    public BaseAdvancementProvider(PackOutput output, String modid) {
         this.modid = modid;
-        this.existingFileHelper = existingFileHelper;
         this.pathProvider = output.createPathProvider(PackOutput.Target.DATA_PACK, "advancements");
     }
 
@@ -51,13 +49,9 @@ public abstract class BaseAdvancementProvider implements DataProvider {
         List<CompletableFuture<?>> futures = new ArrayList<>();
         registerAdvancements(advancement -> {
             ResourceLocation id = advancement.getId();
-            if (existingFileHelper.exists(id, PackType.SERVER_DATA, ".json", "advancements")) {
-                throw new IllegalStateException("Duplicate advancement " + id);
-            }
             Path path = this.pathProvider.json(id);
             JsonObject json = advancement.deconstruct().serializeToJson();
             cleanAdvancementJson(json);
-            existingFileHelper.trackGenerated(id, PackType.SERVER_DATA, ".json", "advancements");
             futures.add(DataProvider.saveStable(cache, json, path));
         });
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
@@ -79,7 +73,7 @@ public abstract class BaseAdvancementProvider implements DataProvider {
     protected abstract void registerAdvancements(@NotNull Consumer<Advancement> consumer);
 
     protected ExtendedAdvancementBuilder advancement(MekanismAdvancement advancement) {
-        return ExtendedAdvancementBuilder.advancement(advancement, existingFileHelper);
+        return ExtendedAdvancementBuilder.advancement(advancement);
     }
 
     public static InventoryChangeTrigger.TriggerInstance hasItems(ItemPredicate... predicates) {

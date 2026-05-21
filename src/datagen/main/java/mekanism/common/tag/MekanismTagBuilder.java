@@ -44,15 +44,6 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
         return apply(builder::addElement, locationGetter, elements);
     }
 
-    public BUILDER replace() {
-        return replace(true);
-    }
-
-    public BUILDER replace(boolean value) {
-        builder.replace(value);
-        return self();
-    }
-
     public BUILDER addOptional(ResourceLocation... locations) {
         return addOptional(Function.identity(), locations);
     }
@@ -79,23 +70,6 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
     @SafeVarargs
     private <T> BUILDER add(Function<ResourceLocation, TagEntry> entryCreator, Function<T, ResourceLocation> locationGetter, T... elements) {
         return apply(rl -> add(entryCreator.apply(rl)), locationGetter, elements);
-    }
-
-    public BUILDER remove(ResourceLocation... locations) {
-        return remove(Function.identity(), locations);
-    }
-
-    @SafeVarargs
-    public final <T> BUILDER remove(Function<T, ResourceLocation> locationGetter, T... elements) {
-        return apply(rl -> builder.removeElement(rl, modID), locationGetter, elements);
-    }
-
-    @SafeVarargs
-    public final BUILDER remove(TagKey<TYPE>... tags) {
-        for (TagKey<TYPE> tag : tags) {
-            builder.removeTag(tag.location(), modID);
-        }
-        return self();
     }
 
     @SafeVarargs

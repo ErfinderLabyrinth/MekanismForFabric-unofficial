@@ -13,7 +13,7 @@ public class ToolsSpriteSourceProvider extends BaseSpriteSourceProvider {
 
     @Override
     protected void addSources() {
-        SourceList atlas = atlas(SHIELD_PATTERNS_ATLAS);
+        List<SpriteSource> atlas = atlas(SHIELD_PATTERNS_ATLAS);
         for (ShieldTextures textures : ShieldTextures.values()) {
             addFiles(atlas, textures.getBase().texture());
         }

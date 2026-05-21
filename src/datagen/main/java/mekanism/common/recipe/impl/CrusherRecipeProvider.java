@@ -19,7 +19,6 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComposterBlock;
-import net.minecraftforge.common.Tags;
 
 class CrusherRecipeProvider implements ISubRecipeProvider {
 
@@ -53,7 +52,7 @@ class CrusherRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "charcoal_dust"));
         //Cobblestone -> Gravel
         ItemStackToItemStackRecipeBuilder.crushing(
-              IngredientCreatorAccess.item().from(Tags.Items.COBBLESTONE_NORMAL),
+              IngredientCreatorAccess.item().from(Items.COBBLESTONE),
               new ItemStack(Blocks.GRAVEL)
         ).build(consumer, Mekanism.rl(basePath + "cobblestone_to_gravel"));
         //Flint -> Gunpowder
@@ -63,7 +62,7 @@ class CrusherRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "flint_to_gunpowder"));
         //Gravel -> Sand
         ItemStackToItemStackRecipeBuilder.crushing(
-              IngredientCreatorAccess.item().from(Tags.Items.GRAVEL),
+              IngredientCreatorAccess.item().from(Items.GRAVEL),
               new ItemStack(Blocks.SAND)
         ).build(consumer, Mekanism.rl(basePath + "gravel_to_sand"));
         //Mud bricks -> packed mud
@@ -276,7 +275,7 @@ class CrusherRecipeProvider implements ISubRecipeProvider {
     private void addCrusherQuartzRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //Quartz Block -> Smooth Quartz Block
         ItemStackToItemStackRecipeBuilder.crushing(
-              IngredientCreatorAccess.item().from(Tags.Items.STORAGE_BLOCKS_QUARTZ),
+              IngredientCreatorAccess.item().from(Items.QUARTZ_BLOCK),
               new ItemStack(Blocks.SMOOTH_QUARTZ)
         ).build(consumer, Mekanism.rl(basePath + "to_smooth_quartz"));
         //Quartz Slab -> Smooth Quartz Slab

@@ -7,11 +7,11 @@ import mekanism.common.Mekanism;
 import mekanism.common.recipe.ISubRecipeProvider;
 import mekanism.common.registries.MekanismItems;
 import mekanism.common.tags.MekanismTags;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 
 class MetallurgicInfuserRecipeProvider implements ISubRecipeProvider {
 
@@ -51,7 +51,7 @@ class MetallurgicInfuserRecipeProvider implements ISubRecipeProvider {
     private void addMetallurgicInfuserAlloyRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //Infused
         ItemStackChemicalToItemStackRecipeBuilder.metallurgicInfusing(
-              IngredientCreatorAccess.item().from(Tags.Items.INGOTS_IRON),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.IRON_INGOTS),
               IngredientCreatorAccess.infusion().from(MekanismTags.InfuseTypes.REDSTONE, 10),
               MekanismItems.INFUSED_ALLOY.getItemStack()
         ).build(consumer, Mekanism.rl(basePath + "infused"));
@@ -130,7 +130,7 @@ class MetallurgicInfuserRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "dirt_to_podzol"));
         //Sand -> dirt
         ItemStackChemicalToItemStackRecipeBuilder.metallurgicInfusing(
-              IngredientCreatorAccess.item().from(Tags.Items.SAND),
+              IngredientCreatorAccess.item().from(Blocks.SAND),
               IngredientCreatorAccess.infusion().from(MekanismTags.InfuseTypes.BIO, 10),
               new ItemStack(Blocks.DIRT)
         ).build(consumer, Mekanism.rl(basePath + "sand_to_dirt"));

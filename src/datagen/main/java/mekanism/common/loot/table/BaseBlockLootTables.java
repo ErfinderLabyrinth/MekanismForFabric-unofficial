@@ -62,7 +62,6 @@ import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
-import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,14 +80,13 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
     }
 
     @Override
-    protected void add(@NotNull Block block, @NotNull LootTable.Builder table) {
+    public void add(@NotNull Block block, @NotNull LootTable.Builder table) {
         //Overwrite the core register method to add to our list of known blocks
         super.add(block, table);
         knownBlocks.add(block);
     }
 
     @NotNull
-    @Override
     protected Iterable<Block> getKnownBlocks() {
         return knownBlocks;
     }
@@ -210,12 +208,10 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
                 //If the block has an inventory and no custom loot function, copy the inventory slots,
                 // but if it is an IItemHandler, which for most cases of ours it will be,
                 // then only copy the slots if we actually have any slots because otherwise maybe something just went wrong
-                else if (!(tile instanceof IItemHandler handler) || handler.getSlots() > 0) {
-                    //If we don't actually handle saving an inventory (such as the quantum entangloporter, don't actually add it as something to copy)
-                    if (!(tile instanceof TileEntityMekanism tileMek) || tileMek.persistInventory()) {
-                        nbtBuilder.copy(NBTConstants.ITEMS, NBTConstants.MEK_DATA + "." + NBTConstants.ITEMS);
-                        hasContents = true;
-                    }
+                //If we don't actually handle saving an inventory (such as the quantum entangloporter, don't actually add it as something to copy)
+                if (!(tile instanceof TileEntityMekanism tileMek) || tileMek.persistInventory()) {
+                    nbtBuilder.copy(NBTConstants.ITEMS, NBTConstants.MEK_DATA + "." + NBTConstants.ITEMS);
+                    hasContents = true;
                 }
             }
             if (block instanceof BlockCardboardBox) {
@@ -233,7 +229,6 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
                 itemLootPool.when(condition);
             }
             add(block, LootTable.lootTable().withPool(applyExplosionCondition(hasContents, LootPool.lootPool()
-                  .name("main")
                   .setRolls(ConstantValue.exactly(1))
                   .add(itemLootPool)
             )));
@@ -252,9 +247,8 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
      */
     @NotNull
     @Override
-    protected LootTable.Builder createSlabItemTable(@NotNull Block slab) {
+    public LootTable.Builder createSlabItemTable(@NotNull Block slab) {
         return LootTable.lootTable().withPool(LootPool.lootPool()
-              .name("main")
               .setRolls(ConstantValue.exactly(1))
               .add(applyExplosionDecay(slab, LootItem.lootTableItem(slab)
                           .apply(SetItemCountFunction.setCount(ConstantValue.exactly(2))
@@ -281,7 +275,6 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
     @Override
     public LootTable.Builder createSingleItemTable(@NotNull ItemLike item) {
         return LootTable.lootTable().withPool(applyExplosionCondition(item, LootPool.lootPool()
-              .name("main")
               .setRolls(ConstantValue.exactly(1))
               .add(LootItem.lootTableItem(item))
         ));
@@ -292,7 +285,7 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
      */
     @NotNull
     @Override
-    protected LootTable.Builder createSingleItemTableWithSilkTouch(@NotNull Block block, @NotNull ItemLike item, @NotNull NumberProvider range) {
+    public LootTable.Builder createSingleItemTableWithSilkTouch(@NotNull Block block, @NotNull ItemLike item, @NotNull NumberProvider range) {
         return createSilkTouchDispatchTable(block, applyExplosionDecay(block, LootItem.lootTableItem(item).apply(SetItemCountFunction.setCount(range))));
     }
 
@@ -300,7 +293,7 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
      * Like vanilla's {@link BlockLootSubProvider#createSilkTouchDispatchTable(Block, LootPoolEntryContainer.Builder)} except with a named pool
      */
     @NotNull
-    protected static LootTable.Builder createSilkTouchDispatchTable(@NotNull Block block, @NotNull LootPoolEntryContainer.Builder<?> builder) {
+    public static LootTable.Builder createSilkTouchDispatchTable(@NotNull Block block, @NotNull LootPoolEntryContainer.Builder<?> builder) {
         return createSelfDropDispatchTable(block, HAS_SILK_TOUCH, builder);
     }
 
@@ -308,10 +301,9 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
      * Like vanilla's {@link BlockLootSubProvider#createSelfDropDispatchTable(Block, LootItemCondition.Builder, LootPoolEntryContainer.Builder)} except with a named pool
      */
     @NotNull
-    protected static LootTable.Builder createSelfDropDispatchTable(@NotNull Block block, @NotNull LootItemCondition.Builder conditionBuilder,
-          @NotNull LootPoolEntryContainer.Builder<?> entry) {
+    public static LootTable.Builder createSelfDropDispatchTable(@NotNull Block block, @NotNull LootItemCondition.Builder conditionBuilder,
+                                                                @NotNull LootPoolEntryContainer.Builder<?> entry) {
         return LootTable.lootTable().withPool(LootPool.lootPool()
-              .name("main")
               .setRolls(ConstantValue.exactly(1))
               .add(LootItem.lootTableItem(block)
                     .when(conditionBuilder)

@@ -27,7 +27,6 @@ public abstract class BaseEntityLootTables extends EntityLootSubProvider {
     }
 
     @NotNull
-    @Override
     protected Stream<EntityType<?>> getKnownEntityTypes() {
         return knownEntityTypes.stream();
     }

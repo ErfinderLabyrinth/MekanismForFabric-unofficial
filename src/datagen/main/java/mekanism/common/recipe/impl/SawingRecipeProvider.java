@@ -7,13 +7,13 @@ import mekanism.common.Mekanism;
 import mekanism.common.recipe.ISubRecipeProvider;
 import mekanism.common.recipe.RecipeProviderUtil;
 import mekanism.common.registries.MekanismItems;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 
 class SawingRecipeProvider implements ISubRecipeProvider {
 
@@ -54,7 +54,7 @@ class SawingRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "barrel"));
         //Bookshelf
         SawmillRecipeBuilder.sawing(
-              IngredientCreatorAccess.item().from(Tags.Items.BOOKSHELVES),
+              IngredientCreatorAccess.item().from(ConventionalItemTags.BOOKSHELVES),
               new ItemStack(Blocks.OAK_PLANKS, 6),
               new ItemStack(Items.BOOK, 3),
               1
@@ -83,7 +83,7 @@ class SawingRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "crafting_table"));
         //Fences
         SawmillRecipeBuilder.sawing(
-              IngredientCreatorAccess.item().from(Tags.Items.FENCES_WOODEN),
+              IngredientCreatorAccess.item().from(ItemTags.FENCES),
               new ItemStack(Items.STICK, 3)
         ).build(consumer, Mekanism.rl(basePath + "fences"));
         //Item Frame
@@ -161,7 +161,7 @@ class SawingRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "stairs"));
         //Stick
         SawmillRecipeBuilder.sawing(
-              IngredientCreatorAccess.item().from(Tags.Items.RODS_WOODEN),
+              IngredientCreatorAccess.item().from(Items.STICK),
               MekanismItems.SAWDUST.getItemStack()
         ).build(consumer, Mekanism.rl(basePath + "stick"));
         //Buttons

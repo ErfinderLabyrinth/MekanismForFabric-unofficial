@@ -1,6 +1,5 @@
 package mekanism.common.recipe.impl;
 
-import java.util.List;
 import java.util.function.Consumer;
 import mekanism.api.datagen.recipe.builder.PressurizedReactionRecipeBuilder;
 import mekanism.api.math.FloatingLong;
@@ -11,11 +10,13 @@ import mekanism.common.recipe.ISubRecipeProvider;
 import mekanism.common.registries.MekanismGases;
 import mekanism.common.registries.MekanismItems;
 import mekanism.common.tags.MekanismTags;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 
 class PressurizedReactionRecipeProvider implements ISubRecipeProvider {
 
@@ -30,10 +31,10 @@ class PressurizedReactionRecipeProvider implements ISubRecipeProvider {
     private void addCoalGasificationRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //Blocks
         PressurizedReactionRecipeBuilder.reaction(
-              IngredientCreatorAccess.item().from(BaseRecipeProvider.createIngredient(List.of(
-                    Tags.Items.STORAGE_BLOCKS_COAL,
-                    MekanismTags.Items.STORAGE_BLOCKS_CHARCOAL
-              ))),
+              IngredientCreatorAccess.item().from(BaseRecipeProvider.createIngredient(
+                    MekanismTags.Items.STORAGE_BLOCKS_CHARCOAL,
+                    Items.COAL_BLOCK
+              )),
               IngredientCreatorAccess.fluid().from(FluidTags.WATER, 1_000),
               IngredientCreatorAccess.gas().from(MekanismGases.OXYGEN, 1_000),
               900,
@@ -51,9 +52,9 @@ class PressurizedReactionRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "coals"));
         //Dusts
         PressurizedReactionRecipeBuilder.reaction(
-              IngredientCreatorAccess.item().from(BaseRecipeProvider.createIngredient(
-                    MekanismTags.Items.DUSTS_COAL,
-                    MekanismTags.Items.DUSTS_CHARCOAL
+              IngredientCreatorAccess.item().from(DefaultCustomIngredients.any(
+                    Ingredient.of(MekanismTags.Items.DUSTS_COAL),
+                    Ingredient.of(MekanismTags.Items.DUSTS_CHARCOAL)
               )),
               IngredientCreatorAccess.fluid().from(FluidTags.WATER, 100),
               IngredientCreatorAccess.gas().from(MekanismGases.OXYGEN, 100),
@@ -99,7 +100,7 @@ class PressurizedReactionRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "planks"));
         //Rods, each worth a 30th of a log.
         PressurizedReactionRecipeBuilder.reaction(
-              IngredientCreatorAccess.item().from(Tags.Items.RODS_WOODEN, 3),
+              IngredientCreatorAccess.item().from(Items.STICK, 3),
               IngredientCreatorAccess.fluid().from(FluidTags.WATER, 10),
               IngredientCreatorAccess.gas().from(MekanismGases.OXYGEN, 10),
               15,

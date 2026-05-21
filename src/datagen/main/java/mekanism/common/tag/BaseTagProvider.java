@@ -29,6 +29,7 @@ import mekanism.common.registries.MekanismDamageTypes.MekanismDamageType;
 import mekanism.common.util.RegistryUtils;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -58,15 +59,13 @@ public abstract class BaseTagProvider implements DataProvider {
     private final Map<ResourceKey<? extends Registry<?>>, Map<TagKey<?>, TagBuilder>> supportedTagTypes = new Object2ObjectLinkedOpenHashMap<>();
     private final Set<Block> knownHarvestRequirements = new ReferenceOpenHashSet<>();
     private final CompletableFuture<HolderLookup.Provider> lookupProvider;
-    private final ExistingFileHelper existingFileHelper;
     private final PackOutput output;
     private final String modid;
 
-    protected BaseTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, String modid, @Nullable ExistingFileHelper existingFileHelper) {
+    protected BaseTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, String modid) {
         this.output = output;
         this.modid = modid;
         this.lookupProvider = lookupProvider;
-        this.existingFileHelper = existingFileHelper;
     }
 
     @NotNull
@@ -103,7 +102,7 @@ public abstract class BaseTagProvider implements DataProvider {
             supportedTagTypes.forEach((registry, tagTypeMap) -> {
                 if (!tagTypeMap.isEmpty()) {
                     //Create a dummy provider and pass all our collected data through to it
-                    futures.add(new TagsProvider(output, registry, lookupProvider, modid, existingFileHelper) {
+                    futures.add(new TagsProvider(output, registry, lookupProvider, modid) {
                         @Override
                         protected void addTags(@NotNull HolderLookup.Provider lookupProvider) {
                             //Add each tag builder to the wrapped provider's builder
@@ -132,12 +131,12 @@ public abstract class BaseTagProvider implements DataProvider {
         return new IntrinsicMekanismTagBuilder<>(keyExtractor, getTagBuilder(registry, tag), modid);
     }
 
-    protected <TYPE> IntrinsicMekanismTagBuilder<TYPE> getBuilder(IForgeRegistry<TYPE> registry, TagKey<TYPE> tag) {
-        return new IntrinsicMekanismTagBuilder<>(element -> registry.getResourceKey(element).orElseThrow(), getTagBuilder(registry.getRegistryKey(), tag), modid);
+    protected <TYPE> IntrinsicMekanismTagBuilder<TYPE> getBuilder(Registry<TYPE> registry, TagKey<TYPE> tag) {
+        return new IntrinsicMekanismTagBuilder<>(element -> registry.getResourceKey(element).orElseThrow(), getTagBuilder((ResourceKey<? extends Registry<TYPE>>) ((Registry<Registry<?>>)BuiltInRegistries.REGISTRY).getResourceKey(registry).get(), tag), modid);
     }
 
     protected IntrinsicMekanismTagBuilder<Item> getItemBuilder(TagKey<Item> tag) {
-        return getBuilder(ForgeRegistries.ITEMS, tag);
+        return getBuilder(BuiltInRegistries.ITEM, tag);
     }
 
     protected IntrinsicMekanismTagBuilder<Block> getBlockBuilder(TagKey<Block> tag) {
@@ -185,7 +184,7 @@ public abstract class BaseTagProvider implements DataProvider {
     }
 
     protected IntrinsicMekanismTagBuilder<MobEffect> getMobEffectBuilder(TagKey<MobEffect> tag) {
-        return getBuilder(ForgeRegistries.MOB_EFFECTS, tag);
+        return getBuilder(Registries.MOB_EFFECT, tag);
     }
 
     protected void addToTag(TagKey<Item> tag, ItemLike... itemProviders) {
