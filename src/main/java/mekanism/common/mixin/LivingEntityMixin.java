@@ -1,5 +1,6 @@
 package mekanism.common.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 import mekanism.common.Mekanism;
@@ -73,6 +74,11 @@ public class LivingEntityMixin implements LivingEntityExtension {
     @Inject(method = "jumpFromGround", at = @At("HEAD"))
     public void onLivingEntityJump(CallbackInfo ci) {
         Mekanism.commonPlayerTickHandler.onLivingJump((LivingEntity) (Object)this);
+    }
+
+    @ModifyExpressionValue(method = "onEquipItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isSameItemSameTags(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z"))
+    public boolean suppressEquipmentSound(boolean original) {
+        return original || SUPPRESS_SOUND.get();
     }
 
 

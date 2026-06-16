@@ -4,7 +4,6 @@ import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.providers.IGasProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.client.render.RenderPropertiesProvider;
@@ -17,6 +16,7 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.interfaces.IItemHUDProvider;
 import mekanism.common.item.interfaces.IJetpackItem;
 import mekanism.common.item.interfaces.IModeItem;
+import mekanism.common.mixinhelper.LivingEntityExtension;
 import mekanism.common.registries.MekanismGases;
 import mekanism.common.util.ItemDataUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -87,7 +87,12 @@ public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IMode
 
     @Override
     public void useJetpackFuel(ContainerItemContext context) {
-        useGas(context, 1);
+        LivingEntityExtension.SUPPRESS_SOUND.set(true);
+        try {
+            useGas(context, 1);
+        } finally {
+            LivingEntityExtension.SUPPRESS_SOUND.set(false);
+        }
     }
 
     public void setMode(ItemStack stack, JetpackMode mode) {
