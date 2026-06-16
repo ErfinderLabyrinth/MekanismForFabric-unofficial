@@ -115,13 +115,18 @@ public class TileEntityQIODriveArray extends TileEntityQIOComponent implements I
     }
 
     @Override
-    public void load(@NotNull CompoundTag tag) {
-        super.load(tag);
-        byte[] status = tag.getByteArray(NBTConstants.DRIVES);
+    public void handleUpdatePacket(CompoundTag updateTag) {
+        super.handleUpdatePacket(updateTag);
+        byte[] status = updateTag.getByteArray(NBTConstants.DRIVES);
         if (!Arrays.equals(status, driveStatus)) {
             driveStatus = status;
             updateModelData();
         }
+    }
+
+    @Override
+    public void load(@NotNull CompoundTag tag) {
+        super.load(tag);
     }
 
     @Override

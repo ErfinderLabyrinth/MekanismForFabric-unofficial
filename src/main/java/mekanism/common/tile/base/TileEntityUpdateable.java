@@ -204,6 +204,6 @@ public abstract class TileEntityUpdateable extends BlockEntity implements ITileW
     }
 
     public void handleUpdatePacket(CompoundTag updateTag) {
-        load(updateTag);
+        //load(updateTag);
     }
 }
