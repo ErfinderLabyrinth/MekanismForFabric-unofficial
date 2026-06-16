@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": {
+      "tag": "c:black_dyes"
+    },
+    "I": {
+      "tag": "forge:ingots/lead"
+    }
+  },
+  "pattern": [
+    "I I",
+    "IDI"
+  ],
+  "result": {
+    "item": "mekanism:hazmat_boots"
+  }
+}

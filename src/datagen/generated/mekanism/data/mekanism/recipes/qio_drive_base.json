@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "forge:pellets/polonium"
+    },
+    "C": {
+      "item": "mekanism:ultimate_control_circuit"
+    },
+    "I": {
+      "tag": "forge:ingots/lead"
+    }
+  },
+  "pattern": [
+    "ICI",
+    "C#C",
+    "ICI"
+  ],
+  "result": {
+    "item": "mekanism:qio_drive_base"
+  }
+}

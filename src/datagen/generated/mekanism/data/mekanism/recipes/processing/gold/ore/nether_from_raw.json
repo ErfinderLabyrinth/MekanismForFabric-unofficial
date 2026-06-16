@@ -1,0 +1,17 @@
+{
+  "type": "mekanism:combining",
+  "extraInput": {
+    "ingredient": {
+      "item": "minecraft:netherrack"
+    }
+  },
+  "mainInput": {
+    "amount": 8,
+    "ingredient": {
+      "tag": "c:raw_gold_ores"
+    }
+  },
+  "output": {
+    "item": "minecraft:nether_gold_ore"
+  }
+}

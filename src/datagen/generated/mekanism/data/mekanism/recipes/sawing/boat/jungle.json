@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:sawing",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:jungle_boat"
+    }
+  },
+  "mainOutput": {
+    "count": 5,
+    "item": "minecraft:jungle_planks"
+  }
+}

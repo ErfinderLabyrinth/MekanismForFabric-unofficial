@@ -1,0 +1,24 @@
+{
+  "type": "mekanism:nucleosynthesizing",
+  "duration": 1000,
+  "gasInput": {
+    "amount": 4,
+    "gas": "mekanism:antimatter"
+  },
+  "itemInput": {
+    "ingredient": {
+      "fabric:type": "fabric:nbt",
+      "base": {
+        "item": "minecraft:diamond_sword"
+      },
+      "nbt": {
+        "Damage": 0
+      },
+      "strict": true
+    }
+  },
+  "output": {
+    "item": "minecraft:trident",
+    "nbt": "{Damage:0}"
+  }
+}

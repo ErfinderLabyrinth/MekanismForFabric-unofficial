@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:crushing",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:prismarine_bricks"
+    }
+  },
+  "output": {
+    "count": 9,
+    "item": "minecraft:prismarine_shard"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "mekanism:combining",
+  "extraInput": {
+    "ingredient": {
+      "item": "minecraft:cobbled_deepslate"
+    }
+  },
+  "mainInput": {
+    "amount": 8,
+    "ingredient": {
+      "tag": "c:raw_iron_ores"
+    }
+  },
+  "output": {
+    "item": "minecraft:deepslate_iron_ore"
+  }
+}

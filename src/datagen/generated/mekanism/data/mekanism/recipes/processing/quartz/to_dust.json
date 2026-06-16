@@ -1,0 +1,11 @@
+{
+  "type": "mekanism:crushing",
+  "input": {
+    "ingredient": {
+      "tag": "c:quartz"
+    }
+  },
+  "output": {
+    "item": "mekanism:dust_quartz"
+  }
+}

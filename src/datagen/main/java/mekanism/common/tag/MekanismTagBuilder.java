@@ -2,6 +2,7 @@ package mekanism.common.tag;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import net.fabricmc.fabric.impl.datagen.ForcedTagEntry;
 import net.minecraft.resources.ResourceKey;
@@ -94,5 +95,23 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
             consumer.accept(locationGetter.apply(element));
         }
         return self();
+    }
+
+    public class MekanismForcedTagEntry extends TagEntry {
+        TagEntry origin;
+        private MekanismForcedTagEntry(TagEntry origin) {
+            super(origin.id, origin.tag, origin.required);
+            this.origin = origin;
+        }
+
+        @Override
+        public <T> boolean build(TagEntry.Lookup<T> arg, Consumer<T> consumer) {
+            return origin.build(arg, consumer);
+        }
+
+        @Override
+        public boolean verifyIfPresent(Predicate<ResourceLocation> objectExistsTest, Predicate<ResourceLocation> tagExistsTest) {
+            return true;
+        }
     }
 }

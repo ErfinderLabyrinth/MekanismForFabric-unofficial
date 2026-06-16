@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:metallurgic_infusing",
+  "chemicalInput": {
+    "amount": 10,
+    "tagSupplier": "mekanism:fungi"
+  },
+  "itemInput": {
+    "ingredient": {
+      "item": "minecraft:dirt"
+    }
+  },
+  "output": {
+    "item": "minecraft:mycelium"
+  }
+}

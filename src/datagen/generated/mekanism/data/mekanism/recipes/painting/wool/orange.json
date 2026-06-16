@@ -1,0 +1,21 @@
+{
+  "type": "mekanism:painting",
+  "chemicalInput": {
+    "amount": 256,
+    "pigment": "mekanism:orange"
+  },
+  "itemInput": {
+    "ingredient": {
+      "fabric:type": "fabric:difference",
+      "base": {
+        "tag": "mekanism:colorable/wool"
+      },
+      "subtracted": {
+        "item": "minecraft:orange_wool"
+      }
+    }
+  },
+  "output": {
+    "item": "minecraft:orange_wool"
+  }
+}

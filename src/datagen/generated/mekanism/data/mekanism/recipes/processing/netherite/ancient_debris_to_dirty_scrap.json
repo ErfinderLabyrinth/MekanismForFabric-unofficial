@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:crushing",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:ancient_debris"
+    }
+  },
+  "output": {
+    "count": 3,
+    "item": "mekanism:dirty_netherite_scrap"
+  }
+}

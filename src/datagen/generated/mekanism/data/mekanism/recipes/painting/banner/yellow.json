@@ -1,0 +1,21 @@
+{
+  "type": "mekanism:painting",
+  "chemicalInput": {
+    "amount": 256,
+    "pigment": "mekanism:yellow"
+  },
+  "itemInput": {
+    "ingredient": {
+      "fabric:type": "fabric:difference",
+      "base": {
+        "tag": "mekanism:colorable/banners"
+      },
+      "subtracted": {
+        "item": "minecraft:yellow_banner"
+      }
+    }
+  },
+  "output": {
+    "item": "minecraft:yellow_banner"
+  }
+}

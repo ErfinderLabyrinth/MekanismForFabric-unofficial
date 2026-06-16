@@ -1,0 +1,11 @@
+{
+  "type": "mekanism:crushing",
+  "input": {
+    "ingredient": {
+      "tag": "c:diamonds"
+    }
+  },
+  "output": {
+    "item": "mekanism:dust_diamond"
+  }
+}

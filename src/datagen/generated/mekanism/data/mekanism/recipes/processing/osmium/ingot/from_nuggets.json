@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "forge:nuggets/osmium"
+    },
+    "P": {
+      "item": "mekanism:nugget_osmium"
+    }
+  },
+  "pattern": [
+    "###",
+    "#P#",
+    "###"
+  ],
+  "result": {
+    "item": "mekanism:ingot_osmium"
+  }
+}

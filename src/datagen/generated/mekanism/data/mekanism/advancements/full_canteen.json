@@ -1,0 +1,31 @@
+{
+  "parent": "mekanism:liquifier",
+  "criteria": {
+    "full_canteen": {
+      "conditions": {
+        "items": [
+          {
+            "mekanism": {
+              "fullCanteen": true
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.mekanism.full_canteen.description"
+    },
+    "frame": "goal",
+    "hidden": true,
+    "icon": {
+      "item": "mekanism:canteen"
+    },
+    "title": {
+      "translate": "advancements.mekanism.full_canteen.title"
+    }
+  },
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,24 @@
+{
+  "type": "mekanism:nucleosynthesizing",
+  "duration": 200,
+  "gasInput": {
+    "amount": 1,
+    "gas": "mekanism:antimatter"
+  },
+  "itemInput": {
+    "ingredient": {
+      "fabric:type": "fabric:nbt",
+      "base": {
+        "item": "minecraft:bow"
+      },
+      "nbt": {
+        "Damage": 0
+      },
+      "strict": true
+    }
+  },
+  "output": {
+    "item": "minecraft:crossbow",
+    "nbt": "{Damage:0}"
+  }
+}

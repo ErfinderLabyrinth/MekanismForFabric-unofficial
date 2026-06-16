@@ -1,0 +1,17 @@
+{
+  "type": "mekanism:combining",
+  "extraInput": {
+    "ingredient": {
+      "item": "minecraft:cobblestone"
+    }
+  },
+  "mainInput": {
+    "amount": 8,
+    "ingredient": {
+      "tag": "c:raw_iron_ores"
+    }
+  },
+  "output": {
+    "item": "minecraft:iron_ore"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:pigment_mixing",
+  "leftInput": {
+    "amount": 1,
+    "pigment": "mekanism:cyan"
+  },
+  "output": {
+    "amount": 2,
+    "pigment": "mekanism:aqua"
+  },
+  "rightInput": {
+    "amount": 1,
+    "pigment": "mekanism:white"
+  }
+}

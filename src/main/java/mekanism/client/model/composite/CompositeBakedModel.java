@@ -79,7 +79,6 @@ public class CompositeBakedModel implements BakedModel {
                             context
                     );
 
-            context.popTransform();
         }
 
         for (BakedModel cutoutChild : cutoutChildren) {
@@ -128,7 +127,6 @@ public class CompositeBakedModel implements BakedModel {
                     context
             );
 
-            context.popTransform();
         }
 
         for (BakedModel cutoutChild : cutoutChildren) {

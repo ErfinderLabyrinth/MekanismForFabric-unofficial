@@ -1,0 +1,22 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "C": {
+      "tag": "forge:circuits/basic"
+    },
+    "I": {
+      "tag": "forge:ingots/tin"
+    },
+    "P": {
+      "item": "mekanism:electric_pump"
+    }
+  },
+  "pattern": [
+    "III",
+    "CPC",
+    "III"
+  ],
+  "result": {
+    "item": "mekanism:fluidic_plenisher"
+  }
+}

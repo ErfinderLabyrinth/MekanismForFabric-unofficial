@@ -1,0 +1,43 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "componentSecurity.owner",
+                  "target": "mekData.owner"
+                },
+                {
+                  "op": "replace",
+                  "source": "componentSecurity.securityMode",
+                  "target": "mekData.securityMode"
+                },
+                {
+                  "op": "replace",
+                  "source": "EnergyContainer",
+                  "target": "mekData.EnergyContainer"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "mekanism:laser"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ]
+}

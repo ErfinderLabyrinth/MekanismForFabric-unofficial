@@ -1,0 +1,52 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_name",
+              "source": "block_entity"
+            },
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "componentFrequency",
+                  "target": "mekData.componentFrequency"
+                },
+                {
+                  "op": "replace",
+                  "source": "componentSecurity.owner",
+                  "target": "mekData.owner"
+                },
+                {
+                  "op": "replace",
+                  "source": "componentSecurity.securityMode",
+                  "target": "mekData.securityMode"
+                },
+                {
+                  "op": "replace",
+                  "source": "color",
+                  "target": "mekData.color"
+                },
+                {
+                  "op": "replace",
+                  "source": "Items",
+                  "target": "mekData.Items"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "mekanism:qio_dashboard"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ]
+}

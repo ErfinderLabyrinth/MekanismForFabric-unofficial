@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "tag": "c:raw_copper_blocks"
+    }
+  },
+  "output": {
+    "count": 12,
+    "item": "mekanism:dust_copper"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:allium"
+    }
+  },
+  "output": {
+    "count": 2,
+    "item": "minecraft:magenta_dye"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": {
+      "tag": "mekanism:alloys/reinforced"
+    },
+    "C": {
+      "tag": "forge:circuits/elite"
+    },
+    "X": {
+      "item": "mekanism:steel_casing"
+    },
+    "_": {
+      "item": "minecraft:cobblestone"
+    }
+  },
+  "pattern": [
+    "ACA",
+    "_X_",
+    "ACA"
+  ],
+  "result": {
+    "item": "mekanism:combiner"
+  }
+}

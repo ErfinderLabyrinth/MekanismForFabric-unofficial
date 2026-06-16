@@ -1,0 +1,30 @@
+{
+  "parent": "mekanism:advanced_control_circuit",
+  "criteria": {
+    "flamethrower": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "mekanism:flamethrower"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.mekanism.playing_with_fire.description"
+    },
+    "icon": {
+      "item": "mekanism:flamethrower"
+    },
+    "title": {
+      "translate": "advancements.mekanism.playing_with_fire.title"
+    }
+  },
+  "sends_telemetry_event": true
+}

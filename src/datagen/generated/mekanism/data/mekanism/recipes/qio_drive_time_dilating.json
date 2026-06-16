@@ -1,0 +1,22 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "#": {
+      "tag": "c:emeralds"
+    },
+    "I": {
+      "tag": "forge:ingots/lead"
+    },
+    "P": {
+      "item": "mekanism:qio_drive_hyper_dense"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "P#P",
+    "IPI"
+  ],
+  "result": {
+    "item": "mekanism:qio_drive_time_dilating"
+  }
+}

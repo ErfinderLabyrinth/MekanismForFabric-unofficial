@@ -1,0 +1,30 @@
+{
+  "parent": "mekanism:infused_alloy",
+  "criteria": {
+    "network_reader": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "mekanism:network_reader"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.mekanism.network_reader.description"
+    },
+    "icon": {
+      "item": "mekanism:network_reader"
+    },
+    "title": {
+      "translate": "advancements.mekanism.network_reader.title"
+    }
+  },
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:chemical_infusing",
+  "leftInput": {
+    "amount": 1,
+    "gas": "mekanism:hydrofluoric_acid"
+  },
+  "output": {
+    "amount": 2,
+    "gas": "mekanism:uranium_hexafluoride"
+  },
+  "rightInput": {
+    "amount": 1,
+    "gas": "mekanism:uranium_oxide"
+  }
+}

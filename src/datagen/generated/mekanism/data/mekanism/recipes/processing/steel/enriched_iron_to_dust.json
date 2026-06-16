@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:metallurgic_infusing",
+  "chemicalInput": {
+    "amount": 10,
+    "tagSupplier": "mekanism:carbon"
+  },
+  "itemInput": {
+    "ingredient": {
+      "item": "mekanism:enriched_iron"
+    }
+  },
+  "output": {
+    "item": "mekanism:dust_steel"
+  }
+}

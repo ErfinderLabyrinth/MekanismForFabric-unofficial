@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:pigment_extracting",
+  "input": {
+    "ingredient": {
+      "tag": "c:red_dyes"
+    }
+  },
+  "output": {
+    "amount": 256,
+    "pigment": "mekanism:red"
+  }
+}

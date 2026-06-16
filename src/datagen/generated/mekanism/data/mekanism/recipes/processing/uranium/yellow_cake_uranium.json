@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "tag": "forge:ingots/uranium"
+    }
+  },
+  "output": {
+    "count": 2,
+    "item": "mekanism:yellow_cake_uranium"
+  }
+}

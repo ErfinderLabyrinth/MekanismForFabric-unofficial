@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:injecting",
+  "chemicalInput": {
+    "amount": 1,
+    "tagSupplier": "mekanism:water_vapor"
+  },
+  "itemInput": {
+    "ingredient": {
+      "item": "minecraft:lime_concrete_powder"
+    }
+  },
+  "output": {
+    "item": "minecraft:lime_concrete"
+  }
+}

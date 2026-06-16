@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:oxidizing",
+  "input": {
+    "ingredient": {
+      "tag": "forge:dusts/salt"
+    }
+  },
+  "output": {
+    "amount": 15,
+    "gas": "mekanism:brine"
+  }
+}

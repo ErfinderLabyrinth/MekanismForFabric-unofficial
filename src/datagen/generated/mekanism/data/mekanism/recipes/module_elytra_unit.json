@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "mekanism:hdpe_elytra"
+    },
+    "A": {
+      "tag": "forge:alloys/elite"
+    },
+    "H": {
+      "tag": "forge:pellets/polonium"
+    },
+    "N": {
+      "item": "mekanism:pellet_antimatter"
+    },
+    "P": {
+      "item": "mekanism:module_base"
+    }
+  },
+  "pattern": [
+    "A#A",
+    "APA",
+    "HNH"
+  ],
+  "result": {
+    "item": "mekanism:module_elytra_unit"
+  }
+}

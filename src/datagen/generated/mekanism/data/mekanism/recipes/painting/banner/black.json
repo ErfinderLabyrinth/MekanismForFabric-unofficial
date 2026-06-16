@@ -1,0 +1,21 @@
+{
+  "type": "mekanism:painting",
+  "chemicalInput": {
+    "amount": 256,
+    "pigment": "mekanism:black"
+  },
+  "itemInput": {
+    "ingredient": {
+      "fabric:type": "fabric:difference",
+      "base": {
+        "tag": "mekanism:colorable/banners"
+      },
+      "subtracted": {
+        "item": "minecraft:black_banner"
+      }
+    }
+  },
+  "output": {
+    "item": "minecraft:black_banner"
+  }
+}

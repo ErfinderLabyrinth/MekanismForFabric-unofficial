@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:separating",
+  "input": {
+    "amount": 2,
+    "tagSupplier": "minecraft:water"
+  },
+  "leftGasOutput": {
+    "amount": 2,
+    "gas": "mekanism:hydrogen"
+  },
+  "rightGasOutput": {
+    "amount": 1,
+    "gas": "mekanism:oxygen"
+  }
+}

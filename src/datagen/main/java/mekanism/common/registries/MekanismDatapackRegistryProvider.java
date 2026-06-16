@@ -77,10 +77,10 @@ public class MekanismDatapackRegistryProvider extends BaseDatapackRegistryProvid
             int features = type.getBaseConfigs().size();
             for (int vein = 0; vein < features; vein++) {
                 OreVeinType oreVeinType = new OreVeinType(type, vein);
-                OreVeinConfig oreVeinConfig = MekanismConfig.world.getVeinConfig(oreVeinType);
+                OreVeinConfig oreVeinConfig = MekanismConfig.COMMON.world.getVeinConfig(oreVeinType);
                 ResourceLocation name = Mekanism.rl(oreVeinType.name());
                 registerPlacedFeature(entries, registries, name, name.withSuffix("_retrogen"), retrogen -> List.of(
-                        new DisableableFeaturePlacement(oreVeinType, () -> MekanismConfig.world.getOreConfig(type).shouldGenerate(), retrogen),
+                        new DisableableFeaturePlacement(oreVeinType, () -> MekanismConfig.COMMON.world.getOreConfig(type).shouldGenerate(), retrogen),
                         CountPlacement.of(new ConfigurableConstantInt(oreVeinType, () -> oreVeinConfig.perChunk())),
                         InSquarePlacement.spread(),
                         HeightRangePlacement.of(ConfigurableHeightProvider.of(oreVeinType, oreVeinConfig)),
@@ -89,8 +89,8 @@ public class MekanismDatapackRegistryProvider extends BaseDatapackRegistryProvid
             }
         }
         registerPlacedFeature(entries, registries, Mekanism.rl("salt"), retrogen -> List.of(
-                new DisableableFeaturePlacement(null, () -> MekanismConfig.world.salt.shouldGenerate, retrogen),
-                CountPlacement.of(new ConfigurableConstantInt(null, () -> MekanismConfig.world.salt.perChunk)),
+                new DisableableFeaturePlacement(null, () -> MekanismConfig.COMMON.world.salt.shouldGenerate, retrogen),
+                CountPlacement.of(new ConfigurableConstantInt(null, () -> MekanismConfig.COMMON.world.salt.perChunk)),
                 InSquarePlacement.spread(),
                 retrogen ? PlacementUtils.HEIGHTMAP_OCEAN_FLOOR : PlacementUtils.HEIGHTMAP_TOP_SOLID,
                 BlockPredicateFilter.forPredicate(BlockPredicate.matchesFluids(Fluids.WATER)),
@@ -124,7 +124,7 @@ public class MekanismDatapackRegistryProvider extends BaseDatapackRegistryProvid
 
     private static ConfiguredFeature<ResizableOreFeatureConfig, ResizableOreFeature> configureOreFeature(OreVeinType oreVeinType,
           FeatureRegistryObject<ResizableOreFeatureConfig, ? extends ResizableOreFeature> featureRO) {
-        OreVeinConfig oreVeinConfig = MekanismConfig.world.getVeinConfig(oreVeinType);
+        OreVeinConfig oreVeinConfig = MekanismConfig.COMMON.world.getVeinConfig(oreVeinType);
         List<TargetBlockState> targetStates = ORE_STONE_TARGETS.computeIfAbsent(oreVeinType.type(), oreType -> {
             OreBlockType oreBlockType = MekanismBlocks.ORES.get(oreType);
             return List.of(

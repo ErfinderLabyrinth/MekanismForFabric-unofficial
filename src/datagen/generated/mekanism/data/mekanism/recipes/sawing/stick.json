@@ -1,0 +1,11 @@
+{
+  "type": "mekanism:sawing",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:stick"
+    }
+  },
+  "mainOutput": {
+    "item": "mekanism:sawdust"
+  }
+}

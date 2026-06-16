@@ -1,0 +1,16 @@
+{
+  "type": "mekanism:nucleosynthesizing",
+  "duration": 500,
+  "gasInput": {
+    "amount": 2,
+    "gas": "mekanism:antimatter"
+  },
+  "itemInput": {
+    "ingredient": {
+      "tag": "c:chests"
+    }
+  },
+  "output": {
+    "item": "minecraft:ender_chest"
+  }
+}

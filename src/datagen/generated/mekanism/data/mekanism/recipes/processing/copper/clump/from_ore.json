@@ -1,0 +1,16 @@
+{
+  "type": "mekanism:purifying",
+  "chemicalInput": {
+    "amount": 1,
+    "gas": "mekanism:oxygen"
+  },
+  "itemInput": {
+    "ingredient": {
+      "tag": "c:copper_ingots"
+    }
+  },
+  "output": {
+    "count": 3,
+    "item": "mekanism:clump_copper"
+  }
+}

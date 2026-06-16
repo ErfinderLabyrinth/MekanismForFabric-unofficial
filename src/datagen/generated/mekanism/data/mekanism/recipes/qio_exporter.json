@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:piston"
+    },
+    "A": {
+      "tag": "forge:pellets/polonium"
+    },
+    "C": {
+      "tag": "forge:circuits/ultimate"
+    },
+    "I": {
+      "tag": "forge:ingots/lead"
+    },
+    "T": {
+      "item": "mekanism:teleportation_core"
+    }
+  },
+  "pattern": [
+    "ITI",
+    "ACA",
+    " # "
+  ],
+  "result": {
+    "item": "mekanism:qio_exporter"
+  }
+}

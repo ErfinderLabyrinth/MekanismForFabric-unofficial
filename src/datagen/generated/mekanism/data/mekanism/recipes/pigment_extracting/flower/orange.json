@@ -1,0 +1,17 @@
+{
+  "type": "mekanism:pigment_extracting",
+  "input": {
+    "ingredient": [
+      {
+        "item": "minecraft:orange_tulip"
+      },
+      {
+        "item": "minecraft:torchflower"
+      }
+    ]
+  },
+  "output": {
+    "amount": 768,
+    "pigment": "mekanism:orange"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:pigment_extracting",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:brown_wool"
+    }
+  },
+  "output": {
+    "amount": 192,
+    "pigment": "mekanism:brown"
+  }
+}
