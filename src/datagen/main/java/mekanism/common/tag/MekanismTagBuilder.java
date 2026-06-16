@@ -2,6 +2,8 @@ package mekanism.common.tag;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import net.fabricmc.fabric.impl.datagen.ForcedTagEntry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
@@ -34,6 +36,13 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
         return self();
     }
 
+    public BUILDER addForced(TagKey<TYPE>... tags) {
+        for (TagKey<TYPE> key : tags) {
+            builder.add(new ForcedTagEntry(TagEntry.tag(key.location())));
+        }
+        return self();
+    }
+
     @SafeVarargs
     public final BUILDER add(ResourceKey<TYPE>... keys) {
         return add(ResourceKey::location, keys);
@@ -42,6 +51,13 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
     @SafeVarargs
     public final <T> BUILDER add(Function<T, ResourceLocation> locationGetter, T... elements) {
         return apply(builder::addElement, locationGetter, elements);
+    }
+
+    public final <T> BUILDER addForced(Function<T, ResourceLocation> locationGetter, T... elements) {
+        for (T element : elements) {
+            builder.add(new ForcedTagEntry(TagEntry.element(locationGetter.apply(element))));
+        }
+        return self();
     }
 
     public BUILDER addOptional(ResourceLocation... locations) {

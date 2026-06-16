@@ -58,14 +58,14 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
 
     @Override
     public void init(IModule<ModuleVeinMiningUnit> module, ModuleConfigItemCreator configItemCreator) {
-        extendedMode = configItemCreator.createDisableableConfigItem("extended_mode", MekanismLang.MODULE_EXTENDED_MODE, false, () -> MekanismConfig.gear.mekaToolExtendedMining);
+        extendedMode = configItemCreator.createDisableableConfigItem("extended_mode", MekanismLang.MODULE_EXTENDED_MODE, false, () -> MekanismConfig.COMMON.gear.mekaToolExtendedMining);
         excavationRange = configItemCreator.createConfigItem("excavation_range", MekanismLang.MODULE_EXCAVATION_RANGE,
               new ModuleEnumData<>(ExcavationRange.LOW, module.getInstalledCount() + 1));
     }
 
     @Override
     public void addRadialModes(IModule<ModuleVeinMiningUnit> module, @NotNull ItemStack stack, Consumer<NestedRadialMode> adder) {
-        if (MekanismConfig.gear.mekaToolExtendedMining) {
+        if (MekanismConfig.COMMON.gear.mekaToolExtendedMining) {
             adder.accept(NESTED_RADIAL_MODE);
         }
     }
@@ -73,7 +73,7 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
     @Nullable
     @Override
     public <MODE extends IRadialMode> MODE getMode(IModule<ModuleVeinMiningUnit> module, ItemStack stack, RadialData<MODE> radialData) {
-        if (radialData == RADIAL_DATA && MekanismConfig.gear.mekaToolExtendedMining) {
+        if (radialData == RADIAL_DATA && MekanismConfig.COMMON.gear.mekaToolExtendedMining) {
             return (MODE) RADIAL_MODES.get(isExtended());
         }
         return null;
@@ -81,7 +81,7 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
 
     @Override
     public <MODE extends IRadialMode> boolean setMode(IModule<ModuleVeinMiningUnit> module, Player player, ItemStack stack, RadialData<MODE> radialData, MODE mode) {
-        if (radialData == RADIAL_DATA && MekanismConfig.gear.mekaToolExtendedMining) {
+        if (radialData == RADIAL_DATA && MekanismConfig.COMMON.gear.mekaToolExtendedMining) {
             boolean extended = mode == RADIAL_MODES.trueMode();
             if (isExtended() != extended) {
                 extendedMode.set(extended);
@@ -127,7 +127,7 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
     public static Object2IntMap<BlockPos> findPositions(Level world, Map<BlockPos, BlockState> initial, int extendedRange, Reference2BooleanMap<Block> oreTracker) {
         Object2IntMap<BlockPos> found = new Object2IntLinkedOpenHashMap<>();
 
-        int maxVein = MekanismConfig.gear.disassemblerMiningCount;
+        int maxVein = MekanismConfig.COMMON.gear.disassemblerMiningCount;
         int maxCount = initial.size() + maxVein * oreTracker.size();
 
         Map<BlockPos, BlockState> frontier = new LinkedHashMap<>(initial);
@@ -170,7 +170,7 @@ public class ModuleVeinMiningUnit implements ICustomModule<ModuleVeinMiningUnit>
     @Override
     public void addHUDStrings(IModule<ModuleVeinMiningUnit> module, Player player, Consumer<Component> hudStringAdder) {
         //Only add hud string for extended vein mining if enabled in config
-        if (module.isEnabled() && MekanismConfig.gear.mekaToolExtendedMining) {
+        if (module.isEnabled() && MekanismConfig.COMMON.gear.mekaToolExtendedMining) {
             hudStringAdder.accept(MekanismLang.MODULE_EXTENDED_ENABLED.translateColored(EnumColor.DARK_GRAY,
                   isExtended() ? EnumColor.BRIGHT_GREEN : EnumColor.DARK_RED,
                   isExtended() ? MekanismLang.MODULE_ENABLED_LOWER : MekanismLang.MODULE_DISABLED_LOWER));

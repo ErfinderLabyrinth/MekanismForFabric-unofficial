@@ -35,7 +35,7 @@ public class ModuleJetpackUnit implements ICustomModule<ModuleJetpackUnit> {
         if (module.isEnabled()) {
             ItemStack container = module.getContainer();
             GasStack stored = ((ItemMekaSuitArmor) container.getItem()).getContainedGas(container, MekanismGases.HYDROGEN.get());
-            double ratio = StorageUtils.getRatio(stored.getAmount(), MekanismConfig.gear.mekaSuitJetpackMaxStorage);
+            double ratio = StorageUtils.getRatio(stored.getAmount(), MekanismConfig.COMMON.gear.mekaSuitJetpackMaxStorage);
             hudElementAdder.accept(IModuleHelper.INSTANCE.hudElementPercent(jetpackMode.get().getHUDIcon(), ratio));
         }
     }

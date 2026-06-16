@@ -57,7 +57,7 @@ public class OredictionificatorItemFilter extends OredictionificatorFilter<Item,
 
     @Override
     protected Map<String, List<String>> getValidValuesConfig() {
-        return MekanismConfig.general.validOredictionificatorFilters;
+        return MekanismConfig.COMMON.general.validOredictionificatorFilters;
     }
 
     @Override

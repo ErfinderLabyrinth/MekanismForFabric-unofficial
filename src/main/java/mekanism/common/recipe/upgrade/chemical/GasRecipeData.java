@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @NothingNullByDefault
-public class GasRecipeData extends ChemicalRecipeData<Gas, GasStack, IGasTank, IGasHandler> {
+public class GasRecipeData extends ChemicalRecipeData<Gas, GasStack, IGasTank, Storage<Gas>> {
 
     public GasRecipeData(ListTag tanks) {
         super(tanks);
@@ -67,7 +67,7 @@ public class GasRecipeData extends ChemicalRecipeData<Gas, GasStack, IGasTank, I
     }
 
     @Override
-    protected ItemApiLookup<IGasHandler, ContainerItemContext> getItemLookup() {
+    protected ItemApiLookup<Storage<Gas>, ContainerItemContext> getItemLookup() {
         return Capabilities.GAS_HANDLER_ITEM;
     }
 

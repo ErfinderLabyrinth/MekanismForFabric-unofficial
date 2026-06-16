@@ -1,6 +1,7 @@
 package mekanism.common.inventory.slot;
 
 import mekanism.api.Action;
+import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -40,7 +41,7 @@ public class BinInventorySlot extends BasicInventorySlot {
     }
 
     @Override
-    public long insert(ItemVariant resource, long amount, TransactionContext transaction) {
+    public long insert(ItemVariant resource, long amount, TransactionContext transaction, AutomationType automationType) {
         updateSnapshots(transaction);
         if (isEmpty()) {
             if (isLocked() && !ItemEntity.areMergable(lockStack, resource.toStack((int) amount))) {
@@ -49,7 +50,7 @@ public class BinInventorySlot extends BasicInventorySlot {
             } else if (isCreative) {
                 //If a player manually inserts into a creative bin, that is empty we need to allow setting the type,
                 // Note: We check that it is not external insertion because an empty creative bin acts as a "void" for automation
-                long amountInserted = super.insert(resource, amount, transaction);
+                long amountInserted = super.insert(resource, amount, transaction, automationType);
                 if (amountInserted == amount) {
                     //If we are able to insert it then set perform the action of setting it to full
                     setStackUnchecked(resource.toStack(getLimit(resource.toStack(1))));
@@ -68,10 +69,10 @@ public class BinInventorySlot extends BasicInventorySlot {
     }
 
     @Override
-    public long extract(ItemVariant resource, long amount, TransactionContext t) {
+    public long extract(ItemVariant resource, long amount, TransactionContext t, AutomationType type) {
         long amountExtracted;
         try(Transaction t2=Transaction.openOuter()) {
-            amountExtracted = super.extract(resource, amount, t2);
+            amountExtracted = super.extract(resource, amount, t2, type);
             if (!isCreative) {
                 t2.commit();
             }

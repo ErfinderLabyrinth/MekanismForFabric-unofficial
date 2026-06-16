@@ -67,7 +67,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler, 
         super(tile);
         gasTanks.add(inputTank = MultiblockChemicalTankBuilder.GAS.input(this, this::getMaxInputGas, gas -> gas == MekanismGases.POLONIUM.get(),
               ChemicalAttributeValidator.ALWAYS_ALLOW, createSaveAndComparator()));
-        gasTanks.add(outputTank = MultiblockChemicalTankBuilder.GAS.output(this, () -> MekanismConfig.general.spsOutputTankCapacity,
+        gasTanks.add(outputTank = MultiblockChemicalTankBuilder.GAS.output(this, () -> MekanismConfig.COMMON.general.spsOutputTankCapacity,
               gas -> gas == MekanismGases.ANTIMATTER.get(), ChemicalAttributeValidator.ALWAYS_ALLOW, this));
     }
 
@@ -78,7 +78,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler, 
     }
 
     private long getMaxInputGas() {
-        return MekanismConfig.general.spsInputPerAntimatter * 2L;
+        return MekanismConfig.COMMON.general.spsInputPerAntimatter * 2L;
     }
 
     @Override
@@ -88,9 +88,9 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler, 
         couldOperate = canOperate();
         if (couldOperate && !receivedEnergy.isZero()) {
             double lastProgress = progress;
-            final int inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter;
+            final int inputPerAntimatter = MekanismConfig.COMMON.general.spsInputPerAntimatter;
             long inputNeeded = (inputPerAntimatter - inputProcessed) + inputPerAntimatter * (outputTank.getNeeded() - 1);
-            double processable = receivedEnergy.doubleValue() / MekanismConfig.general.spsEnergyPerInput.doubleValue();
+            double processable = receivedEnergy.doubleValue() / (double)MekanismConfig.COMMON.general.spsEnergyPerInput;
             if (processable + progress >= inputNeeded) {
                 processed = process(inputNeeded);
                 progress = 0;
@@ -154,7 +154,7 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler, 
         int lastInputProcessed = inputProcessed;
         //Limit how much input we actually increase the input processed by to how much we were actually able to remove from the input tank
         inputProcessed += MathUtils.clampToInt(processed);
-        final int inputPerAntimatter = MekanismConfig.general.spsInputPerAntimatter;
+        final int inputPerAntimatter = MekanismConfig.COMMON.general.spsInputPerAntimatter;
         if (inputProcessed >= inputPerAntimatter) {
             GasStack toAdd = MekanismGases.ANTIMATTER.getStack(inputProcessed / inputPerAntimatter);
             try(Transaction t=Transaction.openOuter()) {
@@ -205,11 +205,11 @@ public class SPSMultiblockData extends MultiblockData implements IValveHandler, 
 
     @ComputerMethod
     public double getProcessRate() {
-        return Math.round((lastProcessed / MekanismConfig.general.spsInputPerAntimatter) * 1_000) / 1_000D;
+        return Math.round((lastProcessed / MekanismConfig.COMMON.general.spsInputPerAntimatter) * 1_000) / 1_000D;
     }
 
     public double getScaledProgress() {
-        return (inputProcessed + progress) / MekanismConfig.general.spsInputPerAntimatter;
+        return (inputProcessed + progress) / MekanismConfig.COMMON.general.spsInputPerAntimatter;
     }
 
     public boolean handlesSound(TileEntitySPSCasing tile) {

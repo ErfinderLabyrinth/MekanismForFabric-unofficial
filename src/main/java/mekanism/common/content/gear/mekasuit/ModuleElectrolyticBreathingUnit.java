@@ -1,6 +1,7 @@
 package mekanism.common.content.gear.mekasuit;
 
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.gear.ICustomModule;
@@ -19,6 +20,7 @@ import mekanism.common.registries.MekanismModules;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.FluidInDetails;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -62,14 +64,14 @@ public class ModuleElectrolyticBreathingUnit implements ICustomModule<ModuleElec
             productionRate = getMaxRate(module) / 2;
         }
         if (productionRate > 0) {
-            long usage = MekanismConfig.general.FROM_H2 * 2;
+            long usage = MekanismConfig.COMMON.general.FROM_H2 * 2;
             int maxRate = Math.min(productionRate, (int) (module.getContainerEnergy() / usage));
             long hydrogenUsed = 0;
             GasStack hydrogenStack = MekanismGases.HYDROGEN.getStack(maxRate * 2L);
             ItemStack chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
             if (checkChestPlate(chestStack)) {
                 SimpleSingleStackStorage chestStorage = new SimpleSingleStackStorage(chestStack);
-                IGasHandler chestCapability = ContainerItemContext.ofPlayerSlot(player, chestStorage).find(Capabilities.GAS_HANDLER_ITEM);
+                Storage<Gas> chestCapability = ContainerItemContext.ofPlayerSlot(player, chestStorage).find(Capabilities.GAS_HANDLER_ITEM);
                 if (chestCapability != null) {
                     try(Transaction t=Transaction.openOuter()) {
                         hydrogenUsed = chestCapability.insert(hydrogenStack.getType(), hydrogenStack.getAmount(), t);
@@ -83,7 +85,7 @@ public class ModuleElectrolyticBreathingUnit implements ICustomModule<ModuleElec
                 ItemStack handStack = player.getItemBySlot(EquipmentSlot.MAINHAND);
                 SimpleSingleStackStorage handStorage = new SimpleSingleStackStorage(handStack);
 
-                IGasHandler handCapability = ContainerItemContext.ofPlayerSlot(player, handStorage).find(Capabilities.GAS_HANDLER_ITEM);
+                Storage<Gas> handCapability = ContainerItemContext.ofPlayerSlot(player, handStorage).find(Capabilities.GAS_HANDLER_ITEM);
                 if (handCapability != null) {
                     try(Transaction t=Transaction.openOuter()) {
                         hydrogenUsed = handCapability.insert(hydrogenStack.getType(), hydrogenStack.getAmount(), t);

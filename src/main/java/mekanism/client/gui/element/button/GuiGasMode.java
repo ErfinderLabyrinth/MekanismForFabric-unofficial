@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.button;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.Mekanism;
 import mekanism.common.network.to_server.PacketGuiInteract;
@@ -28,7 +29,7 @@ public class GuiGasMode extends MekanismImageButton {
     }
 
     public GuiGasMode(IGuiWrapper gui, int x, int y, boolean left, Supplier<GasMode> gasModeSupplier, BlockPos pos, int tank, IHoverable onHover) {
-        super(gui, x, y, 10, IDLE, () -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.GAS_MODE_BUTTON, pos, tank)), onHover);
+        super(gui, x, y, 10, IDLE, () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.GAS_MODE_BUTTON, pos, tank)), onHover);
         this.left = left;
         this.gasModeSupplier = gasModeSupplier;
     }

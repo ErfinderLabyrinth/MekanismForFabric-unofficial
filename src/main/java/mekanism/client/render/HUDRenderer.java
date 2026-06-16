@@ -51,7 +51,7 @@ public class HUDRenderer {
           boolean reverseHud) {
         Player player = minecraft.player;
         update(minecraft.level, player);
-        if (MekanismConfig.client.hudOpacity < 0.05F) {
+        if (MekanismConfig.CLIENT.client.hudOpacity < 0.05F) {
             return;
         }
         int color = HUDColor.REGULAR.getColorARGB();
@@ -60,7 +60,7 @@ public class HUDRenderer {
         float yawJitter = -absSqrt(player.yHeadRot - prevRotationYaw);
         float pitchJitter = -absSqrt(player.getXRot() - prevRotationPitch);
         pose.translate(yawJitter, pitchJitter, 0);
-        if (MekanismConfig.client.hudCompassEnabled) {
+        if (MekanismConfig.CLIENT.client.hudCompassEnabled) {
             renderCompass(player, font, guiGraphics, partialTick, screenWidth, screenHeight, maxTextHeight, reverseHud, color);
         }
 
@@ -79,7 +79,7 @@ public class HUDRenderer {
         lastTick = level.getGameTime();
         float yawDiff = player.yHeadRot - prevRotationYaw;
         float pitchDiff = player.getXRot() - prevRotationPitch;
-        float jitter = MekanismConfig.client.hudJitter;
+        float jitter = MekanismConfig.CLIENT.client.hudJitter;
         prevRotationYaw += yawDiff / jitter;
         prevRotationPitch += pitchDiff / jitter;
     }

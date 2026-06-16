@@ -88,8 +88,8 @@ public class EnergyInventorySlot extends BasicInventorySlot {
                 return false;
             }
             //Otherwise, if we can accept any energy that is currently stored in the container, then we allow inserting the item
-            try(Transaction t=Transaction.openOuter()) {
-                return itemEnergyStorage.insert(storedEnergy, t) < storedEnergy;
+            try(Transaction t= Transaction.isOpen() ? Transaction.openNested(Transaction.getCurrentUnsafe()) : Transaction.openOuter()) {
+                return itemEnergyStorage.insert(storedEnergy, t) > 0;
             }
         };
         return new EnergyInventorySlot(energyContainer, insertPredicate.negate(), insertPredicate, EnergyCompatUtils::hasStrictEnergyHandler, listener, x, y);
@@ -100,7 +100,7 @@ public class EnergyInventorySlot extends BasicInventorySlot {
         //If we can extract any energy we are valid. Note: We can't just use FloatingLong.ONE as depending on conversion rates
         // that might be less than a single unit and thus can't be extracted
         if (itemEnergyStorage != null) {
-            try(Transaction t=Transaction.openOuter()) {
+            try(Transaction t= Transaction.isOpen() ? Transaction.openNested(Transaction.getCurrentUnsafe()) : Transaction.openOuter()) {
                 return itemEnergyStorage.extract(Long.MAX_VALUE, t) != 0;
             }
         }
@@ -179,7 +179,7 @@ public class EnergyInventorySlot extends BasicInventorySlot {
                         //If we were simulated that we could actually insert any, then
                         // extract up to as much energy as we were able to accept from the item
                         long extractedEnergy;
-                        try(Transaction t2=Transaction.openOuter()) {
+                        try(Transaction t2=Transaction.openNested(t)) {
                             extractedEnergy = itemEnergyStorage.extract(simulatedInsert, t2);
                         }
                         if (extractedEnergy != 0) {
@@ -222,7 +222,8 @@ public class EnergyInventorySlot extends BasicInventorySlot {
                     if (extractedEnergy != 0) {
                         //If we were able to actually extract it from our energy container, then insert it into the item
                         try(Transaction t=Transaction.openOuter()) {
-                            MekanismUtils.logExpectedZero(itemEnergyStorage.insert(extractedEnergy, t));
+                            MekanismUtils.logExpectedZero(extractedEnergy - itemEnergyStorage.insert(extractedEnergy, t));
+                            t.commit();
                         }
                         onContentsChanged();
                     }

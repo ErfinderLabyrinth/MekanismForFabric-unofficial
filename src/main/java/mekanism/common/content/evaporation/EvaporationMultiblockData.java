@@ -78,7 +78,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
     private double biomeAmbientTemp;
     private double tempMultiplier;
 
-    private int inputTankCapacity;
+    private long inputTankCapacity;
     public float prevScale;
 
     @SyntheticComputerMethod(getter = "getProductionAmount")
@@ -114,7 +114,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
         //Default biome temp to the ambient temperature at the block we are at
         biomeAmbientTemp = HeatAPI.getAmbientTemp(tile.getLevel(), tile.getTilePos());
         fluidTanks.add(inputTank = VariableCapacityFluidTank.input(this, this::getMaxFluid, this::containsRecipe, createSaveAndComparator(recipeCacheLookupMonitor)));
-        fluidTanks.add(outputTank = VariableCapacityFluidTank.output(this, () -> MekanismConfig.general.evaporationOutputTankCapacity, BasicFluidTank.alwaysTrue, this));
+        fluidTanks.add(outputTank = VariableCapacityFluidTank.output(this, () -> MekanismConfig.COMMON.general.evaporationOutputTankCapacity, BasicFluidTank.alwaysTrue, this));
         inputHandler = InputHelper.getInputHandler(inputTank, RecipeError.NOT_ENOUGH_INPUT);
         outputHandler = OutputHelper.getOutputHandler(outputTank, RecipeError.NOT_ENOUGH_OUTPUT_SPACE);
         inventorySlots.add(inputInputSlot = FluidInventorySlot.fill(inputTank, this, 28, 20));
@@ -123,7 +123,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
         inventorySlots.add(outputOutputSlot = OutputInventorySlot.at(this, 132, 51));
         inputInputSlot.setSlotType(ContainerSlotType.INPUT);
         inputOutputSlot.setSlotType(ContainerSlotType.INPUT);
-        heatCapacitors.add(heatCapacitor = VariableHeatCapacitor.create(MekanismConfig.general.evaporationHeatCapacity * 3, () -> biomeAmbientTemp, this));
+        heatCapacitors.add(heatCapacitor = VariableHeatCapacitor.create(MekanismConfig.COMMON.general.evaporationHeatCapacity * 3, () -> biomeAmbientTemp, this));
     }
 
     @Override
@@ -131,7 +131,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
         super.onCreated(world);
         biomeAmbientTemp = calculateAverageAmbientTemperature(world);
         // update the heat capacity now that we've read
-        heatCapacitor.setHeatCapacity(MekanismConfig.general.evaporationHeatCapacity * height(), true);
+        heatCapacitor.setHeatCapacity(MekanismConfig.COMMON.general.evaporationHeatCapacity * height(), true);
         updateSolars(world);
     }
 
@@ -144,7 +144,7 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
 //        updateHeatCapacitors(null);
         //After we update the heat capacitors, update our temperature multiplier
         // Note: We use the ambient temperature without taking our biome into account as we want to have a consistent multiplier
-        tempMultiplier = (Math.min(MAX_MULTIPLIER_TEMP, getTemperature()) - HeatAPI.AMBIENT_TEMP) * MekanismConfig.general.evaporationTempMultiplier *
+        tempMultiplier = (Math.min(MAX_MULTIPLIER_TEMP, getTemperature()) - HeatAPI.AMBIENT_TEMP) * MekanismConfig.COMMON.general.evaporationTempMultiplier *
                          ((double) height() / MAX_HEIGHT);
         inputOutputSlot.drainTank(outputOutputSlot);
         inputInputSlot.fillTank(outputInputSlot);
@@ -176,11 +176,11 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
     public double simulateEnvironment() {
         double currentTemperature = getTemperature();
         double heatCapacity = heatCapacitor.getHeatCapacity();
-        heatCapacitor.handleHeat(getActiveSolars() * MekanismConfig.general.evaporationSolarMultiplier * heatCapacity);
+        heatCapacitor.handleHeat(getActiveSolars() * MekanismConfig.COMMON.general.evaporationSolarMultiplier * heatCapacity);
         if (Math.abs(currentTemperature - biomeAmbientTemp) < 0.001) {
             heatCapacitor.handleHeat(biomeAmbientTemp * heatCapacity - heatCapacitor.getHeat());
         } else {
-            double incr = MekanismConfig.general.evaporationHeatDissipation * Math.sqrt(Math.abs(currentTemperature - biomeAmbientTemp));
+            double incr = MekanismConfig.COMMON.general.evaporationHeatDissipation * Math.sqrt(Math.abs(currentTemperature - biomeAmbientTemp));
             if (currentTemperature > biomeAmbientTemp) {
                 incr = -incr;
             }
@@ -202,11 +202,11 @@ public class EvaporationMultiblockData extends MultiblockData implements IValveH
         if (getVolume() != volume) {
             super.setVolume(volume);
             //Note: We only count the inner volume for the tank capacity for the evap tower
-            inputTankCapacity = (volume / 4) * MekanismConfig.general.evaporationFluidPerTank;
+            inputTankCapacity = (volume / 4) * MekanismConfig.COMMON.general.evaporationFluidPerTank;
         }
     }
 
-    public int getMaxFluid() {
+    public long getMaxFluid() {
         return inputTankCapacity;
     }
 

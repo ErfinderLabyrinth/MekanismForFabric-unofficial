@@ -8,8 +8,8 @@ import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 public class CommonConfig extends BaseMekanismConfig {
 
     public EnergyUnit energyUnit = EnergyUnit.FORGE_ENERGY;
-    public TemperatureUnit tempUnit;
-    public boolean enableDecayTimers;
+    public TemperatureUnit tempUnit = TemperatureUnit.KELVIN;
+    public boolean enableDecayTimers = true;
 
     CommonConfig() {
 //        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();

@@ -169,6 +169,13 @@ SourceSet setupExtraSourceSet(SourceSet baseSourceSet, String extra) {
     extraSourceSet.compileClasspath += project.sourceSets.api.output
     extraSourceSet.compileClasspath += project.sourceSets.main.output
     extraSourceSet.compileClasspath += sourceSets.main.compileClasspath
+    extraSourceSet.compileClasspath += sourceSets.main.output
+
+    extraSourceSet.runtimeClasspath += project.sourceSets.api.output
+    extraSourceSet.runtimeClasspath += project.sourceSets.main.output
+    extraSourceSet.runtimeClasspath += sourceSets.main.runtimeClasspath
+    extraSourceSet.runtimeClasspath += sourceSets.main.output
+
     if (baseSourceSet != project.sourceSets.main) {
         //If the base sourceSet is main it already is the extra source set and has a reference to the base one from before this if statement
         extraSourceSet.compileClasspath += getExtraSourceSet(project.sourceSets.main, extra).output
@@ -239,7 +246,13 @@ def setupTasks(SourceSet sourceSet) {
         //finalizedBy(replaceResourceTask)
         doLast {
             fileTree(dir: getOutputs().getFiles().getAsPath(), includes: jsonPatterns).each {
-                File file -> file.setText(JsonOutput.toJson(new JsonSlurper().parse(file)))
+                File file -> {
+                    try {
+                        file.setText(JsonOutput.toJson(new JsonSlurper().parse(file)))
+                    }catch (Exception e) {
+                        throw new RuntimeException("Error while parsing File " + file.toPath(), e)
+                    }
+                }
             }
         }
     }
@@ -331,6 +344,13 @@ loom {
         server {
             /*setupRunConfig(it, true)*/
             server()
+        }
+        datagen {
+            source sourceSets.datagenMain
+
+            client()
+            property "fabric-api.datagen"
+            property "fabric-api.datagen.output-dir", file("src/datagen/generated/mekanism").absolutePath
         }
     }
 
@@ -449,6 +469,7 @@ repositories { RepositoryHandler handler ->
     maven { url "https://maven.terraformersmc.com/releases/" }
     maven { url "https://maven.blamejared.com" }
     maven { url "https://maven.felnull.dev" }
+    maven { url "https://maven.siphalor.de/"}
 
     mavenCentral()
 }
@@ -480,6 +501,7 @@ dependencies {
     include modApi("dev.felnull:special-model-loader:1.2.0") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+    include modImplementation("de.siphalor.amecs.amecs-key-modifiers:amecs-key-modifiers-mc1.20.0:1.0.2")
 
     annotationProcessor project(":annotation-processor")
 

@@ -1,15 +1,20 @@
 package mekanism.common.lib.transmitter.acceptor;
 
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.infuse.IInfusionHandler;
+import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.pigment.IPigmentHandler;
+import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.slurry.ISlurryHandler;
+import mekanism.api.chemical.slurry.Slurry;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.chemical.BoxedChemicalHandler;
 import mekanism.common.content.network.transmitter.BoxedPressurizedTube;
 import mekanism.common.lib.transmitter.acceptor.BoxedChemicalAcceptorCache.BoxedChemicalAcceptorInfo;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -59,10 +64,10 @@ public class BoxedChemicalAcceptorCache extends AbstractAcceptorCache<BoxedChemi
     public boolean isChemicalAcceptorAndListen(@Nullable BlockEntity tile, Direction side) {
         //TODO: Improve this to make it easier to add more chemical types
         Direction opposite = side.getOpposite();
-        IGasHandler gasAcceptor = Capabilities.GAS_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
-        IInfusionHandler infusionAcceptor = Capabilities.INFUSION_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
-        IPigmentHandler pigmentAcceptor = Capabilities.PIGMENT_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
-        ISlurryHandler slurryAcceptor = Capabilities.SLURRY_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+        Storage<Gas> gasAcceptor = Capabilities.GAS_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+        Storage<InfuseType> infusionAcceptor = Capabilities.INFUSION_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+        Storage<Pigment> pigmentAcceptor = Capabilities.PIGMENT_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
+        Storage<Slurry> slurryAcceptor = Capabilities.SLURRY_HANDLER_BLOCK.find(tile.getLevel(), tile.getBlockPos(), opposite);
         if (gasAcceptor != null || infusionAcceptor != null || pigmentAcceptor != null || slurryAcceptor != null) {
             BoxedChemicalHandler chemicalHandler = new BoxedChemicalHandler();
             if (gasAcceptor != null) {

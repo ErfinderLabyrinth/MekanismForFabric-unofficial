@@ -49,10 +49,10 @@ public class MekaSuitBarDecorator {
             Storage<FluidVariant> fluidStorage = context.find(FluidStorage.ITEM);
             if (fluidStorage != null) {
                 StorageView<FluidVariant> view = getDisplayTank(fluidTankSpecs, stack, fluidStorage);
-                FluidStack fluidInTank = new FluidStack(view.getResource(), view.getAmount());
-                if (fluidInTank != null) {
+                if (view != null) {
+                    FluidStack fluidInTank = new FluidStack(view.getResource(), view.getAmount());
                     ChemicalFluidBarDecorator.renderBar(guiGraphics, xOffset, yOffset, fluidInTank.amount(), view.getCapacity(),
-                          FluidUtils.getRGBDurabilityForDisplay(stack).orElse(0xFFFFFFFF));
+                            FluidUtils.getRGBDurabilityForDisplay(stack).orElse(0xFFFFFFFF));
                 }
             }
         }
@@ -105,6 +105,9 @@ public class MekaSuitBarDecorator {
     private static <TYPE> StorageView<FluidVariant> getDisplayTank(List<? extends GenericTankSpec<TYPE>> tankSpecs, ItemStack stack, Storage<FluidVariant> storage) {
         List<StorageView<FluidVariant>> views = Lists.newArrayList(storage.iterator());
         int index = getDisplayTank(tankSpecs, stack, views.size());
+        if (index == -1) {
+            return null;
+        }
         return views.get(index);
     }
 }

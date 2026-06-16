@@ -18,6 +18,8 @@ import mekanism.api.text.ILangEntry;
 import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
+import mekanism.common.capabilities.energy.BasicEnergyContainer;
+import mekanism.common.capabilities.energy.item.RateLimitEnergyHandler;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.gear.mekatool.ModuleExcavationEscalationUnit.ExcavationMode;
 import mekanism.common.content.gear.mekatool.ModuleVeinMiningUnit;
@@ -27,7 +29,10 @@ import mekanism.common.item.interfaces.IItemHUDProvider;
 import mekanism.common.lib.attribute.AttributeCache;
 import mekanism.common.lib.attribute.IAttributeRefresher;
 import mekanism.common.lib.radial.IRadialEnumModeItem;
+import mekanism.common.registration.impl.CreativeTabDeferredRegister;
 import mekanism.common.registries.MekanismItems;
+import mekanism.common.storage.item.EnergyItemStorage;
+import mekanism.common.storage.item.ItemStorageHandler;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.StorageUtils;
@@ -57,7 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
-public class ItemAtomicDisassembler extends DiggerItem implements IItemHUDProvider, IRadialEnumModeItem<DisassemblerMode>, IAttributeRefresher, RenderPropertiesProvider.MekRenderPropertiesGetter {
+public class ItemAtomicDisassembler extends DiggerItem implements CreativeTabDeferredRegister.ICustomCreativeTabContents, IItemHUDProvider, IRadialEnumModeItem<DisassemblerMode>, IAttributeRefresher, RenderPropertiesProvider.MekRenderPropertiesGetter, ItemStorageHandler {
 
     //All basic dig actions except shears
 //    public static final Set<ToolAction> ALWAYS_SUPPORTED_ACTIONS = Set.of(ToolActions.AXE_DIG, ToolActions.HOE_DIG, ToolActions.SHOVEL_DIG, ToolActions.PICKAXE_DIG,
@@ -70,7 +75,7 @@ public class ItemAtomicDisassembler extends DiggerItem implements IItemHUDProvid
     public static ItemStack fullyChargedStack() {
         ItemAtomicDisassembler disassembler = MekanismItems.ATOMIC_DISASSEMBLER.get();
         ItemStack stack = new ItemStack(disassembler);
-        return StorageUtils.getFilledEnergyVariant(stack, disassembler.getMaxEnergy(stack));
+        return StorageUtils.getFilledEnergyVariant(stack);
     }
 
     private final AttributeCache attributeCache;
@@ -78,7 +83,7 @@ public class ItemAtomicDisassembler extends DiggerItem implements IItemHUDProvid
     public ItemAtomicDisassembler(Properties properties) {
         super(1, -2.8F, Tiers.NETHERITE, null, properties.rarity(Rarity.RARE));
         //super(() -> MekanismConfig.gear.disassemblerChargeRate, () -> MekanismConfig.gear.disassemblerMaxEnergy, properties.rarity(Rarity.RARE));
-        this.attributeCache = new AttributeCache(this, () -> MekanismConfig.gear.disassemblerMaxDamage, () -> MekanismConfig.gear.disassemblerAttackSpeed);
+        this.attributeCache = new AttributeCache(this, () -> MekanismConfig.COMMON.gear.disassemblerMaxDamage, () -> MekanismConfig.COMMON.gear.disassemblerAttackSpeed);
     }
 
     @Override
@@ -125,7 +130,7 @@ public class ItemAtomicDisassembler extends DiggerItem implements IItemHUDProvid
                 // we don't have enough energy, but we will remove as much as we can, which is how much corresponds
                 // to the amount of damage we will actually do
                 try(Transaction t=Transaction.openOuter()) {
-                    energyStorage.extract(MekanismConfig.gear.disassemblerEnergyUsageWeapon, t);
+                    energyStorage.extract(MekanismConfig.COMMON.gear.disassemblerEnergyUsageWeapon, t);
                     t.commit();
                 }
             }
@@ -204,7 +209,7 @@ public class ItemAtomicDisassembler extends DiggerItem implements IItemHUDProvid
     }
 
     private long getDestroyEnergy(ItemStack itemStack) {
-        return MekanismConfig.gear.disassemblerEnergyUsage * getMode(itemStack).getEfficiency();
+        return MekanismConfig.COMMON.gear.disassemblerEnergyUsage * getMode(itemStack).getEfficiency();
     }
 
     @Override
@@ -229,19 +234,19 @@ public class ItemAtomicDisassembler extends DiggerItem implements IItemHUDProvid
         if (slot == EquipmentSlot.MAINHAND) {
             EnergyStorage energyStorage = ContainerItemContext.withConstant(stack).find(EnergyStorage.ITEM);
             long energy = energyStorage == null ? 0 : energyStorage.getAmount();
-            long energyCost = MekanismConfig.gear.disassemblerEnergyUsageWeapon;
+            long energyCost = MekanismConfig.COMMON.gear.disassemblerEnergyUsageWeapon;
             if (energy > energyCost) {
                 //If we have enough energy to act at full damage, use the cached multimap rather than creating a new one
                 // This will be the case the vast majority of the time
                 return attributeCache.get();
             }
             //If we don't have enough power use it at a reduced power level
-            int minDamage = MekanismConfig.gear.disassemblerMinDamage;
-            int damageDifference = MekanismConfig.gear.disassemblerMaxDamage - minDamage;
+            int minDamage = MekanismConfig.COMMON.gear.disassemblerMinDamage;
+            int damageDifference = MekanismConfig.COMMON.gear.disassemblerMaxDamage - minDamage;
             double damage = minDamage + (double) (damageDifference * energy) / energyCost;
             ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
             builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", damage, Operation.ADDITION));
-            builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", MekanismConfig.gear.disassemblerAttackSpeed, Operation.ADDITION));
+            builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", MekanismConfig.COMMON.gear.disassemblerAttackSpeed, Operation.ADDITION));
             return builder.build();
         }
         return super.getAttributeModifiers(stack, slot);
@@ -249,8 +254,8 @@ public class ItemAtomicDisassembler extends DiggerItem implements IItemHUDProvid
 
     @Override
     public void addToBuilder(Builder<Attribute, AttributeModifier> builder) {
-        builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", MekanismConfig.gear.disassemblerMaxDamage, Operation.ADDITION));
-        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", MekanismConfig.gear.disassemblerAttackSpeed, Operation.ADDITION));
+        builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", MekanismConfig.COMMON.gear.disassemblerMaxDamage, Operation.ADDITION));
+        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", MekanismConfig.COMMON.gear.disassemblerAttackSpeed, Operation.ADDITION));
     }
 
     @Override
@@ -294,29 +299,35 @@ public class ItemAtomicDisassembler extends DiggerItem implements IItemHUDProvid
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        return MekanismConfig.client.energyColor;
+        return MekanismConfig.CLIENT.client.energyColor;
     }
 
-//    @Override
-//    public void addItems(CreativeModeTab.Output tabOutput) {
-//        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this), MekanismConfig.gear.disassemblerMaxEnergy));
-//    }
+    @Override
+    public void addItems(CreativeModeTab.Output tabOutput) {
+        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this)));
+    }
 
     protected long getMaxEnergy(ItemStack stack) {
-        return MekanismConfig.gear.disassemblerMaxEnergy;
+        return MekanismConfig.COMMON.gear.disassemblerMaxEnergy;
     }
 
     protected long getChargeRate(ItemStack stack) {
-        return MekanismConfig.gear.disassemblerChargeRate;
+        return MekanismConfig.COMMON.gear.disassemblerChargeRate;
+    }
+
+    @Override
+    public EnergyStorage getEnergyStorage(ContainerItemContext context) {
+        return new EnergyItemStorage(context, () -> RateLimitEnergyHandler.create(() -> MekanismConfig.COMMON.gear.disassemblerChargeRate, () -> MekanismConfig.COMMON.gear.disassemblerMaxEnergy,
+                BasicEnergyContainer.manualOnly, BasicEnergyContainer.alwaysTrue));
     }
 
     @NothingNullByDefault
     public enum DisassemblerMode implements IDisableableEnum<DisassemblerMode>, IHasTextComponent, IRadialMode {
         NORMAL(MekanismLang.RADIAL_EXCAVATION_SPEED_NORMAL, 20, () -> true, EnumColor.BRIGHT_GREEN, ExcavationMode.NORMAL.icon()),
-        SLOW(MekanismLang.RADIAL_EXCAVATION_SPEED_SLOW, 8, () -> MekanismConfig.gear.disassemblerSlowMode, EnumColor.PINK, ExcavationMode.SLOW.icon()),
+        SLOW(MekanismLang.RADIAL_EXCAVATION_SPEED_SLOW, 8, () -> MekanismConfig.COMMON.gear.disassemblerSlowMode, EnumColor.PINK, ExcavationMode.SLOW.icon()),
         //Note: Uses extreme icon as both are efficiency 128
-        FAST(MekanismLang.RADIAL_EXCAVATION_SPEED_FAST, 128, () -> MekanismConfig.gear.disassemblerFastMode, EnumColor.RED, ExcavationMode.EXTREME.icon()),
-        VEIN(MekanismLang.RADIAL_VEIN_NORMAL, 20, () -> MekanismConfig.gear.disassemblerVeinMining, EnumColor.AQUA, MekanismUtils.getResource(MekanismUtils.ResourceType.GUI_RADIAL, "vein_normal.png")),
+        FAST(MekanismLang.RADIAL_EXCAVATION_SPEED_FAST, 128, () -> MekanismConfig.COMMON.gear.disassemblerFastMode, EnumColor.RED, ExcavationMode.EXTREME.icon()),
+        VEIN(MekanismLang.RADIAL_VEIN_NORMAL, 20, () -> MekanismConfig.COMMON.gear.disassemblerVeinMining, EnumColor.AQUA, MekanismUtils.getResource(MekanismUtils.ResourceType.GUI_RADIAL, "vein_normal.png")),
         OFF(MekanismLang.RADIAL_EXCAVATION_SPEED_OFF, 0, () -> true, EnumColor.WHITE, ExcavationMode.OFF.icon());
 
         private static final DisassemblerMode[] MODES = values();

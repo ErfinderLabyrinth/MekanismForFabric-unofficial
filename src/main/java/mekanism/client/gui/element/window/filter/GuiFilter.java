@@ -2,6 +2,7 @@ package mekanism.client.gui.element.window.filter;
 
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.ILangEntry;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.button.MekanismImageButton;
@@ -115,7 +116,7 @@ public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends Til
         addChild(new TranslationButton(gui(), getLeftButtonX(), screenBottom + 2, 60, 20,
               isNew ? MekanismLang.BUTTON_CANCEL : MekanismLang.BUTTON_DELETE, () -> {
             if (origFilter != null) {
-                Mekanism.packetHandler().sendToServer(new PacketEditFilter<>(tile.getBlockPos(), origFilter, null));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketEditFilter<>(tile.getBlockPos(), origFilter, null));
             }
             close();
         }));
@@ -195,9 +196,9 @@ public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends Til
 
     protected void saveFilter() {
         if (isNew) {
-            Mekanism.packetHandler().sendToServer(new PacketNewFilter(tile.getBlockPos(), filter));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketNewFilter(tile.getBlockPos(), filter));
         } else {
-            Mekanism.packetHandler().sendToServer(new PacketEditFilter<>(tile.getBlockPos(), origFilter, filter));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketEditFilter<>(tile.getBlockPos(), origFilter, filter));
         }
         close();
     }

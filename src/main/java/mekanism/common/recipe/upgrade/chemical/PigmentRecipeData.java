@@ -2,6 +2,7 @@ package mekanism.common.recipe.upgrade.chemical;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTankBuilder;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.IPigmentHandler.IMekanismPigmentHandler;
 import mekanism.api.chemical.pigment.IPigmentTank;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @NothingNullByDefault
-public class PigmentRecipeData extends ChemicalRecipeData<Pigment, PigmentStack, IPigmentTank, IPigmentHandler> {
+public class PigmentRecipeData extends ChemicalRecipeData<Pigment, PigmentStack, IPigmentTank, Storage<Pigment>> {
 
     public PigmentRecipeData(ListTag tanks) {
         super(tanks);
@@ -67,7 +68,7 @@ public class PigmentRecipeData extends ChemicalRecipeData<Pigment, PigmentStack,
     }
 
     @Override
-    protected ItemApiLookup<IPigmentHandler, ContainerItemContext> getItemLookup() {
+    protected ItemApiLookup<Storage<Pigment>, ContainerItemContext> getItemLookup() {
         return Capabilities.PIGMENT_HANDLER_ITEM;
     }
 

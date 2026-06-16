@@ -136,7 +136,7 @@ public class ModuleFarmingUnit implements ICustomModule<ModuleFarmingUnit> {
 
     private InteractionResult dowseCampfire(UseOnContext context, BlockState clickedState, EnergyStorage energyStorage) {
         long energy = energyStorage.getAmount();
-        long energyUsage = MekanismConfig.gear.mekaToolEnergyUsageShovel;
+        long energyUsage = MekanismConfig.COMMON.gear.mekaToolEnergyUsageShovel;
         if (energy < energyUsage) {
             //Fail if we don't have enough energy or using the item failed
             return InteractionResult.FAIL;
@@ -162,7 +162,7 @@ public class ModuleFarmingUnit implements ICustomModule<ModuleFarmingUnit> {
 
     private InteractionResult tillAOE(UseOnContext context, BlockState clickedState, EnergyStorage energyStorage, int diameter) {
         return useAOE(context, clickedState, energyStorage, diameter, ModuleFarmingUnit::getHoeInteractionBlockstate, SoundEvents.HOE_TILL, -1,
-              MekanismConfig.gear.mekaToolEnergyUsageHoe, new HoeToolAOEData());
+              MekanismConfig.COMMON.gear.mekaToolEnergyUsageHoe, new HoeToolAOEData());
     }
 
     private static Optional<BlockState> getHoeInteractionBlockstate(BlockState old) {
@@ -182,12 +182,12 @@ public class ModuleFarmingUnit implements ICustomModule<ModuleFarmingUnit> {
             return InteractionResult.PASS;
         }
         return useAOE(context, clickedState, energyStorage, diameter, blockstate -> Optional.ofNullable(ShovelItem.FLATTENABLES.get(blockstate.getBlock())), SoundEvents.SHOVEL_FLATTEN, -1,
-              MekanismConfig.gear.mekaToolEnergyUsageShovel, new ShovelToolAOEData());
+              MekanismConfig.COMMON.gear.mekaToolEnergyUsageShovel, new ShovelToolAOEData());
     }
 
     private InteractionResult useAxeAOE(UseOnContext context, BlockState clickedState, EnergyStorage energyStorage, int diameter, Function<BlockState, Optional<BlockState>> interaction,
           SoundEvent sound, int particle) {
-        return useAOE(context, clickedState, energyStorage, diameter, interaction, sound, particle, MekanismConfig.gear.mekaToolEnergyUsageAxe,
+        return useAOE(context, clickedState, energyStorage, diameter, interaction, sound, particle, MekanismConfig.COMMON.gear.mekaToolEnergyUsageAxe,
               new AxeToolAOEData());
     }
 

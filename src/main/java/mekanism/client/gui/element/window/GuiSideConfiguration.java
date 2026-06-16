@@ -3,6 +3,7 @@ package mekanism.client.gui.element.window;
 import mekanism.api.RelativeSide;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInnerScreen;
@@ -65,10 +66,10 @@ public class GuiSideConfiguration<TILE extends TileEntityMekanism & ISideConfigu
             configTabs.add(tab);
         }
         ejectButton = addChild(new MekanismImageButton(gui, relativeX + 136, relativeY + 6, 14, getButtonLocation("auto_eject"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketConfigurationUpdate(ConfigurationPacket.EJECT, this.tile.getBlockPos(), currentType)),
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketConfigurationUpdate(ConfigurationPacket.EJECT, this.tile.getBlockPos(), currentType)),
               getOnHover(MekanismLang.AUTO_EJECT)));
         addChild(new MekanismImageButton(gui, relativeX + 136, relativeY + 95, 14, getButtonLocation("clear_sides"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketConfigurationUpdate(ConfigurationPacket.CLEAR_ALL, this.tile.getBlockPos(), currentType)),
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketConfigurationUpdate(ConfigurationPacket.CLEAR_ALL, this.tile.getBlockPos(), currentType)),
               getOnHover(MekanismLang.SIDE_CONFIG_CLEAR)));
         addSideDataButton(RelativeSide.BOTTOM, 68, 92);
         addSideDataButton(RelativeSide.TOP, 68, 46);
@@ -78,7 +79,7 @@ public class GuiSideConfiguration<TILE extends TileEntityMekanism & ISideConfigu
         addSideDataButton(RelativeSide.RIGHT, 91, 69);
         updateTabs();
         ((MekanismContainer) ((GuiMekanism<?>) gui()).getMenu()).startTracking(MekanismContainer.SIDE_CONFIG_WINDOW, this.tile.getConfig());
-        Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_TRACK_SIDE_CONFIG, tile, MekanismContainer.SIDE_CONFIG_WINDOW));
+        MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_TRACK_SIDE_CONFIG, tile, MekanismContainer.SIDE_CONFIG_WINDOW));
     }
 
     private void addSideDataButton(RelativeSide side, int xPos, int yPos) {
@@ -92,7 +93,7 @@ public class GuiSideConfiguration<TILE extends TileEntityMekanism & ISideConfigu
     @Override
     public void close() {
         super.close();
-        Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_STOP_TRACKING, tile, MekanismContainer.SIDE_CONFIG_WINDOW));
+        MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_STOP_TRACKING, tile, MekanismContainer.SIDE_CONFIG_WINDOW));
         ((MekanismContainer) ((GuiMekanism<?>) gui()).getMenu()).stopTracking(MekanismContainer.SIDE_CONFIG_WINDOW);
     }
 

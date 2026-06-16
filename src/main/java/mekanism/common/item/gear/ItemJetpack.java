@@ -20,6 +20,7 @@ import mekanism.common.item.interfaces.IModeItem;
 import mekanism.common.registries.MekanismGases;
 import mekanism.common.util.ItemDataUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -55,12 +56,12 @@ public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IMode
 
     @Override
     protected LongSupplier getMaxGas() {
-        return () -> MekanismConfig.gear.jetpackMaxGas;
+        return () -> MekanismConfig.COMMON.gear.jetpackMaxGas;
     }
 
     @Override
     protected LongSupplier getFillRate() {
-        return () -> MekanismConfig.gear.jetpackFillRate;
+        return () -> MekanismConfig.COMMON.gear.jetpackFillRate;
     }
 
     @Override
@@ -99,7 +100,7 @@ public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IMode
             ItemJetpack jetpack = (ItemJetpack) stack.getItem();
             list.add(MekanismLang.JETPACK_MODE.translateColored(EnumColor.DARK_GRAY, jetpack.getJetpackMode(stack)));
             GasStack stored = GasStack.EMPTY;
-            IGasHandler gasHandlerItem = ContainerItemContext.withConstant(stack).find(Capabilities.GAS_HANDLER_ITEM);
+            Storage<Gas> gasHandlerItem = ContainerItemContext.withConstant(stack).find(Capabilities.GAS_HANDLER_ITEM);
             if (gasHandlerItem != null) {
                 Iterator<StorageView<Gas>> iterator = gasHandlerItem.iterator();
                 if (iterator.hasNext()) {

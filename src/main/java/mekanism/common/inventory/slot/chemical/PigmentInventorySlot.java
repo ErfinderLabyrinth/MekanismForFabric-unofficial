@@ -9,6 +9,7 @@ import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.common.capabilities.Capabilities;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,7 @@ import java.util.function.Supplier;
 public class PigmentInventorySlot extends ChemicalInventorySlot<Pigment, PigmentStack> {
 
     @Nullable
-    public static IPigmentHandler getCapability(ContainerItemContext stack) {
+    public static Storage<Pigment> getCapability(ContainerItemContext stack) {
         return stack.find(Capabilities.PIGMENT_HANDLER_ITEM);
     }
 
@@ -60,7 +61,7 @@ public class PigmentInventorySlot extends ChemicalInventorySlot<Pigment, Pigment
 
     @Nullable
     @Override
-    protected IChemicalHandler<Pigment, PigmentStack, IPigmentTank> getCapability() {
+    protected Storage<Pigment> getCapability() {
         return getCapability(ContainerItemContext.ofSingleSlot(current));
     }
 }

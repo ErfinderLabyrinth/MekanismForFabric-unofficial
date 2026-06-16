@@ -21,6 +21,6 @@ public class BasePackMetadataGenerator extends PackMetadataGenerator {
             packTypeVersions.put(packType, version);
             maxVersion = Math.max(maxVersion, version);
         }
-        add(PackMetadataSection.TYPE, new PackMetadataSection(Component.translatable(description.getTranslationKey()), maxVersion, packTypeVersions));
+//        add(PackMetadataSection.TYPE, new PackMetadataSection(Component.translatable(description.getTranslationKey()), maxVersion, packTypeVersions));
     }
 }

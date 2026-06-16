@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.IHasTranslationKey;
 import mekanism.common.MekanismLang;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import org.jetbrains.annotations.Nullable;
 

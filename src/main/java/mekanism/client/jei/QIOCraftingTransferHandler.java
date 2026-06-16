@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.MathUtils;
+import mekanism.client.MekanismClient;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.qio.QIOCraftingTransferHelper;
@@ -321,7 +322,7 @@ public class QIOCraftingTransferHandler<CONTAINER extends QIOItemViewerContainer
                 // things may not fully be accurate on the client side with the stacks that JEI lets us know match the recipe, as
                 // they may require extra NBT that is server side only.
                 //TODO: If the sources are all from the crafting window and are already in the correct spots, there is no need to send this packet
-                Mekanism.packetHandler().sendToServer(new PacketQIOFillCraftingWindow(recipe.getId(), maxTransfer, sources));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketQIOFillCraftingWindow(recipe.getId(), maxTransfer, sources));
             }
         }
         return null;

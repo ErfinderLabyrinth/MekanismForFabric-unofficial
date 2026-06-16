@@ -89,7 +89,7 @@ public class GuiEnergyTab extends GuiTexturedElement {
         EnergyUnit current = EnergyUnit.getConfigured();
         EnergyUnit updated = converter.apply(current);
         if (current != updated) {//May be equal if all other energy types are disabled
-            MekanismConfig.common.energyUnit = updated;
+            MekanismConfig.COMMON.common.energyUnit = updated;
 //            MekanismConfig.common.save();
         }
     }

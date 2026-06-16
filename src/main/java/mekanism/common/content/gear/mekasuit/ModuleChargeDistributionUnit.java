@@ -73,7 +73,7 @@ public class ModuleChargeDistributionUnit implements ICustomModule<ModuleChargeD
     }
 
     private void chargeInventory(IModule<ModuleChargeDistributionUnit> module, Player player) {
-        long toCharge = MekanismConfig.gear.mekaSuitInventoryChargeRate;
+        long toCharge = MekanismConfig.COMMON.gear.mekaSuitInventoryChargeRate;
         // first try to charge mainhand/offhand item
         toCharge = charge(module, player, ContainerItemContext.ofPlayerHand(player, InteractionHand.MAIN_HAND), toCharge);
         toCharge = charge(module, player, ContainerItemContext.ofPlayerHand(player, InteractionHand.OFF_HAND), toCharge);

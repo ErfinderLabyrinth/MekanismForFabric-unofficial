@@ -9,6 +9,7 @@ import mekanism.common.entity.RobitPrideSkinData;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.registries.MekanismRobitSkins;
+import mekanism.common.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -113,7 +114,7 @@ public class PacketRobit implements IMekanismPacket {
         String name = null;
         ResourceKey<RobitSkin> skin = null;
         if (activeType == RobitPacketType.NAME) {
-            name = BasePacketHandler.readString(buffer).trim();
+            name = NetworkUtil.readString(buffer).trim();
         } else if (activeType == RobitPacketType.SKIN) {
             skin = buffer.readResourceKey(MekanismAPI.ROBIT_SKIN_REGISTRY_NAME);
         }

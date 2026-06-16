@@ -27,6 +27,8 @@ import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.tile.interfaces.ISustainedData;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -65,7 +67,7 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class BaseBlockLootTables extends BlockLootSubProvider {
+public abstract class BaseBlockLootTables extends FabricBlockLootTableProvider {
 
     private static final LootItemCondition.Builder HAS_SILK_TOUCH = MatchTool.toolMatches(ItemPredicate.Builder.item()
           .hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))));
@@ -74,9 +76,9 @@ public abstract class BaseBlockLootTables extends BlockLootSubProvider {
     //Note: We use an array set as we never expect this to have more than a few elements (in reality it only ever has one)
     private final Set<Block> toSkip = new ReferenceArraySet<>();
 
-    protected BaseBlockLootTables() {
+    protected BaseBlockLootTables(FabricDataOutput output) {
         //Note: We manually handle explosion resistance on a case by case basis dynamically
-        super(Collections.emptySet(), FeatureFlags.VANILLA_SET);
+        super(output);
     }
 
     @Override

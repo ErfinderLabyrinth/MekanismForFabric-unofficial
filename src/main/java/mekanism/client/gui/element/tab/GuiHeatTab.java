@@ -40,13 +40,13 @@ public class GuiHeatTab extends GuiTexturedElement {
     public void renderToolTip(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY) {
         super.renderToolTip(guiGraphics, mouseX, mouseY);
         List<Component> info = new ArrayList<>(infoHandler.getInfo());
-        info.add(MekanismLang.UNIT.translate(MekanismConfig.common.tempUnit));
+        info.add(MekanismLang.UNIT.translate(MekanismConfig.COMMON.common.tempUnit));
         displayTooltips(guiGraphics, mouseX, mouseY, info);
     }
 
     @Override
     protected ResourceLocation getResource() {
-        return ICONS.computeIfAbsent(MekanismConfig.common.tempUnit, type -> MekanismUtils.getResource(ResourceType.GUI_TAB,
+        return ICONS.computeIfAbsent(MekanismConfig.COMMON.common.tempUnit, type -> MekanismUtils.getResource(ResourceType.GUI_TAB,
               "heat_info_" + type.getTabName() + ".png"));
     }
 
@@ -65,10 +65,10 @@ public class GuiHeatTab extends GuiTexturedElement {
     }
 
     private void updateTemperatureUnit(UnaryOperator<TemperatureUnit> converter) {
-        TemperatureUnit current = MekanismConfig.common.tempUnit;
+        TemperatureUnit current = MekanismConfig.COMMON.common.tempUnit;
         TemperatureUnit updated = converter.apply(current);
         if (current != updated) {//Should always be true but validate it
-            MekanismConfig.common.tempUnit = updated;
+            MekanismConfig.COMMON.common.tempUnit = updated;
 //            MekanismConfig.common.save();
         }
     }

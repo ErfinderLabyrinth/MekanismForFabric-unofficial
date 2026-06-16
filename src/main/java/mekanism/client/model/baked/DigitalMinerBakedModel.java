@@ -40,7 +40,7 @@ public class DigitalMinerBakedModel extends ExtensionBakedModel<Void> {
     @Nullable
     @Override
     protected QuadsKey<Void> createKey(QuadsKey<Void> key, Object o) {
-        if (MekanismConfig.client.holidays) {
+        if (MekanismConfig.CLIENT.client.holidays) {
             if (HolidayManager.MAY_4.isToday()) {
                 return key.transform(MAY_4TH_TRANSFORM);
             } else if (HolidayManager.APRIL_FOOLS.isToday()) {

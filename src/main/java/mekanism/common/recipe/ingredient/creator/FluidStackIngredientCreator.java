@@ -12,6 +12,7 @@ import mekanism.common.Mekanism;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.recipe.ingredient.IMultiIngredient;
 import mekanism.common.tags.TagUtils;
+import mekanism.common.util.NetworkUtil;
 import mekanism.common.util.RegistryUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.core.Holder;
@@ -63,7 +64,7 @@ public class FluidStackIngredientCreator implements IFluidStackIngredientCreator
         return switch (buffer.readEnum(IngredientType.class)) {
             case SINGLE -> from(FluidStack.readFromBuffer(buffer));
             case TAGGED -> from(TagKey.create(Registries.FLUID, buffer.readResourceLocation()), buffer.readVarInt());
-            case MULTI -> createMulti(BasePacketHandler.readArray(buffer, FluidStackIngredient[]::new, this::read));
+            case MULTI -> createMulti(NetworkUtil.readArray(buffer, FluidStackIngredient[]::new, this::read));
         };
     }
 
@@ -248,7 +249,7 @@ public class FluidStackIngredientCreator implements IFluidStackIngredientCreator
         private final int amount;
 
         private TaggedFluidStackIngredient(TagKey<Fluid> tag, int amount) {
-            this(TagUtils.tag(BuiltInRegistries.FLUID, tag).get(), amount);
+            this(TagUtils.createKey(BuiltInRegistries.FLUID, tag.location()), amount);
         }
 
         private TaggedFluidStackIngredient(HolderSet.Named<Fluid> tag, int amount) {
@@ -428,7 +429,7 @@ public class FluidStackIngredientCreator implements IFluidStackIngredientCreator
         @Override
         public void write(FriendlyByteBuf buffer) {
             buffer.writeEnum(IngredientType.MULTI);
-            BasePacketHandler.writeArray(buffer, ingredients, InputIngredient::write);
+            NetworkUtil.writeArray(buffer, ingredients, InputIngredient::write);
         }
 
         @Override

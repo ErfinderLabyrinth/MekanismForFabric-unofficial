@@ -10,6 +10,7 @@ import mekanism.api.math.MathUtils;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.ILangEntry;
+import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.common.MekanismLang;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.interfaces.IGasItem;
@@ -33,7 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
-public class ItemFlamethrower extends Item implements IItemHUDProvider, IModeItem, IGasItem, ICustomCreativeTabContents {
+public class ItemFlamethrower extends Item implements IItemHUDProvider, IModeItem, IGasItem, ICustomCreativeTabContents, RenderPropertiesProvider.MekRenderPropertiesGetter {
 
     public ItemFlamethrower(Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.RARE));
@@ -43,6 +44,12 @@ public class ItemFlamethrower extends Item implements IItemHUDProvider, IModeIte
 //    public void initializeClient(@NotNull Consumer<IClientItemExtensions> consumer) {
 //        consumer.accept(RenderPropertiesProvider.flamethrower());
 //    }
+
+
+    @Override
+    public RenderPropertiesProvider.MekRenderProperties getRenderProperties() {
+        return RenderPropertiesProvider.flamethrower();
+    }
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
@@ -72,7 +79,7 @@ public class ItemFlamethrower extends Item implements IItemHUDProvider, IModeIte
 
     @Override
     public void addItems(CreativeModeTab.Output tabOutput) {
-        tabOutput.accept(ChemicalUtil.getFilledVariant(new ItemStack(this), MekanismConfig.gear.flamethrowerMaxGas, MekanismGases.HYDROGEN));
+        tabOutput.accept(ChemicalUtil.getFilledVariant(new ItemStack(this), MekanismConfig.COMMON.gear.flamethrowerMaxGas, MekanismGases.HYDROGEN));
     }
 
     public FlamethrowerMode getMode(ItemStack stack) {

@@ -1,6 +1,7 @@
 package mekanism.common.storage.item;
 
 import mekanism.api.DataHandlerUtils;
+import mekanism.api.NBTConstants;
 import mekanism.api.NBTSerializable;
 import mekanism.common.util.ItemDataUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
@@ -10,6 +11,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,14 +31,17 @@ public abstract class AbstractItemStorage<T, TANK extends SingleSlotStorage<T> &
 
     protected boolean save(TransactionContext t, List<TANK> tanks) {
         CompoundTag oldNBT = context.getItemVariant().copyOrCreateNbt();
-        oldNBT.put(getNBTPath(), DataHandlerUtils.writeContainers(tanks, NBTSerializable::serializeNBT));
+        CompoundTag mekData = oldNBT.getCompound(NBTConstants.MEK_DATA).copy();
+        mekData.put(getNBTPath(), DataHandlerUtils.writeContainers(tanks, NBTSerializable::serializeNBT));
+        oldNBT.put(NBTConstants.MEK_DATA, mekData);
         return context.exchange(ItemVariant.of(context.getItemVariant().getItem(), oldNBT), 1, t) == 1;
     }
 
     @Override
     public long insert(T resource, long maxAmount, TransactionContext transaction) {
         List<TANK> tanks = tankCreator.get();
-        ItemDataUtils.readContainers(context.getItemVariant().toStack((int)context.getAmount()), getNBTPath(), tanks);
+        CompoundTag nbt = context.getItemVariant().copyOrCreateNbt();
+        DataHandlerUtils.readContainers(tanks, nbt.getCompound(NBTConstants.MEK_DATA).getList(getNBTPath(), Tag.TAG_COMPOUND));
         long amountInserted = 0;
         for(TANK tank:tanks) {
             amountInserted += tank.insert(resource, maxAmount - amountInserted, transaction);
@@ -55,7 +60,8 @@ public abstract class AbstractItemStorage<T, TANK extends SingleSlotStorage<T> &
     @Override
     public long extract(T resource, long maxAmount, TransactionContext transaction) {
         List<TANK> tanks = tankCreator.get();
-        ItemDataUtils.readContainers(context.getItemVariant().toStack((int)context.getAmount()), getNBTPath(), tanks);
+        CompoundTag nbt = context.getItemVariant().copyOrCreateNbt();
+        DataHandlerUtils.readContainers(tanks, nbt.getCompound(NBTConstants.MEK_DATA).getList(getNBTPath(), Tag.TAG_COMPOUND));
         long amountExtracted = 0;
         for(TANK tank:tanks) {
             amountExtracted += tank.extract(resource, maxAmount - amountExtracted, transaction);
@@ -92,7 +98,8 @@ public abstract class AbstractItemStorage<T, TANK extends SingleSlotStorage<T> &
         @Override
         public long extract(T resource, long maxAmount, TransactionContext transaction) {
             List<TANK> tanks = tankCreator.get();
-            ItemDataUtils.readContainers(context.getItemVariant().toStack((int)context.getAmount()), getNBTPath(), tanks);
+            CompoundTag nbt = context.getItemVariant().copyOrCreateNbt();
+            DataHandlerUtils.readContainers(tanks, nbt.getCompound(NBTConstants.MEK_DATA).getList(getNBTPath(), Tag.TAG_COMPOUND));
 
             long amountExtracted = tanks.get(index).extract(resource, maxAmount, transaction);
 
@@ -109,28 +116,32 @@ public abstract class AbstractItemStorage<T, TANK extends SingleSlotStorage<T> &
         @Override
         public boolean isResourceBlank() {
             List<TANK> tanks = tankCreator.get();
-            ItemDataUtils.readContainers(context.getItemVariant().toStack((int)context.getAmount()), getNBTPath(), tanks);
+            CompoundTag nbt = context.getItemVariant().copyOrCreateNbt();
+            DataHandlerUtils.readContainers(tanks, nbt.getCompound(NBTConstants.MEK_DATA).getList(getNBTPath(), Tag.TAG_COMPOUND));
             return tanks.get(index).isResourceBlank();
         }
 
         @Override
         public T getResource() {
             List<TANK> tanks = tankCreator.get();
-            ItemDataUtils.readContainers(context.getItemVariant().toStack((int)context.getAmount()), getNBTPath(), tanks);
+            CompoundTag nbt = context.getItemVariant().copyOrCreateNbt();
+            DataHandlerUtils.readContainers(tanks, nbt.getCompound(NBTConstants.MEK_DATA).getList(getNBTPath(), Tag.TAG_COMPOUND));
             return tanks.get(index).getResource();
         }
 
         @Override
         public long getAmount() {
             List<TANK> tanks = tankCreator.get();
-            ItemDataUtils.readContainers(context.getItemVariant().toStack((int)context.getAmount()), getNBTPath(), tanks);
+            CompoundTag nbt = context.getItemVariant().copyOrCreateNbt();
+            DataHandlerUtils.readContainers(tanks, nbt.getCompound(NBTConstants.MEK_DATA).getList(getNBTPath(), Tag.TAG_COMPOUND));
             return tanks.get(index).getAmount();
         }
 
         @Override
         public long getCapacity() {
             List<TANK> tanks = tankCreator.get();
-            ItemDataUtils.readContainers(context.getItemVariant().toStack((int)context.getAmount()), getNBTPath(), tanks);
+            CompoundTag nbt = context.getItemVariant().copyOrCreateNbt();
+            DataHandlerUtils.readContainers(tanks, nbt.getCompound(NBTConstants.MEK_DATA).getList(getNBTPath(), Tag.TAG_COMPOUND));
             return tanks.get(index).getCapacity();
         }
     }

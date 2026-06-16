@@ -66,9 +66,9 @@ public class TileEntityFuelwoodHeater extends TileEntityMekanism {
             maxBurnTime = burnTime = fuelSlot.burn();
         }
         if (burnTime > 0) {
-            int ticks = Math.min(burnTime, MekanismConfig.general.fuelwoodTickMultiplier);
+            int ticks = Math.min(burnTime, MekanismConfig.COMMON.general.fuelwoodTickMultiplier);
             burnTime -= ticks;
-            heatCapacitor.handleHeat(MekanismConfig.general.heatPerFuelTick * ticks);
+            heatCapacitor.handleHeat(MekanismConfig.COMMON.general.heatPerFuelTick * ticks);
             setActive(true);
         } else {
             setActive(false);

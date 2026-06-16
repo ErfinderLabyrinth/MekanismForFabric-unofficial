@@ -14,6 +14,7 @@ import mekanism.common.base.KeySync;
 import mekanism.common.base.MekFakePlayer;
 import mekanism.common.base.PlayerState;
 import mekanism.common.capabilities.Capabilities;
+import mekanism.common.capabilities.energy.item.RateLimitEnergyHandler;
 import mekanism.common.capabilities.fluid.item.RateLimitFluidHandler;
 import mekanism.common.capabilities.fluid.item.RateLimitMultiTankFluidHandler;
 import mekanism.common.command.ChunkCommand;
@@ -42,14 +43,13 @@ import mekanism.common.content.tank.TankValidator;
 import mekanism.common.content.transporter.PathfinderCache;
 import mekanism.common.content.transporter.TransporterManager;
 import mekanism.common.integration.MekanismHooks;
+import mekanism.common.item.ItemEnergized;
 import mekanism.common.item.block.machine.ItemBlockFluidTank;
 import mekanism.common.item.block.machine.ItemBlockFluidTank.BasicCauldronInteraction;
 import mekanism.common.item.block.machine.ItemBlockFluidTank.BasicDrainCauldronInteraction;
 import mekanism.common.item.block.machine.ItemBlockFluidTank.FluidTankItemDispenseBehavior;
 import mekanism.common.item.gear.ItemMekaSuitArmor;
 import mekanism.common.item.loot.MekanismLootFunctions;
-import mekanism.common.item.predicate.FullCanteenLootCondition;
-import mekanism.common.item.predicate.MaxedModuleContainerLootItemCondition;
 import mekanism.common.lib.Version;
 import mekanism.common.lib.frequency.FrequencyManager;
 import mekanism.common.lib.frequency.FrequencyType;
@@ -65,6 +65,7 @@ import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.registries.*;
 import mekanism.common.storage.item.ItemStorageHandler;
 import mekanism.common.tags.MekanismTags;
+import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.world.GenHandler;
 import net.fabricmc.api.ModInitializer;
@@ -87,7 +88,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -98,6 +98,7 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -178,7 +179,7 @@ public class Mekanism implements ModInitializer {
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(getRecipeCacheManager());
         ServerChunkEvents.CHUNK_LOAD.register(ChunkCommand::onChunkLoad);
         ServerChunkEvents.CHUNK_UNLOAD.register(ChunkCommand::onChunkUnload);
-        imcQueue();
+        MekanismModules.MODULES.createAndRegister();
         MekanismItems.register();
         MekanismBlocks.register();
         MekanismFluids.register();
@@ -202,9 +203,24 @@ public class Mekanism implements ModInitializer {
         MekanismPigments.PIGMENTS.createAndRegisterChemical();
         MekanismSlurries.SLURRIES.createAndRegisterChemical();
         MekanismRobitSkins.createAndRegisterDatapack();
-        MekanismModules.MODULES.createAndRegister();
+        imcQueue();
 
         FluidStorage.GENERAL_COMBINED_PROVIDER.register(this::findFluidStorage);
+        EnergyStorage.SIDED.registerFallback(((world, pos, state, blockEntity, context) -> {
+            if (blockEntity instanceof TileEntityMekanism tileEntityMekanism) {
+                if (tileEntityMekanism.canHandleEnergy()) {
+                    return tileEntityMekanism.getEnergyContainer(context);
+                }
+            }
+            return null;
+        }));
+
+        EnergyStorage.ITEM.registerFallback((stack, context) -> {
+            if(stack.getItem() instanceof ItemStorageHandler itemStorageHandler) {
+                return itemStorageHandler.getEnergyStorage(context);
+            }
+            return null;
+        });
 
         Capabilities.register();
 
@@ -234,11 +250,12 @@ public class Mekanism implements ModInitializer {
 
     private @Nullable Storage<FluidVariant> findFluidStorage(ContainerItemContext containerItemContext) {
         ItemStack itemStack = containerItemContext.getItemVariant().toStack();
-        if (itemStack.getItem() instanceof ItemBlockFluidTank itemBlockFluidTank) {
-            return RateLimitFluidHandler.create(itemBlockFluidTank.getTier());
-        }else if(itemStack.getItem() instanceof ItemMekaSuitArmor itemMekaSuitArmor) {
-            return RateLimitMultiTankFluidHandler.create(itemStack, itemMekaSuitArmor.getFluidTankSpecs());
-        }else if(itemStack.getItem() instanceof ItemStorageHandler itemStorageHandler) {
+//        if (itemStack.getItem() instanceof ItemBlockFluidTank itemBlockFluidTank) {
+//            return RateLimitFluidHandler.create(itemBlockFluidTank.getTier());
+//        }else if(itemStack.getItem() instanceof ItemMekaSuitArmor itemMekaSuitArmor) {
+//            return RateLimitMultiTankFluidHandler.create(itemStack, itemMekaSuitArmor.getFluidTankSpecs());
+        /*}else*/
+        if(itemStack.getItem() instanceof ItemStorageHandler itemStorageHandler) {
             return itemStorageHandler.getFluidStorage(containerItemContext);
         }
         return null;
@@ -344,9 +361,9 @@ public class Mekanism implements ModInitializer {
         registerDispenseBehavior(new ModuleDispenseBehavior(), MekanismItems.MEKA_TOOL);
         registerDispenseBehavior(new MekaSuitDispenseBehavior(), MekanismItems.MEKASUIT_HELMET, MekanismItems.MEKASUIT_BODYARMOR, MekanismItems.MEKASUIT_PANTS,
                 MekanismItems.MEKASUIT_BOOTS);
-        //Register custom item predicates
-        Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, FullCanteenLootCondition.ID, FullCanteenLootCondition.TYPE);
-        Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, MaxedModuleContainerLootItemCondition.ID, MaxedModuleContainerLootItemCondition.TYPE);
+//        //Register custom item predicates
+//        Registry.register(BuiltInRegistries.PROV, FullCanteenItemPredicate.ID, FullCanteenItemPredicate.TYPE);
+//        Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, MaxedModuleContainerLootItemCondition.ID, MaxedModuleContainerLootItemCondition.TYPE);
         //Add any extra game event frequencies
         MekanismGameEvents.addFrequencies();
 

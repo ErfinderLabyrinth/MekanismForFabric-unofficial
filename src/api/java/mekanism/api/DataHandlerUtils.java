@@ -24,7 +24,7 @@ public class DataHandlerUtils {
     /**
      * Helper to read and load a list of containers from a {@link ListTag}
      */
-    public static void readContainers(List<? extends NBTSerializable> containers, ListTag storedContainers) {
+    public static void readContainers(List<? extends NBTSerializable<CompoundTag>> containers, ListTag storedContainers) {
         readContents(containers, storedContainers, getTagByType(containers));
     }
 
@@ -45,7 +45,7 @@ public class DataHandlerUtils {
     /**
      * Helper to read and load a list of handler contents from a {@link ListTag}
      */
-    public static void readContents(List<? extends NBTSerializable> contents, ListTag storedContents, String key) {
+    public static void readContents(List<? extends NBTSerializable<CompoundTag>> contents, ListTag storedContents, String key) {
         int size = contents.size();
         for (int tagCount = 0; tagCount < storedContents.size(); tagCount++) {
             CompoundTag tagCompound = storedContents.getCompound(tagCount);

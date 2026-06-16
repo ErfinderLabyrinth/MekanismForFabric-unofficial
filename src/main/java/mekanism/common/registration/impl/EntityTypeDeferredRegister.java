@@ -40,7 +40,7 @@ public class EntityTypeDeferredRegister extends WrappedDeferredRegister<EntityTy
         registerEntityAttributes();
     }
 
-    private void registerEntityAttributes() {
+    public void registerEntityAttributes() {
         if (livingEntityAttributes == null) {
             Mekanism.logger.error("GlobalEntityTypeAttributes have already been set. This should not happen.");
         } else {

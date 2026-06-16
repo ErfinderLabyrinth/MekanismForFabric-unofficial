@@ -62,7 +62,7 @@ public class ModuleShearingUnit implements ICustomModule<ModuleShearingUnit> {
     @Override
     public InteractionResult onInteract(IModule<ModuleShearingUnit> module, Player player, LivingEntity entity, InteractionHand hand) {
         if (entity instanceof Shearable) {
-            long cost = MekanismConfig.gear.mekaToolEnergyUsageShearEntity;
+            long cost = MekanismConfig.COMMON.gear.mekaToolEnergyUsageShearEntity;
             EnergyStorage energyContainer = module.getEnergyContainer();
             if (cost == 0 || energyContainer != null && energyContainer.getAmount() >= cost &&
                                  shearEntity(energyContainer, entity, player, module.getContainer(), entity.level(), entity.blockPosition())) {
@@ -106,8 +106,8 @@ public class ModuleShearingUnit implements ICustomModule<ModuleShearingUnit> {
 
     //Modified copy of ShearsDispenseItemBehavior#tryShearLivingEntity to work with IForgeShearable
     private boolean tryShearLivingEntity(@Nullable EnergyStorage energyContainer, ServerLevel world, BlockPos pos, ItemStack stack) {
-        long cost = MekanismConfig.gear.mekaToolEnergyUsageShearEntity;
-        if (cost == 0 || energyContainer != null && energyContainer.getAmount() >= MekanismConfig.gear.mekaToolEnergyUsageShearEntity) {
+        long cost = MekanismConfig.COMMON.gear.mekaToolEnergyUsageShearEntity;
+        if (cost == 0 || energyContainer != null && energyContainer.getAmount() >= MekanismConfig.COMMON.gear.mekaToolEnergyUsageShearEntity) {
             for (LivingEntity entity : world.getEntitiesOfClass(LivingEntity.class, new AABB(pos), SHEARABLE)) {
                 if (shearEntity(energyContainer, entity, null, stack, world, pos)) {
                     return true;
@@ -132,7 +132,7 @@ public class ModuleShearingUnit implements ICustomModule<ModuleShearingUnit> {
 //                }
                 if (energyContainer != null) {
                     try(Transaction t=Transaction.openOuter()) {
-                        energyContainer.extract(MekanismConfig.gear.mekaToolEnergyUsageShearEntity, t);
+                        energyContainer.extract(MekanismConfig.COMMON.gear.mekaToolEnergyUsageShearEntity, t);
                         t.commit();
                     }
                 }

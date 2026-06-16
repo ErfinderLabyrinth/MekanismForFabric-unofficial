@@ -1,6 +1,7 @@
 package mekanism.client.render.obj;
 
 import mekanism.client.model.CustomGeometry;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -21,8 +22,8 @@ public class TransmitterModel extends CustomGeometry {
     }
 
     @Override
-    public BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
-          ItemOverrides overrides, ResourceLocation modelLocation) {
+    public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
+                           ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
         return new TransmitterBakedModel(internal, glass, baker, spriteGetter, modelTransform, overrides, modelLocation);
     }
 

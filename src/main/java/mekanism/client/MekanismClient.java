@@ -1,6 +1,7 @@
 package mekanism.client;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import mekanism.client.network.ClientPacketHandler;
 import mekanism.client.render.RenderTickHandler;
 import mekanism.client.render.tileentity.RenderSPS;
 import mekanism.client.sound.SoundHandler;
@@ -23,10 +24,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class MekanismClient implements ClientModInitializer {
+    private static ClientPacketHandler clientPacketHandler = new ClientPacketHandler();
 
     @Override
     public void onInitializeClient() {
         ClientRegistration.init();
+        clientPacketHandler.initialize();
     }
 
     public static final Map<UUID, SecurityData> clientSecurityMap = new Object2ObjectOpenHashMap<>();
@@ -43,10 +46,14 @@ public class MekanismClient implements ClientModInitializer {
             UUID playerUUID = Minecraft.getInstance().player.getUUID();
             boolean down = Minecraft.getInstance().screen == null && pressed;
             if (down != Mekanism.keyMap.has(playerUUID, type)) {
-                Mekanism.packetHandler().sendToServer(new PacketKey(type, down));
+                clientPacketHandler.sendToServer(new PacketKey(type, down));
                 Mekanism.keyMap.update(playerUUID, type, down);
             }
         }
+    }
+
+    public static ClientPacketHandler clientPacketHandler() {
+        return clientPacketHandler;
     }
 
     public static void reset() {

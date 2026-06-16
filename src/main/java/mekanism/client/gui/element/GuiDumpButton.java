@@ -1,5 +1,6 @@
 package mekanism.client.gui.element;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.Mekanism;
 import mekanism.common.network.to_server.PacketGuiInteract;
@@ -31,6 +32,6 @@ public class GuiDumpButton<TILE extends BlockEntity & IHasDumpButton> extends Gu
 
     @Override
     public void onClick(double mouseX, double mouseY, int button) {
-        Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.DUMP_BUTTON, tile));
+        MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.DUMP_BUTTON, tile));
     }
 }

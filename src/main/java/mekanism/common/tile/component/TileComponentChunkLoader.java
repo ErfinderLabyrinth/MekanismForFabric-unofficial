@@ -48,7 +48,7 @@ public class TileComponentChunkLoader<T extends TileEntityMekanism & IChunkLoade
     }
 
     public boolean canOperate() {
-        return MekanismConfig.general.allowChunkloading && tile.supportsUpgrades() && tile.getComponent().isUpgradeInstalled(Upgrade.ANCHOR);
+        return MekanismConfig.COMMON.general.allowChunkloading && tile.supportsUpgrades() && tile.getComponent().isUpgradeInstalled(Upgrade.ANCHOR);
     }
 
     private void releaseChunkTickets(@NotNull ServerLevel world, @NotNull BlockPos pos) {

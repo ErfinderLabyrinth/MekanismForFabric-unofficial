@@ -47,8 +47,8 @@ public class ChemicalFluidBarDecorator{
             return false;
         }
         yOffset += 12;
-        for (ItemApiLookup<? extends IChemicalHandler<? extends Chemical<?>, ? extends ChemicalStack<? extends Chemical<?>>, ?>, ContainerItemContext> chemicalCap : List.of(Capabilities.GAS_HANDLER_ITEM, Capabilities.INFUSION_HANDLER_ITEM, Capabilities.PIGMENT_HANDLER_ITEM, Capabilities.SLURRY_HANDLER_ITEM)) {
-            IChemicalHandler<? extends Chemical<?>, ? extends ChemicalStack<? extends Chemical<?>>, ?> handler = ContainerItemContext.withConstant(stack).find(chemicalCap);
+        for (ItemApiLookup<? extends Storage<? extends Chemical<?>>, ContainerItemContext> chemicalCap : List.of(Capabilities.GAS_HANDLER_ITEM, Capabilities.INFUSION_HANDLER_ITEM, Capabilities.PIGMENT_HANDLER_ITEM, Capabilities.SLURRY_HANDLER_ITEM)) {
+            Storage<? extends Chemical<?>> handler = ContainerItemContext.withConstant(stack).find(chemicalCap);
             if (handler != null) {
                 StorageView<? extends Chemical<?>> tank = getDisplayTank(handler);
                 if (tank != null) {

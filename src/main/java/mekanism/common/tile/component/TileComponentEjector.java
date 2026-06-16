@@ -51,7 +51,7 @@ public class TileComponentEjector implements ITileComponent, ISpecificContainerT
     private int tickDelay = 0;
 
     public TileComponentEjector(TileEntityMekanism tile) {
-        this(tile, () -> MekanismConfig.general.chemicalAutoEjectRate, () -> MekanismConfig.general.fluidAutoEjectRate);
+        this(tile, () -> MekanismConfig.COMMON.general.chemicalAutoEjectRate, () -> MekanismConfig.COMMON.general.fluidAutoEjectRate);
     }
 
 //    public TileComponentEjector(TileEntityMekanism tile, LongSupplier chemicalEjectRate) {

@@ -75,7 +75,7 @@ public class BlockTile<TILE extends TileEntityMekanism, TYPE extends BlockTypeTi
     @Override
     public void animateTick(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull RandomSource random) {
         super.animateTick(state, world, pos, random);
-        if (MekanismConfig.client.machineEffects) {
+        if (MekanismConfig.CLIENT.client.machineEffects) {
             AttributeParticleFX particleFX = type.get(AttributeParticleFX.class);
             if (particleFX != null && Attribute.isActive(state)) {
                 Direction facing = Attribute.getFacing(state);

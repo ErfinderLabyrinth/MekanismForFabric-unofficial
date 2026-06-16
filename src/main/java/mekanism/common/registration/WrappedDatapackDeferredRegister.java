@@ -35,6 +35,9 @@ public class WrappedDatapackDeferredRegister<T> extends WrappedDeferredRegister<
     public Codec<T> createAndRegisterDatapack(Function<? super T, Codec<? extends T>> baseCodec, @Nullable Codec<T> networkCodec) {
         //Create the register for the serializers and mark they don't need to be persisted or sync'd
         register();
+
+
+
         Registry<Codec<? extends T>> registry = internal;
         Codec<T> directCodec = ExtraCodecs.lazyInitializedCodec(() -> registry.byNameCodec())
               .dispatch(baseCodec, Function.identity());

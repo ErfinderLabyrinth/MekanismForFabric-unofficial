@@ -19,6 +19,6 @@ public class MekanismEntityTypes {
     public static final EntityTypeRegistryObject<EntityRobit> ROBIT = ENTITY_TYPES.register("robit", EntityType.Builder.of(EntityRobit::new, MobCategory.MISC).sized(0.6F, 0.65F).fireImmune().noSummon(), EntityRobit::getDefaultAttributes);
 
     public static void register() {
-
+        ENTITY_TYPES.registerEntityAttributes();
     }
 }

@@ -36,7 +36,7 @@ import java.util.Set;
 public class ItemNetworkReader extends ItemEnergized {
 
     public ItemNetworkReader(Properties properties) {
-        super(() -> MekanismConfig.gear.networkReaderChargeRate, () -> MekanismConfig.gear.networkReaderMaxEnergy, properties.rarity(Rarity.UNCOMMON));
+        super(() -> MekanismConfig.COMMON.gear.networkReaderChargeRate, () -> MekanismConfig.COMMON.gear.networkReaderMaxEnergy, properties.rarity(Rarity.UNCOMMON));
     }
 
     private void displayBorder(Player player, Object toDisplay, boolean brackets) {
@@ -58,7 +58,7 @@ public class ItemNetworkReader extends ItemEnergized {
             BlockEntity tile = WorldUtils.getTileEntity(world, pos);
             if (tile != null) {
                 if (!player.isCreative()) {
-                    long energyPerUse = MekanismConfig.gear.networkReaderEnergyUsage;
+                    long energyPerUse = MekanismConfig.COMMON.gear.networkReaderEnergyUsage;
                     EnergyStorage energyContainer = ContainerItemContext.forPlayerInteraction(player, context.getHand()).find(EnergyStorage.ITEM);
                     try(Transaction t=Transaction.openOuter()) {
                         if (energyContainer == null || energyContainer.extract(energyPerUse, t) < energyPerUse) {

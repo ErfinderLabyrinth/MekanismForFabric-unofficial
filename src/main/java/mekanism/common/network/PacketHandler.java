@@ -42,20 +42,5 @@ public class PacketHandler extends BasePacketHandler {
         registerClientToServer(PacketSecurityMode.TYPE);
         registerClientToServer(PacketUpdateModuleSettings.TYPE);
         registerClientToServer(PacketWindowSelect.TYPE);
-
-        //Server to client messages
-        registerServerToClient(PacketLaserHitBlock.TYPE);
-        registerServerToClient(PacketLightningRender.TYPE);
-        registerServerToClient(PacketPlayerData.TYPE);
-        registerServerToClient(PacketPortalFX.TYPE);
-        registerServerToClient(PacketQIOItemViewerGuiSync.TYPE);
-        registerServerToClient(PacketRadiationData.TYPE);
-        registerServerToClient(PacketResetPlayerClient.TYPE);
-        registerServerToClient(PacketSecurityUpdate.TYPE);
-        registerServerToClient(PacketShowModeChange.TYPE);
-        registerServerToClient(PacketTransmitterUpdate.TYPE);
-        registerServerToClient(PacketTransporterUpdate.TYPE);
-        registerServerToClient(PacketUpdateContainer.TYPE);
-        registerServerToClient(PacketUpdateTile.TYPE);
     }
 }

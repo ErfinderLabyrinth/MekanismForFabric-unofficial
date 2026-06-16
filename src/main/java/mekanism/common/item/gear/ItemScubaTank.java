@@ -21,6 +21,7 @@ import mekanism.common.util.ItemDataUtils;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
 import mekanism.common.util.text.BooleanStateDisplay.YesNo;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -51,12 +52,12 @@ public class ItemScubaTank extends ItemGasArmor implements IItemHUDProvider, IMo
 
     @Override
     protected LongSupplier getMaxGas() {
-        return () -> MekanismConfig.gear.scubaMaxGas;
+        return () -> MekanismConfig.COMMON.gear.scubaMaxGas;
     }
 
     @Override
     protected LongSupplier getFillRate() {
-        return () -> MekanismConfig.gear.scubaFillRate;
+        return () -> MekanismConfig.COMMON.gear.scubaFillRate;
     }
 
     @Override
@@ -84,7 +85,7 @@ public class ItemScubaTank extends ItemGasArmor implements IItemHUDProvider, IMo
             ItemScubaTank scubaTank = (ItemScubaTank) stack.getItem();
             list.add(MekanismLang.SCUBA_TANK_MODE.translateColored(EnumColor.DARK_GRAY, OnOff.of(scubaTank.getFlowing(stack), true)));
             GasStack stored = GasStack.EMPTY;
-            IGasHandler gasHandlerItem = ContainerItemContext.withConstant(stack).find(Capabilities.GAS_HANDLER_ITEM);
+            Storage<Gas> gasHandlerItem = ContainerItemContext.withConstant(stack).find(Capabilities.GAS_HANDLER_ITEM);
             if (gasHandlerItem != null) {
                 Iterator<StorageView<Gas>> iterator = gasHandlerItem.iterator();
                 if (iterator.hasNext()) {

@@ -102,6 +102,10 @@ public class ExtendedAdvancementBuilder {
         return addCriterion(RegistryUtils.getPath(item.asItem()), InventoryChangeTrigger.TriggerInstance.hasItems(item));
     }
 
+    public ExtendedAdvancementBuilder parent(Advancement parent) {
+        return runInternal(builder -> builder.parent(parent));
+    }
+
     public ExtendedAdvancementBuilder requirements(String[][] requirements) {
         return runInternal(builder -> builder.requirements(requirements));
     }

@@ -111,7 +111,7 @@ public class ClientTickHandler {
 
     public static boolean isVisionEnhancementOn(Player player) {
         IModule<ModuleVisionEnhancementUnit> module = IModuleHelper.INSTANCE.load(player.getItemBySlot(EquipmentSlot.HEAD), MekanismModules.VISION_ENHANCEMENT_UNIT);
-        return module != null && module.isEnabled() && module.hasEnoughEnergy(MekanismConfig.gear.mekaSuitEnergyUsageVisionEnhancement);
+        return module != null && module.isEnabled() && module.hasEnoughEnergy(MekanismConfig.COMMON.gear.mekaSuitEnergyUsageVisionEnhancement);
     }
 
     public static boolean isFlamethrowerOn(Player player) {
@@ -127,9 +127,9 @@ public class ClientTickHandler {
     }
 
     public static void portableTeleport(Player player, InteractionHand hand, FrequencyIdentity identity) {
-        int delay = MekanismConfig.gear.portableTeleporterDelay;
+        int delay = MekanismConfig.COMMON.gear.portableTeleporterDelay;
         if (delay == 0) {
-            Mekanism.packetHandler().sendToServer(new PacketPortableTeleporterTeleport(hand, identity));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketPortableTeleporterTeleport(hand, identity));
         } else {
             portableTeleports.put(player, new TeleportData(hand, identity, minecraft.level.getGameTime() + delay));
         }
@@ -202,7 +202,7 @@ public class ClientTickHandler {
                 }
                 TeleportData data = entry.getValue();
                 if (minecraft.level.getGameTime() == data.teleportTime) {
-                    Mekanism.packetHandler().sendToServer(new PacketPortableTeleporterTeleport(data.hand, data.identity));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketPortableTeleporterTeleport(data.hand, data.identity));
                     iter.remove();
                 }
             }
@@ -239,7 +239,7 @@ public class ClientTickHandler {
                 }
             }
 
-            if (MekanismConfig.client.enablePlayerSounds) {
+            if (MekanismConfig.CLIENT.client.enablePlayerSounds) {
                 RadiationScale scale = RadiationManager.get().getClientScale();
                 if (scale != RadiationScale.NONE && !SoundHandler.radiationSoundMap.containsKey(scale)) {
                     GeigerSound sound = GeigerSound.create(minecraft.player, scale);
@@ -269,7 +269,7 @@ public class ClientTickHandler {
     }
 
     public static boolean onMouseScroll(double delta) {
-        if (MekanismConfig.client.allowModeScroll && minecraft.player != null && minecraft.player.isShiftKeyDown()) {
+        if (MekanismConfig.CLIENT.client.allowModeScroll && minecraft.player != null && minecraft.player.isShiftKeyDown()) {
             return handleModeScroll(EquipmentSlot.MAINHAND, delta);
         }
         return false;
@@ -280,7 +280,7 @@ public class ClientTickHandler {
             int shift = scrollIncrementer.scroll(delta);
             if (shift != 0) {
                 MekanismStatusOverlay.INSTANCE.setTimer();
-                Mekanism.packetHandler().sendToServer(new PacketModeChange(slot, shift));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketModeChange(slot, shift));
             }
             return true;
         }

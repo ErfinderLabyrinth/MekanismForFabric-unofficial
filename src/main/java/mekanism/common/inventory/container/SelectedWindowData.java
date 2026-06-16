@@ -52,7 +52,7 @@ public class SelectedWindowData {
     public void updateLastPosition(int x, int y) {
         String saveName = type.getSaveName(extraData);
         if (saveName != null) {
-            CachedWindowPosition cachedPosition = MekanismConfig.client.lastWindowPositions.get(saveName);
+            CachedWindowPosition cachedPosition = MekanismConfig.CLIENT.client.lastWindowPositions.get(saveName);
             if (cachedPosition != null) {
                 boolean changed = false;
                 int cachedX = cachedPosition.x();
@@ -78,7 +78,7 @@ public class SelectedWindowData {
     public WindowPosition getLastPosition() {
         String saveName = type.getSaveName(extraData);
         if (saveName != null) {
-            CachedWindowPosition cachedPosition = MekanismConfig.client.lastWindowPositions.get(saveName);
+            CachedWindowPosition cachedPosition = MekanismConfig.CLIENT.client.lastWindowPositions.get(saveName);
             if (cachedPosition != null) {
                 return new WindowPosition(cachedPosition.x(), cachedPosition.y());
             }

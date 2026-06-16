@@ -46,7 +46,7 @@ public final class SecurityUtils implements ISecurityUtils {
      */
     private boolean isOp(Player p) {
         Objects.requireNonNull(p, "Player may not be null.");
-        return MekanismConfig.general.opsBypassRestrictions && p instanceof ServerPlayer player &&
+        return MekanismConfig.COMMON.general.opsBypassRestrictions && p instanceof ServerPlayer player &&
                 MekanismPermissions.BYPASS_SECURITY.test(p);
     }
 
@@ -89,7 +89,7 @@ public final class SecurityUtils implements ISecurityUtils {
 
     @Override
     public boolean canAccess(@Nullable UUID player, @Nullable Object provider, boolean isClient) {
-        if (!MekanismConfig.general.allowProtection || provider == null) {
+        if (!MekanismConfig.COMMON.general.allowProtection || provider == null) {
             //If protection is disabled, access is always granted
             return true;
         }
@@ -112,7 +112,7 @@ public final class SecurityUtils implements ISecurityUtils {
     @Override
     public boolean canAccessObject(@Nullable UUID player, @NotNull ISecurityObject security, boolean isClient) {
         Objects.requireNonNull(security, "Security object may not be null.");
-        if (!MekanismConfig.general.allowProtection) {
+        if (!MekanismConfig.COMMON.general.allowProtection) {
             //If protection is disabled, access is always granted
             return true;
         }
@@ -155,7 +155,7 @@ public final class SecurityUtils implements ISecurityUtils {
     }
 
     public SecurityData getFinalData(ISecurityObject securityObject, boolean isClient) {
-        if (!MekanismConfig.general.allowProtection) {
+        if (!MekanismConfig.COMMON.general.allowProtection) {
             return SecurityData.DUMMY;
         }
         SecurityData data = getData(securityObject.getOwnerUUID(), isClient);
@@ -180,7 +180,7 @@ public final class SecurityUtils implements ISecurityUtils {
 
     @Override
     public SecurityMode getSecurityMode(@Nullable Object provider, boolean isClient) {
-        if (provider == null || !MekanismConfig.general.allowProtection) {
+        if (provider == null || !MekanismConfig.COMMON.general.allowProtection) {
             return SecurityMode.PUBLIC;
         }
         return getSecurityObject(provider).map(security -> getEffectiveSecurityMode(security, isClient))

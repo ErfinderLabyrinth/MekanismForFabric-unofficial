@@ -4,8 +4,11 @@
   "package": "mekanism.common.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "DataGeneratorMixin",
     "EntityMixin",
     "ExplosionMixin",
+    "HashCacheMixin",
+    "ItemPredicateMekanismAddonMixin",
     "LivingEntityMixin",
     "PersistentEntitySectionManagerMixin",
     "PiglinAiMixin",
@@ -17,5 +20,6 @@
     "defaultRequire": 1
   },
   "client": [
+    "AbstractBlockRenderContextMixin"
   ]
 }

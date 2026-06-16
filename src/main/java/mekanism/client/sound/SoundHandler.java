@@ -165,7 +165,7 @@ public class SoundHandler {
     }
 
     public static void playSound(SoundEvent sound) {
-        playSound(SimpleSoundInstance.forUI(sound, 1, MekanismConfig.client.baseSoundVolume));
+        playSound(SimpleSoundInstance.forUI(sound, 1, MekanismConfig.CLIENT.client.baseSoundVolume));
     }
 
     public static void playSound(SoundInstance sound) {
@@ -278,7 +278,7 @@ public class SoundHandler {
         TileTickableSound(SoundEvent soundEvent, SoundSource category, RandomSource random, BlockPos pos, float volume, boolean looping) {
             super(soundEvent, category, random);
             //Keep track of our original volume
-            this.originalVolume = volume * MekanismConfig.client.baseSoundVolume;
+            this.originalVolume = volume * MekanismConfig.CLIENT.client.baseSoundVolume;
             this.x = pos.getX() + 0.5F;
             this.y = pos.getY() + 0.5F;
             this.z = pos.getZ() + 0.5F;

@@ -44,7 +44,7 @@ public class ModuleLocomotiveBoostingUnit implements ICustomModule<ModuleLocomot
     @Override
     public void tickServer(IModule<ModuleLocomotiveBoostingUnit> module, Player player) {
         if (tick(module, player)) {
-            module.useEnergy(player, (long) (MekanismConfig.gear.mekaSuitEnergyUsageSprintBoost * (getBoost() / 0.1F)));
+            module.useEnergy(player, (long) (MekanismConfig.COMMON.gear.mekaSuitEnergyUsageSprintBoost * (getBoost() / 0.1F)));
         }
     }
 
@@ -72,7 +72,7 @@ public class ModuleLocomotiveBoostingUnit implements ICustomModule<ModuleLocomot
     public boolean canFunction(IModule<ModuleLocomotiveBoostingUnit> module, Player player) {
         //Don't allow boosting unit to work when flying with the elytra, a jetpack should be used instead
         return !player.isFallFlying() && player.isSprinting() && module.canUseEnergy(player,
-                (long) (MekanismConfig.gear.mekaSuitEnergyUsageSprintBoost * (getBoost() / 0.1F)));
+                (long) (MekanismConfig.COMMON.gear.mekaSuitEnergyUsageSprintBoost * (getBoost() / 0.1F)));
     }
 
     public float getBoost() {

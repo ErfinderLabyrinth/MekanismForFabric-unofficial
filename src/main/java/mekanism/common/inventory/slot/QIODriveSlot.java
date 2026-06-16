@@ -1,5 +1,6 @@
 package mekanism.common.inventory.slot;
 
+import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.content.qio.IQIODriveHolder;
@@ -56,8 +57,8 @@ public class QIODriveSlot extends BasicInventorySlot {
     }
 
     @Override
-    public long insert(ItemVariant resource, long amount, TransactionContext transaction) {
-        long amountInserted = super.insert(resource, amount, transaction);
+    public long insert(ItemVariant resource, long amount, TransactionContext transaction, AutomationType automationType) {
+        long amountInserted = super.insert(resource, amount, transaction, automationType);
         if (!isRemote() && amountInserted != 0) {
             addDrive(resource.toStack((int)amount));
         }
@@ -65,8 +66,8 @@ public class QIODriveSlot extends BasicInventorySlot {
     }
 
     @Override
-    public long extract(ItemVariant resource, long amount, TransactionContext transaction) {
-        long amountExtracted = super.extract(resource, amount, transaction);
+    public long extract(ItemVariant resource, long amount, TransactionContext transaction, AutomationType type) {
+        long amountExtracted = super.extract(resource, amount, transaction, type);
         if (!isRemote() && amountExtracted != 0) {
             removeDrive();
         }

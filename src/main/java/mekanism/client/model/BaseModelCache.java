@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.client.model.ModelProviderException;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -116,13 +117,13 @@ public class BaseModelCache {
         protected void setup(ModelLoadingPlugin.Context context) {
         }
 
-        public BakedModel bake(Object config) {
+        public BakedModel bake(Object config, BlockModel blockModel) {
             return bakedMap.computeIfAbsent(config, c -> {
                 ModelBaker baker = ((ModelManagerModelBakeryGetter)Minecraft.getInstance().getModelManager()).getModelBakery().new ModelBakerImpl(
                       (modelLoc, material) -> material.sprite(),
                       rl
                 );
-                return model.bake(baker, Material::sprite, BlockModelRotation.X0_Y0, ItemOverrides.EMPTY, rl);
+                return model.bake(blockModel, baker, Material::sprite, BlockModelRotation.X0_Y0, ItemOverrides.EMPTY, rl, blockModel.bake(baker, Material::sprite, BlockModelRotation.X0_Y0, rl));
             });
         }
 
@@ -149,7 +150,7 @@ public class BaseModelCache {
             UnbakedModel finalUnbakedModel = unbakedModel;
             model = new CustomGeometry() {
                 @Override
-                public BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+                public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
                     return finalUnbakedModel.bake(baker, spriteGetter, modelTransform, modelLocation);
                 }
 

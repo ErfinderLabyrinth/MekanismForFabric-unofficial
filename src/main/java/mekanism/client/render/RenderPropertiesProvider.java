@@ -104,7 +104,11 @@ public class RenderPropertiesProvider {
 //        };
 //    }
 
-    public record MekRenderProperties(BlockEntityWithoutLevelRenderer renderer) {
+    public static class MekRenderProperties {
+        private BlockEntityWithoutLevelRenderer renderer;
+        MekRenderProperties(BlockEntityWithoutLevelRenderer renderer) {
+            this.renderer = renderer;
+        }
 
         public BlockEntityWithoutLevelRenderer getCustomRenderer() {
             return renderer;
@@ -115,10 +119,12 @@ public class RenderPropertiesProvider {
         MekRenderProperties getRenderProperties();
     }
 
-    public record MekCustomArmorRenderProperties(BlockEntityWithoutLevelRenderer renderer, ICustomArmor gearModel) implements ISpecialGear {
+    public static class MekCustomArmorRenderProperties extends MekRenderProperties implements ISpecialGear {
+        ICustomArmor gearModel;
 
-        public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-            return renderer;
+        public MekCustomArmorRenderProperties(BlockEntityWithoutLevelRenderer renderer, ICustomArmor gearModel) {
+            super(renderer);
+            this.gearModel = gearModel;
         }
 
         @NotNull

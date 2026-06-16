@@ -6,6 +6,7 @@ import mekanism.api.security.SecurityMode;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -147,15 +148,15 @@ public abstract class Frequency implements IFrequency {
     public void write(FriendlyByteBuf buffer) {
         getType().write(buffer);
         buffer.writeUtf(name);
-        BasePacketHandler.writeOptional(buffer, ownerUUID, FriendlyByteBuf::writeUUID);
+        NetworkUtil.writeOptional(buffer, ownerUUID, FriendlyByteBuf::writeUUID);
         buffer.writeUtf(MekanismUtils.getLastKnownUsername(ownerUUID, null));
         buffer.writeBoolean(publicFreq);
     }
 
     protected void read(FriendlyByteBuf dataStream) {
-        name = BasePacketHandler.readString(dataStream);
-        ownerUUID = BasePacketHandler.readOptional(dataStream, FriendlyByteBuf::readUUID);
-        clientOwner = BasePacketHandler.readString(dataStream);
+        name = NetworkUtil.readString(dataStream);
+        ownerUUID = NetworkUtil.readOptional(dataStream, FriendlyByteBuf::readUUID);
+        clientOwner = NetworkUtil.readString(dataStream);
         publicFreq = dataStream.readBoolean();
     }
 

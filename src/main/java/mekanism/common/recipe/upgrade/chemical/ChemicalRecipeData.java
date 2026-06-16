@@ -25,7 +25,7 @@ import java.util.List;
 
 @NothingNullByDefault
 public abstract class ChemicalRecipeData<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>,
-      HANDLER extends IChemicalHandler<CHEMICAL, STACK, TANK>> implements RecipeUpgradeData<ChemicalRecipeData<CHEMICAL, STACK, TANK, HANDLER>> {
+      HANDLER extends Storage<CHEMICAL>> implements RecipeUpgradeData<ChemicalRecipeData<CHEMICAL, STACK, TANK, HANDLER>> {
 
     protected final List<TANK> tanks;
 

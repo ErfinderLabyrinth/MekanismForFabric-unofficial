@@ -21,9 +21,9 @@ public class ConfigurableConstantInt extends IntProvider {
     ).apply(builder, oreType -> {
         if (oreType.isPresent()) {
             OreVeinType type = oreType.get();
-            return new ConfigurableConstantInt(type, () -> MekanismConfig.world.getVeinConfig(type).perChunk());
+            return new ConfigurableConstantInt(type, () -> MekanismConfig.COMMON.world.getVeinConfig(type).perChunk());
         }
-        return new ConfigurableConstantInt(null, () -> MekanismConfig.world.salt.perChunk);
+        return new ConfigurableConstantInt(null, () -> MekanismConfig.COMMON.world.salt.perChunk);
     }));
 
     @Nullable

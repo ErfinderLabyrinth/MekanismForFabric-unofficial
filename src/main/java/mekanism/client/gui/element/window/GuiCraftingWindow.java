@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.window;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiRightArrow;
 import mekanism.client.gui.element.button.MekanismImageButton;
@@ -39,7 +40,7 @@ public class GuiCraftingWindow extends GuiWindow {
         slots.add(addChild(new GuiVirtualSlot(this, SlotType.NORMAL, gui, relativeX + 92, relativeY + 36,
               this.container.getCraftingWindowSlot(this.index, 9))));
         addChild(new MekanismImageButton(gui, relativeX + width - 20, relativeY + height - 20, 14, getButtonLocation("clear_sides"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketQIOClearCraftingWindow(index, Screen.hasShiftDown())), getOnHover(MekanismLang.CRAFTING_WINDOW_CLEAR)));
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketQIOClearCraftingWindow(index, Screen.hasShiftDown())), getOnHover(MekanismLang.CRAFTING_WINDOW_CLEAR)));
     }
 
     public void updateContainer(QIOItemViewerContainer container) {

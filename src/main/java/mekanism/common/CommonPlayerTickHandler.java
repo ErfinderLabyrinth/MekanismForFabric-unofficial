@@ -160,7 +160,7 @@ public class CommonPlayerTickHandler {
     public static boolean isGravitationalModulationReady(Player player) {
         if (MekanismUtils.isPlayingMode(player)) {
             IModule<ModuleGravitationalModulatingUnit> module = IModuleHelper.INSTANCE.load(player.getItemBySlot(EquipmentSlot.CHEST), MekanismModules.GRAVITATIONAL_MODULATING_UNIT);
-            return module != null && module.isEnabled() && module.hasEnoughEnergy(MekanismConfig.gear.mekaSuitEnergyUsageGravitationalModulation);
+            return module != null && module.isEnabled() && module.hasEnoughEnergy(MekanismConfig.COMMON.gear.mekaSuitEnergyUsageGravitationalModulation);
         }
         return false;
     }
@@ -293,7 +293,7 @@ public class CommonPlayerTickHandler {
             IModule<ModuleHydraulicPropulsionUnit> module = IModuleHelper.INSTANCE.load(player.getItemBySlot(EquipmentSlot.FEET), MekanismModules.HYDRAULIC_PROPULSION_UNIT);
             if (module != null && module.isEnabled() && Mekanism.keyMap.has(player.getUUID(), KeySync.BOOST)) {
                 float boost = module.getCustomInstance().getBoost();
-                long usage = (long) (MekanismConfig.gear.mekaSuitBaseJumpEnergyUsage * (boost / 0.1F));
+                long usage = (long) (MekanismConfig.COMMON.gear.mekaSuitBaseJumpEnergyUsage * (boost / 0.1F));
                 EnergyStorage energyContainer = module.getEnergyContainer();
                 if (module.canUseEnergy(player, energyContainer, usage, false)) {
                     // if we're sprinting with the boost module, limit the height
@@ -319,12 +319,12 @@ public class CommonPlayerTickHandler {
             ContainerItemContext cic = ContainerItemContext.ofSingleSlot(storage);
             if (feetStack.getItem() instanceof ItemFreeRunners boots) {
                 if (boots.getMode(feetStack).preventsFallDamage()) {
-                    return new FallEnergyInfo(cic.find(EnergyStorage.ITEM), () -> MekanismConfig.gear.freeRunnerFallDamageRatio,
-                            () -> MekanismConfig.gear.freeRunnerFallEnergyCost);
+                    return new FallEnergyInfo(cic.find(EnergyStorage.ITEM), () -> MekanismConfig.COMMON.gear.freeRunnerFallDamageRatio,
+                            () -> MekanismConfig.COMMON.gear.freeRunnerFallEnergyCost);
                 }
             } else if (feetStack.getItem() instanceof ItemMekaSuitArmor) {
-                return new FallEnergyInfo(cic.find(EnergyStorage.ITEM), () ->MekanismConfig.gear.mekaSuitFallDamageRatio,
-                        () -> MekanismConfig.gear.mekaSuitEnergyUsageFall);
+                return new FallEnergyInfo(cic.find(EnergyStorage.ITEM), () ->MekanismConfig.COMMON.gear.mekaSuitFallDamageRatio,
+                        () -> MekanismConfig.COMMON.gear.mekaSuitEnergyUsageFall);
             }
         }
         return null;

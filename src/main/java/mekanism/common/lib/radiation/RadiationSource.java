@@ -38,7 +38,7 @@ public class RadiationSource implements IRadiationSource {
 
     @Override
     public boolean decay() {
-        magnitude *= MekanismConfig.general.radiationSourceDecayRate;
+        magnitude *= MekanismConfig.COMMON.general.radiationSourceDecayRate;
         return magnitude < RadiationManager.MIN_MAGNITUDE;
     }
 

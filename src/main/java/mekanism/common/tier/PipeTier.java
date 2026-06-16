@@ -7,10 +7,10 @@ import mekanism.common.util.EnumUtils;
 import java.util.function.IntSupplier;
 
 public enum PipeTier implements ITier {
-    BASIC(BaseTier.BASIC, 2_000, 250),
-    ADVANCED(BaseTier.ADVANCED, 8_000, 1_000),
-    ELITE(BaseTier.ELITE, 32_000, 8_000),
-    ULTIMATE(BaseTier.ULTIMATE, 128_000, 32_000);
+    BASIC(BaseTier.BASIC, 2_000 * 81, 250 * 81),
+    ADVANCED(BaseTier.ADVANCED, 8_000 * 81, 1_000 * 81),
+    ELITE(BaseTier.ELITE, 32_000 * 81, 8_000 * 81),
+    ULTIMATE(BaseTier.ULTIMATE, 128_000 * 81, 32_000 * 81);
 
     private final int baseCapacity;
     private final int basePull;

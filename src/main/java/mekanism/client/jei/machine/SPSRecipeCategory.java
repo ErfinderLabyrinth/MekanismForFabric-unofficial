@@ -40,7 +40,7 @@ public class SPSRecipeCategory extends BaseRecipeCategory<SPSJEIRecipe> {
             List<Component> list = new ArrayList<>();
             list.add(MekanismLang.STATUS.translate(MekanismLang.ACTIVE));
             list.add(MekanismLang.SPS_ENERGY_INPUT.translate(EnergyDisplay.of(
-                  MekanismConfig.general.spsEnergyPerInput.multiply(MekanismConfig.general.spsInputPerAntimatter))));
+                  MekanismConfig.COMMON.general.spsEnergyPerInput * MekanismConfig.COMMON.general.spsInputPerAntimatter)));
             list.add(MekanismLang.PROCESS_RATE_MB.translate(1.0));
             return list;
         }));
@@ -57,7 +57,7 @@ public class SPSRecipeCategory extends BaseRecipeCategory<SPSJEIRecipe> {
     }
 
     public static List<SPSJEIRecipe> getSPSRecipes() {
-        return Collections.singletonList(new SPSJEIRecipe(IngredientCreatorAccess.gas().from(MekanismGases.POLONIUM, MekanismConfig.general.spsInputPerAntimatter),
+        return Collections.singletonList(new SPSJEIRecipe(IngredientCreatorAccess.gas().from(MekanismGases.POLONIUM, MekanismConfig.COMMON.general.spsInputPerAntimatter),
               MekanismGases.ANTIMATTER.getStack(1)));
     }
 }

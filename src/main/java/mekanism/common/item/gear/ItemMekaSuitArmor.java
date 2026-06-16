@@ -124,36 +124,36 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
         Supplier armorConfig;
         switch (armorType) {
             case HELMET -> {
-                fluidTankSpecs.add(FluidTankSpec.createFillOnly(() -> MekanismConfig.gear.mekaSuitNutritionalTransferRate, () -> MekanismConfig.gear.mekaSuitNutritionalMaxStorage,
+                fluidTankSpecs.add(FluidTankSpec.createFillOnly(() -> MekanismConfig.COMMON.gear.mekaSuitNutritionalTransferRate, () -> MekanismConfig.COMMON.gear.mekaSuitNutritionalMaxStorage,
                       fluid -> fluid.getFluid() == MekanismFluids.NUTRITIONAL_PASTE.getFluid(), stack -> hasModule(stack, MekanismModules.NUTRITIONAL_INJECTION_UNIT)));
                 absorption = 0.15F;
                 laserDissipation = 0.15;
                 laserRefraction = 0.2;
-                armorConfig = () -> MekanismConfig.gear.mekaSuitHelmetArmor;
+                armorConfig = () -> MekanismConfig.COMMON.gear.mekaSuitHelmetArmor;
             }
             case CHESTPLATE -> {
-                gasTankSpecs.add(ChemicalTankSpec.createFillOnly(() -> MekanismConfig.gear.mekaSuitJetpackTransferRate, () -> MekanismConfig.gear.mekaSuitJetpackMaxStorage,
+                gasTankSpecs.add(ChemicalTankSpec.createFillOnly(() -> MekanismConfig.COMMON.gear.mekaSuitJetpackTransferRate, () -> MekanismConfig.COMMON.gear.mekaSuitJetpackMaxStorage,
                       gas -> gas == MekanismGases.HYDROGEN.get(), stack -> hasModule(stack, MekanismModules.JETPACK_UNIT)));
                 absorption = 0.4F;
                 laserDissipation = 0.3;
                 laserRefraction = 0.4;
-                armorConfig = () -> MekanismConfig.gear.mekaSuitBodyArmorArmor;
+                armorConfig = () -> MekanismConfig.COMMON.gear.mekaSuitBodyArmorArmor;
             }
             case LEGGINGS -> {
                 absorption = 0.3F;
                 laserDissipation = 0.1875;
                 laserRefraction = 0.25;
-                armorConfig = () -> MekanismConfig.gear.mekaSuitPantsArmor;
+                armorConfig = () -> MekanismConfig.COMMON.gear.mekaSuitPantsArmor;
             }
             case BOOTS -> {
                 absorption = 0.15F;
                 laserDissipation = 0.1125;
                 laserRefraction = 0.15;
-                armorConfig = () -> MekanismConfig.gear.mekaSuitBootsArmor;
+                armorConfig = () -> MekanismConfig.COMMON.gear.mekaSuitBootsArmor;
             }
             default -> throw new IllegalArgumentException("Unknown Equipment Slot Type");
         }
-        this.attributeCache = new AttributeCache(this, armorConfig, () -> MekanismConfig.gear.mekaSuitToughness, () -> MekanismConfig.gear.mekaSuitKnockbackResistance);
+        this.attributeCache = new AttributeCache(this, armorConfig, () -> MekanismConfig.COMMON.gear.mekaSuitToughness, () -> MekanismConfig.COMMON.gear.mekaSuitKnockbackResistance);
     }
 
 //    @Override
@@ -205,7 +205,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        return MekanismConfig.client.energyColor;
+        return MekanismConfig.CLIENT.client.energyColor;
     }
 
 //    @Override
@@ -233,7 +233,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
 
     @Override
     public void addItems(CreativeModeTab.Output tabOutput) {
-        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this), MekanismConfig.gear.mekaSuitBaseEnergyCapacity));
+        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this)));
     }
 
     public void onArmorTick(ItemStack stack, Level world, Player player) {
@@ -252,7 +252,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
 
     @Override
     protected boolean areCapabilityConfigsLoaded() {
-        return super.areCapabilityConfigsLoaded() && MekanismConfig.gear.isLoaded();
+        return super.areCapabilityConfigsLoaded() && MekanismConfig.COMMON.gear.isLoaded();
     }
 
     protected void gatherCapabilities(List<Object> capabilities, ItemStack stack, CompoundTag nbt) {
@@ -327,7 +327,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
 
     @NotNull
     public GasStack useGas(ContainerItemContext context, Gas type, long amount) {
-        IGasHandler gasHandlerItem = context.find(Capabilities.GAS_HANDLER_ITEM);
+        Storage<Gas> gasHandlerItem = context.find(Capabilities.GAS_HANDLER_ITEM);
         if (gasHandlerItem != null) {
             try(Transaction t=Transaction.openOuter()) {
                 long amountExtracted = gasHandlerItem.extract(type, amount, t);
@@ -384,7 +384,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
         if (getType() == ArmorItem.Type.CHESTPLATE && !entity.isShiftKeyDown()) {
             //Don't allow elytra flight if the player is sneaking. This lets the player exit elytra flight early
             IModule<ModuleElytraUnit> module = getModule(stack, MekanismModules.ELYTRA_UNIT);
-            if (module != null && module.isEnabled() && module.canUseEnergy(entity, MekanismConfig.gear.mekaSuitElytraEnergyUsage)) {
+            if (module != null && module.isEnabled() && module.canUseEnergy(entity, MekanismConfig.COMMON.gear.mekaSuitElytraEnergyUsage)) {
                 //If we can use the elytra, check if the jetpack unit is also installed, and if it is,
                 // only mark that we can use the elytra if the jetpack is not set to hover or if it is if it has no hydrogen stored
                 IModule<ModuleJetpackUnit> jetpack = getModule(stack, MekanismModules.JETPACK_UNIT);
@@ -405,7 +405,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
                 if (nextFlightTicks % 20 == 0) {
                     IModule<ModuleElytraUnit> module = getModule(stack, MekanismModules.ELYTRA_UNIT);
                     if (module != null && module.isEnabled()) {
-                        module.useEnergy(entity, MekanismConfig.gear.mekaSuitElytraEnergyUsage);
+                        module.useEnergy(entity, MekanismConfig.COMMON.gear.mekaSuitElytraEnergyUsage);
                     }
                 }
                 entity.gameEvent(GameEvent.ELYTRA_GLIDE);
@@ -436,12 +436,12 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
 
     private long getMaxEnergy(ItemStack stack) {
         IModule<ModuleEnergyUnit> module = getModule(stack, MekanismModules.ENERGY_UNIT);
-        return module == null ? MekanismConfig.gear.mekaSuitBaseEnergyCapacity : module.getCustomInstance().getEnergyCapacity(module);
+        return module == null ? MekanismConfig.COMMON.gear.mekaSuitBaseEnergyCapacity : module.getCustomInstance().getEnergyCapacity(module);
     }
 
     private long getChargeRate(ItemStack stack) {
         IModule<ModuleEnergyUnit> module = getModule(stack, MekanismModules.ENERGY_UNIT);
-        return module == null ? MekanismConfig.gear.mekaSuitBaseChargeRate : module.getCustomInstance().getChargeRate(module);
+        return module == null ? MekanismConfig.COMMON.gear.mekaSuitBaseChargeRate : module.getCustomInstance().getChargeRate(module);
     }
 
     @NotNull
@@ -549,10 +549,10 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
                                 .orElse(null)
                           );
                     if (damageTypeName != null) {//Note: This should not be null unless something went wrong and the damage source is for a damage type that is not registered
-                        absorbRatio = MekanismConfig.gear.mekaSuitDamageRatios.get(damageTypeName);
+                        absorbRatio = MekanismConfig.COMMON.gear.mekaSuitDamageRatios.get(damageTypeName.toString());
                     }
                     if (absorbRatio == null) {
-                        absorbRatio = MekanismConfig.gear.mekaSuitUnspecifiedDamageRatio;
+                        absorbRatio = MekanismConfig.COMMON.gear.mekaSuitUnspecifiedDamageRatio;
                     }
                     if (absorbRatio == 0) {
                         //If the config specifies that the damage type shouldn't be blocked at all
@@ -561,7 +561,7 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
                     }
                 }
                 float absorption = details.armor.absorption * absorbRatio;
-                ratioAbsorbed += absorbDamage(details.usageInfo, amount, absorption, ratioAbsorbed, () -> MekanismConfig.gear.mekaSuitEnergyUsageDamage);
+                ratioAbsorbed += absorbDamage(details.usageInfo, amount, absorption, ratioAbsorbed, () -> MekanismConfig.COMMON.gear.mekaSuitEnergyUsageDamage);
                 if (ratioAbsorbed >= 1) {
                     //If we have fully absorbed the damage, stop checking/trying to absorb more
                     break;
@@ -662,21 +662,21 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
         @Override
         public int getDefenseForType(@NotNull ArmorItem.Type armorType) {
             return switch (armorType) {
-                case BOOTS -> MekanismConfig.gear.mekaSuitBootsArmor;
-                case LEGGINGS -> MekanismConfig.gear.mekaSuitPantsArmor;
-                case CHESTPLATE -> MekanismConfig.gear.mekaSuitBodyArmorArmor;
-                case HELMET -> MekanismConfig.gear.mekaSuitHelmetArmor;
+                case BOOTS -> MekanismConfig.COMMON.gear.mekaSuitBootsArmor;
+                case LEGGINGS -> MekanismConfig.COMMON.gear.mekaSuitPantsArmor;
+                case CHESTPLATE -> MekanismConfig.COMMON.gear.mekaSuitBodyArmorArmor;
+                case HELMET -> MekanismConfig.COMMON.gear.mekaSuitHelmetArmor;
             };
         }
 
         @Override
         public float getToughness() {
-            return MekanismConfig.gear.mekaSuitToughness;
+            return MekanismConfig.COMMON.gear.mekaSuitToughness;
         }
 
         @Override
         public float getKnockbackResistance() {
-            return MekanismConfig.gear.mekaSuitKnockbackResistance;
+            return MekanismConfig.COMMON.gear.mekaSuitKnockbackResistance;
         }
 
         @NotNull

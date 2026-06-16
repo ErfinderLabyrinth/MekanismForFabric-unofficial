@@ -20,7 +20,7 @@ public class ConfigurableHeightProvider extends HeightProvider {
 
     public static final Codec<ConfigurableHeightProvider> CODEC = RecordCodecBuilder.create(builder -> builder.group(
           OreVeinType.CODEC.fieldOf("oreVeinType").forGetter(config -> config.oreVeinType)
-    ).apply(builder, type -> new ConfigurableHeightProvider(type, MekanismConfig.world.getVeinConfig(type))));
+    ).apply(builder, type -> new ConfigurableHeightProvider(type, MekanismConfig.COMMON.world.getVeinConfig(type))));
 
     private final OreVeinType oreVeinType;
     private final ConfigurableHeightRange range;

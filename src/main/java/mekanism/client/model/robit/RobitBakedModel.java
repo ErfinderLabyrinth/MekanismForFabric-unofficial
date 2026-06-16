@@ -36,6 +36,11 @@ public class RobitBakedModel extends ExtensionOverrideBakedModel<ResourceLocatio
     }
 
     @Override
+    public boolean isCustomRenderer() {
+        return false;
+    }
+
+    @Override
     public List<BakedQuad> createQuads(QuadsKey<ResourceLocation> key) {
         List<BakedQuad> quads = key.getQuads();
         if (RobitSpriteUploader.UPLOADER != null) {
@@ -53,7 +58,7 @@ public class RobitBakedModel extends ExtensionOverrideBakedModel<ResourceLocatio
     @Nullable
     @Override
     public QuadsKey<ResourceLocation> createKey(QuadsKey<ResourceLocation> key, Object data) {
-        ResourceLocation skinTexture = ((ResourceKey<?>) data).location();
+        ResourceLocation skinTexture = (ResourceLocation) data;
         if (skinTexture == null) {
             return null;
         }
@@ -103,7 +108,7 @@ public class RobitBakedModel extends ExtensionOverrideBakedModel<ResourceLocatio
                 if (!textures.isEmpty()) {
                     //Assuming the skin actually has textures (it should), grab the first texture as the model data
 //                    ModelData modelData = ModelData.builder().with(EntityRobit.SKIN_TEXTURE_PROPERTY, textures.get(0)).build();
-//                    return wrap(model, stack, world, entity, seed, modelData, RobitModelDataBakedModel::new);
+                    return wrap(model, stack, world, entity, seed, textures.get(0), RobitModelDataBakedModel::new);
                 }
             }
             return original.resolve(model, stack, world, entity, seed);

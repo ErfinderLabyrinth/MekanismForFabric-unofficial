@@ -11,6 +11,7 @@ import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -76,7 +77,7 @@ public class PacketTransmitterUpdate implements IMekanismPacket {
         buffer.writeEnum(tramsmittionType);
         buffer.writeUUID(networkID);
         buffer.writeFloat(scale);
-        BasePacketHandler.log("Sending '{}' update message for network with id {}", tramsmittionType, networkID);
+        NetworkUtil.log("Sending '{}' update message for network with id {}", tramsmittionType, networkID);
         if (tramsmittionType == TramsmittionType.FLUID) {
             fluidStack.writeToPacket(buffer);
         } else if (tramsmittionType == TramsmittionType.CHEMICAL) {

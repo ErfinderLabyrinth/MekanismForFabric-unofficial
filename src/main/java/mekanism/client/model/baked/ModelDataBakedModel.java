@@ -1,6 +1,7 @@
 package mekanism.client.model.baked;
 
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.client.model.robit.RobitBakedModel;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -17,7 +18,7 @@ import java.util.List;
 @NothingNullByDefault
 public class ModelDataBakedModel implements BakedModel {
 
-    private final BakedModel original;
+    protected final BakedModel original;
     private final List<BakedModel> renderPasses;
 
     public ModelDataBakedModel(BakedModel original) {
@@ -28,7 +29,7 @@ public class ModelDataBakedModel implements BakedModel {
     @Override
     @Deprecated
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
-        return getQuads(state, side, rand);
+        return original.getQuads(state, side, rand);
     }
 
     @Override

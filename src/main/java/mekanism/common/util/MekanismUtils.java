@@ -277,7 +277,7 @@ public final class MekanismUtils {
                 // def * upgradeMultiplier ^ ((speed - gas) / 8)
                 //TODO: We may want to validate this provides the numbers we desire if we ever end up with any machines
                 // that use this that are not statistical and have gas upgrades so would go through this code path
-                return Math.round(def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier,
+                return Math.round(def * Math.pow(MekanismConfig.COMMON.general.maxUpgradeMultiplier,
                       fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.GAS)));
             }
             //If it doesn't support gas upgrades, we can fall through to the default value as the math would be:
@@ -297,7 +297,7 @@ public final class MekanismUtils {
      */
     public static int getTicks(IUpgradeTile tile, int def) {
         if (tile.supportsUpgrades()) {
-            return MathUtils.clampToInt(def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier, -fractionUpgrades(tile, Upgrade.SPEED)));
+            return MathUtils.clampToInt(def * Math.pow(MekanismConfig.COMMON.general.maxUpgradeMultiplier, -fractionUpgrades(tile, Upgrade.SPEED)));
         }
         return def;
     }
@@ -312,7 +312,7 @@ public final class MekanismUtils {
      */
     public static long getEnergyPerTick(IUpgradeTile tile, long def) {
         if (tile.supportsUpgrades()) {
-            return (long) (def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier, 2 * fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.ENERGY)));
+            return (long) (def * Math.pow(MekanismConfig.COMMON.general.maxUpgradeMultiplier, 2 * fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.ENERGY)));
         }
         return def;
     }
@@ -327,9 +327,9 @@ public final class MekanismUtils {
     public static double getGasPerTickMeanMultiplier(IUpgradeTile tile) {
         if (tile.supportsUpgrades()) {
             if (tile.supportsUpgrade(Upgrade.GAS)) {
-                return Math.pow(MekanismConfig.general.maxUpgradeMultiplier, 2 * fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.GAS));
+                return Math.pow(MekanismConfig.COMMON.general.maxUpgradeMultiplier, 2 * fractionUpgrades(tile, Upgrade.SPEED) - fractionUpgrades(tile, Upgrade.GAS));
             }
-            return Math.pow(MekanismConfig.general.maxUpgradeMultiplier, fractionUpgrades(tile, Upgrade.SPEED));
+            return Math.pow(MekanismConfig.COMMON.general.maxUpgradeMultiplier, fractionUpgrades(tile, Upgrade.SPEED));
         }
         return 1;
     }
@@ -344,7 +344,7 @@ public final class MekanismUtils {
      */
     public static long getMaxEnergy(IUpgradeTile tile, long def) {
         if (tile.supportsUpgrades()) {
-            return (long) (def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier, fractionUpgrades(tile, Upgrade.ENERGY)));
+            return (long) (def * Math.pow(MekanismConfig.COMMON.general.maxUpgradeMultiplier, fractionUpgrades(tile, Upgrade.ENERGY)));
         }
         return def;
     }
@@ -363,7 +363,7 @@ public final class MekanismUtils {
             Map<Upgrade, Integer> upgrades = Upgrade.buildMap(ItemDataUtils.getCompound(stack, NBTConstants.COMPONENT_UPGRADE));
             numUpgrades = upgrades.getOrDefault(Upgrade.ENERGY, 0);
         }
-        return (long) (def * Math.pow(MekanismConfig.general.maxUpgradeMultiplier, numUpgrades / Upgrade.ENERGY.getMax()));
+        return (long) (def * Math.pow(MekanismConfig.COMMON.general.maxUpgradeMultiplier, numUpgrades / Upgrade.ENERGY.getMax()));
     }
 
     /**
@@ -547,7 +547,7 @@ public final class MekanismUtils {
      */
     public static Component getTemperatureDisplay(double temp, TemperatureUnit unit, boolean shift) {
         double tempKelvin = unit.convertToK(temp, true);
-        return UnitDisplayUtils.getDisplayShort(tempKelvin, MekanismConfig.common.tempUnit, shift);
+        return UnitDisplayUtils.getDisplayShort(tempKelvin, MekanismConfig.COMMON.common.tempUnit, shift);
     }
 
     public static CraftingContainer getDummyCraftingInv() {

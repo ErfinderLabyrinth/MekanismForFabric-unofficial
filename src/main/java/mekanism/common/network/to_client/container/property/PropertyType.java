@@ -19,6 +19,7 @@ import mekanism.common.network.to_client.container.property.chemical.InfusionSta
 import mekanism.common.network.to_client.container.property.chemical.PigmentStackPropertyData;
 import mekanism.common.network.to_client.container.property.chemical.SlurryStackPropertyData;
 import mekanism.common.network.to_client.container.property.list.ListPropertyData;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -62,7 +63,7 @@ public enum PropertyType {
           FrequencyPropertyData::readFrequency),
     LIST(ArrayList.class, Collections.emptyList(), (getter, setter) -> null /* not handled */, ListPropertyData::readList),
     BLOCK_POS(BlockPos.class, null, (getter, setter) -> SyncableBlockPos.create(() -> (BlockPos) getter.get(), setter::accept),
-          (property, buffer) -> new BlockPosPropertyData(property, BasePacketHandler.readOptional(buffer, FriendlyByteBuf::readBlockPos))),
+          (property, buffer) -> new BlockPosPropertyData(property, NetworkUtil.readOptional(buffer, FriendlyByteBuf::readBlockPos))),
     FLOATING_LONG(FloatingLong.class, FloatingLong.ZERO, (getter, setter) -> SyncableFloatingLong.create(() -> (FloatingLong) getter.get(), setter::accept),
           (property, buffer) -> new FloatingLongPropertyData(property, FloatingLong.readFromBuffer(buffer)));
 

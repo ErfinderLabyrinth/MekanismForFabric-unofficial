@@ -134,7 +134,7 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
     @Override
     public boolean mayPickup(@NotNull Player player) {
         try(Transaction t=Transaction.openOuter()) {
-            return slot.extract(slot.getResource(), 1, t) != 0;
+            return slot.extract(slot.getResource(), 1, t, AutomationType.MANUAL) != 0;
         }
     }
 
@@ -148,7 +148,7 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
     public ItemStack remove(int amount) {
         try(Transaction t=Transaction.openOuter()) {
             ItemVariant resource = slot.getResource();
-            long amountExtracted = slot.extract(resource, amount, t);
+            long amountExtracted = slot.extract(resource, amount, t, AutomationType.MANUAL);
             t.commit();
             return resource.toStack((int)amountExtracted);
         }

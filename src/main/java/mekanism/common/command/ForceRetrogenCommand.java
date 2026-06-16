@@ -42,7 +42,7 @@ public class ForceRetrogenCommand {
     }
 
     private static int addChunksToRegen(CommandSourceStack source, ColumnPos start, ColumnPos end) throws CommandSyntaxException {
-        if (!MekanismConfig.world.enableRegeneration) {
+        if (!MekanismConfig.COMMON.world.enableRegeneration) {
             throw RETROGEN_NOT_ENABLED.create();
         }
         int xStart = Math.min(start.x(), end.x());

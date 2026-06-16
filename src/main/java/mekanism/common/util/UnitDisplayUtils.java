@@ -164,10 +164,10 @@ public class UnitDisplayUtils {
                 return joules;
             }
         },
-        FORGE_ENERGY(MekanismLang.ENERGY_FORGE, MekanismLang.ENERGY_FORGE, MekanismLang.ENERGY_FORGE_SHORT, "fe", () -> () -> MekanismConfig.general.forgeConversionRate,
+        FORGE_ENERGY(MekanismLang.ENERGY_FORGE, MekanismLang.ENERGY_FORGE, MekanismLang.ENERGY_FORGE_SHORT, "fe", () -> () -> MekanismConfig.COMMON.general.forgeConversionRate,
               //Note: Use default value if called before configs are loaded. In general this should never happen, but third party mods may just call it regardless
-              () -> !MekanismConfig.general.blacklistForge),
-        ELECTRICAL_UNITS(MekanismLang.ENERGY_EU, MekanismLang.ENERGY_EU_PLURAL, MekanismLang.ENERGY_EU_SHORT, "eu", () -> () -> MekanismConfig.general.ic2ConversionRate,
+              () -> !MekanismConfig.COMMON.general.blacklistForge),
+        ELECTRICAL_UNITS(MekanismLang.ENERGY_EU, MekanismLang.ENERGY_EU_PLURAL, MekanismLang.ENERGY_EU_SHORT, "eu", () -> () -> MekanismConfig.COMMON.general.ic2ConversionRate,
               EnergyCompatUtils::useIC2);
 
 
@@ -260,7 +260,7 @@ public class UnitDisplayUtils {
         }
 
         public static EnergyUnit getConfigured() {
-            EnergyUnit type = MekanismConfig.common.energyUnit;
+            EnergyUnit type = MekanismConfig.COMMON.common.energyUnit;
             return type.isEnabled() ? type : EnergyUnit.JOULES;
         }
     }

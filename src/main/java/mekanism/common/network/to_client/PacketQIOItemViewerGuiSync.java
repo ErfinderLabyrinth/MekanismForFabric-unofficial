@@ -7,6 +7,7 @@ import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.lib.inventory.HashedItem.UUIDAwareHashedItem;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -60,10 +61,10 @@ public class PacketQIOItemViewerGuiSync implements IMekanismPacket {
         if (type == Type.BATCH || type == Type.UPDATE) {
             buffer.writeVarLong(countCapacity);
             buffer.writeVarInt(typeCapacity);
-            BasePacketHandler.writeMap(buffer, itemMap, (key, value, buf) -> {
+            NetworkUtil.writeMap(buffer, itemMap, (key, value, buf) -> {
                 buf.writeItem(key.getInternalStack());
                 //Shouldn't be null unless something failed, but if it does try to handle it relatively gracefully
-                BasePacketHandler.writeOptional(buf, key.getUUID(), FriendlyByteBuf::writeUUID);
+                NetworkUtil.writeOptional(buf, key.getUUID(), FriendlyByteBuf::writeUUID);
                 buf.writeVarLong(value);
             });
         }
@@ -77,8 +78,8 @@ public class PacketQIOItemViewerGuiSync implements IMekanismPacket {
         if (type == Type.BATCH || type == Type.UPDATE) {
             countCapacity = buffer.readVarLong();
             typeCapacity = buffer.readVarInt();
-            map = BasePacketHandler.readMap(buffer, Object2LongOpenHashMap::new,
-                  buf -> new UUIDAwareHashedItem(buf.readItem(), BasePacketHandler.readOptional(buf, FriendlyByteBuf::readUUID)), FriendlyByteBuf::readVarLong);
+            map = NetworkUtil.readMap(buffer, Object2LongOpenHashMap::new,
+                  buf -> new UUIDAwareHashedItem(buf.readItem(), NetworkUtil.readOptional(buf, FriendlyByteBuf::readUUID)), FriendlyByteBuf::readVarLong);
         }
         return new PacketQIOItemViewerGuiSync(type, map, countCapacity, typeCapacity);
     }

@@ -26,7 +26,7 @@ public class ItemAlloy extends Item {
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Player player = context.getPlayer();
-        if (player != null && MekanismConfig.general.transmitterAlloyUpgrade) {
+        if (player != null && MekanismConfig.COMMON.general.transmitterAlloyUpgrade) {
             Level world = context.getLevel();
             BlockPos pos = context.getClickedPos();
             BlockEntity tile = WorldUtils.getTileEntity(world, pos);

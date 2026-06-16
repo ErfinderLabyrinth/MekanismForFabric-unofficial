@@ -29,6 +29,7 @@ import mekanism.common.tier.ChemicalTankTier;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.ChatFormatting;
@@ -56,7 +57,7 @@ public class ChemicalUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <CHEMICAL extends Chemical<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, ?, ?>> ItemApiLookup<HANDLER, ContainerItemContext> getItemLookupForChemical(CHEMICAL chemical) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>, HANDLER extends Storage<CHEMICAL>> ItemApiLookup<HANDLER, ContainerItemContext> getItemLookupForChemical(CHEMICAL chemical) {
         if (chemical instanceof Gas) {
             return (ItemApiLookup<HANDLER, ContainerItemContext>) Capabilities.GAS_HANDLER_ITEM;
         } else if (chemical instanceof InfuseType) {
@@ -71,7 +72,7 @@ public class ChemicalUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <CHEMICAL extends Chemical<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, ?, ?>> BlockApiLookup<HANDLER, Direction> getBlockLookupForChemical(CHEMICAL chemical) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>, HANDLER extends Storage<CHEMICAL>> BlockApiLookup<HANDLER, Direction> getBlockLookupForChemical(CHEMICAL chemical) {
         if (chemical instanceof Gas) {
             return (BlockApiLookup<HANDLER, Direction>) Capabilities.GAS_HANDLER_BLOCK;
         } else if (chemical instanceof InfuseType) {
@@ -270,7 +271,7 @@ public class ChemicalUtil {
         return hasChemical(stack, s -> s.isTypeEqual(type), capability);
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> boolean hasChemical(
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends Storage<CHEMICAL>> boolean hasChemical(
           ItemStack stack, Predicate<STACK> validityCheck, ItemApiLookup<HANDLER, ContainerItemContext> capability) {
         HANDLER handler = ContainerItemContext.withConstant(stack).find(capability);
         if (handler != null) {
@@ -354,7 +355,7 @@ public class ChemicalUtil {
         return 0;
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> boolean canInsert(
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends Storage<CHEMICAL>> boolean canInsert(
           HANDLER handler, @NotNull STACK stack) {
         try(Transaction t=Transaction.openOuter()) {
             return handler.insert(stack.getType(), stack.getAmount(), t) > 0;

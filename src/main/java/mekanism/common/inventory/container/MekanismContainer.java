@@ -10,6 +10,7 @@ import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.api.math.FloatingLong;
+import mekanism.client.MekanismClient;
 import mekanism.common.Mekanism;
 import mekanism.common.inventory.container.slot.*;
 import mekanism.common.inventory.container.sync.*;
@@ -421,7 +422,7 @@ public abstract class MekanismContainer extends AbstractContainerMenu implements
     public void setSelectedWindow(@Nullable SelectedWindowData selectedWindow) {
         if (!Objects.equals(this.selectedWindow, selectedWindow)) {
             this.selectedWindow = selectedWindow;
-            Mekanism.packetHandler().sendToServer(new PacketWindowSelect(this.selectedWindow));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketWindowSelect(this.selectedWindow));
         }
     }
 

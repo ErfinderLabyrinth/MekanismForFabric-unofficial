@@ -4,6 +4,7 @@ import mekanism.api.security.IItemOwnerObjectGetter;
 import mekanism.api.security.ISecurityObject;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.text.EnumColor;
+import mekanism.client.MekanismClient;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInsetElement;
@@ -103,19 +104,19 @@ public class GuiSecurityTab extends GuiInsetElement<Supplier<@Nullable Object>> 
         if (provider instanceof ISecurityObject security) {
             if (security.ownerMatches(minecraft.player)) {
                 if (currentHand != null) {
-                    Mekanism.packetHandler().sendToServer(new PacketSecurityMode(currentHand, button == GLFW.GLFW_MOUSE_BUTTON_LEFT));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketSecurityMode(currentHand, button == GLFW.GLFW_MOUSE_BUTTON_LEFT));
                 } else if (provider instanceof BlockEntity tile) {
-                    Mekanism.packetHandler().sendToServer(new PacketGuiInteract(button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? GuiInteraction.NEXT_SECURITY_MODE
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? GuiInteraction.NEXT_SECURITY_MODE
                             : GuiInteraction.PREVIOUS_SECURITY_MODE, tile));
                 } else if (provider instanceof Entity entity) {
-                    Mekanism.packetHandler().sendToServer(new PacketGuiInteract(button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? GuiInteractionEntity.NEXT_SECURITY_MODE
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? GuiInteractionEntity.NEXT_SECURITY_MODE
                             : GuiInteractionEntity.PREVIOUS_SECURITY_MODE, entity));
                 }
             }
         }else if(provider instanceof ItemStack itemStack && itemStack.getItem() instanceof IItemOwnerObjectGetter ownerObjectGetter && ownerObjectGetter.getOwnerObject(itemStack) instanceof ISecurityObject security) {
             if (security.ownerMatches(minecraft.player)) {
                 if (currentHand != null) {
-                    Mekanism.packetHandler().sendToServer(new PacketSecurityMode(currentHand, button == GLFW.GLFW_MOUSE_BUTTON_LEFT));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketSecurityMode(currentHand, button == GLFW.GLFW_MOUSE_BUTTON_LEFT));
                 }
             }
         }

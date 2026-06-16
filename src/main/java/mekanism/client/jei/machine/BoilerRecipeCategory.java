@@ -110,7 +110,7 @@ public class BoilerRecipeCategory extends BaseRecipeCategory<BoilerJEIRecipe> {
         double waterToSteamEfficiency = HeatUtils.getWaterThermalEnthalpy() / HeatUtils.getSteamEnergyEfficiency();
         List<BoilerJEIRecipe> recipes = new ArrayList<>();
         //Special case heat only recipe
-        double temperature = waterAmount * waterToSteamEfficiency / (BoilerMultiblockData.CASING_HEAT_CAPACITY * MekanismConfig.general.boilerWaterConductivity) +
+        double temperature = waterAmount * waterToSteamEfficiency / (BoilerMultiblockData.CASING_HEAT_CAPACITY * MekanismConfig.COMMON.general.boilerWaterConductivity) +
                              HeatUtils.BASE_BOIL_TEMP;
         recipes.add(new BoilerJEIRecipe(null, IngredientCreatorAccess.fluid().from(FluidTags.WATER, waterAmount),
               MekanismGases.STEAM.getStack(waterAmount), GasStack.EMPTY, temperature));

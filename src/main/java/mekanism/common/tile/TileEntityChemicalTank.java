@@ -88,7 +88,7 @@ public class TileEntityChemicalTank extends TileEntityConfigurableMachine implem
         configComponent.setupIOConfig(TransmissionType.INFUSION, getInfusionTank(), RelativeSide.FRONT).setEjecting(true);
         configComponent.setupIOConfig(TransmissionType.PIGMENT, getPigmentTank(), RelativeSide.FRONT).setEjecting(true);
         configComponent.setupIOConfig(TransmissionType.SLURRY, getSlurryTank(), RelativeSide.FRONT).setEjecting(true);
-        ejectorComponent = new TileComponentEjector(this, () -> tier.getOutput(), () -> MekanismConfig.general.fluidAutoEjectRate);
+        ejectorComponent = new TileComponentEjector(this, () -> tier.getOutput(), () -> MekanismConfig.COMMON.general.fluidAutoEjectRate);
         ejectorComponent.setOutputData(configComponent, TransmissionType.GAS, TransmissionType.INFUSION, TransmissionType.PIGMENT, TransmissionType.SLURRY)
               .setCanEject(type -> MekanismUtils.canFunction(this) && (tier == ChemicalTankTier.CREATIVE || dumping != GasMode.DUMPING));
     }
@@ -157,7 +157,7 @@ public class TileEntityChemicalTank extends TileEntityConfigurableMachine implem
                 if (dumping == GasMode.DUMPING) {
                     currentTank.shrinkStack(tier.getStorage() / 400);
                 } else {//dumping == GasMode.DUMPING_EXCESS
-                    long target = MathUtils.clampToLong(currentTank.getCapacity() * MekanismConfig.general.dumpExcessKeepRatio);
+                    long target = MathUtils.clampToLong(currentTank.getCapacity() * MekanismConfig.COMMON.general.dumpExcessKeepRatio);
                     long stored = currentTank.getStored();
                     if (target < stored) {
                         //Dump excess that we need to get to the target (capping at our eject rate for how much we can dump at once)

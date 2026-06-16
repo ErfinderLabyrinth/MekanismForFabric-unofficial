@@ -54,7 +54,7 @@ public class ItemElectricBow extends BowItem implements IModeItem, IItemHUDProvi
             long energyNeeded = 0;
             if (!player.isCreative()) {
                 energyContainer = ContainerItemContext.forPlayerInteraction(player, player.getUsedItemHand()).find(EnergyStorage.ITEM);
-                energyNeeded = getFireState(stack) ? MekanismConfig.gear.electricBowEnergyUsageFire : MekanismConfig.gear.electricBowEnergyUsage;
+                energyNeeded = getFireState(stack) ? MekanismConfig.COMMON.gear.electricBowEnergyUsageFire : MekanismConfig.COMMON.gear.electricBowEnergyUsage;
                 try(Transaction t=Transaction.openOuter()) {
                     if (energyContainer == null || energyContainer.extract(energyNeeded, t) < energyNeeded) {
                         return;
@@ -172,12 +172,12 @@ public class ItemElectricBow extends BowItem implements IModeItem, IItemHUDProvi
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        return MekanismConfig.client.energyColor;
+        return MekanismConfig.CLIENT.client.energyColor;
     }
 
     @Override
     public void addItems(CreativeModeTab.Output tabOutput) {
-        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this), MekanismConfig.gear.electricBowMaxEnergy));
+        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this)));
     }
 
 //    @Override
@@ -194,7 +194,7 @@ public class ItemElectricBow extends BowItem implements IModeItem, IItemHUDProvi
 
     @Override
     public EnergyStorage getEnergyStorage(ContainerItemContext context) {
-        return new EnergyItemStorage(context, () -> RateLimitEnergyHandler.create(() -> MekanismConfig.gear.electricBowChargeRate, () -> MekanismConfig.gear.electricBowMaxEnergy,
+        return new EnergyItemStorage(context, () -> RateLimitEnergyHandler.create(() -> MekanismConfig.COMMON.gear.electricBowChargeRate, () -> MekanismConfig.COMMON.gear.electricBowMaxEnergy,
                 BasicEnergyContainer.manualOnly, BasicEnergyContainer.alwaysTrue));
     }
 

@@ -287,7 +287,7 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
             // due to trying to validate if the value is actually a Player
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null && worldPosition.distSqr(player.blockPosition()) <= 1_600) {
-                if (MekanismConfig.client.enableMultiblockFormationParticles) {
+                if (MekanismConfig.CLIENT.client.enableMultiblockFormationParticles) {
                     new SparkleAnimation(this, multiblock.renderLocation, multiblock.length() - 1, multiblock.width() - 1, multiblock.height() - 1).run();
                 } else {
                     player.displayClientMessage(MekanismLang.MULTIBLOCK_FORMED_CHAT.translateColored(EnumColor.INDIGO), true);

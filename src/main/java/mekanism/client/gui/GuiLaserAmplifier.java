@@ -1,6 +1,7 @@
 package mekanism.client.gui;
 
 import mekanism.api.math.FloatingLong;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiEnergyGauge;
 import mekanism.client.gui.element.tab.GuiAmplifierTab;
@@ -88,7 +89,7 @@ public class GuiLaserAmplifier extends GuiMekanismTile<TileEntityLaserAmplifier,
     private void setMinThreshold() {
         if (!minField.getText().isEmpty()) {
             try {
-                Mekanism.packetHandler().sendToServer(new PacketGuiSetEnergy(GuiEnergyValue.MIN_THRESHOLD, tile.getBlockPos(),
+                MekanismClient.clientPacketHandler().sendToServer(new PacketGuiSetEnergy(GuiEnergyValue.MIN_THRESHOLD, tile.getBlockPos(),
                       MekanismUtils.convertToJoules(parseLong(minField))));
             } catch (NumberFormatException ignored) {
             }
@@ -99,7 +100,7 @@ public class GuiLaserAmplifier extends GuiMekanismTile<TileEntityLaserAmplifier,
     private void setMaxThreshold() {
         if (!maxField.getText().isEmpty()) {
             try {
-                Mekanism.packetHandler().sendToServer(new PacketGuiSetEnergy(GuiEnergyValue.MAX_THRESHOLD, tile.getBlockPos(),
+                MekanismClient.clientPacketHandler().sendToServer(new PacketGuiSetEnergy(GuiEnergyValue.MAX_THRESHOLD, tile.getBlockPos(),
                       MekanismUtils.convertToJoules(parseLong(maxField))));
             } catch (NumberFormatException ignored) {
             }
@@ -110,7 +111,7 @@ public class GuiLaserAmplifier extends GuiMekanismTile<TileEntityLaserAmplifier,
     private void setTime() {
         if (!timerField.getText().isEmpty()) {
             try {
-                Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.SET_TIME, tile, Integer.parseInt(timerField.getText())));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.SET_TIME, tile, Integer.parseInt(timerField.getText())));
             } catch (NumberFormatException ignored) {
             }
             timerField.setText("");

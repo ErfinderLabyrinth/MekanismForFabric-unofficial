@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.window;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.button.TranslationButton;
 import mekanism.client.gui.element.text.GuiTextField;
@@ -29,7 +30,7 @@ public class GuiRobitRename extends GuiWindow {
     private void changeName() {
         String name = nameChangeField.getText().trim();
         if (!name.isEmpty()) {
-            Mekanism.packetHandler().sendToServer(new PacketRobit(robit, name));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketRobit(robit, name));
             close();
         }
     }

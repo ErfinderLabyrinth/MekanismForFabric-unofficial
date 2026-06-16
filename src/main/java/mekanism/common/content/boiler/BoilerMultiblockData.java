@@ -84,7 +84,7 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
     private int waterVolume;
     private int steamVolume;
 
-    private int waterTankCapacity;
+    private long waterTankCapacity;
     private long superheatedCoolantCapacity, steamTankCapacity, cooledCoolantCapacity;
 
     public BlockPos upperRenderLocation;
@@ -217,8 +217,8 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
     }
 
     private double getHeatAvailable() {
-        double heatAvailable = (heatCapacitor.getTemperature() - HeatUtils.BASE_BOIL_TEMP) * (heatCapacitor.getHeatCapacity() * MekanismConfig.general.boilerWaterConductivity);
-        return Math.min(heatAvailable, MekanismConfig.general.superheatingHeatTransfer * superheatingElements);
+        double heatAvailable = (heatCapacitor.getTemperature() - HeatUtils.BASE_BOIL_TEMP) * (heatCapacitor.getHeatCapacity() * MekanismConfig.COMMON.general.boilerWaterConductivity);
+        return Math.min(heatAvailable, MekanismConfig.COMMON.general.superheatingHeatTransfer * superheatingElements);
     }
 
     @Override
@@ -236,8 +236,8 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
     public void setWaterVolume(int volume) {
         if (waterVolume != volume) {
             waterVolume = volume;
-            waterTankCapacity = volume * MekanismConfig.general.boilerWaterPerTank;
-            superheatedCoolantCapacity = volume * MekanismConfig.general.boilerHeatedCoolantPerTank;
+            waterTankCapacity = volume * MekanismConfig.COMMON.general.boilerWaterPerTank;
+            superheatedCoolantCapacity = volume * MekanismConfig.COMMON.general.boilerHeatedCoolantPerTank;
         }
     }
 
@@ -248,14 +248,14 @@ public class BoilerMultiblockData extends MultiblockData implements IValveHandle
     public void setSteamVolume(int volume) {
         if (steamVolume != volume) {
             steamVolume = volume;
-            steamTankCapacity = volume * MekanismConfig.general.boilerSteamPerTank;
-            cooledCoolantCapacity = volume * MekanismConfig.general.boilerCooledCoolantPerTank;
+            steamTankCapacity = volume * MekanismConfig.COMMON.general.boilerSteamPerTank;
+            cooledCoolantCapacity = volume * MekanismConfig.COMMON.general.boilerCooledCoolantPerTank;
         }
     }
 
     @ComputerMethod(methodDescription = "Get the maximum possible boil rate for this Boiler, based on the number of Superheating Elements")
     public long getBoilCapacity() {
-        double boilCapacity = MekanismConfig.general.superheatingHeatTransfer * superheatingElements / HeatUtils.getWaterThermalEnthalpy();
+        double boilCapacity = MekanismConfig.COMMON.general.superheatingHeatTransfer * superheatingElements / HeatUtils.getWaterThermalEnthalpy();
         return MathUtils.clampToLong(boilCapacity * HeatUtils.getSteamEnergyEfficiency());
     }
 

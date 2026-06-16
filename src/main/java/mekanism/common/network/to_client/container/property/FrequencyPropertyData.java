@@ -3,6 +3,7 @@ package mekanism.common.network.to_client.container.property;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.lib.frequency.Frequency;
 import mekanism.common.network.BasePacketHandler;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,7 @@ public class FrequencyPropertyData<FREQUENCY extends Frequency> extends Property
     }
 
     public static <FREQUENCY extends Frequency> FrequencyPropertyData<FREQUENCY> readFrequency(short property, FriendlyByteBuf buffer) {
-        return new FrequencyPropertyData<>(property, BasePacketHandler.readOptional(buffer, Frequency::readFromPacket));
+        return new FrequencyPropertyData<>(property, NetworkUtil.readOptional(buffer, Frequency::readFromPacket));
     }
 
     @Override
@@ -28,6 +29,6 @@ public class FrequencyPropertyData<FREQUENCY extends Frequency> extends Property
     @Override
     public void writeToPacket(FriendlyByteBuf buffer) {
         super.writeToPacket(buffer);
-        BasePacketHandler.writeOptional(buffer, value, (buf, val) -> val.write(buf));
+        NetworkUtil.writeOptional(buffer, value, (buf, val) -> val.write(buf));
     }
 }

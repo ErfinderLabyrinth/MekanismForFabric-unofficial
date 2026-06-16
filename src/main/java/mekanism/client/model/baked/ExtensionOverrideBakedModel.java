@@ -5,10 +5,12 @@ import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -41,7 +43,18 @@ public class ExtensionOverrideBakedModel<T> extends ExtensionBakedModel<T> {
         public abstract BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed);
 
         protected BakedModel wrap(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed,
-              Function<BakedModel, ModelDataBakedModel> wrapper) {
+              ResourceLocation texture, BiFunction<BakedModel, ResourceLocation, ModelDataBakedModel> wrapper) {
+            // perform any overrides the original may have (most likely it doesn't have any)
+            // and then wrap the baked model so that it makes use of the model data
+            BakedModel resolved = original.resolve(model, stack, world, entity, seed);
+            if (resolved == null) {
+                resolved = model;
+            }
+            return wrapper.apply(resolved, texture);
+        }
+
+        protected BakedModel wrap(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed,
+                                  Function<BakedModel, ModelDataBakedModel> wrapper) {
             // perform any overrides the original may have (most likely it doesn't have any)
             // and then wrap the baked model so that it makes use of the model data
             BakedModel resolved = original.resolve(model, stack, world, entity, seed);

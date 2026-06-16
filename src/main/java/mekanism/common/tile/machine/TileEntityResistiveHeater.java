@@ -87,7 +87,7 @@ public class TileEntityResistiveHeater extends TileEntityMekanism implements ICo
             try(Transaction t=Transaction.openOuter()) {
                 toUse = energyContainer.extract(energyContainer.getEnergyPerTick(), t);
                 if (toUse != 0) {
-                    heatCapacitor.handleHeat(toUse * MekanismConfig.general.resistiveHeaterEfficiency);
+                    heatCapacitor.handleHeat(toUse * MekanismConfig.COMMON.general.resistiveHeaterEfficiency);
                     t.commit();
                 }
             }

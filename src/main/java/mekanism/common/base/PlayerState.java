@@ -3,6 +3,7 @@ package mekanism.common.base;
 import mekanism.api.functions.FloatSupplier;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
+import mekanism.client.MekanismClient;
 import mekanism.client.sound.PlayerSound.SoundType;
 import mekanism.client.sound.SoundHandler;
 import mekanism.common.CommonPlayerTickHandler;
@@ -119,11 +120,11 @@ public class PlayerState {
         if (changed && world.isClientSide()) {
             // If the player is the "local" player, we need to tell the server the state has changed
             if (isLocal) {
-                Mekanism.packetHandler().sendToServer(new PacketGearStateUpdate(GearType.JETPACK, uuid, isActive));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketGearStateUpdate(GearType.JETPACK, uuid, isActive));
             }
 
             // Start a sound playing if the person is now flying
-            if (isActive && MekanismConfig.client.enablePlayerSounds) {
+            if (isActive && MekanismConfig.CLIENT.client.enablePlayerSounds) {
                 SoundHandler.startSound(world, uuid, SoundType.JETPACK);
             }
         }
@@ -156,11 +157,11 @@ public class PlayerState {
         if (changed && world.isClientSide()) {
             // If the player is the "local" player, we need to tell the server the state has changed
             if (isLocal) {
-                Mekanism.packetHandler().sendToServer(new PacketGearStateUpdate(GearType.SCUBA_MASK, uuid, isActive));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketGearStateUpdate(GearType.SCUBA_MASK, uuid, isActive));
             }
 
             // Start a sound playing if the person is now using a scuba mask
-            if (isActive && MekanismConfig.client.enablePlayerSounds) {
+            if (isActive && MekanismConfig.CLIENT.client.enablePlayerSounds) {
                 SoundHandler.startSound(world, uuid, SoundType.SCUBA_MASK);
             }
         }
@@ -234,11 +235,11 @@ public class PlayerState {
         if (changed && world.isClientSide()) {
             // If the player is the "local" player, we need to tell the server the state has changed
             if (isLocal) {
-                Mekanism.packetHandler().sendToServer(new PacketGearStateUpdate(GearType.GRAVITATIONAL_MODULATOR, uuid, isActive));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketGearStateUpdate(GearType.GRAVITATIONAL_MODULATOR, uuid, isActive));
             }
 
             // Start a sound playing if the person is now using a gravitational modulator
-            if (isActive && MekanismConfig.client.enablePlayerSounds) {
+            if (isActive && MekanismConfig.CLIENT.client.enablePlayerSounds) {
                 SoundHandler.startSound(world, uuid, SoundType.GRAVITATIONAL_MODULATOR);
             }
         }
@@ -284,7 +285,7 @@ public class PlayerState {
                 //If the player is actively flying (not just allowed to), and has the gravitational modulator ready then apply movement boost if active, and use energy
                 IModule<ModuleGravitationalModulatingUnit> module = IModuleHelper.INSTANCE.load(player.getItemBySlot(EquipmentSlot.CHEST), MekanismModules.GRAVITATIONAL_MODULATING_UNIT);
                 if (module != null) {//Should not be null but double check
-                    long usage = MekanismConfig.gear.mekaSuitEnergyUsageGravitationalModulation;
+                    long usage = MekanismConfig.COMMON.gear.mekaSuitEnergyUsageGravitationalModulation;
                     GameEventRegistryObject<GameEvent> gameEvent = MekanismGameEvents.GRAVITY_MODULATE;
                     if (Mekanism.keyMap.has(player.getUUID(), KeySync.BOOST)) {
                         long boostUsage = usage * 4;
@@ -298,7 +299,7 @@ public class PlayerState {
                         }
                     }
                     module.useEnergy(player, usage);
-                    if (MekanismConfig.gear.mekaSuitGravitationalVibrations && player.level().getGameTime() % 10 == 0) {
+                    if (MekanismConfig.COMMON.gear.mekaSuitGravitationalVibrations && player.level().getGameTime() % 10 == 0) {
                         player.gameEvent(gameEvent.get());
                     }
                 }
@@ -358,7 +359,7 @@ public class PlayerState {
             if (changed) {
                 // If the player is the "local" player, we need to tell the server the state has changed
                 if (isLocal) {
-                    Mekanism.packetHandler().sendToServer(new PacketGearStateUpdate(GearType.FLAMETHROWER, uuid, isActive));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketGearStateUpdate(GearType.FLAMETHROWER, uuid, isActive));
                 }
 
                 // Start a sound playing if the person is now using a flamethrower
@@ -374,7 +375,7 @@ public class PlayerState {
                 // attempt to start the sound. This is not a major deal as the uuid gets checked before attempting
                 // to retrieve the player or actually creating a new sound object.
             }
-            if (startSound && MekanismConfig.client.enablePlayerSounds) {
+            if (startSound && MekanismConfig.CLIENT.client.enablePlayerSounds) {
                 SoundHandler.startSound(world, uuid, SoundType.FLAMETHROWER);
             }
         }

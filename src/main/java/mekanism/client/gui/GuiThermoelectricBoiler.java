@@ -70,7 +70,7 @@ public class GuiThermoelectricBoiler extends GuiMekanismTile<TileEntityBoilerCas
             public double getLevel() {
                 BoilerMultiblockData multiblock = tile.getMultiblock();
                 return Math.min(1, multiblock.lastMaxBoil * HeatUtils.getWaterThermalEnthalpy() /
-                                   (multiblock.superheatingElements * MekanismConfig.general.superheatingHeatTransfer));
+                                   (multiblock.superheatingElements * MekanismConfig.COMMON.general.superheatingHeatTransfer));
             }
         }, 164, 13));
         addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().superheatedCoolantTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 6, 13)

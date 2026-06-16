@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public enum SubstanceType {
-    ENERGY(NBTConstants.ENERGY_CONTAINERS, tile -> tile.getEnergyManager().canHandle() ? tile.getEnergyManager().getHolder().getAll() : List.of()),
+    ENERGY(NBTConstants.ENERGY_CONTAINER, tile -> tile.getEnergyManager().canHandle() ? tile.getEnergyManager().getHolder().getAll() : List.of()),
     FLUID(NBTConstants.FLUID_TANKS, tile -> tile.getFluidManager().canHandle() ? tile.getFluidManager().getHolder().getAll() : List.of()),
     GAS(NBTConstants.GAS_TANKS, tile -> tile.getGasManager().canHandle() ? tile.getGasManager().getHolder().getAll() : List.of()),
     INFUSION(NBTConstants.INFUSION_TANKS, tile -> tile.getInfusionManager().canHandle() ? tile.getInfusionManager().getHolder().getAll() : List.of()),

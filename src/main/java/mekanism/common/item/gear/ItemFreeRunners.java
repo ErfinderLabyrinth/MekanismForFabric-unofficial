@@ -61,7 +61,7 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
 
     @Override
     public void addItems(CreativeModeTab.Output tabOutput) {
-        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this), MekanismConfig.gear.freeRunnerMaxEnergy));
+        tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this)));
     }
 
     @Override
@@ -81,12 +81,12 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        return MekanismConfig.client.energyColor;
+        return MekanismConfig.CLIENT.client.energyColor;
     }
 
     @Override
     protected boolean areCapabilityConfigsLoaded() {
-        return super.areCapabilityConfigsLoaded() && MekanismConfig.gear.isLoaded();
+        return super.areCapabilityConfigsLoaded() && MekanismConfig.COMMON.gear.isLoaded();
     }
 
 //    @Override
@@ -98,7 +98,7 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
 
     @Override
     public EnergyStorage getEnergyStorage(ContainerItemContext context) {
-        return new EnergyItemStorage(context, () -> RateLimitEnergyHandler.create(() -> MekanismConfig.gear.freeRunnerChargeRate, () -> MekanismConfig.gear.freeRunnerMaxEnergy,
+        return new EnergyItemStorage(context, () -> RateLimitEnergyHandler.create(() -> MekanismConfig.COMMON.gear.freeRunnerChargeRate, () -> MekanismConfig.COMMON.gear.freeRunnerMaxEnergy,
                 BasicEnergyContainer.manualOnly, BasicEnergyContainer.alwaysTrue));
     }
 

@@ -3,6 +3,7 @@ package mekanism.client.gui;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import mekanism.api.gear.IModule;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.button.TranslationButton;
 import mekanism.client.gui.element.custom.module.GuiModuleScreen;
@@ -57,7 +58,7 @@ public class GuiModuleTweaker extends GuiMekanism<ModuleTweakerContainer> {
                 IModule<?> module = moduleScreen.getCurrentModule();
                 if (module != null && selected != -1) {//Shouldn't be null but validate just in case
                     int slotIndex = menu.slots.get(selected).index;
-                    Mekanism.packetHandler().sendToServer(PacketUpdateModuleSettings.create(slotIndex, module.getData(), dataIndex, configItem.getData()));
+                    MekanismClient.clientPacketHandler().sendToServer(PacketUpdateModuleSettings.create(slotIndex, module.getData(), dataIndex, configItem.getData()));
                 }
             }
         };

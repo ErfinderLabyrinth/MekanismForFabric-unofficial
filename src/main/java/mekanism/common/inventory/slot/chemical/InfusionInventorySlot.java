@@ -11,6 +11,7 @@ import mekanism.api.recipes.ItemStackToInfuseTypeRecipe;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.recipe.MekanismRecipeType;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ import java.util.function.Supplier;
 public class InfusionInventorySlot extends ChemicalInventorySlot<InfuseType, InfusionStack> {
 
     @Nullable
-    public static IInfusionHandler getCapability(ContainerItemContext stack) {
+    public static Storage<InfuseType> getCapability(ContainerItemContext stack) {
         return stack.find(Capabilities.INFUSION_HANDLER_ITEM);
     }
 
@@ -62,7 +63,7 @@ public class InfusionInventorySlot extends ChemicalInventorySlot<InfuseType, Inf
 
     @Nullable
     @Override
-    protected IChemicalHandler<InfuseType, InfusionStack, IInfusionTank> getCapability() {
+    protected Storage<InfuseType> getCapability() {
         return getCapability(ContainerItemContext.ofSingleSlot(current));
     }
 

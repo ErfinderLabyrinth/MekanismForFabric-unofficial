@@ -1,5 +1,6 @@
 package mekanism.client.gui.machine;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiConfigurableTile;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.button.FilterButton;
@@ -56,7 +57,7 @@ public class GuiOredictionificator extends GuiConfigurableTile<TileEntityOredict
         //Add each of the buttons and then just change visibility state to match filter info
         for (int i = 0; i < FILTER_COUNT; i++) {
             addRenderableWidget(new FilterButton(this, 10, 18 + i * 22, 142, 22, i, scrollBar::getCurrentSelection, filterManager, this::onClick,
-                  index -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.TOGGLE_FILTER_STATE, tile, index)), filter -> {
+                  index -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.TOGGLE_FILTER_STATE, tile, index)), filter -> {
                 if (filter instanceof OredictionificatorItemFilter oredictionificatorFilter) {
                     return Collections.singletonList(oredictionificatorFilter.getResult());
                 }

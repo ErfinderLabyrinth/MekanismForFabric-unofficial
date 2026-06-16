@@ -188,16 +188,26 @@ public class Vertex {
         return new Vertex(pos, normal, red, green, blue, alpha, texU, texV, overlayU, overlayV, lightU, lightV, miscData);
     }
 
-    public void write(VertexConsumer consumer) {
-        consumer.vertex(pos.x, pos.y, pos.z);
-        consumer.color(red, green, blue, alpha);
-        consumer.uv(texU, texV);
-        consumer.overlayCoords(overlayU, overlayV);
-        consumer.uv2(lightU, lightV);
-        consumer.normal(normal.x(), normal.y(), normal.z());
-        for (Map.Entry<VertexFormatElement, int[]> entry : miscData.entrySet()) {
-            //consumer.misc(entry.getKey(), entry.getValue());
-        }
-        consumer.endVertex();
+    public void write(int index, int[] is) {
+        is[index * 8] = Float.floatToRawIntBits((float) pos.x);
+        is[index * 8 + 1] = Float.floatToRawIntBits((float) pos.y);
+        is[index * 8 + 2] = Float.floatToRawIntBits((float) pos.z);
+        is[index * 8 + 3] = red << 24 | green << 16 | blue << 8 | alpha;
+        is[index * 8 + 4] = Float.floatToRawIntBits(texU);
+        is[index * 8 + 5] = Float.floatToRawIntBits(texV);
+        is[index * 8 + 6] = lightU | lightV << 16;
+        is[index * 8 + 7] = (byte)normal.x() << 24 | (byte)normal.y() << 16 | (byte)normal.z() << 8;
+
+
+//        consumer.vertex(pos.x, pos.y, pos.z);
+//        consumer.color(red, green, blue, alpha);
+//        consumer.uv(texU, texV);
+//        consumer.overlayCoords(overlayU, overlayV);
+//        consumer.uv2(lightU, lightV);
+//        consumer.normal(normal.x(), normal.y(), normal.z());
+//        for (Map.Entry<VertexFormatElement, int[]> entry : miscData.entrySet()) {
+//            //consumer.misc(entry.getKey(), entry.getValue());
+//        }
+//        consumer.endVertex();
     }
 }

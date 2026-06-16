@@ -115,7 +115,7 @@ public class BasicFluidTank extends SnapshotParticipant<FluidStack> implements I
 
     protected BasicFluidTank(long capacity, BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canExtract,
           BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canInsert, Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
-        this.capacity = capacity * 81; //81 Einheiten pro mB
+        this.capacity = capacity;
         this.canExtract = canExtract;
         this.canInsert = canInsert;
         this.validator = validator;

@@ -74,7 +74,7 @@ public class RenderLogisticalTransporter extends RenderTransmitterBase<TileEntit
           ProfilerFiller profiler) {
         LogisticalTransporterBase transporter = tile.getTransmitter();
         BlockPos pos = tile.getBlockPos();
-        if (!MekanismConfig.client.opaqueTransmitters) {
+        if (!MekanismConfig.CLIENT.client.opaqueTransmitters) {
             Collection<TransporterStack> inTransit = transporter.getTransit();
             if (!inTransit.isEmpty()) {
                 matrix.pushPose();

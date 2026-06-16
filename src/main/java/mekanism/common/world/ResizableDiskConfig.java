@@ -20,7 +20,7 @@ public record ResizableDiskConfig(RuleBasedBlockStateProvider stateProvider, Blo
     ).apply(builder, ResizableDiskConfig::new));
 
     public ResizableDiskConfig(RuleBasedBlockStateProvider stateProvider, BlockPredicate target, IntProvider radius) {
-        this(stateProvider, target, radius, () -> MekanismConfig.world.salt.halfHeight);
+        this(stateProvider, target, radius, () -> MekanismConfig.COMMON.world.salt.halfHeight);
     }
 
     public DiskConfiguration asVanillaConfig() {

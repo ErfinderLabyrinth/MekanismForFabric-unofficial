@@ -3,12 +3,13 @@ package mekanism.common;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingOutputStream;
 import com.google.gson.JsonElement;
-import com.mojang.logging.LogUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+
+import mekanism.api.MekanismAPI;
 import mekanism.client.lang.MekanismLangProvider;
 import mekanism.client.model.MekanismItemModelProvider;
 import mekanism.client.sound.MekanismSoundProvider;
@@ -18,10 +19,7 @@ import mekanism.client.texture.PrideRobitTextureProvider;
 import mekanism.common.advancements.MekanismAdvancementProvider;
 import mekanism.common.advancements.MekanismCriteriaTriggers;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.integration.computer.ComputerHelpProvider;
-import mekanism.common.integration.crafttweaker.MekanismCrTExampleProvider;
-import mekanism.common.integration.projecte.MekanismCustomConversions;
-import mekanism.common.loot.MekanismLootProvider;
+import mekanism.common.loot.table.MekanismBlockLootTables;
 import mekanism.common.recipe.impl.MekanismRecipeProvider;
 import mekanism.common.registries.MekanismDatapackRegistryProvider;
 import mekanism.common.tag.MekanismTagProvider;
@@ -29,12 +27,9 @@ import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.Util;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
-import org.slf4j.Logger;
 
 public class MekanismDataGenerator implements DataGeneratorEntrypoint {
     @Override
@@ -44,27 +39,29 @@ public class MekanismDataGenerator implements DataGeneratorEntrypoint {
         MekanismDatapackRegistryProvider drProvider = pack.addProvider(MekanismDatapackRegistryProvider::new);
         //Bootstrap our advancement triggers as common setup doesn't run
         MekanismCriteriaTriggers.init();
-        pack.addProvider((FabricDataOutput output) -> new BasePackMetadataGenerator(output, MekanismLang.PACK_DESCRIPTION));
+//        pack.addProvider((FabricDataOutput output) -> new BasePackMetadataGenerator(output, MekanismLang.PACK_DESCRIPTION));
         //Client side data generators
         addProvider(pack, MekanismLangProvider::new);
         pack.addProvider(PrideRobitTextureProvider::new);
         pack.addProvider((FabricDataOutput output) -> new MekanismSoundProvider(output));
         pack.addProvider((FabricDataOutput output) -> new MekanismSpriteSourceProvider(output));
         pack.addProvider(MekanismItemModelProvider::new);
-        pack.addProvider((FabricDataOutput output) -> new MekanismBlockStateProvider(output));
+        pack.addProvider(MekanismBlockStateProvider::new);
         //Server side data generators
-        pack.addProvider(new MekanismTagProvider(output, lookupProvider, existingFileHelper));
-        addProvider(pack, MekanismLootProvider::new);
-        pack.addProvider(event.includeServer(), drProvider);
-        MekanismRecipeProvider recipeProvider = new MekanismRecipeProvider(output, existingFileHelper);
-        pack.addProvider(event.includeServer(), recipeProvider);
-        pack.addProvider(event.includeServer(), new MekanismAdvancementProvider(output, existingFileHelper));
-        pack.addProvider(event.includeServer(), new MekanismCustomConversions(output, lookupProvider));
-        pack.addProvider(event.includeServer(), new MekanismCrTExampleProvider(output, existingFileHelper));
-        pack.addProvider(event.includeServer(), new ComputerHelpProvider(output, Mekanism.MODID));
+        pack.addProvider(MekanismTagProvider::new);
+
+        //Loot Tables
+        pack.addProvider(MekanismBlockLootTables::new);
+        //pack.addProvider(MekanismEntityLootTables::new);
+
+        MekanismRecipeProvider recipeProvider = pack.addProvider(MekanismRecipeProvider::new);
+        pack.addProvider(MekanismAdvancementProvider::new);
+//        pack.addProvider(MekanismCustomConversions::new);
+//        pack.addProvider(new MekanismCrTExampleProvider(output, existingFileHelper));
+//        pack.addProvider(new ComputerHelpProvider(output, Mekanism.MODID));
         //Data generator to help with persisting data when porting across MC versions when optional deps aren't updated yet
         // DO NOT ADD OTHERS AFTER THIS ONE
-        gen.addProvider(true, new PersistingDisabledProvidersProvider(output, recipeProvider.getDisabledCompats()));
+        pack.addProvider((FabricDataOutput output) -> new PersistingDisabledProvidersProvider(output, recipeProvider.getDisabledCompats()));
     }
 
     //@SubscribeEvent
@@ -102,6 +99,11 @@ public class MekanismDataGenerator implements DataGeneratorEntrypoint {
 
     public static <PROVIDER extends DataProvider> void addProvider(FabricDataGenerator.Pack pack, FabricDataGenerator.Pack.Factory<PROVIDER> factory) {
         pack.addProvider(factory);
+    }
+
+    @Override
+    public void buildRegistry(RegistrySetBuilder registryBuilder) {
+        registryBuilder.add(MekanismAPI.ROBIT_SKIN_REGISTRY_NAME, (unused) -> {});
     }
 
     /**

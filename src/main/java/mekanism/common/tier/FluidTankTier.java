@@ -6,10 +6,10 @@ import mekanism.api.tier.ITier;
 import java.util.function.IntSupplier;
 
 public enum FluidTankTier implements ITier {
-    BASIC(BaseTier.BASIC, 32_000, 1_000),
-    ADVANCED(BaseTier.ADVANCED, 64_000, 4_000),
-    ELITE(BaseTier.ELITE, 128_000, 16_000),
-    ULTIMATE(BaseTier.ULTIMATE, 256_000, 64_000),
+    BASIC(BaseTier.BASIC, 32_000 * 81, 1_000 * 81),
+    ADVANCED(BaseTier.ADVANCED, 64_000 * 81, 4_000 * 81),
+    ELITE(BaseTier.ELITE, 128_000 * 81, 16_000 * 81),
+    ULTIMATE(BaseTier.ULTIMATE, 256_000 * 81, 64_000 * 81),
     CREATIVE(BaseTier.CREATIVE, Integer.MAX_VALUE, Integer.MAX_VALUE / 2);
 
     private final int baseStorage;

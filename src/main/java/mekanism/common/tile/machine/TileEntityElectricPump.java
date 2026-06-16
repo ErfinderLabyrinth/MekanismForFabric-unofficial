@@ -161,8 +161,8 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
         }
     }
 
-    public int estimateIncrementAmount() {
-        return fluidTank.getFluid().getFluid() == MekanismFluids.HEAVY_WATER.getFluid() ? MekanismConfig.general.pumpHeavyWaterAmount : 81000;
+    public long estimateIncrementAmount() {
+        return fluidTank.getFluid().getFluid() == MekanismFluids.HEAVY_WATER.getFluid() ? MekanismConfig.COMMON.general.pumpHeavyWaterAmount : 81000;
     }
 
     private boolean suck() {
@@ -183,7 +183,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
             //Add all the blocks surrounding this recurring node to the recurring node list
             for (Direction orientation : EnumUtils.DIRECTIONS) {
                 BlockPos side = tempPumpPos.relative(orientation);
-                if (WorldUtils.distanceBetween(worldPosition, side) <= MekanismConfig.general.maxPumpRange) {
+                if (WorldUtils.distanceBetween(worldPosition, side) <= MekanismConfig.COMMON.general.maxPumpRange) {
                     if (suck(side, hasFilter, true)) {
                         return true;
                     }
@@ -209,7 +209,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
                     FluidStack fluidStack = getOutput(sourceFluid, hasFilter);
                     if (validFluid(fluidStack)) {
                         //If it can be picked up by a bucket, and we actually want to pick it up, do so to update the fluid type we are doing
-                        if (sourceFluid != Fluids.WATER || MekanismConfig.general.pumpWaterSources) {
+                        if (sourceFluid != Fluids.WATER || MekanismConfig.COMMON.general.pumpWaterSources) {
                             //Note we only attempt taking if it is not water, or we want to pump water sources
                             // otherwise we assume the type from the fluid state is correct
                             ItemStack pickedUpStack = bucketPickup.pickupBlock(level, pos, blockState);
@@ -241,7 +241,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
 
     private FluidStack getOutput(Fluid sourceFluid, boolean hasFilter) {
         if (hasFilter && sourceFluid == Fluids.WATER) {
-            return MekanismFluids.HEAVY_WATER.getFluidStack(MekanismConfig.general.pumpHeavyWaterAmount);
+            return MekanismFluids.HEAVY_WATER.getFluidStack(MekanismConfig.COMMON.general.pumpHeavyWaterAmount);
         }
         return new FluidStack(FluidVariant.of(sourceFluid), 81000);
     }

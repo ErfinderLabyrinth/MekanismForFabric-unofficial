@@ -18,7 +18,7 @@ public record ResizableOreFeatureConfig(List<TargetBlockState> targetStates, Ore
           Codec.list(OreConfiguration.TargetBlockState.CODEC).fieldOf("targets").forGetter(config -> config.targetStates),
           OreVeinType.CODEC.fieldOf("oreVeinType").forGetter(config -> config.oreVeinType)
     ).apply(builder, (targetStates, oreVeinType) -> {
-        OreVeinConfig veinConfig = MekanismConfig.world.getVeinConfig(oreVeinType);
+        OreVeinConfig veinConfig = MekanismConfig.COMMON.world.getVeinConfig(oreVeinType);
         return new ResizableOreFeatureConfig(targetStates, oreVeinType, veinConfig.maxVeinSize(), veinConfig.discardChanceOnAirExposure());
     }));
 }

@@ -6,6 +6,7 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.providers.IFluidProvider;
 import mekanism.common.capabilities.fluid.BasicFluidTank;
 import mekanism.common.content.network.distribution.FluidHandlerTarget;
+import mekanism.common.inventory.SimpleSingleStackStorage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
@@ -23,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 import java.util.function.IntSupplier;
@@ -37,6 +39,25 @@ public final class FluidUtils {
     }
 
     public static ItemStack getFilledVariant(ItemStack toFill, int capacity, IFluidProvider provider) {
+        SimpleSingleStackStorage itemStorage = new SimpleSingleStackStorage(toFill);
+        Storage<FluidVariant> fluidStorage = ContainerItemContext.ofSingleSlot(itemStorage).find(FluidStorage.ITEM);
+        if (fluidStorage != null) {
+            try (Transaction t = Transaction.openOuter()) {
+                fluidStorage.insert(FluidVariant.of(provider.getFluid()), Long.MAX_VALUE, t);
+                t.commit();
+            }
+        }
+        return itemStorage.getStack();
+
+//        IExtendedFluidTank dummyTank = BasicFluidTank.create(capacity, null);
+//        //Manually handle filling it as capabilities are not necessarily loaded yet (at least not on the first call to this, which is made via fillItemGroup)
+//        dummyTank.setStack(provider.getFluidStack(dummyTank.getCapacity()));
+//        ItemDataUtils.writeContainers(toFill, NBTConstants.FLUID_TANKS, Collections.singletonList(dummyTank));
+//        //The item is now filled return it for convenience
+//        return toFill;
+    }
+
+    public static ItemStack getForceFilledVariant(ItemStack toFill, int capacity, IFluidProvider provider) {
         IExtendedFluidTank dummyTank = BasicFluidTank.create(capacity, null);
         //Manually handle filling it as capabilities are not necessarily loaded yet (at least not on the first call to this, which is made via fillItemGroup)
         dummyTank.setStack(provider.getFluidStack(dummyTank.getCapacity()));

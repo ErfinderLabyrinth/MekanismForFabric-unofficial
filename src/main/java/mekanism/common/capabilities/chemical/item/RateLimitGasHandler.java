@@ -53,6 +53,11 @@ public class RateLimitGasHandler extends ItemStackMekanismGasHandler {
     }
 
     @Override
+    public List<IGasTank> getTanks() {
+        return getInitialTanks();
+    }
+
+    @Override
     public void onContentsChanged() {
 
     }

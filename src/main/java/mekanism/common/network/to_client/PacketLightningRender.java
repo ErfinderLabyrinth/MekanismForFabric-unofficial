@@ -8,6 +8,7 @@ import mekanism.common.lib.effect.BoltEffect.BoltRenderInfo;
 import mekanism.common.lib.effect.BoltEffect.SpawnFunction;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -45,16 +46,16 @@ public class PacketLightningRender implements IMekanismPacket {
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(preset);
         buffer.writeVarInt(renderer);
-        BasePacketHandler.writeVector3d(buffer, start);
-        BasePacketHandler.writeVector3d(buffer, end);
+        NetworkUtil.writeVector3d(buffer, start);
+        NetworkUtil.writeVector3d(buffer, end);
         buffer.writeVarInt(segments);
     }
 
     public static PacketLightningRender decode(FriendlyByteBuf buffer) {
         LightningPreset preset = buffer.readEnum(LightningPreset.class);
         int renderer = buffer.readVarInt();
-        Vec3 start = BasePacketHandler.readVector3d(buffer);
-        Vec3 end = BasePacketHandler.readVector3d(buffer);
+        Vec3 start = NetworkUtil.readVector3d(buffer);
+        Vec3 end = NetworkUtil.readVector3d(buffer);
         int segments = buffer.readVarInt();
         return new PacketLightningRender(preset, renderer, start, end, segments);
     }
@@ -71,9 +72,9 @@ public class PacketLightningRender implements IMekanismPacket {
     }
 
     public enum LightningPreset {
-        MAGNETIC_ATTRACTION(() -> MekanismConfig.client.renderMagneticAttractionParticles, (start, end, segments) ->
+        MAGNETIC_ATTRACTION(() -> MekanismConfig.CLIENT.client.renderMagneticAttractionParticles, (start, end, segments) ->
               new BoltEffect(BoltRenderInfo.ELECTRICITY, start, end, segments).size(0.04F).lifespan(8).spawn(SpawnFunction.noise(8, 4))),
-        TOOL_AOE(() -> MekanismConfig.client.renderToolAOEParticles, (start, end, segments) ->
+        TOOL_AOE(() -> MekanismConfig.CLIENT.client.renderToolAOEParticles, (start, end, segments) ->
               new BoltEffect(BoltRenderInfo.ELECTRICITY, start, end, segments).size(0.015F).lifespan(12).spawn(SpawnFunction.NO_DELAY));
 
         private final BooleanSupplier shouldAdd;

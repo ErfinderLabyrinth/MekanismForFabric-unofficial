@@ -5,10 +5,14 @@ import mekanism.common.registries.MekanismItems;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.resource.ResourceType;
 import mekanism.common.resource.ore.OreType;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 public class MekanismBlockLootTables extends BaseBlockLootTables {
+    public MekanismBlockLootTables(FabricDataOutput output) {
+        super(output);
+    }
 
     @Override
     public void generate() {

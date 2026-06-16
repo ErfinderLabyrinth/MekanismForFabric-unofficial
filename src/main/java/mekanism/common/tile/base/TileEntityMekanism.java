@@ -216,7 +216,7 @@ public abstract class TileEntityMekanism extends TileEntityUpdateable implements
     //Variables for handling ITileActive
     private boolean currentActive;
     private int updateDelay;
-    protected IntSupplier delaySupplier = () -> MekanismConfig.general.blockDeactivationDelay;
+    protected IntSupplier delaySupplier = () -> MekanismConfig.COMMON.general.blockDeactivationDelay;
     //End variables ITileActive
 
     //Variables for handling ITileSound
@@ -379,12 +379,12 @@ public abstract class TileEntityMekanism extends TileEntityUpdateable implements
         return slurryHandlerManager.canHandle();
     }
 
-    //@Override
+    @Override
     public final boolean canHandleFluid() {
         return fluidHandlerManager.canHandle();
     }
 
-    //@Override
+    @Override
     public final boolean canHandleEnergy() {
         return energyHandlerManager.canHandle();
     }
@@ -1224,7 +1224,7 @@ public abstract class TileEntityMekanism extends TileEntityUpdateable implements
      */
     private void updateSound() {
         // If machine sounds are disabled, noop
-        if (!hasSound() || !MekanismConfig.client.enableMachineSounds || soundEvent == null) {
+        if (!hasSound() || !MekanismConfig.CLIENT.client.enableMachineSounds || soundEvent == null) {
             return;
         }
         if (canPlaySound() && !isRemoved()) {

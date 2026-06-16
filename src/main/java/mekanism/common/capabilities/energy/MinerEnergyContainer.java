@@ -44,10 +44,10 @@ public class MinerEnergyContainer extends MachineEnergyContainer<TileEntityDigit
     public void updateMinerEnergyPerTick() {
         minerEnergyPerTick = super.getEnergyPerTick();
         if (tile.getSilkTouch()) {
-            minerEnergyPerTick = minerEnergyPerTick * MekanismConfig.general.minerSilkMultiplier;
+            minerEnergyPerTick = minerEnergyPerTick * MekanismConfig.COMMON.general.minerSilkMultiplier;
         }
         //Ranges are difference between max and default
-        double radiusRange = MekanismConfig.general.minerMaxRadius - TileEntityDigitalMiner.DEFAULT_RADIUS;
+        double radiusRange = MekanismConfig.COMMON.general.minerMaxRadius - TileEntityDigitalMiner.DEFAULT_RADIUS;
         double heightRange;
         Level level = tile.getLevel();
         if (level == null) {

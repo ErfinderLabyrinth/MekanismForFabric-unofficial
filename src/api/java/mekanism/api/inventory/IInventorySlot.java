@@ -1,6 +1,7 @@
 package mekanism.api.inventory;
 
 import mekanism.api.Action;
+import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTSerializable;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -69,8 +70,12 @@ public interface IInventorySlot extends NBTSerializable<CompoundTag>, IContentsL
      * run
      */
 
-
+    @Override
     default long insert(ItemVariant resource, long amount, TransactionContext transaction) {
+        return insert(resource, amount, transaction, AutomationType.EXTERNAL);
+    }
+
+    default long insert(ItemVariant resource, long amount, TransactionContext transaction, AutomationType automationType) {
         updateSnapshots(transaction);
         ItemStack stack = resource.toStack((int)Math.max(Integer.MAX_VALUE, amount));
         if (resource.isBlank() || amount == 0 || !isItemValid(stack)) {

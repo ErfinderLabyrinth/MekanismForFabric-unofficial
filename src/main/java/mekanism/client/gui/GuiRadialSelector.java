@@ -8,6 +8,7 @@ import mekanism.api.radial.RadialData;
 import mekanism.api.radial.mode.INestedRadialMode;
 import mekanism.api.radial.mode.IRadialMode;
 import mekanism.api.text.EnumColor;
+import mekanism.client.MekanismClient;
 import mekanism.client.render.lib.ScrollIncrementer;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
@@ -174,7 +175,7 @@ public class GuiRadialSelector extends Screen {
         }
 
         // Labels (has to be separate from icons or the icons occasionally will get extra artifacts for some reason)
-        boolean whiteRadialText = MekanismConfig.client.whiteRadialText;
+        boolean whiteRadialText = MekanismConfig.CLIENT.client.whiteRadialText;
         for (PositionedText toDraw : textToDraw) {
             pose.pushPose();
             pose.translate(toDraw.x, toDraw.y, 0);
@@ -298,7 +299,7 @@ public class GuiRadialSelector extends Screen {
                 if (networkRepresentation != -1) {
                     //TODO: If we ever add a radial type where the network representation may be negative,
                     // re-evaluate how we do this type validation
-                    Mekanism.packetHandler().sendToServer(new PacketRadialModeChange(slot, path, networkRepresentation));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketRadialModeChange(slot, path, networkRepresentation));
                 }
             }
         } else if (overBackButton) {

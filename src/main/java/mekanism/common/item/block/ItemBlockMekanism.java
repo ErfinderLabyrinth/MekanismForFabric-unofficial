@@ -151,7 +151,7 @@ public class ItemBlockMekanism<BLOCK extends Block> extends BlockItem implements
 
     protected boolean areCapabilityConfigsLoaded(ItemStack stack) {
         if (exposesEnergyCap(stack)) {
-            return MekanismConfig.storage.isLoaded() && MekanismConfig.usage.isLoaded();
+            return MekanismConfig.COMMON.storage.isLoaded() && MekanismConfig.COMMON.usage.isLoaded();
         }
         return true;
     }

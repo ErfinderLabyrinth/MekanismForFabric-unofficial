@@ -1,5 +1,6 @@
 package mekanism.client.gui.machine;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.bar.GuiVerticalPowerBar;
@@ -66,7 +67,7 @@ public class GuiResistiveHeater extends GuiMekanismTile<TileEntityResistiveHeate
     private void setEnergyUsage() {
         if (!energyUsageField.getText().isEmpty()) {
             try {
-                Mekanism.packetHandler().sendToServer(new PacketGuiSetEnergy(GuiEnergyValue.ENERGY_USAGE, tile.getBlockPos(),
+                MekanismClient.clientPacketHandler().sendToServer(new PacketGuiSetEnergy(GuiEnergyValue.ENERGY_USAGE, tile.getBlockPos(),
                       MekanismUtils.convertToJoules(Long.parseLong(energyUsageField.getText()))));
             } catch (NumberFormatException ignored) {
             }

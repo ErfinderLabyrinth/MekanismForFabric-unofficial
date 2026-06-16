@@ -17,6 +17,7 @@ import mekanism.api.recipes.ingredients.InputIngredient;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.recipe.ingredient.IMultiIngredient;
 import mekanism.common.recipe.ingredient.chemical.ChemicalIngredientDeserializer.IngredientType;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -114,7 +115,7 @@ public abstract class MultiChemicalStackIngredient<CHEMICAL extends Chemical<CHE
     @Override
     public void write(FriendlyByteBuf buffer) {
         buffer.writeEnum(IngredientType.MULTI);
-        BasePacketHandler.writeArray(buffer, ingredients, InputIngredient::write);
+        NetworkUtil.writeArray(buffer, ingredients, InputIngredient::write);
     }
 
     @NotNull

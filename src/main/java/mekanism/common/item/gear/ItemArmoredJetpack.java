@@ -28,8 +28,8 @@ public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresh
 
     public ItemArmoredJetpack(Properties properties) {
         super(ARMORED_JETPACK_MATERIAL, properties);
-        this.attributeCache = new AttributeCache(this, () -> MekanismConfig.gear.armoredJetpackArmor, () -> MekanismConfig.gear.armoredJetpackToughness,
-                () -> MekanismConfig.gear.armoredJetpackKnockbackResistance);
+        this.attributeCache = new AttributeCache(this, () -> MekanismConfig.COMMON.gear.armoredJetpackArmor, () -> MekanismConfig.COMMON.gear.armoredJetpackToughness,
+                () -> MekanismConfig.COMMON.gear.armoredJetpackKnockbackResistance);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresh
 
         @Override
         public int getDefenseForType(ArmorItem.Type armorType) {
-            return armorType == ArmorItem.Type.CHESTPLATE ? MekanismConfig.gear.armoredJetpackArmor : 0;
+            return armorType == ArmorItem.Type.CHESTPLATE ? MekanismConfig.COMMON.gear.armoredJetpackArmor : 0;
         }
 
         @Override
@@ -77,12 +77,12 @@ public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresh
 
         @Override
         public float getToughness() {
-            return MekanismConfig.gear.armoredJetpackToughness;
+            return MekanismConfig.COMMON.gear.armoredJetpackToughness;
         }
 
         @Override
         public float getKnockbackResistance() {
-            return MekanismConfig.gear.armoredJetpackKnockbackResistance;
+            return MekanismConfig.COMMON.gear.armoredJetpackKnockbackResistance;
         }
     }
 }

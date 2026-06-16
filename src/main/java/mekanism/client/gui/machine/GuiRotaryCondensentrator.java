@@ -1,6 +1,7 @@
 package mekanism.client.gui.machine;
 
 import mekanism.api.recipes.cache.CachedRecipe.OperationTracker.RecipeError;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiConfigurableTile;
 import mekanism.client.gui.element.GuiDownArrow;
 import mekanism.client.gui.element.bar.GuiHorizontalPowerBar;
@@ -71,7 +72,7 @@ public class GuiRotaryCondensentrator extends GuiConfigurableTile<TileEntityRota
             }
         }, ProgressType.LARGE_LEFT, this, 64, 39).jeiCategories(MekanismJEIRecipeType.DECONDENSENTRATING))
               .warning(WarningType.INPUT_DOESNT_PRODUCE_OUTPUT, tile.getWarningCheck(RecipeError.INPUT_DOESNT_PRODUCE_OUTPUT));
-        addRenderableWidget(new ToggleButton(this, 4, 4, () -> tile.mode, () -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.NEXT_MODE, tile)),
+        addRenderableWidget(new ToggleButton(this, 4, 4, () -> tile.mode, () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.NEXT_MODE, tile)),
               getOnHover(MekanismLang.CONDENSENTRATOR_TOGGLE)));
     }
 

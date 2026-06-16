@@ -1,5 +1,6 @@
 package mekanism.client.gui.qio;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.gui.element.custom.GuiFrequencySelector;
@@ -31,7 +32,7 @@ public class GuiQIOItemFrequencySelect extends GuiMekanism<QIOFrequencySelectIte
         super.addGuiElements();
         addRenderableWidget(new GuiFrequencySelector<>(this, 17));
         addRenderableWidget(new MekanismImageButton(this, 6, 6, 14, getButtonLocation("back"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketGuiButtonPress(ClickedItemButton.BACK_BUTTON, menu.getHand())), getOnHover(MekanismLang.BACK)));
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiButtonPress(ClickedItemButton.BACK_BUTTON, menu.getHand())), getOnHover(MekanismLang.BACK)));
     }
 
     @Override

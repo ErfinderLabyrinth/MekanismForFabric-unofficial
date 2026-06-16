@@ -26,10 +26,10 @@ public class MekanismKeyHandler {
               Player player = Minecraft.getInstance().player;
               if (player != null) {
                   if (IModeItem.isModeItem(player, EquipmentSlot.MAINHAND, false)) {
-                      Mekanism.packetHandler().sendToServer(new PacketModeChange(EquipmentSlot.MAINHAND, player.isShiftKeyDown()));
+                      MekanismClient.clientPacketHandler().sendToServer(new PacketModeChange(EquipmentSlot.MAINHAND, player.isShiftKeyDown()));
                   } else if (!IModeItem.isModeItem(player, EquipmentSlot.MAINHAND) && IModeItem.isModeItem(player, EquipmentSlot.OFFHAND, false)) {
                       //Otherwise, try their offhand
-                      Mekanism.packetHandler().sendToServer(new PacketModeChange(EquipmentSlot.OFFHAND, player.isShiftKeyDown()));
+                      MekanismClient.clientPacketHandler().sendToServer(new PacketModeChange(EquipmentSlot.OFFHAND, player.isShiftKeyDown()));
                   }
               }
           }).build();
@@ -48,14 +48,14 @@ public class MekanismKeyHandler {
           .onKeyDown((kb, isRepeat) -> {
               Player player = Minecraft.getInstance().player;
               if (player != null && ModuleTweakerContainer.hasTweakableItem(player)) {
-                  Mekanism.packetHandler().sendToServer(new PacketOpenGui(GuiType.MODULE_TWEAKER));
+                  MekanismClient.clientPacketHandler().sendToServer(new PacketOpenGui(GuiType.MODULE_TWEAKER));
               }
           }).build();
     public static final KeyMapping boostKey = new MekKeyBindingBuilder().description(MekanismLang.KEY_BOOST).keyCode(GLFW.GLFW_KEY_LEFT_CONTROL)
           .onKeyDown((kb, isRepeat) -> MekanismClient.updateKey(kb, KeySync.BOOST)).onKeyUp(kb -> MekanismClient.updateKey(kb, KeySync.BOOST)).build();
     public static final KeyMapping hudKey = new MekKeyBindingBuilder().description(MekanismLang.KEY_HUD).keyCode(GLFW.GLFW_KEY_H)
           .onKeyDown((kb, isRepeat) -> {
-              MekanismConfig.client.enableHUD = !MekanismConfig.client.enableHUD;
+              MekanismConfig.CLIENT.client.enableHUD = !MekanismConfig.CLIENT.client.enableHUD;
               // save the updated config info
               //MekanismConfig.client.save();
           }).build();
@@ -69,7 +69,7 @@ public class MekanismKeyHandler {
         Player player = Minecraft.getInstance().player;
         if (player != null) {
             if (IModeItem.isModeItem(player, slot)) {
-                Mekanism.packetHandler().sendToServer(new PacketModeChange(slot, player.isShiftKeyDown()));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketModeChange(slot, player.isShiftKeyDown()));
                 SoundHandler.playSound(MekanismSounds.HYDRAULIC);
             } else if (Mekanism.hooks.CuriosLoaded) {
                 //TODO support curios

@@ -115,11 +115,11 @@ public class Quad {
 //        quadBaker.setTintIndex(tintIndex);
 //        quadBaker.setShade(shade);
 //        quadBaker.setHasAmbientOcclusion(hasAmbientOcclusion);
-//        for (Vertex vertex : vertices) {
-//            vertex.write(quadBaker);
-//        }
-//        return quadBaker.getQuad();
-        return new BakedQuad(new int[0], 0, Direction.NORTH, Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(TextureManager.INTENTIONAL_MISSING_TEXTURE), false);
+        int[] is = new int[32];
+        for (int i = 0; i < 4; i++) {
+            vertices[i].write(i, is);
+        }
+        return new BakedQuad(is, tintIndex, side, sprite, hasAmbientOcclusion);
     }
 
     public Quad copy() {

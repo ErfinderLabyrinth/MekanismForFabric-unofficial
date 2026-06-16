@@ -95,7 +95,7 @@ public abstract class TileEntityBasicLaser extends TileEntityMekanism {
             Direction direction = getDirection();
             Level level = getWorldNN();
             Pos3D from = Pos3D.create(this).centre().translate(direction, 0.501);
-            Pos3D to = from.translate(direction, MekanismConfig.general.laserRange - 0.002);
+            Pos3D to = from.translate(direction, MekanismConfig.COMMON.general.laserRange - 0.002);
             BlockHitResult result = level.clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
             if (result.getType() != Type.MISS) {
                 to = new Pos3D(result.getLocation());
@@ -113,7 +113,7 @@ public abstract class TileEntityBasicLaser extends TileEntityMekanism {
                 //Sort the entities in order of which one is closest to the laser
                 Pos3D finalFrom = from;
                 hitEntities.sort(Comparator.comparing(entity -> entity.distanceToSqr(finalFrom)));
-                long energyPerDamage = MekanismConfig.general.laserEnergyPerDamage;
+                long energyPerDamage = MekanismConfig.COMMON.general.laserEnergyPerDamage;
                 for (Entity entity : hitEntities) {
                     if (entity.isInvulnerableTo(MekanismDamageTypes.LASER.source(level))) {
                         //The entity can absorb all the energy because they are immune to the damage
@@ -288,8 +288,8 @@ public abstract class TileEntityBasicLaser extends TileEntityMekanism {
                     float hardness = hitState.getDestroySpeed(level, hitPos);
                     if (hardness >= 0) {
                         diggingProgress = diggingProgress.plusEqual(remainingEnergy);
-                        if (diggingProgress.doubleValue() >= MekanismConfig.general.laserEnergyNeededPerHardness * hardness) {
-                            if (MekanismConfig.general.aestheticWorldDamage) {
+                        if (diggingProgress.doubleValue() >= MekanismConfig.COMMON.general.laserEnergyNeededPerHardness * hardness) {
+                            if (MekanismConfig.COMMON.general.aestheticWorldDamage) {
                                 MekFakePlayer.withFakePlayer((ServerLevel) level, to.x(), to.y(), to.z(), dummy -> {
                                     dummy.setEmulatingUUID(getOwnerUUID());//pretend to be the owner
 //                                    BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, hitPos, hitState, dummy);
@@ -376,7 +376,7 @@ public abstract class TileEntityBasicLaser extends TileEntityMekanism {
     }
 
     private float getEnergyScale(long energy) {
-        return (float) Math.min((double)energy / (MekanismConfig.usage.laser * 10), 0.6F);
+        return (float) Math.min((double)energy / (MekanismConfig.COMMON.usage.laser * 10), 0.6F);
     }
 
     private void sendLaserDataToPlayers(LaserParticleData data, Vec3 from) {

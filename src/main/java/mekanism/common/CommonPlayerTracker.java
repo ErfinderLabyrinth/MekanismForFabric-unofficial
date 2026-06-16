@@ -40,7 +40,7 @@ public class CommonPlayerTracker {
 
     private static final Component ALPHA_WARNING = MekanismLang.LOG_FORMAT.translateColored(EnumColor.RED, MekanismLang.MEKANISM, EnumColor.GRAY,
           MekanismLang.ALPHA_WARNING.translate(EnumColor.INDIGO, ChatFormatting.UNDERLINE, new ClickEvent(Action.OPEN_URL,
-                "https://github.com/mekanism/Mekanism#alpha-status"), MekanismLang.ALPHA_WARNING_HERE));
+                "https://github.com/ErfinderLabyrinth/MekanismForFabric-unofficial#alpha-status"), MekanismLang.ALPHA_WARNING_HERE));
 
     public CommonPlayerTracker() {
         ServerPlayConnectionEvents.JOIN.register(this::onPlayerLoginEvent);

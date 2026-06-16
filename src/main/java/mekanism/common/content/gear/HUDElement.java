@@ -43,10 +43,10 @@ public class HUDElement implements IHUDElement {
     }
 
     public enum HUDColor {
-        REGULAR(() -> MekanismConfig.client.hudColor),
+        REGULAR(() -> MekanismConfig.CLIENT.client.hudColor),
         FADED(() -> REGULAR.getColor().darken(0.5).rgb()),
-        WARNING(() -> MekanismConfig.client.hudWarningColor),
-        DANGER(() -> MekanismConfig.client.hudDangerColor);
+        WARNING(() -> MekanismConfig.CLIENT.client.hudWarningColor),
+        DANGER(() -> MekanismConfig.CLIENT.client.hudDangerColor);
 
         private final IntSupplier color;
 
@@ -55,7 +55,7 @@ public class HUDElement implements IHUDElement {
         }
 
         public Color getColor() {
-            return Color.rgb(color.getAsInt()).alpha(MekanismConfig.client.hudOpacity);
+            return Color.rgb(color.getAsInt()).alpha(MekanismConfig.CLIENT.client.hudOpacity);
         }
 
         public int getColorARGB() {

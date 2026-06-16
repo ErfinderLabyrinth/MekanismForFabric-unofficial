@@ -12,7 +12,7 @@ import java.util.List;
 
 public class AttributeStateActive implements AttributeState {
 
-    private static final BooleanProperty activeProperty = BooleanProperty.create("active");
+    public static final BooleanProperty activeProperty = BooleanProperty.create("active");
 
     private final int ambientLight;
 

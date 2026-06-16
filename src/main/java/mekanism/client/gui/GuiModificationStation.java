@@ -1,6 +1,7 @@
 package mekanism.client.gui;
 
 import mekanism.api.gear.IModule;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.element.bar.GuiVerticalPowerBar;
 import mekanism.client.gui.element.button.TranslationButton;
 import mekanism.client.gui.element.progress.GuiProgress;
@@ -37,7 +38,7 @@ public class GuiModificationStation extends GuiMekanismTile<TileEntityModificati
         addRenderableWidget(new GuiEnergyTab(this, tile.getEnergyContainer(), tile::usedEnergy));
         addRenderableWidget(new GuiProgress(tile::getScaledProgress, ProgressType.LARGE_RIGHT, this, 65, 123));
         removeButton = addRenderableWidget(new TranslationButton(this, 34, 96, 108, 17, MekanismLang.BUTTON_REMOVE,
-              () -> Mekanism.packetHandler().sendToServer(new PacketRemoveModule(tile.getBlockPos(), selectedModule.getData()))));
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketRemoveModule(tile.getBlockPos(), selectedModule.getData()))));
         removeButton.active = selectedModule != null;
 
         addRenderableWidget(new GuiModuleScrollList(this, 34, 20, 108, 74, () -> tile.containerSlot.getStack().copy(), this::onModuleSelected));

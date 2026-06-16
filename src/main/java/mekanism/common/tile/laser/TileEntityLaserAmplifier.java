@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 public class TileEntityLaserAmplifier extends TileEntityLaserReceptor implements IHasMode, IConfigCardAccess {
 
     private long minThreshold = 0;
-    private long maxThreshold = MekanismConfig.storage.laserAmplifier;
+    private long maxThreshold = MekanismConfig.COMMON.storage.laserAmplifier;
     private int ticks = 0;
     private int delay = 0;
     private boolean emittingRedstone;

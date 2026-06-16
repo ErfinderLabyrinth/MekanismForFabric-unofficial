@@ -2,6 +2,7 @@ package mekanism.client.gui.element.custom;
 
 import com.google.common.collect.Streams;
 import mekanism.api.FluidStack;
+import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.chemical.IChemicalTank;
@@ -209,12 +210,11 @@ public class GuiDictionaryTarget extends GuiElement implements IJEIGhostTarget {
         playClickSound(SoundEvents.UI_BUTTON_CLICK::value);
     }
 
-    private <STACK extends ChemicalStack<?>, TANK extends IChemicalTank<?, STACK>, HANDLER extends IChemicalHandler<?, STACK, TANK>> void addChemicalTags(DictionaryTagType tagType, ItemStack stack, ItemApiLookup<? extends IChemicalHandler<?,?,TANK>, ContainerItemContext> itemApiLookup) {
-        IChemicalHandler<?,?,TANK> chemicalHandler = ContainerItemContext.withConstant(stack).find(itemApiLookup);
+    private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<?, STACK>, HANDLER extends IChemicalHandler<?, STACK, TANK>> void addChemicalTags(DictionaryTagType tagType, ItemStack stack, ItemApiLookup<? extends Storage<CHEMICAL>, ContainerItemContext> itemApiLookup) {
+        Storage<CHEMICAL> chemicalHandler = ContainerItemContext.withConstant(stack).find(itemApiLookup);
         if (chemicalHandler != null) {
-            tags.put(tagType, TagCache.getTagsAsStrings(chemicalHandler.getTanks().stream()
-                            .filter(chemicalInTank -> !chemicalInTank.isEmpty())
-                            .flatMap(chemicalInTank -> chemicalInTank.getType().getTags())
+            tags.put(tagType, TagCache.getTagsAsStrings(Streams.stream(chemicalHandler.nonEmptyIterator())
+                            .flatMap(chemicalInTank -> chemicalInTank.getResource().getTags())
                             .distinct()
                     )
             );

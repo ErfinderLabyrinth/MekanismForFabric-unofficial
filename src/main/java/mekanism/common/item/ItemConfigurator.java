@@ -67,7 +67,7 @@ public class ItemConfigurator extends ItemEnergized implements IRadialEnumModeIt
     public static final RadialData<ConfiguratorMode> RADIAL_DATA = IRadialDataHelper.INSTANCE.dataForEnum(Mekanism.rl("configurator_mode"), ConfiguratorMode.class);
 
     public ItemConfigurator(Properties properties) {
-        super(() -> MekanismConfig.gear.configuratorChargeRate, () -> MekanismConfig.gear.configuratorMaxEnergy, properties.rarity(Rarity.UNCOMMON));
+        super(() -> MekanismConfig.COMMON.gear.configuratorChargeRate, () -> MekanismConfig.COMMON.gear.configuratorMaxEnergy, properties.rarity(Rarity.UNCOMMON));
     }
 
     @Override
@@ -108,7 +108,7 @@ public class ItemConfigurator extends ItemEnergized implements IRadialEnumModeIt
                         } else {
                             if (!player.isCreative()) {
                                 EnergyStorage energyContainer = ContainerItemContext.forPlayerInteraction(context.getPlayer(), context.getHand()).find(EnergyStorage.ITEM);
-                                long energyPerConfigure = MekanismConfig.gear.configuratorEnergyPerConfigure;
+                                long energyPerConfigure = MekanismConfig.COMMON.gear.configuratorEnergyPerConfigure;
                                 try(Transaction t=Transaction.openOuter()) {
                                     if (energyContainer == null || energyContainer.extract(energyPerConfigure, t) < energyPerConfigure) {
                                         return InteractionResult.FAIL;
@@ -161,7 +161,7 @@ public class ItemConfigurator extends ItemEnergized implements IRadialEnumModeIt
                         return InteractionResult.FAIL;
                     }
                     //TODO: Switch this to items being handled by TileEntityMekanism, energy handled here (via lambdas?)
-                    long energyPerItemDump = MekanismConfig.gear.configuratorEnergyPerItem;
+                    long energyPerItemDump = MekanismConfig.COMMON.gear.configuratorEnergyPerItem;
                     for (StorageView<ItemVariant> inventorySlot : inv.getItemStorage(null)) {
                         if (!inventorySlot.isResourceBlank() && inventorySlot.getAmount() != 0) {
                             if (!creative) {

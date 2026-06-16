@@ -158,7 +158,7 @@ public class TileEntityFluidicPlenisher extends TileEntityMekanism implements IC
     }
 
     private void doPlenish() {
-        if (usedNodes.size() >= MekanismConfig.general.maxPlenisherNodes) {
+        if (usedNodes.size() >= MekanismConfig.COMMON.general.maxPlenisherNodes) {
             finishedCalc = true;
             return;
         }

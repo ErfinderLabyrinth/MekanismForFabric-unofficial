@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.tab;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInsetElement;
@@ -40,6 +41,6 @@ public class GuiSortingTab extends GuiInsetElement<TileEntityFactory<?>> {
 
     @Override
     public void onClick(double mouseX, double mouseY, int button) {
-        Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.AUTO_SORT_BUTTON, dataSource));
+        MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.AUTO_SORT_BUTTON, dataSource));
     }
 }

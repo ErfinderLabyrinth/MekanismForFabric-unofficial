@@ -2,6 +2,7 @@ package mekanism.common.recipe.upgrade.chemical;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTankBuilder;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.IInfusionHandler.IMekanismInfusionHandler;
 import mekanism.api.chemical.infuse.IInfusionTank;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @NothingNullByDefault
-public class InfusionRecipeData extends ChemicalRecipeData<InfuseType, InfusionStack, IInfusionTank, IInfusionHandler> {
+public class InfusionRecipeData extends ChemicalRecipeData<InfuseType, InfusionStack, IInfusionTank, Storage<InfuseType>> {
 
     public InfusionRecipeData(ListTag tanks) {
         super(tanks);
@@ -67,7 +68,7 @@ public class InfusionRecipeData extends ChemicalRecipeData<InfuseType, InfusionS
     }
 
     @Override
-    protected ItemApiLookup<IInfusionHandler, ContainerItemContext> getItemLookup() {
+    protected ItemApiLookup<Storage<InfuseType>, ContainerItemContext> getItemLookup() {
         return Capabilities.INFUSION_HANDLER_ITEM;
     }
 

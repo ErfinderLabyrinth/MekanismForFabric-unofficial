@@ -24,9 +24,9 @@ public class DisableableFeaturePlacement extends PlacementFilter {
     ).apply(builder, (oreType, retroGen) -> {
         if (oreType.isPresent()) {
             OreVeinType type = oreType.get();
-            return new DisableableFeaturePlacement(type, () -> MekanismConfig.world.getOreConfig(type.type()).shouldGenerate(), retroGen);
+            return new DisableableFeaturePlacement(type, () -> MekanismConfig.COMMON.world.getOreConfig(type.type()).shouldGenerate(), retroGen);
         }
-        return new DisableableFeaturePlacement(null, () -> MekanismConfig.world.salt.shouldGenerate, retroGen);
+        return new DisableableFeaturePlacement(null, () -> MekanismConfig.COMMON.world.salt.shouldGenerate, retroGen);
     }));
 
     private final BooleanSupplier enabledSupplier;
@@ -44,7 +44,7 @@ public class DisableableFeaturePlacement extends PlacementFilter {
     protected boolean shouldPlace(@NotNull PlacementContext context, @NotNull RandomSource random, @NotNull BlockPos pos) {
         if (enabledSupplier.getAsBoolean()) {
             //If we are enabled, and we are either not a retrogen feature or retrogen is enabled, generate
-            return !retroGen || MekanismConfig.world.enableRegeneration;
+            return !retroGen || MekanismConfig.COMMON.world.enableRegeneration;
         }
         return false;
     }

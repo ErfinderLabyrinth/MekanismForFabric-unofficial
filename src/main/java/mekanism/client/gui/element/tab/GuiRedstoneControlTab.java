@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.tab;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInsetElement;
@@ -34,7 +35,7 @@ public class GuiRedstoneControlTab extends GuiInsetElement<TileEntityMekanism> {
 
     @Override
     public void onClick(double mouseX, double mouseY, int button) {
-        Mekanism.packetHandler().sendToServer(new PacketGuiInteract(button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? GuiInteraction.NEXT_REDSTONE_CONTROL
+        MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(button == GLFW.GLFW_MOUSE_BUTTON_LEFT ? GuiInteraction.NEXT_REDSTONE_CONTROL
                                                                                                        : GuiInteraction.PREVIOUS_REDSTONE_CONTROL, dataSource));
     }
 

@@ -19,7 +19,7 @@ public class MekanismGases {
 
     public static final GasDeferredRegister GASES = new GasDeferredRegister(Mekanism.MODID);
 
-    public static final GasRegistryObject<Gas> HYDROGEN = GASES.register(ChemicalConstants.HYDROGEN, new Fuel(() -> 1, () -> MekanismConfig.general.FROM_H2));
+    public static final GasRegistryObject<Gas> HYDROGEN = GASES.register(ChemicalConstants.HYDROGEN, new Fuel(() -> 1, () -> MekanismConfig.COMMON.general.FROM_H2));
     public static final GasRegistryObject<Gas> OXYGEN = GASES.register(ChemicalConstants.OXYGEN);
     public static final GasRegistryObject<Gas> STEAM = GASES.register("steam", () -> new Gas(GasBuilder.builder(Mekanism.rl("liquid/steam"))));
     public static final GasRegistryObject<Gas> WATER_VAPOR = GASES.register("water_vapor", () -> new Gas(GasBuilder.builder(Mekanism.rl("liquid/steam"))));

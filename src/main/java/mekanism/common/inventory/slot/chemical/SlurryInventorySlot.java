@@ -9,6 +9,7 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.common.capabilities.Capabilities;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,7 @@ import java.util.function.Supplier;
 public class SlurryInventorySlot extends ChemicalInventorySlot<Slurry, SlurryStack> {
 
     @Nullable
-    public static ISlurryHandler getCapability(ContainerItemContext stack) {
+    public static Storage<Slurry> getCapability(ContainerItemContext stack) {
         return stack.find(Capabilities.SLURRY_HANDLER_ITEM);
     }
 
@@ -51,7 +52,7 @@ public class SlurryInventorySlot extends ChemicalInventorySlot<Slurry, SlurrySta
 
     @Nullable
     @Override
-    protected IChemicalHandler<Slurry, SlurryStack, ISlurryTank> getCapability() {
+    protected Storage<Slurry> getCapability() {
         return getCapability(ContainerItemContext.ofSingleSlot(current));
     }
 }

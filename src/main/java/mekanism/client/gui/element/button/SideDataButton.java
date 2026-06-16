@@ -2,6 +2,7 @@ package mekanism.client.gui.element.button;
 
 import mekanism.api.RelativeSide;
 import mekanism.api.text.EnumColor;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.Mekanism;
@@ -32,8 +33,8 @@ public class SideDataButton extends BasicColorButton {
         super(gui, x, y, 22, () -> {
                   DataType dataType = dataTypeSupplier.get();
                   return dataType == null ? null : colorSupplier.get();
-              }, () -> Mekanism.packetHandler().sendToServer(new PacketConfigurationUpdate(packetType, tile.getBlockPos(), Screen.hasShiftDown() ? 2 : 0, slotPos, transmissionType.get())),
-              () -> Mekanism.packetHandler().sendToServer(new PacketConfigurationUpdate(packetType, tile.getBlockPos(), 1, slotPos, transmissionType.get())), onHover);
+              }, () -> MekanismClient.clientPacketHandler().sendToServer(new PacketConfigurationUpdate(packetType, tile.getBlockPos(), Screen.hasShiftDown() ? 2 : 0, slotPos, transmissionType.get())),
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketConfigurationUpdate(packetType, tile.getBlockPos(), 1, slotPos, transmissionType.get())), onHover);
         this.dataTypeSupplier = dataTypeSupplier;
         Level tileWorld = tile.getTileWorld();
         if (tileWorld != null) {

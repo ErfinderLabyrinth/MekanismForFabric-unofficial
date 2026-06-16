@@ -60,8 +60,8 @@ import mekanism.common.tile.transmitter.TileEntityLogisticalTransporter;
 import mekanism.common.util.RegistryUtils;
 import mekanism.common.util.WorldUtils;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
@@ -158,6 +158,8 @@ public class ClientRegistration {
             return canFly ? 0.0F : 1.0F;
         });
 
+        ModelLoadingPlugin.register(new MekanismModelLoadingPlugin());
+
         addCustomModel(MekanismBlocks.QIO_DRIVE_ARRAY, (orig) -> new DriveArrayBakedModel(orig));
         addCustomModel(MekanismBlocks.DIGITAL_MINER, (orig) -> new DigitalMinerBakedModel(orig));
 
@@ -166,9 +168,7 @@ public class ClientRegistration {
         registerKeybindings();
         registerLayer();
 
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> { // Otherwise, there is a gl call before gl is initialized (see RobitSpriteUploader).
-            registerClientReloadListeners();
-        });
+        registerClientReloadListeners();
 
         registerContainers();
         registerParticleFactories();
@@ -177,7 +177,7 @@ public class ClientRegistration {
 
         registerFluidRenderProperties();
         registerRenderers();
-        registerCutoutBlocks();
+        registerRenderTypes();
 
         LivingEntityFeatureRendererRegistrationCallback.EVENT.register(ClientRegistration::addLayers);
         CoreShaderRegistrationCallback.EVENT.register(MekanismShaders::registerShaders);
@@ -205,6 +205,7 @@ public class ClientRegistration {
         BlockEntityRenderers.register(MekanismTileEntityTypes.TELEPORTER.get(), RenderTeleporter::new);
         BlockEntityRenderers.register(MekanismTileEntityTypes.THERMAL_EVAPORATION_CONTROLLER.get(), RenderThermalEvaporationPlant::new);
         BlockEntityRenderers.register(MekanismTileEntityTypes.INDUSTRIAL_ALARM.get(), RenderIndustrialAlarm::new);
+
         ClientRegistrationUtil.bindTileEntityRenderer(RenderSPS::new, MekanismTileEntityTypes.SPS_CASING, MekanismTileEntityTypes.SPS_PORT);
         ClientRegistrationUtil.bindTileEntityRenderer(RenderBin::new, MekanismTileEntityTypes.BASIC_BIN, MekanismTileEntityTypes.ADVANCED_BIN, MekanismTileEntityTypes.ELITE_BIN,
               MekanismTileEntityTypes.ULTIMATE_BIN, MekanismTileEntityTypes.CREATIVE_BIN);
@@ -226,12 +227,40 @@ public class ClientRegistration {
               MekanismTileEntityTypes.ADVANCED_THERMODYNAMIC_CONDUCTOR, MekanismTileEntityTypes.ELITE_THERMODYNAMIC_CONDUCTOR, MekanismTileEntityTypes.ULTIMATE_THERMODYNAMIC_CONDUCTOR);
     }
 
-    public static void registerCutoutBlocks() {
+    public static void registerRenderTypes() {
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.BASIC_FLUID_TANK.getBlock(), RenderType.cutoutMipped());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ADVANCED_FLUID_TANK.getBlock(), RenderType.cutoutMipped());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELITE_FLUID_TANK.getBlock(), RenderType.cutoutMipped());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ULTIMATE_FLUID_TANK.getBlock(), RenderType.cutoutMipped());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CREATIVE_FLUID_TANK.getBlock(), RenderType.cutoutMipped());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.BASIC_ENERGY_CUBE.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ADVANCED_ENERGY_CUBE.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELITE_ENERGY_CUBE.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ULTIMATE_ENERGY_CUBE.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CREATIVE_ENERGY_CUBE.getBlock(), RenderType.cutout());
+
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CHARGEPAD.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CHEMICAL_INFUSER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CHEMICAL_OXIDIZER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CHEMICAL_WASHER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.DIGITAL_MINER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELECTRIC_PUMP.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELECTROLYTIC_SEPARATOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ISOTOPIC_CENTRIFUGE.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.LASER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.LOGISTICAL_SORTER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.MODIFICATION_STATION.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.PIGMENT_MIXER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.RADIOACTIVE_WASTE_BARREL.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.RESISTIVE_HEATER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ROTARY_CONDENSENTRATOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.SEISMIC_VIBRATOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.STRUCTURAL_GLASS.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.SUPERCHARGED_COIL.getBlock(), RenderType.cutout());
+
+        for(BlockRegistryObject<?,?> block : MekanismBlocks.getFactoryBlocks()) {
+            BlockRenderLayerMap.INSTANCE.putBlock(block.getBlock(), RenderType.cutout());
+        }
     }
 
     public static void registerLayer() {
@@ -250,8 +279,7 @@ public class ClientRegistration {
 
     public static void registerClientReloadListeners() {
         ResourceManagerHelper clientResource = ResourceManagerHelper.get(PackType.CLIENT_RESOURCES);
-        //Robit Texture Atlas
-        clientResource.registerReloadListener(new RobitSpriteUploader(Minecraft.getInstance().getTextureManager()));
+
         //ISTERs
         clientResource.registerReloadListener(RenderEnergyCubeItem.RENDERER);
         clientResource.registerReloadListener(RenderJetpack.ARMORED_RENDERER);
@@ -261,12 +289,12 @@ public class ClientRegistration {
         clientResource.registerReloadListener(RenderFreeRunners.ARMORED_RENDERER);
         clientResource.registerReloadListener(RenderJetpack.RENDERER);
         clientResource.registerReloadListener(RenderScubaMask.RENDERER);
+        clientResource.registerReloadListener(RenderScubaTank.RENDERER);
         //Custom Armor
         clientResource.registerReloadListener(JetpackArmor.ARMORED_JETPACK);
         clientResource.registerReloadListener(JetpackArmor.JETPACK);
         clientResource.registerReloadListener(FreeRunnerArmor.ARMORED_FREE_RUNNERS);
         clientResource.registerReloadListener(FreeRunnerArmor.FREE_RUNNERS);
-        clientResource.registerReloadListener(JetpackArmor.ARMORED_JETPACK);
         clientResource.registerReloadListener(ScubaMaskArmor.SCUBA_MASK);
         clientResource.registerReloadListener(ScubaTankArmor.SCUBA_TANK);
     }

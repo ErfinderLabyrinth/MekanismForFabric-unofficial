@@ -32,7 +32,7 @@ public class StackedWasteBarrel extends VariableCapacityChemicalTank<Gas, GasSta
     private final TileEntityRadioactiveWasteBarrel tile;
 
     protected StackedWasteBarrel(TileEntityRadioactiveWasteBarrel tile, @Nullable IContentsListener listener) {
-        super(() -> MekanismConfig.general.radioactiveWasteBarrelMaxGas, ChemicalTankBuilder.GAS.alwaysTrueBi, ChemicalTankBuilder.GAS.alwaysTrueBi,
+        super(() -> MekanismConfig.COMMON.general.radioactiveWasteBarrelMaxGas, ChemicalTankBuilder.GAS.alwaysTrueBi, ChemicalTankBuilder.GAS.alwaysTrueBi,
               ChemicalTankBuilder.GAS.alwaysTrue, ATTRIBUTE_VALIDATOR, listener);
         this.tile = tile;
     }

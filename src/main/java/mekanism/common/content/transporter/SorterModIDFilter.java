@@ -5,6 +5,7 @@ import mekanism.common.content.filter.FilterType;
 import mekanism.common.content.filter.IModIDFilter;
 import mekanism.common.lib.inventory.Finder;
 import mekanism.common.network.BasePacketHandler;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -49,7 +50,7 @@ public class SorterModIDFilter extends SorterFilter<SorterModIDFilter> implement
     @Override
     public void read(FriendlyByteBuf dataStream) {
         super.read(dataStream);
-        modID = BasePacketHandler.readString(dataStream);
+        modID = NetworkUtil.readString(dataStream);
     }
 
     @Override

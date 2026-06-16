@@ -65,7 +65,7 @@ public class DefaultRadiationEntity implements IRadiationEntity {
         }
 
         RandomSource rand = entity.level().getRandom();
-        double minSeverity = MekanismConfig.general.radiationNegativeEffectsMinSeverity;
+        double minSeverity = MekanismConfig.COMMON.general.radiationNegativeEffectsMinSeverity;
         double severityScale = RadiationScale.getScaledDoseSeverity(radiation);
         double chance = minSeverity + rand.nextDouble() * (1 - minSeverity);
 
@@ -102,7 +102,7 @@ public class DefaultRadiationEntity implements IRadiationEntity {
 
     @Override
     public void decay() {
-        set(radiation * MekanismConfig.general.radiationTargetDecayRate);
+        set(radiation * MekanismConfig.COMMON.general.radiationTargetDecayRate);
     }
 
     @Override

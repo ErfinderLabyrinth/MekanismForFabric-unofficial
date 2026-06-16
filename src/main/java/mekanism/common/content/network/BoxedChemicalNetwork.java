@@ -27,6 +27,7 @@ import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EmitUtils;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -237,11 +238,11 @@ public class BoxedChemicalNetwork extends DynamicBufferedNetwork<BoxedChemicalHa
     private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> long tickEmit(@NotNull STACK stack) {
         ChemicalType chemicalType = ChemicalType.getTypeFor(stack);
         Collection<Map<Direction, Optional<BoxedChemicalHandler>>> acceptorValues = acceptorCache.getAcceptorValues();
-        ChemicalHandlerTarget<CHEMICAL, STACK, IChemicalHandler<CHEMICAL, STACK, ?>> target = new ChemicalHandlerTarget<>(stack, acceptorValues.size() * 2);
+        ChemicalHandlerTarget<CHEMICAL, STACK, Storage<CHEMICAL>> target = new ChemicalHandlerTarget<>(stack, acceptorValues.size() * 2);
         for (Map<Direction, Optional<BoxedChemicalHandler>> acceptors : acceptorValues) {
             for (Optional<BoxedChemicalHandler> lazyAcceptor : acceptors.values()) {
                 lazyAcceptor.ifPresent(acceptor -> {
-                    IChemicalHandler<CHEMICAL, STACK, ?> handler = acceptor.getHandlerFor(chemicalType);
+                    Storage<CHEMICAL> handler = acceptor.getHandlerFor(chemicalType);
                     if (handler != null && ChemicalUtil.canInsert(handler, stack)) {
                         target.addHandler(handler);
                     }

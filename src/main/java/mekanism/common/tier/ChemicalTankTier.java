@@ -9,10 +9,10 @@ import java.util.Locale;
 import java.util.function.LongSupplier;
 
 public enum ChemicalTankTier implements ITier, StringRepresentable {
-    BASIC(BaseTier.BASIC, 64_000, 1_000),
-    ADVANCED(BaseTier.ADVANCED, 256_000, 16_000),
-    ELITE(BaseTier.ELITE, 1_024_000, 128_000),
-    ULTIMATE(BaseTier.ULTIMATE, 8_192_000, 512_000),
+    BASIC(BaseTier.BASIC, 64_000 * 81, 1_000 * 81),
+    ADVANCED(BaseTier.ADVANCED, 256_000 * 81, 16_000 * 81),
+    ELITE(BaseTier.ELITE, 1_024_000 * 81, 128_000 * 81),
+    ULTIMATE(BaseTier.ULTIMATE, 8_192_000 * 81, 512_000 * 81),
     CREATIVE(BaseTier.CREATIVE, Long.MAX_VALUE, Long.MAX_VALUE / 2);
 
     private final long baseStorage;

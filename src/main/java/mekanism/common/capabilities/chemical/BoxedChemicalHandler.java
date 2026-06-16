@@ -5,10 +5,15 @@ import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.ChemicalType;
 import mekanism.api.chemical.IChemicalHandler;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.infuse.IInfusionHandler;
+import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.pigment.IPigmentHandler;
+import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.slurry.ISlurryHandler;
+import mekanism.api.chemical.slurry.Slurry;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -19,33 +24,33 @@ import java.util.function.Consumer;
 @ParametersAreNotNullByDefault
 public class BoxedChemicalHandler {
 
-    private final Map<ChemicalType, Optional<? extends IChemicalHandler<?, ?, ?>>> handlers = new EnumMap<>(ChemicalType.class);
+    private final Map<ChemicalType, Optional<? extends Storage<?>>> handlers = new EnumMap<>(ChemicalType.class);
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> IChemicalHandler<CHEMICAL, STACK, ?> getHandlerFor(ChemicalType chemicalType) {
+    public <CHEMICAL extends Chemical<CHEMICAL>> Storage<CHEMICAL> getHandlerFor(ChemicalType chemicalType) {
         if (handlers.containsKey(chemicalType)) {
-            Optional<? extends IChemicalHandler<?, ?, ?>> handler = handlers.get(chemicalType);
+            Optional<? extends Storage<?>> handler = handlers.get(chemicalType);
             if (handler.isPresent()) {
-                return (IChemicalHandler<CHEMICAL, STACK, ?>) handler.get();
+                return (Storage<CHEMICAL>) handler.get();
             }
         }
         return null;
     }
 
-    public void addGasHandler(Optional<IGasHandler> handler) {
+    public void addGasHandler(Optional<Storage<Gas>> handler) {
         handlers.put(ChemicalType.GAS, handler);
     }
 
-    public void addInfusionHandler(Optional<IInfusionHandler> handler) {
+    public void addInfusionHandler(Optional<Storage<InfuseType>> handler) {
         handlers.put(ChemicalType.INFUSION, handler);
     }
 
-    public void addPigmentHandler(Optional<IPigmentHandler> handler) {
+    public void addPigmentHandler(Optional<Storage<Pigment>> handler) {
         handlers.put(ChemicalType.PIGMENT, handler);
     }
 
-    public void addSlurryHandler(Optional<ISlurryHandler> handler) {
+    public void addSlurryHandler(Optional<Storage<Slurry>> handler) {
         handlers.put(ChemicalType.SLURRY, handler);
     }
 
@@ -55,7 +60,7 @@ public class BoxedChemicalHandler {
 
     public void addRefreshListeners(Consumer<Optional<BoxedChemicalHandler>> refreshListener) {
         //TODO - V11: Make the listener only have to invalidate specific sub pieces
-        for (Optional<? extends IChemicalHandler<?, ?, ?>> sourceAcceptor : handlers.values()) {
+        for (Optional<? extends Storage<?>> sourceAcceptor : handlers.values()) {
             //Use unchecked generics to add the listener to the source acceptor
 //            CapabilityUtils.addListener(sourceAcceptor, refreshListener);
         }

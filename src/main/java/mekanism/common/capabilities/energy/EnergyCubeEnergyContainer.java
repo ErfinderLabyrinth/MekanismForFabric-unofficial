@@ -31,20 +31,30 @@ public class EnergyCubeEnergyContainer extends BasicEnergyContainer {
     @Override
     protected long getRate(@Nullable AutomationType automationType) {
         //Only limit the internal rate to change the speed at which this can be filled from an item
-        return automationType == AutomationType.INTERNAL ? rate.getAsLong() : super.getRate(automationType);
+        //TODO
+        //return automationType == AutomationType.INTERNAL ? rate.getAsLong() : super.getRate(automationType);
+        return rate.getAsLong();
     }
 
     @Override
     public long insert(long amount, TransactionContext t) {
-        try(Transaction t2=Transaction.openOuter()) {
-            return super.insert(amount, t2);
+        try(Transaction t2=Transaction.openNested(t)) {
+            long inserted = super.insert(amount, t2);
+            if (!isCreative) {
+                t2.commit();
+            }
+            return inserted;
         }
     }
 
     @Override
     public long extract(long amount, TransactionContext t) {
-        try(Transaction t2=Transaction.openOuter()) {
-            return super.extract(amount, t2);
+        try(Transaction t2=Transaction.openNested(t)) {
+            long extracted = super.extract(amount, t2);
+            if (!isCreative) {
+                t2.commit();
+            }
+            return extracted;
         }
     }
 }

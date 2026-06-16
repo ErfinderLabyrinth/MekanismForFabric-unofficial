@@ -6,6 +6,7 @@ import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.gas.IGasHandler.IMekanismGasHandler;
 import mekanism.common.capabilities.Capabilities;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +19,7 @@ public interface IGasItem {
 
     @NotNull
     default GasStack useGas(ContainerItemContext context, long amount) {
-        IGasHandler gasHandlerItem = context.find(Capabilities.GAS_HANDLER_ITEM);
+        Storage<Gas> gasHandlerItem = context.find(Capabilities.GAS_HANDLER_ITEM);
         if (gasHandlerItem != null) {
             if (gasHandlerItem instanceof IMekanismGasHandler gasHandler) {
                 //TODO: If we end up having more tanks than one in any IGasItem's just kill off this if branch

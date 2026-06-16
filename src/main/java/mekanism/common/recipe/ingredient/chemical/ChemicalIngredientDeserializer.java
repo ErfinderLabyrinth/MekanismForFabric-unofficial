@@ -27,6 +27,7 @@ import mekanism.common.recipe.ingredient.chemical.MultiChemicalStackIngredient.M
 import mekanism.common.recipe.ingredient.chemical.MultiChemicalStackIngredient.MultiInfusionStackIngredient;
 import mekanism.common.recipe.ingredient.chemical.MultiChemicalStackIngredient.MultiPigmentStackIngredient;
 import mekanism.common.recipe.ingredient.chemical.MultiChemicalStackIngredient.MultiSlurryStackIngredient;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -104,7 +105,7 @@ public class ChemicalIngredientDeserializer<CHEMICAL extends Chemical<CHEMICAL>,
         return switch (buffer.readEnum(IngredientType.class)) {
             case SINGLE -> ingredientCreator.from(fromPacket.apply(buffer));
             case TAGGED -> ingredientCreator.from(tags.tag(buffer.readResourceLocation()), buffer.readVarLong());
-            case MULTI -> createMulti(BasePacketHandler.readArray(buffer, arrayCreator, this::read));
+            case MULTI -> createMulti(NetworkUtil.readArray(buffer, arrayCreator, this::read));
         };
     }
 

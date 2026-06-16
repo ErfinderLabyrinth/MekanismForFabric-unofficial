@@ -19,6 +19,7 @@ import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.fluid.BasicFluidTank;
 import mekanism.common.capabilities.heat.BasicHeatCapacitor;
+import mekanism.common.inventory.SimpleSingleStackStorage;
 import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.TextUtils;
 import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
@@ -27,6 +28,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -71,7 +74,7 @@ public class StorageUtils {
         }, Capabilities.GAS_HANDLER_ITEM);
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>>
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends Storage<CHEMICAL>>
     void addStoredChemical(@NotNull ItemStack stack, @NotNull List<Component> tooltip, boolean showMissingCap, boolean showAttributes, ILangEntry emptyLangEntry,
           Function<STACK, Component> storedFunction, ItemApiLookup<HANDLER, ContainerItemContext> capability) {
         HANDLER handler = ContainerItemContext.withConstant(stack).find(capability);
@@ -98,7 +101,7 @@ public class StorageUtils {
                 return emptyLangEntry.translateColored(EnumColor.GRAY);
             }
             return MekanismLang.STORED.translateColored(EnumColor.ORANGE, EnumColor.ORANGE, stored, EnumColor.GRAY,
-                  MekanismLang.GENERIC_MB.translate(TextUtils.format(stored.amount())));
+                  MekanismLang.GENERIC_MB.translate(TextUtils.format(stored.amount() / 81)));
         });
     }
 
@@ -168,9 +171,15 @@ public class StorageUtils {
      */
     @NotNull
     public static FluidStack getStoredFluidFromNBT(ItemStack stack) {
-        BasicFluidTank tank = BasicFluidTank.create(Integer.MAX_VALUE, null);
-        ItemDataUtils.readContainers(stack, NBTConstants.FLUID_TANKS, Collections.singletonList(tank));
-        return tank.getFluid();
+        Storage<FluidVariant> storage = ContainerItemContext.withConstant(stack).find(FluidStorage.ITEM);
+        if (storage != null) {
+            Iterator<StorageView<FluidVariant>> iterator = storage.iterator();
+            if (iterator.hasNext()) {
+                StorageView<FluidVariant> view = iterator.next();
+                return new FluidStack(view.getResource(), view.getAmount());
+            }
+        }
+        return FluidStack.EMPTY;
     }
 
     /**
@@ -220,18 +229,24 @@ public class StorageUtils {
      * an energy handler attached to our item, but it may have stored data in its container from when it was a block
      */
     public static long getStoredEnergyFromNBT(ItemStack stack) {
-        BasicEnergyContainer container = BasicEnergyContainer.create(Long.MAX_VALUE, null);
-        ItemDataUtils.readContainers(stack, NBTConstants.ENERGY_CONTAINERS, Collections.singletonList(container));
-        return container.getEnergy();
+        EnergyStorage storage = ContainerItemContext.withConstant(stack).find(EnergyStorage.ITEM);
+        if (storage != null) {
+            return storage.getAmount();
+        }
+        return 0;
     }
 
-    public static ItemStack getFilledEnergyVariant(ItemStack toFill, long capacity) {
+    public static ItemStack getFilledEnergyVariant(ItemStack toFill) {
         //Manually handle this as capabilities are not necessarily loaded yet (at least not on the first call to this, which is made via fillItemGroup)
-        BasicEnergyContainer container = BasicEnergyContainer.create(capacity, null);
-        container.setEnergy(capacity);
-        ItemDataUtils.writeContainers(toFill, NBTConstants.ENERGY_CONTAINERS, Collections.singletonList(container));
-        //The item is now filled return it for convenience
-        return toFill;
+        SimpleSingleStackStorage itemStorage = new SimpleSingleStackStorage(toFill);
+        EnergyStorage energyStorage = ContainerItemContext.ofSingleSlot(itemStorage).find(EnergyStorage.ITEM);
+        if (energyStorage != null) {
+            try(Transaction t=Transaction.openOuter()) {
+                energyStorage.insert(Long.MAX_VALUE, t);
+                t.commit();
+            }
+        }
+        return itemStorage.getStack();
     }
 
     @Nullable
@@ -312,8 +327,8 @@ public class StorageUtils {
         return 1 - bestRatio;
     }
 
-    private static double calculateRatio(ItemStack stack, double bestRatio, ItemApiLookup<? extends IChemicalHandler<?,?,?>, ContainerItemContext> capability) {
-        IChemicalHandler<?, ?, ?> handler = ContainerItemContext.withConstant(stack).find(capability);
+    private static double calculateRatio(ItemStack stack, double bestRatio, ItemApiLookup<? extends Storage<?>, ContainerItemContext> capability) {
+        Storage<?> handler = ContainerItemContext.withConstant(stack).find(capability);
         if (handler != null) {
             for (StorageView<?> view:handler) {
                 bestRatio = Math.max(bestRatio, getRatio(view.getAmount(), view.getCapacity()));

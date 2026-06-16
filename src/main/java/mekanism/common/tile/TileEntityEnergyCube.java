@@ -61,7 +61,7 @@ public class TileEntityEnergyCube extends TileEntityConfigurableMachine {
         configComponent = new TileComponentConfig(this, TransmissionType.ENERGY, TransmissionType.ITEM);
         configComponent.setupIOConfig(TransmissionType.ITEM, chargeSlot, dischargeSlot, RelativeSide.FRONT, true).setCanEject(false);
         configComponent.setupIOConfig(TransmissionType.ENERGY, energyContainer, RelativeSide.FRONT).setEjecting(true);
-        ejectorComponent = new TileComponentEjector(this, () -> tier.getOutput(), () -> MekanismConfig.general.fluidAutoEjectRate);
+        ejectorComponent = new TileComponentEjector(this, () -> tier.getOutput(), () -> MekanismConfig.COMMON.general.fluidAutoEjectRate);
         ejectorComponent.setOutputData(configComponent, TransmissionType.ENERGY).setCanEject(type -> MekanismUtils.canFunction(this));
     }
 

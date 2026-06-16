@@ -33,22 +33,22 @@ public class MekanismCreativeTabs {
 
 
     private static void addFilledTanks(CreativeModeTab.Output output, boolean chemical) {
-        if (MekanismConfig.general.isLoaded()) {
+        if (MekanismConfig.COMMON.general.isLoaded()) {
             //Fluid Tanks
-            if (MekanismConfig.general.prefilledFluidTanks) {
+            if (MekanismConfig.COMMON.general.prefilledFluidTanks) {
                 int capacity = FluidTankTier.CREATIVE.getStorage();
                 for (Fluid fluid : BuiltInRegistries.FLUID) {
                     if (fluid.isSource(fluid.defaultFluidState())) {//Only add sources
-                        output.accept(FluidUtils.getFilledVariant(MekanismBlocks.CREATIVE_FLUID_TANK.getItemStack(), capacity, () -> fluid));
+                        output.accept(FluidUtils.getForceFilledVariant(MekanismBlocks.CREATIVE_FLUID_TANK.getItemStack(), capacity, () -> fluid));
                     }
                 }
             }
             if (chemical) {
                 //Chemical Tanks
-                addFilled(() -> MekanismConfig.general.prefilledGasTanks, MekanismAPI.gasRegistry(), output);
-                addFilled(() -> MekanismConfig.general.prefilledInfusionTanks, MekanismAPI.infuseTypeRegistry(), output);
-                addFilled(() -> MekanismConfig.general.prefilledPigmentTanks, MekanismAPI.pigmentRegistry(), output);
-                addFilled(() -> MekanismConfig.general.prefilledSlurryTanks, MekanismAPI.slurryRegistry(), output);
+                addFilled(() -> MekanismConfig.COMMON.general.prefilledGasTanks, MekanismAPI.gasRegistry(), output);
+                addFilled(() -> MekanismConfig.COMMON.general.prefilledInfusionTanks, MekanismAPI.infuseTypeRegistry(), output);
+                addFilled(() -> MekanismConfig.COMMON.general.prefilledPigmentTanks, MekanismAPI.pigmentRegistry(), output);
+                addFilled(() -> MekanismConfig.COMMON.general.prefilledSlurryTanks, MekanismAPI.slurryRegistry(), output);
             }
         }
     }

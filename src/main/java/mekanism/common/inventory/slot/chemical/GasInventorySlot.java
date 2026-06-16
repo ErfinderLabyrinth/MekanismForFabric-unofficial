@@ -11,6 +11,7 @@ import mekanism.api.recipes.ItemStackToGasRecipe;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.recipe.MekanismRecipeType;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ import java.util.function.Supplier;
 public class GasInventorySlot extends ChemicalInventorySlot<Gas, GasStack> {
 
     @Nullable
-    public static IGasHandler getCapability(ContainerItemContext stack) {
+    public static Storage<Gas> getCapability(ContainerItemContext stack) {
         return stack.find(Capabilities.GAS_HANDLER_ITEM);
     }
 
@@ -110,7 +111,7 @@ public class GasInventorySlot extends ChemicalInventorySlot<Gas, GasStack> {
 
     @Nullable
     @Override
-    protected IChemicalHandler<Gas, GasStack, IGasTank> getCapability() {
+    protected Storage<Gas> getCapability() {
         return getCapability(ContainerItemContext.ofSingleSlot(current));
     }
 

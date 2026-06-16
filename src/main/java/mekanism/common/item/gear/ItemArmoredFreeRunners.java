@@ -29,8 +29,8 @@ public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttribut
 
     public ItemArmoredFreeRunners(Properties properties) {
         super(ARMORED_FREE_RUNNER_MATERIAL, properties);
-        this.attributeCache = new AttributeCache(this, () -> MekanismConfig.gear.armoredFreeRunnerArmor, () -> MekanismConfig.gear.armoredFreeRunnerToughness,
-                () -> MekanismConfig.gear.armoredFreeRunnerKnockbackResistance);
+        this.attributeCache = new AttributeCache(this, () -> MekanismConfig.COMMON.gear.armoredFreeRunnerArmor, () -> MekanismConfig.COMMON.gear.armoredFreeRunnerToughness,
+                () -> MekanismConfig.COMMON.gear.armoredFreeRunnerKnockbackResistance);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttribut
 
         @Override
         public int getDefenseForType(ArmorItem.Type armorType) {
-            return armorType == ArmorItem.Type.BOOTS ? MekanismConfig.gear.armoredFreeRunnerArmor : 0;
+            return armorType == ArmorItem.Type.BOOTS ? MekanismConfig.COMMON.gear.armoredFreeRunnerArmor : 0;
         }
 
         @Override
@@ -78,12 +78,12 @@ public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttribut
 
         @Override
         public float getToughness() {
-            return MekanismConfig.gear.armoredFreeRunnerToughness;
+            return MekanismConfig.COMMON.gear.armoredFreeRunnerToughness;
         }
 
         @Override
         public float getKnockbackResistance() {
-            return MekanismConfig.gear.armoredFreeRunnerKnockbackResistance;
+            return MekanismConfig.COMMON.gear.armoredFreeRunnerKnockbackResistance;
         }
     }
 }

@@ -73,7 +73,7 @@ public class ItemBlockEnergyCube extends ItemBlockTooltip<BlockEnergyCube> imple
 
     @Override
     public int getBarColor(@NotNull ItemStack stack) {
-        return MekanismConfig.client.energyColor;
+        return MekanismConfig.CLIENT.client.energyColor;
     }
 
     @Override
@@ -82,9 +82,9 @@ public class ItemBlockEnergyCube extends ItemBlockTooltip<BlockEnergyCube> imple
         if (tier == EnergyCubeTier.CREATIVE) {
             //Add the empty and charged variants
             tabOutput.accept(withEnergyCubeSideConfig(DataType.INPUT));
-            tabOutput.accept(StorageUtils.getFilledEnergyVariant(withEnergyCubeSideConfig(DataType.OUTPUT), tier.getMaxEnergy()));
+            tabOutput.accept(StorageUtils.getFilledEnergyVariant(withEnergyCubeSideConfig(DataType.OUTPUT)));
         } else {
-            tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this), tier.getMaxEnergy()));
+            tabOutput.accept(StorageUtils.getFilledEnergyVariant(new ItemStack(this)));
         }
     }
 

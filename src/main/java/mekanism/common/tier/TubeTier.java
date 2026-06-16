@@ -7,10 +7,10 @@ import mekanism.common.util.EnumUtils;
 import java.util.function.LongSupplier;
 
 public enum TubeTier implements ITier {
-    BASIC(BaseTier.BASIC, 4_000, 750),
-    ADVANCED(BaseTier.ADVANCED, 16_000, 2_000),
-    ELITE(BaseTier.ELITE, 256_000, 64_000),
-    ULTIMATE(BaseTier.ULTIMATE, 1_024_000, 256_000);
+    BASIC(BaseTier.BASIC, 4_000 * 81, 750 * 81),
+    ADVANCED(BaseTier.ADVANCED, 16_000 * 81, 2_000 * 81),
+    ELITE(BaseTier.ELITE, 256_000 * 81, 64_000 * 81),
+    ULTIMATE(BaseTier.ULTIMATE, 1_024_000 * 81, 256_000 * 81);
 
     private final long baseCapacity;
     private final long basePull;

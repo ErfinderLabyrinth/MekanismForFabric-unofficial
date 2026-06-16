@@ -278,11 +278,10 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
         setStackUnchecked(stack);
     }
 
-    @Override
-    public long insert(ItemVariant resource, long amount, TransactionContext transaction) {
+    public long insert(ItemVariant resource, long amount, TransactionContext transaction, AutomationType automationType) {
         updateSnapshots(transaction);
         ItemStack stack = resource.toStack((int) Math.min(amount, Integer.MAX_VALUE));
-        if (resource.isBlank() || amount == 0 || !isItemValid(stack) || !canInsert.test(stack, null)) {
+        if (resource.isBlank() || amount == 0 || !isItemValid(stack) || !canInsert.test(stack, automationType)) {
             //"Fail quick" if the given stack is empty, or we can never insert the item or currently are unable to insert it
             return 0;
         }
@@ -313,8 +312,12 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
 
     @Override
     public long extract(ItemVariant resource, long amount, TransactionContext transaction) {
+        return extract(resource, amount, transaction, AutomationType.EXTERNAL);
+    }
+
+    public long extract(ItemVariant resource, long amount, TransactionContext transaction, AutomationType type) {
         updateSnapshots(transaction);
-        if (isEmpty() || amount < 1 || !canExtract.test(current.getStack(), null)) {
+        if (isEmpty() || amount < 1 || !canExtract.test(current.getStack(), type)) {
             //"Fail quick" if we don't can never extract from this slot, have an item stored, or the amount being requested is less than one
             return 0;
         }

@@ -1,5 +1,6 @@
 package mekanism.client.gui.element.bar;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.GuiUtils.TilingDirection;
 import mekanism.client.gui.IGuiWrapper;
@@ -92,7 +93,7 @@ public abstract class GuiTankBar<STACK> extends GuiBar<TankInfoProvider<STACK>> 
                     } else { //GLFW.GLFW_MOUSE_BUTTON_RIGHT
                         action = DropperAction.DRAIN_DROPPER;
                     }
-                    Mekanism.packetHandler().sendToServer(new PacketDropperUse(gui.getTileEntity().getBlockPos(), action, tankType, index));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketDropperUse(gui.getTileEntity().getBlockPos(), action, tankType, index));
                 }
             }
         }

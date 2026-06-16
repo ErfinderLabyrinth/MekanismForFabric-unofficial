@@ -58,8 +58,8 @@ public abstract class RenderTransmitterBase<TRANSMITTER extends TileEntityTransm
             );
             //Note: We get model and then bake as we use different parameters and are caching after modifying
             List<BakedQuad> bakedQuads = MekanismModelCache.INSTANCE.TRANSMITTER_CONTENTS.getModel()
-                  .bake(baker, material -> modelData.icon,
-                        BlockModelRotation.X0_Y0, ItemOverrides.EMPTY, MODEL_LOCATION)
+                  .bake(null, baker, material -> modelData.icon,
+                        BlockModelRotation.X0_Y0, ItemOverrides.EMPTY, MODEL_LOCATION, null)
                   .getQuads(null, null, world.getRandom());
             List<Quad> unpackedQuads = QuadUtils.unpack(bakedQuads);
             for (Quad unpackedQuad : unpackedQuads) {
@@ -99,7 +99,7 @@ public abstract class RenderTransmitterBase<TRANSMITTER extends TileEntityTransm
     }
 
     protected boolean shouldRenderTransmitter(TRANSMITTER tile, Vec3 camera) {
-        return !MekanismConfig.client.opaqueTransmitters;
+        return !MekanismConfig.CLIENT.client.opaqueTransmitters;
     }
 
     private record ContentsModelData(List<String> visible, TextureAtlasSprite icon) {

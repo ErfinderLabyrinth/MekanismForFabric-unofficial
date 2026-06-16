@@ -94,7 +94,7 @@ public class RadiationManager implements IRadiationManager {
     }
 
     private static final String DATA_HANDLER_NAME = "radiation_manager";
-    private static final IntSupplier MAX_RANGE = () -> MekanismConfig.general.radiationChunkCheckRadius * 16;
+    private static final IntSupplier MAX_RANGE = () -> MekanismConfig.COMMON.general.radiationChunkCheckRadius * 16;
     private static final Random RAND = new Random();
 
     public static final double BASELINE = 0.000_000_100; // 100 nSv/h
@@ -123,7 +123,7 @@ public class RadiationManager implements IRadiationManager {
     @Override
     public boolean isRadiationEnabled() {
         //Get the default value for cases when we may call this early such as via chemical attributes
-        return MekanismConfig.general.radiationEnabled;
+        return MekanismConfig.COMMON.general.radiationEnabled;
     }
 
     private void markDirty() {
@@ -154,7 +154,7 @@ public class RadiationManager implements IRadiationManager {
      * @param source    {@code true} for if it is a {@link IRadiationSource} or an {@link IRadiationEntity} decaying
      */
     public int getDecayTime(double magnitude, boolean source) {
-        double decayRate = source ? MekanismConfig.general.radiationSourceDecayRate : MekanismConfig.general.radiationTargetDecayRate;
+        double decayRate = source ? MekanismConfig.COMMON.general.radiationSourceDecayRate : MekanismConfig.COMMON.general.radiationTargetDecayRate;
         int seconds = 0;
         double localMagnitude = magnitude;
         while (localMagnitude > RadiationManager.MIN_MAGNITUDE) {
@@ -201,7 +201,7 @@ public class RadiationManager implements IRadiationManager {
     public LevelAndMaxMagnitude getRadiationLevelAndMaxMagnitude(Coord4D coord) {
         double level = BASELINE;
         double maxMagnitude = BASELINE;
-        for (Chunk3D chunk : new Chunk3D(coord).expand(MekanismConfig.general.radiationChunkCheckRadius)) {
+        for (Chunk3D chunk : new Chunk3D(coord).expand(MekanismConfig.COMMON.general.radiationChunkCheckRadius)) {
             for (Map.Entry<Coord4D, RadiationSource> entry : radiationTable.row(chunk).entrySet()) {
                 // we only compute exposure when within the MAX_RANGE bounds
                 if (entry.getKey().distanceTo(coord) <= MAX_RANGE.getAsInt()) {
@@ -374,9 +374,9 @@ public class RadiationManager implements IRadiationManager {
         }
         // perhaps also play Geiger counter sound effect, even when not using item (similar to fallout)
         RandomSource randomSource = player.level().getRandom();
-        if (clientRadiationScale != RadiationScale.NONE && MekanismConfig.client.radiationParticleCount != 0 && randomSource.nextInt(2) == 0) {
-            int count = randomSource.nextInt(clientRadiationScale.ordinal() * MekanismConfig.client.radiationParticleCount);
-            int radius = MekanismConfig.client.radiationParticleRadius;
+        if (clientRadiationScale != RadiationScale.NONE && MekanismConfig.CLIENT.client.radiationParticleCount != 0 && randomSource.nextInt(2) == 0) {
+            int count = randomSource.nextInt(clientRadiationScale.ordinal() * MekanismConfig.CLIENT.client.radiationParticleCount);
+            int radius = MekanismConfig.CLIENT.client.radiationParticleRadius;
             for (int i = 0; i < count; i++) {
                 double x = player.getX() + randomSource.nextDouble() * radius * 2 - radius;
                 double y = player.getY() + randomSource.nextDouble() * radius * 2 - radius;

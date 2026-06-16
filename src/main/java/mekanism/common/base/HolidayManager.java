@@ -41,7 +41,7 @@ public final class HolidayManager {
     }
 
     public static void notify(Player player) {
-        if (MekanismConfig.client.holidays) {
+        if (MekanismConfig.CLIENT.client.holidays) {
             for (Holiday holiday : holidays) {
                 if (holiday.isToday() && !holiday.hasNotified()) {
                     holiday.notify(player);
@@ -52,7 +52,7 @@ public final class HolidayManager {
 
     public static SoundEventRegistryObject<SoundEvent> filterSound(SoundEventRegistryObject<SoundEvent> sound) {
         //Only filter sounds when on the client
-        if (MekanismConfig.client.isLoaded() && MekanismConfig.client.holidays) {
+        if (MekanismConfig.CLIENT.client.isLoaded() && MekanismConfig.CLIENT.client.holidays) {
             for (Holiday holiday : holidays) {
                 if (holiday.isToday()) {
                     return holiday.filterSound(sound);

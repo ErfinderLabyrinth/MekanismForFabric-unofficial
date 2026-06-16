@@ -2,6 +2,7 @@ package mekanism.common.recipe.upgrade.chemical;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTankBuilder;
+import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.ISlurryHandler.IMekanismSlurryHandler;
 import mekanism.api.chemical.slurry.ISlurryTank;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @NothingNullByDefault
-public class SlurryRecipeData extends ChemicalRecipeData<Slurry, SlurryStack, ISlurryTank, ISlurryHandler> {
+public class SlurryRecipeData extends ChemicalRecipeData<Slurry, SlurryStack, ISlurryTank, Storage<Slurry>> {
 
     public SlurryRecipeData(ListTag tanks) {
         super(tanks);
@@ -67,7 +68,7 @@ public class SlurryRecipeData extends ChemicalRecipeData<Slurry, SlurryStack, IS
     }
 
     @Override
-    protected ItemApiLookup<ISlurryHandler, ContainerItemContext> getItemLookup() {
+    protected ItemApiLookup<Storage<Slurry>, ContainerItemContext> getItemLookup() {
         return Capabilities.SLURRY_HANDLER_ITEM;
     }
 

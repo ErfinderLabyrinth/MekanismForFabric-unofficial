@@ -21,8 +21,8 @@ import java.util.List;
 @ParametersAreNotNullByDefault
 public class ModuleInhalationPurificationUnit implements ICustomModule<ModuleInhalationPurificationUnit> {
 
-    private static final ModuleDamageAbsorbInfo INHALATION_ABSORB_INFO = new ModuleDamageAbsorbInfo(() -> MekanismConfig.gear.mekaSuitMagicDamageRatio,
-            () -> MekanismConfig.gear.mekaSuitEnergyUsageMagicReduce);
+    private static final ModuleDamageAbsorbInfo INHALATION_ABSORB_INFO = new ModuleDamageAbsorbInfo(() -> MekanismConfig.COMMON.gear.mekaSuitMagicDamageRatio,
+            () -> MekanismConfig.COMMON.gear.mekaSuitEnergyUsageMagicReduce);
 
     private IModuleConfigItem<Boolean> beneficialEffects;
     private IModuleConfigItem<Boolean> neutralEffects;
@@ -39,7 +39,7 @@ public class ModuleInhalationPurificationUnit implements ICustomModule<ModuleInh
     public void tickClient(IModule<ModuleInhalationPurificationUnit> module, Player player) {
         //Messy rough estimate version of tickServer so that the timer actually properly updates
         if (!player.isSpectator()) {
-            long usage = MekanismConfig.gear.mekaSuitEnergyUsagePotionTick;
+            long usage = MekanismConfig.COMMON.gear.mekaSuitEnergyUsagePotionTick;
             boolean free = usage == 0 || player.isCreative();
             long energy = free ? 0 : module.getContainerEnergy();
             if (free || energy >= usage) {
@@ -64,7 +64,7 @@ public class ModuleInhalationPurificationUnit implements ICustomModule<ModuleInh
 
     @Override
     public void tickServer(IModule<ModuleInhalationPurificationUnit> module, Player player) {
-        long usage = MekanismConfig.gear.mekaSuitEnergyUsagePotionTick;
+        long usage = MekanismConfig.COMMON.gear.mekaSuitEnergyUsagePotionTick;
         boolean free = usage == 0 || player.isCreative();
         EnergyStorage energyContainer = free ? null : module.getEnergyContainer();
         if (free || (energyContainer != null && energyContainer.getAmount() >= usage)) {

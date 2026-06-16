@@ -45,9 +45,9 @@ public abstract class BaseDatapackRegistryProvider extends FabricDynamicRegistry
 
     protected static PlacedFeaturesHolder registerPlacedFeature(Entries entries, HolderLookup.Provider registries, ResourceLocation name, ResourceLocation retrogenName,
           Boolean2ObjectFunction<List<PlacementModifier>> placementModifiers) {
-        HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures = registries.lookup(Registries.CONFIGURED_FEATURE).get();
-        Reference<ConfiguredFeature<?, ?>> configuredFeature = configuredFeatures.getOrThrow(configuredFeature(name));
-        Reference<ConfiguredFeature<?, ?>> retrogenConfiguredFeature = configuredFeatures.getOrThrow(configuredFeature(retrogenName));
+//        HolderGetter<ConfiguredFeature<?, ?>> configuredFeatures = entries.getLookup(Registries.CONFIGURED_FEATURE);
+        Holder<ConfiguredFeature<?, ?>> configuredFeature = entries.ref(configuredFeature(name));
+        Holder<ConfiguredFeature<?, ?>> retrogenConfiguredFeature = entries.ref(configuredFeature(retrogenName));
         return new PlacedFeaturesHolder(
                 entries.add(placedFeature(name), new PlacedFeature(configuredFeature, placementModifiers.get(false))),
                 entries.add(placedFeature(name.withSuffix("_retrogen")), new PlacedFeature(retrogenConfiguredFeature, placementModifiers.get(true)))

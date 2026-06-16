@@ -35,7 +35,7 @@ public class ModuleDosimeterUnit implements ICustomModule<ModuleDosimeterUnit> {
             if(radiationEntity != null) {
                 double radiation = IRadiationManager.INSTANCE.isRadiationEnabled() ? radiationEntity.getRadiation() : 0;
                 Component text = UnitDisplayUtils.getDisplayShort(radiation, RadiationUnit.SV, 2);
-                if (MekanismConfig.common.enableDecayTimers && radiation > RadiationManager.MIN_MAGNITUDE) {
+                if (MekanismConfig.COMMON.common.enableDecayTimers && radiation > RadiationManager.MIN_MAGNITUDE) {
                     text = MekanismLang.GENERIC_WITH_PARENTHESIS.translate(text, TextUtils.getHoursMinutes(RadiationManager.get().getDecayTime(radiation, false)));
                 }
                 HUDColor color;

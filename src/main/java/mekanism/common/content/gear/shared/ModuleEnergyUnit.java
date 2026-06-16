@@ -12,14 +12,14 @@ import team.reborn.energy.api.EnergyStorage;
 public class ModuleEnergyUnit implements ICustomModule<ModuleEnergyUnit> {
 
     public long getEnergyCapacity(IModule<ModuleEnergyUnit> module) {
-        long base = module.getContainer().getItem() instanceof ItemMekaSuitArmor ? MekanismConfig.gear.mekaSuitBaseEnergyCapacity
-                                                                                         : MekanismConfig.gear.mekaToolBaseEnergyCapacity;
+        long base = module.getContainer().getItem() instanceof ItemMekaSuitArmor ? MekanismConfig.COMMON.gear.mekaSuitBaseEnergyCapacity
+                                                                                         : MekanismConfig.COMMON.gear.mekaToolBaseEnergyCapacity;
         return (long) (base * Math.pow(2, module.getInstalledCount()));
     }
 
     public long getChargeRate(IModule<ModuleEnergyUnit> module) {
-        long base = module.getContainer().getItem() instanceof ItemMekaSuitArmor ? MekanismConfig.gear.mekaSuitBaseChargeRate
-                                                                                         : MekanismConfig.gear.mekaToolBaseChargeRate;
+        long base = module.getContainer().getItem() instanceof ItemMekaSuitArmor ? MekanismConfig.COMMON.gear.mekaSuitBaseChargeRate
+                                                                                         : MekanismConfig.COMMON.gear.mekaToolBaseChargeRate;
         return (long) (base * Math.pow(2, module.getInstalledCount()));
     }
 

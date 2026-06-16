@@ -8,6 +8,7 @@ import mekanism.common.lib.frequency.FrequencyType;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -87,7 +88,7 @@ public class SecurityFrequency extends Frequency {
         super.read(dataStream);
         override = dataStream.readBoolean();
         securityMode = dataStream.readEnum(SecurityMode.class);
-        trustedCache = dataStream.readList(BasePacketHandler::readString);
+        trustedCache = dataStream.readList(NetworkUtil::readString);
     }
 
     @Override

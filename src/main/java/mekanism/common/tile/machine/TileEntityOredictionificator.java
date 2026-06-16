@@ -117,7 +117,7 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
         if (tags.isEmpty()) {
             return Collections.emptyList();
         }
-        Map<String, List<String>> possibleFilters = MekanismConfig.general.validOredictionificatorFilters;
+        Map<String, List<String>> possibleFilters = MekanismConfig.COMMON.general.validOredictionificatorFilters;
         List<ResourceLocation> filterableTags = new ArrayList<>();
         for (ResourceLocation resource : tags) {
             if (possibleFilters.getOrDefault(resource.getNamespace(), Collections.emptyList()).stream().anyMatch(pre -> resource.getPath().startsWith(pre))) {
@@ -131,7 +131,7 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
     private boolean hasFilterableTags(ItemStack stack) {
         Set<ResourceLocation> tags = TagUtils.tagNames(stack.getTags());
         if (!tags.isEmpty()) {
-            Map<String, List<String>> possibleFilters = MekanismConfig.general.validOredictionificatorFilters;
+            Map<String, List<String>> possibleFilters = MekanismConfig.COMMON.general.validOredictionificatorFilters;
             for (ResourceLocation resource : tags) {
                 if (possibleFilters.getOrDefault(resource.getNamespace(), Collections.emptyList()).stream().anyMatch(pre -> resource.getPath().startsWith(pre))) {
                     return true;
@@ -144,7 +144,7 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
     public static boolean isValidTarget(ResourceLocation tag) {
         Optional<HolderSet.Named<Item>> tagEntry = BuiltInRegistries.ITEM.getTag(TagKey.create(BuiltInRegistries.ITEM.key(), tag));
         if (tagEntry.isPresent()) {
-            for (String filter : MekanismConfig.general.validOredictionificatorFilters.getOrDefault(tag.getNamespace(), Collections.emptyList())) {
+            for (String filter : MekanismConfig.COMMON.general.validOredictionificatorFilters.getOrDefault(tag.getNamespace(), Collections.emptyList())) {
                 if (tag.getPath().startsWith(filter)) {
                     return true;
                 }

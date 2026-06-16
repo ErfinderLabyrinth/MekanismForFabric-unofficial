@@ -47,8 +47,8 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
     protected GuiQIOItemViewer(CONTAINER container, Inventory inv, Component title) {
         super(container, inv, title);
         this.inv = inv;
-        imageWidth = 16 + MekanismConfig.client.qioItemViewerSlotsX * 18 + 18;
-        imageHeight = QIOItemViewerContainer.SLOTS_START_Y + MekanismConfig.client.qioItemViewerSlotsY * 18 + 96;
+        imageWidth = 16 + MekanismConfig.CLIENT.client.qioItemViewerSlotsX * 18 + 18;
+        imageHeight = QIOItemViewerContainer.SLOTS_START_Y + MekanismConfig.CLIENT.client.qioItemViewerSlotsY * 18 + 96;
         inventoryLabelY = imageHeight - 94;
         titleLabelY = 5;
         dynamicSlots = true;
@@ -57,7 +57,7 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
     @Override
     protected void addGuiElements() {
         super.addGuiElements();
-        int slotsY = MekanismConfig.client.qioItemViewerSlotsY;
+        int slotsY = MekanismConfig.CLIENT.client.qioItemViewerSlotsY;
         addRenderableWidget(new GuiInnerScreen(this, 7, 15, imageWidth - 16, 12, () -> {
             FrequencyIdentity freq = getFrequency();
             if (freq == null) {
@@ -84,7 +84,7 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
         searchField.setVisible(true);
         searchField.setTextColor(0xFFFFFF);
         searchField.setFocused(true);
-        addRenderableWidget(new GuiSlotScroll(this, 7, QIOItemViewerContainer.SLOTS_START_Y, MekanismConfig.client.qioItemViewerSlotsX, slotsY,
+        addRenderableWidget(new GuiSlotScroll(this, 7, QIOItemViewerContainer.SLOTS_START_Y, MekanismConfig.CLIENT.client.qioItemViewerSlotsX, slotsY,
               menu::getQIOItemList, menu));
         addRenderableWidget(new GuiDropdown<>(this, imageWidth - 9 - 54, QIOItemViewerContainer.SLOTS_START_Y + slotsY * 18 + 1,
               41, ListSortType.class, menu::getSortType, menu::setSortType));
@@ -109,9 +109,9 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
         super.repositionElements();
         //Validate the height is still valid, and if it isn't recreate it
         int maxY = QIOItemViewerContainer.getSlotsYMax();
-        if (MekanismConfig.client.qioItemViewerSlotsY > maxY) {
+        if (MekanismConfig.CLIENT.client.qioItemViewerSlotsY > maxY) {
             //Note: We need to update it here to ensure that it refreshes when recreating the viewer on the client when connected to a server
-            MekanismConfig.client.qioItemViewerSlotsY = maxY;
+            MekanismConfig.CLIENT.client.qioItemViewerSlotsY = maxY;
             // save the updated config info
             //MekanismConfig.client.save();
             recreateViewer();
@@ -125,19 +125,19 @@ public abstract class GuiQIOItemViewer<CONTAINER extends QIOItemViewerContainer>
     public abstract FrequencyIdentity getFrequency();
 
     private void resize(ResizeType type) {
-        int sizeX = MekanismConfig.client.qioItemViewerSlotsX, sizeY = MekanismConfig.client.qioItemViewerSlotsY;
+        int sizeX = MekanismConfig.CLIENT.client.qioItemViewerSlotsX, sizeY = MekanismConfig.CLIENT.client.qioItemViewerSlotsY;
         boolean changed = false;
         if (type == ResizeType.EXPAND_X && sizeX < QIOItemViewerContainer.SLOTS_X_MAX) {
-            MekanismConfig.client.qioItemViewerSlotsX = sizeX + 1;
+            MekanismConfig.CLIENT.client.qioItemViewerSlotsX = sizeX + 1;
             changed = true;
         } else if (type == ResizeType.EXPAND_Y && sizeY < QIOItemViewerContainer.getSlotsYMax()) {
-            MekanismConfig.client.qioItemViewerSlotsY = sizeY + 1;
+            MekanismConfig.CLIENT.client.qioItemViewerSlotsY = sizeY + 1;
             changed = true;
         } else if (type == ResizeType.SHRINK_X && sizeX > QIOItemViewerContainer.SLOTS_X_MIN) {
-            MekanismConfig.client.qioItemViewerSlotsX = sizeX - 1;
+            MekanismConfig.CLIENT.client.qioItemViewerSlotsX = sizeX - 1;
             changed = true;
         } else if (type == ResizeType.SHRINK_Y && sizeY > QIOItemViewerContainer.SLOTS_Y_MIN) {
-            MekanismConfig.client.qioItemViewerSlotsY = sizeY - 1;
+            MekanismConfig.CLIENT.client.qioItemViewerSlotsY = sizeY - 1;
             changed = true;
         }
         if (changed) {

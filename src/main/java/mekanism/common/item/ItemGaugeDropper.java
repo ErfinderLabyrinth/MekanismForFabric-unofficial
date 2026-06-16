@@ -91,8 +91,8 @@ public class ItemGaugeDropper extends Item implements ItemStorageHandler {
         return InteractionResultHolder.pass(stack);
     }
 
-    private static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> void clearChemicalTanks(ContainerItemContext context, ItemApiLookup<? extends IChemicalHandler<CHEMICAL, STACK, ?>, ContainerItemContext> lookup) {
-        IChemicalHandler<CHEMICAL, STACK, ?> handler = context.find(lookup);
+    private static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> void clearChemicalTanks(ContainerItemContext context, ItemApiLookup<? extends Storage<CHEMICAL>, ContainerItemContext> lookup) {
+        Storage<CHEMICAL> handler = context.find(lookup);
         if (handler != null) {
             for (StorageView<CHEMICAL> view : handler) {
                 try(Transaction t=Transaction.openOuter()) {

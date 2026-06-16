@@ -6,6 +6,7 @@ import mekanism.api.MekanismAPI;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
 import mekanism.client.model.ModelEnergyCore;
+import mekanism.client.model.energycube.EnergyCubeBakedModel;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.item.MekanismISTER;
 import mekanism.client.render.tileentity.RenderEnergyCube;
@@ -61,7 +62,13 @@ public class RenderEnergyCubeItem extends MekanismISTER {
                 sideStates[side.ordinal()] = tier == EnergyCubeTier.CREATIVE || side == RelativeSide.FRONT ? CubeSideState.ACTIVE_LIT : CubeSideState.ACTIVE_UNLIT;
             }
         }
-        renderBlockItem(stack, displayContext, matrix, renderer, light, overlayLight);
+        renderBlockItem(stack, displayContext, matrix, renderer, light, overlayLight, ((model, state, direction, random) -> {
+            if (model instanceof EnergyCubeBakedModel energyCubeBakedModel) {
+                return energyCubeBakedModel.getQuads(state, direction, random, sideStates);
+            }else {
+                return model.getQuads(state, direction, random);
+            }
+        }));
         double energyPercentage = (double) StorageUtils.getStoredEnergyFromNBT(stack) / tier.getMaxEnergy();
         if (energyPercentage > 0) {
             float ticks = Minecraft.getInstance().levelRenderer.ticks + MekanismRenderer.getPartialTick();

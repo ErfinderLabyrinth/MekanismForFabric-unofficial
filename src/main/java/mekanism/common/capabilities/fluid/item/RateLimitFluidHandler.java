@@ -89,7 +89,7 @@ public class RateLimitFluidHandler extends ItemStackMekanismFluidHandler {
         @Override
         public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
             long amountInserted;
-            try(Transaction t=Transaction.openOuter()) {
+            try(Transaction t=Transaction.openNested(transaction)) {
                 amountInserted = super.insert(resource, maxAmount, t);
                 if (!isCreative)
                     t.commit();
@@ -100,7 +100,7 @@ public class RateLimitFluidHandler extends ItemStackMekanismFluidHandler {
         @Override
         public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
             long amountExtracted;
-            try(Transaction t=Transaction.openOuter()) {
+            try(Transaction t=Transaction.openNested(transaction)) {
                 amountExtracted = super.extract(resource, maxAmount, t);
                 if (!isCreative)
                     t.commit();

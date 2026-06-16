@@ -24,7 +24,7 @@ import java.util.List;
 public class ItemPortableTeleporter extends ItemEnergized implements IFrequencyItem, IGuiItem {
 
     public ItemPortableTeleporter(Properties properties) {
-        super(() -> MekanismConfig.gear.portableTeleporterChargeRate, () -> MekanismConfig.gear.portableTeleporterMaxEnergy, properties.rarity(Rarity.RARE));
+        super(() -> MekanismConfig.COMMON.gear.portableTeleporterChargeRate, () -> MekanismConfig.COMMON.gear.portableTeleporterMaxEnergy, properties.rarity(Rarity.RARE));
     }
 
     @Override

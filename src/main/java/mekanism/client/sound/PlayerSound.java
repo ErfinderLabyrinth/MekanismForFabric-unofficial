@@ -126,7 +126,7 @@ public abstract class PlayerSound extends AbstractTickableSoundInstance {
 
     @Override
     public float getVolume() {
-        return super.getVolume() * MekanismConfig.client.baseSoundVolume;
+        return super.getVolume() * MekanismConfig.CLIENT.client.baseSoundVolume;
     }
 
     @Override

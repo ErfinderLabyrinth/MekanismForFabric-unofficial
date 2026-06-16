@@ -337,7 +337,7 @@ public class MekanismJEI implements IModPlugin {
                                            return Optional.empty();
                                        }
                                    }, FabricTypes.FLUID_STACK,
-                MekanismLang.JEI_INFO_HEAVY_WATER.translate(MekanismConfig.general.pumpHeavyWaterAmount));
+                MekanismLang.JEI_INFO_HEAVY_WATER.translate(MekanismConfig.COMMON.general.pumpHeavyWaterAmount));
         registry.addIngredientInfo(MekanismAPI.moduleRegistry().stream().map(data -> data.getItemProvider().getItemStack()).toList(),
               VanillaTypes.ITEM_STACK, MekanismLang.JEI_INFO_MODULE_INSTALLATION.translate());
     }

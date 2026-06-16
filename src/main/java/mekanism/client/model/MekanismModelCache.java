@@ -36,6 +36,7 @@ public class MekanismModelCache extends BaseModelCache {
     public final JSONModelData LIQUIFIER_BLADE = registerJSON("block/liquifier_blade");
     public final JSONModelData VIBRATOR_SHAFT = registerJSON("block/vibrator_shaft");
     public final JSONModelData PIGMENT_MIXER_SHAFT = registerJSON("block/pigment_mixer_shaft");
+
     public final JSONModelData[] QIO_DRIVES = new JSONModelData[DriveStatus.STATUSES.length];
     private final Map<ResourceLocation, JSONModelData> CUSTOM_ROBIT_MODELS = new HashMap<>();
     private final Map<ResourceLocation, JSONModelData> ROBIT_SKINS = new HashMap<>();

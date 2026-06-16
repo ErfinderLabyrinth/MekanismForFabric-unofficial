@@ -78,7 +78,7 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
     private final Int2ObjectMap<AttributeCache> attributeCaches = new Int2ObjectArrayMap<>(ModuleAttackAmplificationUnit.AttackDamage.values().length);
 
     public ItemMekaTool(Properties properties) {
-        super(() -> MekanismConfig.gear.mekaToolBaseChargeRate, () -> MekanismConfig.gear.mekaToolBaseEnergyCapacity, properties.rarity(Rarity.EPIC));
+        super(() -> MekanismConfig.COMMON.gear.mekaToolBaseChargeRate, () -> MekanismConfig.COMMON.gear.mekaToolBaseEnergyCapacity, properties.rarity(Rarity.EPIC));
     }
 
     @Override
@@ -201,10 +201,10 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
         }
         if (energyAvailable < energyRequired) {
             //If we can't extract all the energy we need to break it go at base speed reduced by how much we actually have available
-            return (float) (MekanismConfig.gear.mekaToolBaseEfficiency * (double)energyAvailable / energyRequired);
+            return (float) (MekanismConfig.COMMON.gear.mekaToolBaseEfficiency * (double)energyAvailable / energyRequired);
         }
         IModule<ModuleExcavationEscalationUnit> module = getModule(stack, MekanismModules.EXCAVATION_ESCALATION_UNIT);
-        return module == null || !module.isEnabled() ? MekanismConfig.gear.mekaToolBaseEfficiency : module.getCustomInstance().getEfficiency();
+        return module == null || !module.isEnabled() ? MekanismConfig.COMMON.gear.mekaToolBaseEfficiency : module.getCustomInstance().getEfficiency();
     }
 
     @Override
@@ -257,7 +257,7 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
                     // we don't have enough energy, but we will remove as much as we can, which is how much corresponds
                     // to the amount of damage we will actually do
                     try(Transaction t = Transaction.openOuter()) {
-                        energyContainer.extract((long) (MekanismConfig.gear.mekaToolEnergyUsageWeapon * unitDamage / 4D), t);
+                        energyContainer.extract((long) (MekanismConfig.COMMON.gear.mekaToolEnergyUsageWeapon * unitDamage / 4D), t);
                     }
                 }
             }
@@ -322,7 +322,7 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
 //    }
 
     private long getDestroyEnergy(boolean silk) {
-        return silk ? MekanismConfig.gear.mekaToolEnergyUsageSilk : MekanismConfig.gear.mekaToolEnergyUsage;
+        return silk ? MekanismConfig.COMMON.gear.mekaToolEnergyUsageSilk : MekanismConfig.COMMON.gear.mekaToolEnergyUsage;
     }
 
     public long getDestroyEnergy(ItemStack itemStack, float hardness, boolean silk) {
@@ -336,7 +336,7 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
     private long getDestroyEnergy(ItemStack itemStack, boolean silk) {
         long destroyEnergy = getDestroyEnergy(silk);
         IModule<ModuleExcavationEscalationUnit> module = getModule(itemStack, MekanismModules.EXCAVATION_ESCALATION_UNIT);
-        float efficiency = module == null || !module.isEnabled() ? MekanismConfig.gear.mekaToolBaseEfficiency : module.getCustomInstance().getEfficiency();
+        float efficiency = module == null || !module.isEnabled() ? MekanismConfig.COMMON.gear.mekaToolBaseEfficiency : module.getCustomInstance().getEfficiency();
         return (long) (destroyEnergy * (double)efficiency);
     }
 
@@ -349,7 +349,7 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
             if (attackAmplificationUnit != null && attackAmplificationUnit.isEnabled()) {
                 unitDamage = attackAmplificationUnit.getCustomInstance().getDamage();
                 if (unitDamage > 0) {
-                    long energyCost = (long) (MekanismConfig.gear.mekaToolEnergyUsageWeapon * unitDamage / 4D);
+                    long energyCost = (long) (MekanismConfig.COMMON.gear.mekaToolEnergyUsageWeapon * unitDamage / 4D);
                     EnergyStorage energyContainer = ContainerItemContext.withConstant(stack).find(EnergyStorage.ITEM);
                     long energy = energyContainer == null ? 0 : energyContainer.getAmount();
                     if (energy < energyCost) {
@@ -360,9 +360,9 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
                             // we can just use the cache for as if there was no bonus damage)
                             ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
                             builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier",
-                                  MekanismConfig.gear.mekaToolBaseDamage + bonusDamage, Operation.ADDITION));
+                                  MekanismConfig.COMMON.gear.mekaToolBaseDamage + bonusDamage, Operation.ADDITION));
                             builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier",
-                                  MekanismConfig.gear.mekaToolAttackSpeed, Operation.ADDITION));
+                                  MekanismConfig.COMMON.gear.mekaToolAttackSpeed, Operation.ADDITION));
                             return builder.build();
                         }
                         //Use cached attribute map for just doing the base damage
@@ -373,10 +373,10 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
             //Retrieve a cached map if we have enough energy to attack at the full damage value based on configured damage
             return attributeCaches.computeIfAbsent(unitDamage, damage -> new AttributeCache(builder -> {
                 builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier",
-                      MekanismConfig.gear.mekaToolBaseDamage + damage, Operation.ADDITION));
+                      MekanismConfig.COMMON.gear.mekaToolBaseDamage + damage, Operation.ADDITION));
                 builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier",
-                      MekanismConfig.gear.mekaToolAttackSpeed, Operation.ADDITION));
-            }, () -> MekanismConfig.gear.mekaToolBaseDamage, () -> MekanismConfig.gear.mekaToolAttackSpeed)).get();
+                      MekanismConfig.COMMON.gear.mekaToolAttackSpeed, Operation.ADDITION));
+            }, () -> MekanismConfig.COMMON.gear.mekaToolBaseDamage, () -> MekanismConfig.COMMON.gear.mekaToolAttackSpeed)).get();
         }
         return super.getAttributeModifiers(stack, slot);
     }
@@ -388,7 +388,7 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
         if (!world.isClientSide()) {
             IModule<ModuleTeleportationUnit> module = getModule(stack, MekanismModules.TELEPORTATION_UNIT);
             if (module != null && module.isEnabled()) {
-                BlockHitResult result = MekanismUtils.rayTrace(player, MekanismConfig.gear.mekaToolMaxTeleportReach);
+                BlockHitResult result = MekanismUtils.rayTrace(player, MekanismConfig.COMMON.gear.mekaToolMaxTeleportReach);
                 //If we don't require a block target or are not a miss, allow teleporting
                 if (!module.getCustomInstance().requiresBlockTarget() || result.getType() != HitResult.Type.MISS) {
                     BlockPos pos = result.getBlockPos();
@@ -399,7 +399,7 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
                             return InteractionResultHolder.pass(stack);
                         }
                         EnergyStorage energyContainer = ContainerItemContext.forPlayerInteraction(player, hand).find(EnergyStorage.ITEM);
-                        long energyNeeded = (long) (MekanismConfig.gear.mekaToolEnergyUsageTeleport * distance / 10D);
+                        long energyNeeded = (long) (MekanismConfig.COMMON.gear.mekaToolEnergyUsageTeleport * distance / 10D);
                         if (energyContainer == null || energyContainer.getAmount() < energyNeeded) {
                             return InteractionResultHolder.fail(stack);
                         }
@@ -476,13 +476,13 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
     @Override
     protected long getMaxEnergy(ItemStack stack) {
         IModule<ModuleEnergyUnit> module = getModule(stack, MekanismModules.ENERGY_UNIT);
-        return module == null ? MekanismConfig.gear.mekaToolBaseEnergyCapacity : module.getCustomInstance().getEnergyCapacity(module);
+        return module == null ? MekanismConfig.COMMON.gear.mekaToolBaseEnergyCapacity : module.getCustomInstance().getEnergyCapacity(module);
     }
 
     @Override
     protected long getChargeRate(ItemStack stack) {
         IModule<ModuleEnergyUnit> module = getModule(stack, MekanismModules.ENERGY_UNIT);
-        return module == null ? MekanismConfig.gear.mekaToolBaseChargeRate : module.getCustomInstance().getChargeRate(module);
+        return module == null ? MekanismConfig.COMMON.gear.mekaToolBaseChargeRate : module.getCustomInstance().getChargeRate(module);
     }
 
     @Nullable

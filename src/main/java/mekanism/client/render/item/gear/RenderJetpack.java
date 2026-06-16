@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class RenderJetpack extends MekanismISTER {
     public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "jetpack");
+    public static final ResourceLocation ID_ARMORED = new ResourceLocation(Mekanism.MODID, "jetpack_armored");
     public static final RenderJetpack RENDERER = new RenderJetpack(false);
     public static final RenderJetpack ARMORED_RENDERER = new RenderJetpack(true);
 
@@ -46,6 +47,6 @@ public class RenderJetpack extends MekanismISTER {
 
     @Override
     public ResourceLocation getFabricId() {
-        return ID;
+        return armored ? ID_ARMORED : ID;
     }
 }

@@ -9,6 +9,7 @@ import mekanism.common.lib.security.SecurityFrequency;
 import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.MekanismUtils;
+import mekanism.common.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -77,7 +78,7 @@ public class PacketSecurityUpdate implements IMekanismPacket {
         if (isUpdate) {
             buffer.writeUUID(playerUUID);
             buffer.writeUtf(playerUsername);
-            BasePacketHandler.writeOptional(buffer, securityData, (buf, data) -> data.write(buf));
+            NetworkUtil.writeOptional(buffer, securityData, (buf, data) -> data.write(buf));
         } else {
             List<SecurityFrequency> frequencies = new ArrayList<>(FrequencyType.SECURITY.getManager(null, null).getFrequencies());
             //In theory no owner should be null but handle the case anyway just in case
@@ -96,8 +97,8 @@ public class PacketSecurityUpdate implements IMekanismPacket {
         PacketSecurityUpdate packet = new PacketSecurityUpdate(buffer.readBoolean());
         if (packet.isUpdate) {
             packet.playerUUID = buffer.readUUID();
-            packet.playerUsername = BasePacketHandler.readString(buffer);
-            packet.securityData = BasePacketHandler.readOptional(buffer, SecurityData::read);
+            packet.playerUsername = NetworkUtil.readString(buffer);
+            packet.securityData = NetworkUtil.readOptional(buffer, SecurityData::read);
         } else {
             int frequencySize = buffer.readVarInt();
             packet.securityMap = new Object2ObjectOpenHashMap<>(frequencySize);
@@ -105,7 +106,7 @@ public class PacketSecurityUpdate implements IMekanismPacket {
             for (int i = 0; i < frequencySize; i++) {
                 UUID uuid = buffer.readUUID();
                 packet.securityMap.put(uuid, SecurityData.read(buffer));
-                packet.uuidMap.put(uuid, BasePacketHandler.readString(buffer));
+                packet.uuidMap.put(uuid, NetworkUtil.readString(buffer));
             }
         }
         return packet;

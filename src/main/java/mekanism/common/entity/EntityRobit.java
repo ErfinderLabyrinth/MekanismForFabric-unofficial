@@ -667,7 +667,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
                       trackedErrors[i] = errors.contains(TRACKED_ERROR_TYPES.get(i));
                   }
               })
-              .setEnergyRequirements(() -> MekanismConfig.usage.energizedSmelter, energyContainer)
+              .setEnergyRequirements(() -> MekanismConfig.COMMON.usage.energizedSmelter, energyContainer)
               .setRequiredTicks(() -> ticksRequired)
               .setOnFinish(this::onContentsChanged)
               .setOperatingTicksChanged(operatingTicks -> progress = operatingTicks);
@@ -753,7 +753,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
     /**
      * @apiNote Only call on the client.
      */
-    private ResourceLocation getModelTexture() {
+    public ResourceLocation getModelTexture() {
         Registry<RobitSkin> robitSkins = level().registryAccess().registryOrThrow(MekanismAPI.ROBIT_SKIN_REGISTRY_NAME);
         ResourceKey<RobitSkin> skinKey = getSkin();
         RobitSkin skin = robitSkins.get(skinKey);

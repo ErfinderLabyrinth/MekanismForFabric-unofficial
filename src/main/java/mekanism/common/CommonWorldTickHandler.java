@@ -111,7 +111,7 @@ public class CommonWorldTickHandler {
 
     public synchronized void chunkSave(Level level, ChunkAccess chunk, CompoundTag data) {
         if (!level.isClientSide()) {
-            int chunkVersion = MekanismConfig.world.userGenVersion;
+            int chunkVersion = MekanismConfig.COMMON.world.userGenVersion;
             if (chunkVersions != null) {
                 chunkVersion = chunkVersions.getOrDefault(level.dimension().location(), Object2IntMaps.emptyMap())
                       .getOrDefault(chunk.getPos(), chunkVersion);
@@ -124,7 +124,7 @@ public class CommonWorldTickHandler {
         if (!level.isClientSide()) {
             int version = data.getInt(NBTConstants.WORLD_GEN_VERSION);
             //When a chunk is loaded, if it has an older version than the latest one
-            if (version < MekanismConfig.world.userGenVersion) {
+            if (version < MekanismConfig.COMMON.world.userGenVersion) {
                 //Track what version it has so that when we save it, if we haven't gotten a chance to update
                 // the chunk yet, then we are able to properly save that we still will need to update it
                 if (chunkVersions == null) {
@@ -134,7 +134,7 @@ public class CommonWorldTickHandler {
                 ResourceKey<Level> dimension = level.dimension();
                 chunkVersions.computeIfAbsent(dimension.location(), dim -> new Object2IntOpenHashMap<>())
                       .put(chunkCoord, version);
-                if (MekanismConfig.world.enableRegeneration) {
+                if (MekanismConfig.COMMON.world.enableRegeneration) {
                     //If retrogen is enabled, then we also need to mark the chunk as needing retrogen
                     addRegenChunk(dimension, chunkCoord);
                 }
@@ -184,7 +184,7 @@ public class CommonWorldTickHandler {
                 flushTagAndRecipeCaches = false;
             }
 
-            if (chunkRegenMap == null || !MekanismConfig.world.enableRegeneration) {
+            if (chunkRegenMap == null || !MekanismConfig.COMMON.world.enableRegeneration) {
                 return;
             }
             ResourceLocation dimensionName = world.dimension().location();

@@ -5,11 +5,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import mekanism.api.MekanismAPI;
+import mekanism.client.mixinhelper.CustomGeometryHolder;
+import mekanism.client.mixinhelper.RenderTypeHolder;
 import mekanism.client.model.CustomGeometry;
+import mekanism.client.model.composite.CompositeModelLoader;
 import mekanism.client.model.energycube.EnergyCubeModelLoader;
 import mekanism.client.model.robit.RobitModel;
 import mekanism.client.render.obj.TransmitterLoader;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,6 +31,16 @@ public class BlockModelDeserializerMixin {
     @Inject(method = "deserialize(Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lnet/minecraft/client/renderer/block/model/BlockModel;", at = @At("RETURN"), cancellable = true)
     public void addLoaderSupport(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext, CallbackInfoReturnable<BlockModel> cir) {
         CustomGeometry customGeometry = deserializeGeometry(jsonDeserializationContext, jsonElement.getAsJsonObject());
+        ((CustomGeometryHolder)cir.getReturnValue()).setCustomGeometry(customGeometry);
+
+        cacheRenderType(cir.getReturnValue(), jsonElement.getAsJsonObject());
+    }
+
+    private void cacheRenderType(BlockModel model, JsonObject object) {
+        if (!object.has("render_type"))
+            return;
+        String renderType = object.get("render_type").getAsString();
+        ((RenderTypeHolder)model).mekanism$setRenderType(renderType);
     }
 
     @Unique
@@ -43,6 +58,9 @@ public class BlockModelDeserializerMixin {
         }
         if (name.equals(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "transmitter"))) {
             return TransmitterLoader.INSTANCE.read(object, deserializationContext);
+        }
+        if (name.equals(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "composite"))) {
+            return CompositeModelLoader.INSTANCE.read(object, deserializationContext);
         }
         throw new JsonParseException(String.format(Locale.ENGLISH, "Model loader '%s' not found.", name));
 

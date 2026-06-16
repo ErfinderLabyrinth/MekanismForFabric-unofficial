@@ -60,11 +60,11 @@ public class TileEntityRadioactiveWasteBarrel extends TileEntityMekanism impleme
         if (level.getGameTime() > lastProcessTick) {
             //If we are not on the same tick do stuff, otherwise ignore it (anti tick accelerator protection)
             lastProcessTick = level.getGameTime();
-            if (MekanismConfig.general.radioactiveWasteBarrelDecayAmount > 0 && !gasTank.isEmpty() &&
+            if (MekanismConfig.COMMON.general.radioactiveWasteBarrelDecayAmount > 0 && !gasTank.isEmpty() &&
                 !MekanismTags.Gases.WASTE_BARREL_DECAY_LOOKUP.contains(gasTank.getType()) &&
-                ++processTicks >= MekanismConfig.general.radioactiveWasteBarrelProcessTicks) {
+                ++processTicks >= MekanismConfig.COMMON.general.radioactiveWasteBarrelProcessTicks) {
                 processTicks = 0;
-                gasTank.shrinkStack(MekanismConfig.general.radioactiveWasteBarrelDecayAmount);
+                gasTank.shrinkStack(MekanismConfig.COMMON.general.radioactiveWasteBarrelDecayAmount);
             }
             if (getActive()) {
                 ChemicalUtil.emit(Collections.singleton(Direction.DOWN), gasTank, this.level, this.getBlockPos());

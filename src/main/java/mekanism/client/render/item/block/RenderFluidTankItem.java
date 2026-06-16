@@ -12,6 +12,7 @@ import mekanism.common.tier.FluidTankTier;
 import mekanism.common.util.StorageUtils;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -40,7 +41,7 @@ public class RenderFluidTankItem extends MekanismISTER {
                       MekanismRenderer.getColorARGB(fluid, fluidScale), MekanismRenderer.calculateGlowLight(light, fluid), overlayLight, FaceDisplay.FRONT, getCamera());
             }
         }
-        renderBlockItem(stack, displayContext, matrix, renderer, light, overlayLight);
+        renderBlockItem(stack, displayContext, matrix, renderer, light, overlayLight, BakedModel::getQuads);
     }
 
     @Override

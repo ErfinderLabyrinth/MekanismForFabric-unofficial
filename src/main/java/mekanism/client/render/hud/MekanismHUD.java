@@ -34,7 +34,7 @@ public class MekanismHUD {
     public void render(Gui gui, GuiGraphics guiGraphics, float partialTicks, int screenWidth, int screenHeight) {
         Minecraft minecraft = gui.minecraft;
         Player player = minecraft.player;
-        if (!minecraft.options.hideGui && player != null && !player.isSpectator() && MekanismConfig.client.enableHUD) {
+        if (!minecraft.options.hideGui && player != null && !player.isSpectator() && MekanismConfig.CLIENT.client.enableHUD) {
             int count = 0;
             List<List<Component>> renderStrings = new ArrayList<>();
             for (EquipmentSlot slotType : EQUIPMENT_ORDER) {
@@ -57,10 +57,10 @@ public class MekanismHUD {
 //                }
             }
             Font font = gui.getFont();
-            boolean reverseHud = MekanismConfig.client.reverseHUD;
+            boolean reverseHud = MekanismConfig.CLIENT.client.reverseHUD;
             int maxTextHeight = screenHeight;
             if (count > 0) {
-                float hudScale = MekanismConfig.client.hudScale;
+                float hudScale = MekanismConfig.CLIENT.client.hudScale;
                 int xScale = (int) (screenWidth / hudScale);
                 int yScale = (int) (screenHeight / hudScale);
                 int start = (renderStrings.size() * 2) + (count * 9);

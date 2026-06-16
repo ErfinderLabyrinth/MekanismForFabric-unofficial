@@ -30,7 +30,7 @@ public class ModuleGeigerUnit implements ICustomModule<ModuleGeigerUnit> {
         if (module.isEnabled()) {
             double magnitude = RadiationManager.get().getClientEnvironmentalRadiation();
             Component text = UnitDisplayUtils.getDisplayShort(magnitude, RadiationUnit.SV, 2);
-            if (MekanismConfig.common.enableDecayTimers && magnitude > RadiationManager.BASELINE) {
+            if (MekanismConfig.COMMON.common.enableDecayTimers && magnitude > RadiationManager.BASELINE) {
                 double maxMagnitude = RadiationManager.get().getClientMaxMagnitude();
                 text = MekanismLang.GENERIC_WITH_PARENTHESIS.translate(text, TextUtils.getHoursMinutes(RadiationManager.get().getDecayTime(maxMagnitude, true)));
             }

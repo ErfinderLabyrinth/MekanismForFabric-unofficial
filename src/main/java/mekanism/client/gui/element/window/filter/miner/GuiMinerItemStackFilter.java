@@ -41,7 +41,7 @@ public class GuiMinerItemStackFilter extends GuiItemStackFilter<MinerItemStackFi
             @Override
             public boolean supportsIngredient(Object ingredient) {
                 //Note: The miner requires the player to actually get targets, unless configured server side to be "easy"
-                return MekanismConfig.general.easyMinerFilters && IGhostItemConsumer.super.supportsIngredient(ingredient);
+                return MekanismConfig.COMMON.general.easyMinerFilters && IGhostItemConsumer.super.supportsIngredient(ingredient);
             }
 
             @Override

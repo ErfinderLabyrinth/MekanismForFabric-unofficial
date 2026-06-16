@@ -30,13 +30,13 @@ public class ModuleNutritionalInjectionUnit implements ICustomModule<ModuleNutri
 
     @Override
     public void tickServer(IModule<ModuleNutritionalInjectionUnit> module, Player player) {
-        long usage = MekanismConfig.gear.mekaSuitEnergyUsageNutritionalInjection;
+        long usage = MekanismConfig.COMMON.gear.mekaSuitEnergyUsageNutritionalInjection;
         if (MekanismUtils.isPlayingMode(player) && player.canEat(false)) {
             //Check if we can use a single iteration of it
             ItemStack container = module.getContainer();
             ItemMekaSuitArmor item = (ItemMekaSuitArmor) container.getItem();
             long needed = Math.min(20 - player.getFoodData().getFoodLevel(),
-                  item.getContainedFluid(container, MekanismFluids.NUTRITIONAL_PASTE.getFluidStack(1)).amount() / MekanismConfig.general.nutritionalPasteMBPerFood);
+                  item.getContainedFluid(container, MekanismFluids.NUTRITIONAL_PASTE.getFluidStack(1)).amount() / MekanismConfig.COMMON.general.nutritionalPasteMBPerFood);
             long toFeed = Math.min(module.getContainerEnergy() / usage, needed);
             if (toFeed > 0) {
                 module.useEnergy(player, usage * toFeed);
@@ -44,11 +44,11 @@ public class ModuleNutritionalInjectionUnit implements ICustomModule<ModuleNutri
                 Storage<FluidVariant> fluidStorage = context.find(FluidStorage.ITEM);
                 if (fluidStorage != null) {
                     try(Transaction t = Transaction.openOuter()) {
-                        fluidStorage.extract(FluidVariant.of(MekanismFluids.NUTRITIONAL_PASTE.getFluid()), toFeed * MekanismConfig.general.nutritionalPasteMBPerFood, t);
+                        fluidStorage.extract(FluidVariant.of(MekanismFluids.NUTRITIONAL_PASTE.getFluid()), toFeed * MekanismConfig.COMMON.general.nutritionalPasteMBPerFood, t);
                         t.commit();
                     }
                 }
-                player.getFoodData().eat((int) needed, MekanismConfig.general.nutritionalPasteSaturation);
+                player.getFoodData().eat((int) needed, MekanismConfig.COMMON.general.nutritionalPasteSaturation);
             }
         }
     }
@@ -59,13 +59,13 @@ public class ModuleNutritionalInjectionUnit implements ICustomModule<ModuleNutri
             ItemStack container = module.getContainer();
             Storage<FluidVariant> capability = ContainerItemContext.withConstant(container).find(FluidStorage.ITEM);
             if (capability != null) {
-                int max = MekanismConfig.gear.mekaSuitNutritionalMaxStorage;
+                int max = MekanismConfig.COMMON.gear.mekaSuitNutritionalMaxStorage;
                 try(Transaction t=Transaction.openOuter()) {
                     capability.extract(FluidVariant.of(MekanismFluids.NUTRITIONAL_PASTE.getFluid()), max, t); //Why?
                 }
             }
             FluidStack stored = ((ItemMekaSuitArmor) container.getItem()).getContainedFluid(container, MekanismFluids.NUTRITIONAL_PASTE.getFluidStack(1));
-            double ratio = StorageUtils.getRatio(stored.amount(), MekanismConfig.gear.mekaSuitNutritionalMaxStorage);
+            double ratio = StorageUtils.getRatio(stored.amount(), MekanismConfig.COMMON.gear.mekaSuitNutritionalMaxStorage);
             hudElementAdder.accept(IModuleHelper.INSTANCE.hudElementPercent(icon, ratio));
         }
     }

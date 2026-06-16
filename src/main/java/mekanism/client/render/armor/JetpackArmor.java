@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class JetpackArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
     public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "jetpack_armor");
+    public static final ResourceLocation ARMORED_ID = new ResourceLocation(Mekanism.MODID, "armored_jetpack_armor");
     public static final JetpackArmor JETPACK = new JetpackArmor(false);
     public static final JetpackArmor ARMORED_JETPACK = new JetpackArmor(true);
 
@@ -66,6 +67,6 @@ public class JetpackArmor implements ICustomArmor, ResourceManagerReloadListener
 
     @Override
     public ResourceLocation getFabricId() {
-        return ID;
+        return armored ? ARMORED_ID : ID;
     }
 }

@@ -2,7 +2,6 @@ package mekanism.common.storage.item;
 
 import mekanism.api.NBTConstants;
 import mekanism.api.energy.IEnergyContainer;
-import mekanism.common.util.ItemDataUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -16,19 +15,22 @@ public class EnergyItemStorage implements EnergyStorage {
     private ContainerItemContext context;
 
     public EnergyItemStorage(ContainerItemContext context, Supplier<IEnergyContainer> tankCreator) {
+        this.context = context;
         this.tankCreator = tankCreator;
     }
 
     private boolean save(TransactionContext t, IEnergyContainer container) {
-        CompoundTag oldNBT = context.getItemVariant().copyNbt();
-        oldNBT.put(NBTConstants.ENERGY_CONTAINER, container.serializeNBT());
+        CompoundTag oldNBT = context.getItemVariant().copyOrCreateNbt();
+        CompoundTag mekData = oldNBT.getCompound(NBTConstants.MEK_DATA).copy();
+        mekData.put(NBTConstants.ENERGY_CONTAINER, container.serializeNBT());
+        oldNBT.put(NBTConstants.MEK_DATA, mekData);
         return context.exchange(ItemVariant.of(context.getItemVariant().getItem(), oldNBT), 1, t) == 1;
     }
 
     @Override
     public long insert(long maxAmount, TransactionContext transaction) {
         IEnergyContainer container = tankCreator.get();
-        container.deserializeNBT(ItemDataUtils.getCompound(context.getItemVariant().toStack((int)context.getAmount()), NBTConstants.ENERGY_CONTAINER));
+        container.deserializeNBT(context.getItemVariant().copyOrCreateNbt().getCompound(NBTConstants.MEK_DATA).getCompound(NBTConstants.ENERGY_CONTAINER));
 
         long amountInserted = container.insert(maxAmount, transaction);
 
@@ -45,7 +47,7 @@ public class EnergyItemStorage implements EnergyStorage {
     @Override
     public long extract(long maxAmount, TransactionContext transaction) {
         IEnergyContainer container = tankCreator.get();
-        container.deserializeNBT(ItemDataUtils.getCompound(context.getItemVariant().toStack((int)context.getAmount()), NBTConstants.ENERGY_CONTAINER));
+        container.deserializeNBT(context.getItemVariant().copyOrCreateNbt().getCompound(NBTConstants.MEK_DATA).getCompound(NBTConstants.ENERGY_CONTAINER));
 
         long amountExtracted = container.extract(maxAmount, transaction);
 
@@ -62,7 +64,7 @@ public class EnergyItemStorage implements EnergyStorage {
     @Override
     public long getAmount() {
         IEnergyContainer container = tankCreator.get();
-        container.deserializeNBT(ItemDataUtils.getCompound(context.getItemVariant().toStack((int)context.getAmount()), NBTConstants.ENERGY_CONTAINER));
+        container.deserializeNBT(context.getItemVariant().copyOrCreateNbt().getCompound(NBTConstants.MEK_DATA).getCompound(NBTConstants.ENERGY_CONTAINER));
 
         return container.getAmount();
     }
@@ -70,17 +72,8 @@ public class EnergyItemStorage implements EnergyStorage {
     @Override
     public long getCapacity() {
         IEnergyContainer container = tankCreator.get();
-        container.deserializeNBT(ItemDataUtils.getCompound(context.getItemVariant().toStack((int)context.getAmount()), NBTConstants.ENERGY_CONTAINER));
+        container.deserializeNBT(context.getItemVariant().copyOrCreateNbt().getCompound(NBTConstants.MEK_DATA).getCompound(NBTConstants.ENERGY_CONTAINER));
 
         return container.getCapacity();
     }
-
-    //    @Override
-//    public Iterator<StorageView<T>> iterator() {
-//        List<StorageView<T>> views = new ArrayList<>();
-//        for (int i = 0; i < tankCreator.get().size(); i++) {
-//            views.add(createView(i));
-//        }
-//        return views.iterator();
-//    }
 }

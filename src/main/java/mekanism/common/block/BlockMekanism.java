@@ -127,12 +127,21 @@ public abstract class BlockMekanism extends Block {
         }
         for (SubstanceType type : EnumUtils.SUBSTANCES) {
             if (tile.handles(type)) {
-                dataMap.put(type.getContainerTag(), DataHandlerUtils.writeContainers(type.getContainers(tile)));
+                if (type == SubstanceType.ENERGY) {
+                    if (!type.getContainers(tile).isEmpty()) {
+                        dataMap.put(type.getContainerTag(), type.getContainers(tile).get(0).serializeNBT());
+                    }
+                }else {
+                    dataMap.put(type.getContainerTag(), DataHandlerUtils.writeContainers(type.getContainers(tile)));
+                }
             }
         }
         if (item instanceof IItemSustainedInventory sustainedInventory && tile.persistInventory() && tile.getItemManager().canHandle() && tile.getItemManager().getHolder().getAll().size() > 0) {
             sustainedInventory.setSustainedInventory(tile.getSustainedInventory(), itemStack);
         }
+        CompoundTag nbt = new CompoundTag();
+        nbt.put(NBTConstants.MEK_DATA, dataMap);
+        itemStack.setTag(nbt);
         return itemStack;
     }
 
@@ -301,7 +310,13 @@ public abstract class BlockMekanism extends Block {
         }
         for (SubstanceType type : EnumUtils.SUBSTANCES) {
             if (type.canHandle(tile)) {
-                DataHandlerUtils.readContainers(type.getContainers(tile), dataMap.getList(type.getContainerTag(), Tag.TAG_COMPOUND));
+                if (type == SubstanceType.ENERGY) { // Energy dont have a list, only one energy Storage
+                    if (!type.getContainers(tile).isEmpty()) {
+                        type.getContainers(tile).get(0).deserializeNBT(dataMap.getCompound(type.getContainerTag()));
+                    }
+                }else {
+                    DataHandlerUtils.readContainers(type.getContainers(tile), dataMap.getList(type.getContainerTag(), Tag.TAG_COMPOUND));
+                }
             }
         }
         if (tile instanceof ISustainedData sustainedData && stack.hasTag()) {

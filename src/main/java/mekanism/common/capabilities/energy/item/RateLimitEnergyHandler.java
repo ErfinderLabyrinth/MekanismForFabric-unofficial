@@ -72,11 +72,6 @@ public class RateLimitEnergyHandler extends ItemStackEnergyHandler {
         return Collections.singletonList(energyContainer);
     }
 
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-
-    }
-
     private static class RateLimitEnergyContainer extends VariableCapacityEnergyContainer {
 
         private final LongSupplier rate;

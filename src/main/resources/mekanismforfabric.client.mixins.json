@@ -5,28 +5,37 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "AbstractContainerScreenMixin",
+    "BlockElementDeserializerMixin",
+    "BlockElementFaceDeserializerMixin",
+    "BlockElementFaceMixin",
+    "BlockElementMixin",
+    "BlockEntityWithoutLevelRendererMixin",
     "BlockModelDeserializerMixin",
     "BlockModelMixin",
     "BlockRenderDispatcherMixin",
     "ClientPacketListenerMixin",
     "ElytraLayerMixin",
+    "FaceBakeryMixin",
     "FogRendererMixin",
     "GuiGraphicsMixin",
     "GuiMixin",
+    "ItemModelGeneratorMixin",
+    "ItemRendererMixin",
     "LevelRendererMixin",
     "LivingEntityRendererMixin",
     "MinecraftMixin",
+    "ModelBlockRendererMixin",
     "ModelManagerMixin",
     "MouseHandlerMixin",
     "PlayerRendererMixin",
-    "TextureAtlasMixin"
+    "TextureAtlasMixin",
+    "VanillaModelEncoderMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
     "ChunkMapMixin",
-    "ChunkSerializerMixin",
-    "ServerPlayerGameModeMixin"
+    "ChunkSerializerMixin"
   ]
 }

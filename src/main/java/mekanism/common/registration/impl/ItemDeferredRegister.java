@@ -25,9 +25,11 @@ import java.util.function.Supplier;
 public class ItemDeferredRegister extends WrappedDeferredRegister<Item> {
 
     private final List<ItemRegistryObject<? extends Item>> allItems = new ArrayList<>();
+    private final String modid;
 
     public ItemDeferredRegister(String modid) {
         super(BuiltInRegistries.ITEM);
+        this.modid = modid;
     }
 
     public ItemRegistryObject<Item> register(ResourceLocation id) {
@@ -52,9 +54,9 @@ public class ItemDeferredRegister extends WrappedDeferredRegister<Item> {
         });
     }
 
-    public ItemRegistryObject<ItemModule> registerModule(ResourceLocation id, ModuleRegistryObject<?> moduleDataSupplier) {
+    public ItemRegistryObject<ItemModule> registerModule(ModuleRegistryObject<?> moduleDataSupplier) {
         //Note: We use the internal helper just in case we end up needing to know it is an ItemModule instead of just an Item somewhere
-        return register(id, () -> ModuleHelper.get().createModuleItem(moduleDataSupplier, new Item.Properties()));
+        return register(new ResourceLocation(modid, "module_" + moduleDataSupplier.getInternalRegistryName()), () -> ModuleHelper.get().createModuleItem(moduleDataSupplier, new Item.Properties()));
     }
 
     public <ITEM extends Item> ItemRegistryObject<ITEM> register(ResourceLocation id, Function<Item.Properties, ITEM> sup) {

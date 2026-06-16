@@ -88,7 +88,7 @@ public class TileEntityDimensionalStabilizer extends TileEntityMekanism implemen
         super.onUpdateServer();
         energySlot.fillContainerOrConvert();
         //Only attempt to use power if chunk loading isn't disabled in the config
-        if (MekanismConfig.general.allowChunkloading && MekanismUtils.canFunction(this)) {
+        if (MekanismConfig.COMMON.general.allowChunkloading && MekanismUtils.canFunction(this)) {
             long energyPerTick = energyContainer.getEnergyPerTick();
             try(Transaction t=Transaction.openOuter()) {
                 if (energyContainer.extract(energyPerTick, t) == energyPerTick) {
@@ -350,7 +350,7 @@ public class TileEntityDimensionalStabilizer extends TileEntityMekanism implemen
 
         @Override
         public boolean canOperate() {
-            return MekanismConfig.general.allowChunkloading && getActive();
+            return MekanismConfig.COMMON.general.allowChunkloading && getActive();
         }
     }
 }

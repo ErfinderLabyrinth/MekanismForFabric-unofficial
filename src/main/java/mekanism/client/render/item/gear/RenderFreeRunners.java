@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class RenderFreeRunners extends MekanismISTER {
     public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "free_runners");
+    public static final ResourceLocation ID_ARMORED = new ResourceLocation(Mekanism.MODID, "armored_free_runners");
     public static final RenderFreeRunners RENDERER = new RenderFreeRunners(false);
     public static final RenderFreeRunners ARMORED_RENDERER = new RenderFreeRunners(true);
 
@@ -47,6 +48,6 @@ public class RenderFreeRunners extends MekanismISTER {
 
     @Override
     public ResourceLocation getFabricId() {
-        return ID;
+        return armored ? ID_ARMORED : ID;
     }
 }

@@ -2,7 +2,12 @@ package mekanism.common.config;
 
 import me.shedaniel.autoconfig.annotation.Config;
 import mekanism.api.math.FloatingLong;
+import mekanism.common.tier.ChemicalTankTier;
+import mekanism.common.tier.EnergyCubeTier;
+import mekanism.common.tier.FluidTankTier;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,91 +31,91 @@ public class GeneralConfig extends BaseMekanismConfig {
     private static final String PREFILLED_CATEGORY = "prefilled";
     private static final String NUTRITIONAL_PASTE_CATEGORY = "nutritional_paste";
 
-    public boolean logPackets;
-    public boolean allowChunkloading;
-    public boolean easyMinerFilters;
-    public int blockDeactivationDelay;
-    public List<String> cardboardModBlacklist;
-    public boolean transmitterAlloyUpgrade;
-    public int maxUpgradeMultiplier;
-    public double boilerWaterConductivity;
-    public double heatPerFuelTick;
-    public int fuelwoodTickMultiplier;
-    public double resistiveHeaterEfficiency;
-    public double superheatingHeatTransfer;
-    public int maxSolarNeutronActivatorRate;
+    public boolean logPackets = false;
+    public boolean allowChunkloading = true;
+    public boolean easyMinerFilters = false;
+    public int blockDeactivationDelay = 60;
+    public List<String> cardboardModBlacklist = Collections.singletonList("cardboardModBlacklist");
+    public boolean transmitterAlloyUpgrade = true;
+    public int maxUpgradeMultiplier = 10;
+    public double boilerWaterConductivity = 0.7;
+    public double heatPerFuelTick = 400;
+    public int fuelwoodTickMultiplier = 1;
+    public double resistiveHeaterEfficiency = 0.6;
+    public double superheatingHeatTransfer = 16_000_000;
+    public int maxSolarNeutronActivatorRate = 64;
     //Auto eject
-    public int fluidAutoEjectRate;
-    public long chemicalAutoEjectRate;
-    public double dumpExcessKeepRatio;
+    public int fluidAutoEjectRate = 1_024;
+    public long chemicalAutoEjectRate = 1_024L;
+    public double dumpExcessKeepRatio = 0.9D;
     //Dynamic Tank
-    public int dynamicTankFluidPerTank;
-    public long dynamicTankChemicalPerTank;
+    public int dynamicTankFluidPerTank = 350_000;
+    public long dynamicTankChemicalPerTank = 16_000_000;
     //Prefilled
-    public boolean prefilledFluidTanks;
-    public boolean prefilledGasTanks;
-    public boolean prefilledInfusionTanks;
-    public boolean prefilledPigmentTanks;
-    public boolean prefilledSlurryTanks;
+    public boolean prefilledFluidTanks = true;
+    public boolean prefilledGasTanks = true;
+    public boolean prefilledInfusionTanks = true;
+    public boolean prefilledPigmentTanks = true;
+    public boolean prefilledSlurryTanks = true;
     //Energy Conversion
-    public boolean blacklistIC2;
-    public double ic2ConversionRate;
-    public boolean blacklistForge;
-    public double forgeConversionRate;
-    public boolean blacklistFluxNetworks;
-    public long FROM_H2;
-    public FloatingLong maxEnergyPerSteam;
+    public boolean blacklistIC2 = false;
+    public double ic2ConversionRate = 10;
+    public boolean blacklistForge = false;
+    public double forgeConversionRate = 2.5;
+    public boolean blacklistFluxNetworks = false;
+    public long FROM_H2 = 200;
+    public double maxEnergyPerSteam = 10;
     //Radiation
-    public boolean radiationEnabled;
-    public int radiationChunkCheckRadius;
-    public double radiationSourceDecayRate;
-    public double radiationTargetDecayRate;
-    public double radiationNegativeEffectsMinSeverity;
-    public long radioactiveWasteBarrelMaxGas;
-    public int radioactiveWasteBarrelProcessTicks;
-    public long radioactiveWasteBarrelDecayAmount;
+    public boolean radiationEnabled = true;
+    public int radiationChunkCheckRadius = 5;
+    public double radiationSourceDecayRate = 0.9995D;
+    public double radiationTargetDecayRate = 0.9995D;
+    public double radiationNegativeEffectsMinSeverity = 0.1D;
+    public long radioactiveWasteBarrelMaxGas = 512_000;
+    public int radioactiveWasteBarrelProcessTicks = 20;
+    public long radioactiveWasteBarrelDecayAmount = 1;
     //Digital Miner
-    public int minerSilkMultiplier;
-    public int minerMaxRadius;
-    public int minerTicksPerMine;
+    public int minerSilkMultiplier = 12;
+    public int minerMaxRadius = 32;
+    public int minerTicksPerMine = 80;
     //Laser
-    public boolean aestheticWorldDamage;
-    public int laserRange;
-    public long laserEnergyNeededPerHardness;
-    public long laserEnergyPerDamage;
+    public boolean aestheticWorldDamage = true;
+    public int laserRange = 64;
+    public long laserEnergyNeededPerHardness = 100_000;
+    public long laserEnergyPerDamage = 2_500;
     //Oredictionificator
-    public Map<String, List<String>> validOredictionificatorFilters;
+    public Map<String, List<String>> validOredictionificatorFilters = Collections.singletonMap("forge", List.of("ingots/", "ores/", "dusts/", "nuggets/", "storage_blocks/", "raw_materials/"));
     //Pump
-    public int maxPumpRange;
-    public boolean pumpWaterSources;
-    public int pumpHeavyWaterAmount;
-    public int maxPlenisherNodes;
+    public int maxPumpRange = 80;
+    public boolean pumpWaterSources = false;
+    public long pumpHeavyWaterAmount = FluidConstants.BUCKET / 100;
+    public int maxPlenisherNodes = 4_000;
     //Quantum Entangloporter
-    public long entangloporterEnergyBuffer;
-    public int entangloporterFluidBuffer;
-    public long entangloporterChemicalBuffer;
+    public long entangloporterEnergyBuffer = EnergyCubeTier.ULTIMATE.getBaseMaxEnergy();
+    public int entangloporterFluidBuffer = FluidTankTier.ULTIMATE.getBaseStorage();
+    public long entangloporterChemicalBuffer = ChemicalTankTier.ULTIMATE.getBaseStorage();
     //Security
-    public boolean allowProtection;
-    public boolean opsBypassRestrictions;
+    public boolean allowProtection = true;
+    public boolean opsBypassRestrictions = false;
     //Nutritional Paste
-    public float nutritionalPasteSaturation;
-    public int nutritionalPasteMBPerFood;
+    public float nutritionalPasteSaturation = 0.8F;
+    public int nutritionalPasteMBPerFood = 50;
     //Boiler
-    public int boilerWaterPerTank;
-    public long boilerSteamPerTank;
-    public long boilerHeatedCoolantPerTank;
-    public long boilerCooledCoolantPerTank;
+    public long boilerWaterPerTank = 16 * FluidConstants.BUCKET;
+    public long boilerSteamPerTank = 160L * FluidConstants.BUCKET;
+    public long boilerHeatedCoolantPerTank = 256L * FluidConstants.BUCKET;
+    public long boilerCooledCoolantPerTank = 256L * FluidConstants.BUCKET;
     //Thermal Evaporation Tower
-    public double evaporationHeatDissipation;
-    public double evaporationTempMultiplier;
-    public double evaporationSolarMultiplier;
-    public double evaporationHeatCapacity;
-    public int evaporationFluidPerTank;
-    public int evaporationOutputTankCapacity;
+    public double evaporationHeatDissipation = 0.02;
+    public double evaporationTempMultiplier = 0.4;
+    public double evaporationSolarMultiplier = 0.2;
+    public double evaporationHeatCapacity = 100D;
+    public long evaporationFluidPerTank = 64 * FluidConstants.BUCKET;
+    public long evaporationOutputTankCapacity = 10 * FluidConstants.BUCKET;
     //SPS
-    public int spsInputPerAntimatter;
-    public long spsOutputTankCapacity;
-    public FloatingLong spsEnergyPerInput;
+    public int spsInputPerAntimatter = 1_000;
+    public long spsOutputTankCapacity = FluidConstants.BUCKET;
+    public long spsEnergyPerInput = 1_000_000;
 
     GeneralConfig() {
 //        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();

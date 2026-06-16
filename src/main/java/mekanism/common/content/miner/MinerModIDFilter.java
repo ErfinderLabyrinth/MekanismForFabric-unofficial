@@ -6,6 +6,7 @@ import mekanism.common.content.filter.FilterType;
 import mekanism.common.content.filter.IModIDFilter;
 import mekanism.common.lib.WildcardMatcher;
 import mekanism.common.network.BasePacketHandler;
+import mekanism.common.util.NetworkUtil;
 import mekanism.common.util.RegistryUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -61,7 +62,7 @@ public class MinerModIDFilter extends MinerFilter<MinerModIDFilter> implements I
     @Override
     public void read(FriendlyByteBuf dataStream) {
         super.read(dataStream);
-        modID = BasePacketHandler.readString(dataStream);
+        modID = NetworkUtil.readString(dataStream);
     }
 
     @Override

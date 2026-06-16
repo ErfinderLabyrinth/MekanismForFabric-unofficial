@@ -18,9 +18,6 @@
     "main": [
       "mekanism.common.Mekanism"
     ],
-    "fabric-model-loading": [
-      "mekanism.client.model.MekanismModelLoadingPlugin"
-    ],
     "fabric-datagen": [
       "mekanism.common.MekanismDataGenerator"
     ]

@@ -149,7 +149,7 @@ public class TileEntityLogisticalSorter extends TileEntityMekanism implements IS
     @Override
     protected void onUpdateClient() {
         super.onUpdateClient();
-        if (MekanismConfig.client.enableMachineSounds && getActive() && level.getGameTime() >= nextSound) {
+        if (MekanismConfig.CLIENT.client.enableMachineSounds && getActive() && level.getGameTime() >= nextSound) {
             if (!isFullyMuffled()) {
                 SoundHandler.startTileSound(soundEvent, getSoundCategory(), getInitialVolume(), level.getRandom(), getSoundPos(), false);
             }

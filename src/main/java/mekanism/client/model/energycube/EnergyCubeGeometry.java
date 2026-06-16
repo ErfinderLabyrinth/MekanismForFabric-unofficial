@@ -29,31 +29,25 @@ public class EnergyCubeGeometry extends CustomGeometry {
     }
 
     @Override
-    public BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
-          ItemOverrides overrides, ResourceLocation modelLocation) {
+    public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
+          ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
         //TODO
 
-        //        TextureAtlasSprite particle = spriteGetter.apply(context.getMaterial("particle"));
+        TextureAtlasSprite particle = spriteGetter.apply(blockModel.getMaterial("particle"));
 
-//        ResourceLocation renderTypeHint = context.getRenderTypeHint();
+//        ResourceLocation renderTypeHint = blockModel.getRenderTypeHint();
 //        RenderTypeGroup renderTypes = renderTypeHint == null ? RenderTypeGroup.EMPTY : context.getRenderType(renderTypeHint);
-//
+
 //        Transformation rootTransform = context.getRootTransform();
 //        if (!rootTransform.isIdentity()) {
 //            modelState = new SimpleModelState(modelState.getRotation().compose(rootTransform), modelState.isUvLocked());
 //        }
-//        Function<String, TextureAtlasSprite> rawSpriteGetter = spriteGetter.compose(context::getMaterial);
-//        FaceData frame = bakeElement(rawSpriteGetter, modelState, modelLocation, this.frame);
-//        Map<RelativeSide, FaceData> leds = bakeElements(rawSpriteGetter, modelState, modelLocation, this.leds);
-//        Map<RelativeSide, FaceData> ports = bakeElements(rawSpriteGetter, modelState, modelLocation, this.ports);
-//        return new EnergyCubeBakedModel(context.useAmbientOcclusion(), context.useBlockLight(), context.isGui3d(), context.getTransforms(), overrides, particle, frame, leds, ports,
-//              renderTypes);
-        return new EnergyCubeBakedModel(true, true, true, ItemTransforms.NO_TRANSFORMS, overrides, spriteGetter.apply(null), new FaceData(), Map.of(), Map.of());
-    }
-
-    @Override
-    public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
-
+        Function<String, TextureAtlasSprite> rawSpriteGetter = spriteGetter.compose(blockModel::getMaterial);
+        FaceData frame = bakeElement(rawSpriteGetter, modelState, modelLocation, this.frame);
+        Map<RelativeSide, FaceData> leds = bakeElements(rawSpriteGetter, modelState, modelLocation, this.leds);
+        Map<RelativeSide, FaceData> ports = bakeElements(rawSpriteGetter, modelState, modelLocation, this.ports);
+        return new EnergyCubeBakedModel(blockModel.hasAmbientOcclusion(), blockModel.getGuiLight().lightLikeBlock(), gui3d, blockModel.getTransforms(), overrides, particle, frame, leds, ports);
+        //return new EnergyCubeBakedModel(true, true, true, ItemTransforms.NO_TRANSFORMS, overrides, spriteGetter.apply(null), new FaceData(), Map.of(), Map.of());
     }
 
     private Map<RelativeSide, FaceData> bakeElements(Function<String, TextureAtlasSprite> spriteGetter, ModelState modelState,

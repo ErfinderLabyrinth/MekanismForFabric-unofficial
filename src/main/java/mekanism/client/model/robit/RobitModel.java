@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import mekanism.client.model.CustomGeometry;
 import net.minecraft.client.renderer.block.model.BlockElement;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
@@ -24,14 +25,9 @@ public class RobitModel extends CustomGeometry {
     }
 
     @Override
-    public BakedModel bake(ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
-          ItemOverrides overrides, ResourceLocation modelLocation) {
-        return new RobitBakedModel(super.bake(baker, spriteGetter, modelTransform, overrides, modelLocation));
-    }
-
-    @Override
-    public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
-
+    public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
+                           ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
+        return new RobitBakedModel(super.bake(blockModel, baker, spriteGetter, modelTransform, overrides, modelLocation, alreadyBaked));
     }
 
     /**

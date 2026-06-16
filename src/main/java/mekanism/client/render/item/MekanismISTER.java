@@ -9,6 +9,7 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
@@ -20,7 +21,10 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer implements IdentifiableResourceReloadListener {
 
@@ -55,7 +59,7 @@ public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer impl
      * @implNote Heavily based on/from vanilla's ItemRenderer#render code that calls the renderByItem method on the ISBER
      */
     protected void renderBlockItem(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight/*, ModelData modelData*/) {
+                                   int light, int overlayLight/*, ModelData modelData*/, QuadsGetter quadsGetter) {
         if (!(stack.getItem() instanceof BlockItem blockItem)) {
             return;
         }
@@ -90,7 +94,7 @@ public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer impl
             itemRenderer.renderQuadList(
                     matrix,
                     buffer,
-                    model.getQuads(state, direction, random),
+                    quadsGetter.getQuads(model, state, direction, random),
                     stack,
                     light,
                     overlayLight
@@ -101,10 +105,14 @@ public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer impl
         itemRenderer.renderQuadList(
                 matrix,
                 buffer,
-                model.getQuads(state, null, random),
+                quadsGetter.getQuads(model, state, null, random),
                 stack,
                 light,
                 overlayLight
         );
+    }
+
+    public interface QuadsGetter {
+        List<BakedQuad> getQuads(BakedModel model, BlockState state, Direction direction, RandomSource random);
     }
 }

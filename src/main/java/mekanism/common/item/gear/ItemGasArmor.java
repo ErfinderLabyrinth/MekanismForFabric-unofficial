@@ -61,7 +61,7 @@ public abstract class ItemGasArmor extends ItemSpecialArmor implements IGasItem,
 
     @Override
     protected boolean areCapabilityConfigsLoaded() {
-        return super.areCapabilityConfigsLoaded() && MekanismConfig.gear.isLoaded();
+        return super.areCapabilityConfigsLoaded() && MekanismConfig.COMMON.gear.isLoaded();
     }
 
 //    @Override

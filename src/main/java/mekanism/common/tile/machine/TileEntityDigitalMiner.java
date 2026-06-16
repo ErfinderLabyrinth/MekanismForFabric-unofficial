@@ -108,7 +108,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     private boolean recheckOverflow;
 
     private int delay;
-    private int delayLength = MekanismConfig.general.minerTicksPerMine;
+    private int delayLength = MekanismConfig.COMMON.general.minerTicksPerMine;
     private int cachedToMine;
     private boolean silkTouch;
     private boolean running;
@@ -345,7 +345,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     }
 
     public void setRadiusFromPacket(int newRadius) {
-        setRadius(Mth.clamp(newRadius, 0, MekanismConfig.general.minerMaxRadius));
+        setRadius(Mth.clamp(newRadius, 0, MekanismConfig.COMMON.general.minerMaxRadius));
         //Send a packet to update the visual renderer
         //TODO: Only do this if the renderer is actually active
         sendUpdatePacket();
@@ -968,7 +968,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
 
     @Override
     public void readSustainedData(CompoundTag dataMap) {
-        setRadius(Math.min(dataMap.getInt(NBTConstants.RADIUS), MekanismConfig.general.minerMaxRadius));
+        setRadius(Math.min(dataMap.getInt(NBTConstants.RADIUS), MekanismConfig.COMMON.general.minerMaxRadius));
         NBTUtils.setIntIfPresent(dataMap, NBTConstants.MIN, newMinY -> {
             if (hasLevel() && !isRemote()) {
                 setMinY(Math.max(newMinY, level.getMinBuildHeight()));
@@ -1039,7 +1039,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     public void recalculateUpgrades(Upgrade upgrade) {
         super.recalculateUpgrades(upgrade);
         if (upgrade == Upgrade.SPEED) {
-            delayLength = MekanismUtils.getTicks(this, MekanismConfig.general.minerTicksPerMine);
+            delayLength = MekanismUtils.getTicks(this, MekanismConfig.COMMON.general.minerTicksPerMine);
         }
     }
 
@@ -1303,7 +1303,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
 
     @ComputerMethod(methodDescription = "Get the maximum allowable Radius value, determined from the mod's config")
     int getMaxRadius() {
-        return MekanismConfig.general.minerMaxRadius;
+        return MekanismConfig.COMMON.general.minerMaxRadius;
     }
 
     private void validateCanChangeConfiguration() throws ComputerException {
@@ -1317,9 +1317,9 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     @ComputerMethod(nameOverride = "setRadius", requiresPublicSecurity = true, methodDescription = "Update the mining radius (blocks). Requires miner to be stopped/reset first")
     void computerSetRadius(int radius) throws ComputerException {
         validateCanChangeConfiguration();
-        if (radius < 0 || radius > MekanismConfig.general.minerMaxRadius) {
+        if (radius < 0 || radius > MekanismConfig.COMMON.general.minerMaxRadius) {
             //Validate dimensions even though we can clamp
-            throw new ComputerException("Radius '%d' is out of range must be between 0 and %d. (Inclusive)", radius, MekanismConfig.general.minerMaxRadius);
+            throw new ComputerException("Radius '%d' is out of range must be between 0 and %d. (Inclusive)", radius, MekanismConfig.COMMON.general.minerMaxRadius);
         }
         setRadiusFromPacket(radius);
     }

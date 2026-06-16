@@ -36,7 +36,7 @@ public class ItemNutritionalPasteBucket extends BucketItem {
     @Override
     public InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
         if (MekanismUtils.isPlayingMode(player)) {
-            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), (int) FluidConstants.BUCKET / MekanismConfig.general.nutritionalPasteMBPerFood);
+            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), (int) FluidConstants.BUCKET / MekanismConfig.COMMON.general.nutritionalPasteMBPerFood);
             if (needed > 0) {
                 return ItemUtils.startUsingInstantly(level, player, hand);
             }
@@ -48,14 +48,14 @@ public class ItemNutritionalPasteBucket extends BucketItem {
     @Override
     public ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity entity) {
         if (entity instanceof Player player && MekanismUtils.isPlayingMode(player)) {
-            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), (int) FluidConstants.BUCKET / MekanismConfig.general.nutritionalPasteMBPerFood);
+            int needed = Math.min(20 - player.getFoodData().getFoodLevel(), (int) FluidConstants.BUCKET / MekanismConfig.COMMON.general.nutritionalPasteMBPerFood);
             if (needed > 0) {
                 if (entity instanceof ServerPlayer serverPlayer) {
                     CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
                     serverPlayer.awardStat(Stats.ITEM_USED.get(this));
                 }
                 if (!level.isClientSide) {
-                    player.getFoodData().eat(needed, MekanismConfig.general.nutritionalPasteSaturation);
+                    player.getFoodData().eat(needed, MekanismConfig.COMMON.general.nutritionalPasteSaturation);
                 }
                 stack.shrink(1);
                 return stack.isEmpty() ? new ItemStack(Items.BUCKET) : stack;

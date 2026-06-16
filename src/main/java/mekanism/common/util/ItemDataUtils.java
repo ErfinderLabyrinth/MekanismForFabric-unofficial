@@ -194,7 +194,7 @@ public final class ItemDataUtils {
         }
     }
 
-    public static void readContainers(ItemStack stack, String containerKey, List<? extends NBTSerializable<?>> containers) {
+    public static void readContainers(ItemStack stack, String containerKey, List<? extends NBTSerializable<CompoundTag>> containers) {
         if (!stack.isEmpty()) {
             DataHandlerUtils.readContainers(containers, getList(stack, containerKey));
         }

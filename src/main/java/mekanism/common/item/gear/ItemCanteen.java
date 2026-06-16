@@ -59,23 +59,23 @@ public class ItemCanteen extends Item implements ICustomCreativeTabContents, Ite
 
     @Override
     public void addItems(CreativeModeTab.Output tabOutput) {
-        tabOutput.accept(FluidUtils.getFilledVariant(new ItemStack(this), MekanismConfig.gear.canteenMaxStorage, MekanismFluids.NUTRITIONAL_PASTE));
+        tabOutput.accept(FluidUtils.getFilledVariant(new ItemStack(this), MekanismConfig.COMMON.gear.canteenMaxStorage * 81, MekanismFluids.NUTRITIONAL_PASTE));
     }
 
     @NotNull
     @Override
     public ItemStack finishUsingItem(@NotNull ItemStack stack, @NotNull Level world, @NotNull LivingEntity entityLiving) {
         if (!world.isClientSide && entityLiving instanceof Player player) {
-            int needed = (int) Math.min(20 - player.getFoodData().getFoodLevel(), getFluid(stack).amount() / MekanismConfig.general.nutritionalPasteMBPerFood);
+            int needed = (int) Math.min(20 - player.getFoodData().getFoodLevel(), getFluid(stack).amount() / MekanismConfig.COMMON.general.nutritionalPasteMBPerFood);
             if (needed > 0) {
-                player.getFoodData().eat(needed, MekanismConfig.general.nutritionalPasteSaturation);
+                player.getFoodData().eat(needed, MekanismConfig.COMMON.general.nutritionalPasteSaturation);
                 Storage<FluidVariant> handler = ContainerItemContext.ofPlayerHand(player, player.getUsedItemHand()).find(FluidStorage.ITEM);
                 if (handler != null) {
                     Iterator<StorageView<FluidVariant>> iterator = handler.iterator();
                     if (iterator.hasNext()) {
                         StorageView<FluidVariant> view = iterator.next();
                         try(Transaction t=Transaction.openOuter()) {
-                            handler.extract(view.getResource(), needed * MekanismConfig.general.nutritionalPasteMBPerFood, t);
+                            handler.extract(view.getResource(), needed * MekanismConfig.COMMON.general.nutritionalPasteMBPerFood, t);
                             t.commit();
                         }
                     }
@@ -111,7 +111,7 @@ public class ItemCanteen extends Item implements ICustomCreativeTabContents, Ite
 
     @Override
     public Storage<FluidVariant> getFluidStorage(ContainerItemContext context) {
-        return new FluidItemStorage(context, () -> RateLimitFluidHandler.create(() -> MekanismConfig.gear.canteenTransferRate, () -> MekanismConfig.gear.canteenMaxStorage,
+        return new FluidItemStorage(context, () -> RateLimitFluidHandler.create(() -> MekanismConfig.COMMON.gear.canteenTransferRate, () -> MekanismConfig.COMMON.gear.canteenMaxStorage,
                 BasicFluidTank.alwaysTrueBi, BasicFluidTank.alwaysTrueBi, fluid -> fluid.getFluid() == MekanismFluids.NUTRITIONAL_PASTE.getFluid()).getTanks());
     }
 

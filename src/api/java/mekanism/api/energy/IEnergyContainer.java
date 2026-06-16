@@ -43,7 +43,7 @@ public interface IEnergyContainer extends NBTSerializable<CompoundTag>, IContent
     void setEnergy(long energy, TransactionContext t);
 
     default void setEnergy(long energy) {
-        try(Transaction t = Transaction.openOuter()) {
+        try(Transaction t = Transaction.isOpen() ? Transaction.openNested(Transaction.getCurrentUnsafe()) : Transaction.openOuter()) {
             setEnergy(energy, t);
             t.commit();
         }
@@ -105,19 +105,19 @@ public interface IEnergyContainer extends NBTSerializable<CompoundTag>, IContent
         updateSnapshots(t);
         if (amount == 0) {
             //"Fail quick" if the given amount is empty
-            return amount;
+            return 0;
         }
         long needed = getNeeded();
         if (needed == 0) {
             //Fail if we are a full container
-            return amount;
+            return 0;
         }
-        long toAdd = amount - needed;
-        if (toAdd != 0) {
-            //If we want to actually insert the energy, then update the current energy
-            // Note: this also will mark that the contents changed
-            setEnergy(getEnergy() + toAdd, t);
-        }
+        long toAdd = Math.min(amount, needed);
+
+        //If we want to actually insert the energy, then update the current energy
+        // Note: this also will mark that the contents changed
+        setEnergy(getEnergy() + toAdd, t);
+
         return toAdd;
     }
 
@@ -215,7 +215,7 @@ public interface IEnergyContainer extends NBTSerializable<CompoundTag>, IContent
     }
 
     default void setEmpty() {
-        try(Transaction t = Transaction.openOuter()) {
+        try(Transaction t = Transaction.isOpen() ? Transaction.openNested(Transaction.getCurrentUnsafe()) : Transaction.openOuter()) {
             setEmpty(t);
             t.commit();
         }
@@ -243,8 +243,15 @@ public interface IEnergyContainer extends NBTSerializable<CompoundTag>, IContent
     default CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
         if (!isEmpty()) {
-            nbt.putString(NBTConstants.STORED, String.valueOf(getEnergy()));
+            nbt.putLong(NBTConstants.STORED, getEnergy());
         }
         return nbt;
+    }
+
+    @Override
+    default void deserializeNBT(CompoundTag nbt) {
+        if (nbt.contains(NBTConstants.STORED)) {
+            setEnergy(nbt.getLong(NBTConstants.STORED));
+        }
     }
 }

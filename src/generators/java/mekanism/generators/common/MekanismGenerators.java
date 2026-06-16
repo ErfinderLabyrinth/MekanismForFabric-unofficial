@@ -45,8 +45,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod(MekanismGenerators.MODID)
-public class MekanismGenerators implements IModModule {
+public class MekanismGenerators implements ModInitializer, IModModule {
 
     public static final String MODID = "mekanismgenerators";
     private static final ConfigBasedCachedFLSupplier ETHENE_ENERGY_DENSITY = new ConfigBasedCachedFLSupplier(() -> {

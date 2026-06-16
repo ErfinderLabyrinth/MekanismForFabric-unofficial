@@ -172,7 +172,7 @@ public interface IStrictEnergyHandler {
             if(action.execute()) {
                 t.commit();
             }
-            return inserted;
+            return amount.subtract(inserted);
         }
     }
 

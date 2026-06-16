@@ -86,13 +86,13 @@ public class InventoryFrequency extends Frequency implements /*IMekanismInventor
     }
 
     private void presetVariables() {
-        fluidTanks = Collections.singletonList(storedFluid = BasicFluidTank.create(MekanismConfig.general.entangloporterFluidBuffer, this));
-        gasTanks = Collections.singletonList(storedGas = ChemicalTankBuilder.GAS.create(MekanismConfig.general.entangloporterChemicalBuffer, this));
-        infusionTanks = Collections.singletonList(storedInfusion = ChemicalTankBuilder.INFUSION.create(MekanismConfig.general.entangloporterChemicalBuffer, this));
-        pigmentTanks = Collections.singletonList(storedPigment = ChemicalTankBuilder.PIGMENT.create(MekanismConfig.general.entangloporterChemicalBuffer, this));
-        slurryTanks = Collections.singletonList(storedSlurry = ChemicalTankBuilder.SLURRY.create(MekanismConfig.general.entangloporterChemicalBuffer, this));
+        fluidTanks = Collections.singletonList(storedFluid = BasicFluidTank.create(MekanismConfig.COMMON.general.entangloporterFluidBuffer, this));
+        gasTanks = Collections.singletonList(storedGas = ChemicalTankBuilder.GAS.create(MekanismConfig.COMMON.general.entangloporterChemicalBuffer, this));
+        infusionTanks = Collections.singletonList(storedInfusion = ChemicalTankBuilder.INFUSION.create(MekanismConfig.COMMON.general.entangloporterChemicalBuffer, this));
+        pigmentTanks = Collections.singletonList(storedPigment = ChemicalTankBuilder.PIGMENT.create(MekanismConfig.COMMON.general.entangloporterChemicalBuffer, this));
+        slurryTanks = Collections.singletonList(storedSlurry = ChemicalTankBuilder.SLURRY.create(MekanismConfig.COMMON.general.entangloporterChemicalBuffer, this));
         inventorySlots = Collections.singletonList(storedItem = EntangloporterInventorySlot.create(this));
-        energyContainers = Collections.singletonList(storedEnergy = BasicEnergyContainer.create(MekanismConfig.general.entangloporterEnergyBuffer, this));
+        energyContainers = Collections.singletonList(storedEnergy = BasicEnergyContainer.create(MekanismConfig.COMMON.general.entangloporterEnergyBuffer, this));
         heatCapacitors = Collections.singletonList(storedHeat = BasicHeatCapacitor.create(HeatAPI.DEFAULT_HEAT_CAPACITY, HeatAPI.DEFAULT_INVERSE_CONDUCTION,
               1_000, null, this));
     }

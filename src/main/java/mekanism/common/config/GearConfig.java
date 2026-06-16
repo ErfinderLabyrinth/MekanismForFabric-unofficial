@@ -1,9 +1,14 @@
 package mekanism.common.config;
 
 import me.shedaniel.autoconfig.annotation.Config;
+import mekanism.common.item.gear.ItemMekaSuitArmor;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterials;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Config(name = "gear")
 public class GearConfig extends BaseMekanismConfig {
@@ -51,8 +56,8 @@ public class GearConfig extends BaseMekanismConfig {
     public long tabletMaxEnergy = 1_000_000;
     public long tabletChargeRate = 5_000;
     //Flamethrower
-    public long flamethrowerMaxGas = 24_000;
-    public long flamethrowerFillRate = 16;
+    public long flamethrowerMaxGas = 24_000 * 81;
+    public long flamethrowerFillRate = 16 * 81;
     public boolean flamethrowerDestroyItems = true;
     //Free runner
     public long freeRunnerFallEnergyCost = 50;
@@ -64,8 +69,8 @@ public class GearConfig extends BaseMekanismConfig {
     public float armoredFreeRunnerToughness = 2F;
     public float armoredFreeRunnerKnockbackResistance = 0F;
     //Jetpack
-    public long jetpackMaxGas = 24_000;
-    public long jetpackFillRate = 16;
+    public long jetpackMaxGas = 24_000 * 81;
+    public long jetpackFillRate = 16 * 81;
     //Armored Jetpack
     public int armoredJetpackArmor = 8;
     public float armoredJetpackToughness = 2F;
@@ -79,15 +84,15 @@ public class GearConfig extends BaseMekanismConfig {
     public long networkReaderChargeRate = 300;
     public long networkReaderEnergyUsage = 400;
     //Scuba Tank
-    public long scubaMaxGas = 24_000;
-    public long scubaFillRate = 16;
+    public long scubaMaxGas = 24_000 * 81;
+    public long scubaFillRate = 16 * 81;
     //Seismic Reader
     public long seismicReaderMaxEnergy = 12_000;
     public long seismicReaderChargeRate = 60;
     public long seismicReaderEnergyUsage = 250;
     //Canteen
-    public int canteenMaxStorage = 64_000;
-    public int canteenTransferRate = 128;
+    public int canteenMaxStorage = 64_000 * 81;
+    public int canteenTransferRate = 128 * 81;
     //Meka-Tool
     public long mekaToolEnergyUsageWeapon = 2_000;
     public long mekaToolEnergyUsageTeleport = 1_000;
@@ -116,26 +121,26 @@ public class GearConfig extends BaseMekanismConfig {
     public long mekaSuitEnergyUsageGravitationalModulation = 1_000;
     public long mekaSuitInventoryChargeRate = 10_000;
     public long mekaSuitSolarRechargingRate = 500;
-    public long mekaSuitEnergyUsageVisionEnhancement;
-    public long mekaSuitEnergyUsageHydrostaticRepulsion;
-    public long mekaSuitEnergyUsageNutritionalInjection;
-    public long mekaSuitEnergyUsageDamage;
-    public long mekaSuitEnergyUsageItemAttraction;
-    public boolean mekaSuitGravitationalVibrations;
-    public int mekaSuitNutritionalMaxStorage;
-    public int mekaSuitNutritionalTransferRate;
-    public long mekaSuitJetpackMaxStorage;
-    public long mekaSuitJetpackTransferRate;
-    public int mekaSuitHelmetArmor;
-    public int mekaSuitBodyArmorArmor;
-    public int mekaSuitPantsArmor;
-    public int mekaSuitBootsArmor;
-    public float mekaSuitToughness;
-    public float mekaSuitKnockbackResistance;
-    public Map<ResourceLocation, Float> mekaSuitDamageRatios;
-    public float mekaSuitFallDamageRatio;
-    public float mekaSuitMagicDamageRatio;
-    public float mekaSuitUnspecifiedDamageRatio;
+    public long mekaSuitEnergyUsageVisionEnhancement = 500;
+    public long mekaSuitEnergyUsageHydrostaticRepulsion = 500;
+    public long mekaSuitEnergyUsageNutritionalInjection = 20_000;
+    public long mekaSuitEnergyUsageDamage = 100_000;
+    public long mekaSuitEnergyUsageItemAttraction = 250;
+    public boolean mekaSuitGravitationalVibrations = true;
+    public int mekaSuitNutritionalMaxStorage = 128_000 * 81;
+    public int mekaSuitNutritionalTransferRate = 256 * 81;
+    public long mekaSuitJetpackMaxStorage = 48_000 * 81;
+    public long mekaSuitJetpackTransferRate = 256 * 81;
+    public int mekaSuitHelmetArmor = ArmorMaterials.NETHERITE.getDefenseForType(ArmorItem.Type.HELMET);
+    public int mekaSuitBodyArmorArmor = ArmorMaterials.NETHERITE.getDefenseForType(ArmorItem.Type.CHESTPLATE);
+    public int mekaSuitPantsArmor = ArmorMaterials.NETHERITE.getDefenseForType(ArmorItem.Type.LEGGINGS);
+    public int mekaSuitBootsArmor = ArmorMaterials.NETHERITE.getDefenseForType(ArmorItem.Type.BOOTS);
+    public float mekaSuitToughness = ArmorMaterials.NETHERITE.getToughness();
+    public float mekaSuitKnockbackResistance = ArmorMaterials.NETHERITE.getKnockbackResistance();
+    public Map<String, Float> mekaSuitDamageRatios = ItemMekaSuitArmor.BASE_ALWAYS_SUPPORTED.stream().collect(Collectors.toMap(key -> key.location().toString(), ItemMekaSuitArmor::getBaseDamageRatio));
+    public float mekaSuitFallDamageRatio = 1;
+    public float mekaSuitMagicDamageRatio = 1;
+    public float mekaSuitUnspecifiedDamageRatio = 1;
 
     GearConfig() {
 //        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();

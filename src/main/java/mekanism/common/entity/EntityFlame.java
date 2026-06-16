@@ -147,7 +147,7 @@ public class EntityFlame extends Projectile {
         Direction hitSide = blockRayTrace.getDirection();
         BlockState hitState = level().getBlockState(hitPos);
         boolean hitFluid = !hitState.getFluidState().isEmpty();
-        if (!level().isClientSide && MekanismConfig.general.aestheticWorldDamage && !hitFluid) {
+        if (!level().isClientSide && MekanismConfig.COMMON.general.aestheticWorldDamage && !hitFluid) {
             if (mode == FlamethrowerMode.HEAT) {
                 Entity owner = getOwner();
                 if (owner instanceof Player player) {
@@ -236,7 +236,7 @@ public class EntityFlame extends Projectile {
     }
 
     private void burn(Entity entity) {
-        if (!(entity instanceof ItemEntity) || MekanismConfig.gear.flamethrowerDestroyItems) {
+        if (!(entity instanceof ItemEntity) || MekanismConfig.COMMON.gear.flamethrowerDestroyItems) {
             //Only actually burn the entity if it is not an item, or we allow destroying items
             entity.setSecondsOnFire(20);
             entity.hurt(damageSources().thrown(this, getOwner()), DAMAGE);

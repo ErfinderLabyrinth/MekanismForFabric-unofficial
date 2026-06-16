@@ -20,7 +20,7 @@ public class HeatUtils {
     public static final double HEATED_COOLANT_TEMP = 100_000D;
 
     public static double getWaterThermalEnthalpy() {
-        return MekanismConfig.general.maxEnergyPerSteam.doubleValue();
+        return MekanismConfig.COMMON.general.maxEnergyPerSteam;
     }
 
     public static double getSteamEnergyEfficiency() {

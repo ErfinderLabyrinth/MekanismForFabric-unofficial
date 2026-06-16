@@ -17,38 +17,38 @@ public class ClientConfig extends BaseMekanismConfig {
     private static final String GUI_WINDOW_CATEGORY = "window";
     private static final String QIO_CATEGORY = "qio";
 
-    public boolean enablePlayerSounds;
-    public boolean enableMachineSounds;
-    public boolean whiteRadialText;
-    public boolean holidays;
-    public float baseSoundVolume;
-    public boolean opaqueTransmitters;
-    public boolean allowModeScroll;
-    public boolean reverseHUD;
-    public float hudScale;
-    public boolean enableHUD;
-    public int energyColor;
-    public int terRange;
+    public boolean enablePlayerSounds = true;
+    public boolean enableMachineSounds = true;
+    public boolean whiteRadialText = false;
+    public boolean holidays = true;
+    public float baseSoundVolume = 1F;
+    public boolean opaqueTransmitters = false;
+    public boolean allowModeScroll = true;
+    public boolean reverseHUD = false;
+    public float hudScale = 0.6F;
+    public boolean enableHUD = true;
+    public int energyColor = 0x3CFE9A;
+    public int terRange = 256;
 
-    public boolean enableMultiblockFormationParticles;
-    public boolean machineEffects;
-    public int radiationParticleRadius;
-    public int radiationParticleCount;
-    public boolean renderMagneticAttractionParticles;
-    public boolean renderToolAOEParticles;
+    public boolean enableMultiblockFormationParticles = true;
+    public boolean machineEffects = true;
+    public int radiationParticleRadius = 30;
+    public int radiationParticleCount = 100;
+    public boolean renderMagneticAttractionParticles = true;
+    public boolean renderToolAOEParticles = true;
 
-    public float hudOpacity;
-    public int hudColor;
-    public int hudWarningColor;
-    public int hudDangerColor;
-    public float hudJitter;
-    public boolean hudCompassEnabled;
+    public float hudOpacity = 0.4F;
+    public int hudColor = 0x40F5F0;
+    public int hudWarningColor = 0xFFDD4F;
+    public int hudDangerColor = 0xFF383C;
+    public float hudJitter = 6F;
+    public boolean hudCompassEnabled = true;
     public Map<String, CachedWindowPosition> lastWindowPositions = new HashMap<>();
 
-    public ListSortType qioItemViewerSortType;
-    public SortDirection qioItemViewerSortDirection;
-    public int qioItemViewerSlotsX;
-    public int qioItemViewerSlotsY;
+    public ListSortType qioItemViewerSortType = ListSortType.NAME;
+    public SortDirection qioItemViewerSortDirection = SortDirection.ASCENDING;
+    public int qioItemViewerSlotsX = 8;
+    public int qioItemViewerSlotsY = 4;
 
     ClientConfig() {
 //        builder.comment("Client Config. This config only exists on the client").push("client");

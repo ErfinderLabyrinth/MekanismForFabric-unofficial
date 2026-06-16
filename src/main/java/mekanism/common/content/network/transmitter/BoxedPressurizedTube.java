@@ -120,8 +120,8 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
         }
     }
 
-    private boolean pullFromAcceptor(BoxedChemicalHandler acceptor, ChemicalType chemicalType, BoxedChemicalStack bufferWithFallback, boolean bufferIsEmpty) {
-        IChemicalHandler<?, ?, ?> handler = acceptor.getHandlerFor(chemicalType);
+    private <CHEMICAL extends Chemical<CHEMICAL>> boolean pullFromAcceptor(BoxedChemicalHandler acceptor, ChemicalType chemicalType, BoxedChemicalStack bufferWithFallback, boolean bufferIsEmpty) {
+        Storage<CHEMICAL> handler = acceptor.getHandlerFor(chemicalType);
         if (handler != null) {
             return pullFromAcceptor(handler, bufferWithFallback, chemicalType, bufferIsEmpty);
         }
@@ -136,10 +136,10 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
      *
      * @return {@code true} if we successfully pulled a chemical, {@code false} if we were unable to pull a chemical.
      */
-    private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>>
-    boolean pullFromAcceptor(HANDLER connectedAcceptor, BoxedChemicalStack bufferWithFallback, ChemicalType chemicalType, boolean bufferIsEmpty) {
+    private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>>
+    boolean pullFromAcceptor(Storage<CHEMICAL> connectedAcceptor, BoxedChemicalStack bufferWithFallback, ChemicalType chemicalType, boolean bufferIsEmpty) {
         long availablePull = getAvailablePull(chemicalType);
-        STACK received = connectedAcceptor.getEmptyStack();
+        STACK received = (STACK) connectedAcceptor.iterator().next().getResource().getStack(0);
         if (bufferIsEmpty) {
             Iterator<StorageView<CHEMICAL>> iterator = connectedAcceptor.nonEmptyIterator();
             if (iterator.hasNext()) {

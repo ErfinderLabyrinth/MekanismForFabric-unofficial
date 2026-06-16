@@ -86,17 +86,15 @@ public class EnergyCubeBakedModel implements BakedModel {
     }
 
     @NotNull
-    @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
-//        CubeSideState[] sideStates = data.get(TileEntityEnergyCube.SIDE_STATE_PROPERTY);
-//        if (sideStates == null || sideStates.length != EnumUtils.SIDES.length) {
-//            //If there is no side data then treat everything as inactive
-//            sideStates = INACTIVE;
-//        }
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, CubeSideState[] sideStates) {
+        if (sideStates == null || sideStates.length != EnumUtils.SIDES.length) {
+            //If there is no side data then treat everything as inactive
+            sideStates = INACTIVE;
+        }
         //Note: We intentionally ignore the state and use null here to minimize cache size as it doesn't actually matter
         // or get used for energy cube models
         QuadsKey<CubeSideState[]> key = new QuadsKey<>(null, side, rand, null, frame.getFaces(side));
-//        key.data(sideStates, Arrays.hashCode(sideStates), DATA_EQUALITY_CHECK);
+        key.data(sideStates, Arrays.hashCode(sideStates), DATA_EQUALITY_CHECK);
         return cache.getUnchecked(key);
     }
 
@@ -119,6 +117,11 @@ public class EnergyCubeBakedModel implements BakedModel {
             }
         }
         return quads;
+    }
+
+    @Override
+    public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, RandomSource randomSource) {
+        return List.of();
     }
 
     @Override

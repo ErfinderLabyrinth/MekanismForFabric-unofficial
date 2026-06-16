@@ -57,7 +57,7 @@ public class ModuleGravitationalModulatingUnit implements ICustomModule<ModuleGr
     public void tickClient(IModule<ModuleGravitationalModulatingUnit> module, Player player) {
         //Client side handling of boost as movement needs to be applied on both the server and the client
         if (player.getAbilities().flying && MekanismKeyHandler.boostKey.isDown() &&
-            module.canUseEnergy(player, MekanismConfig.gear.mekaSuitEnergyUsageGravitationalModulation * 4, false)) {
+            module.canUseEnergy(player, MekanismConfig.COMMON.gear.mekaSuitEnergyUsageGravitationalModulation * 4, false)) {
             float boost = getBoost();
             if (boost > 0) {
                 player.moveRelative(boost, new Vec3(0, 0, 1));

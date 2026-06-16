@@ -1,6 +1,7 @@
 package mekanism.client.gui.element.tab;
 
 import mekanism.api.text.ILangEntry;
+import mekanism.client.MekanismClient;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.tab.GuiMatrixTab.MatrixTab;
@@ -44,7 +45,7 @@ public class GuiMatrixTab extends GuiTabElementType<TileEntityInductionCasing, M
 
         @Override
         public void onClick(TileEntityInductionCasing tile) {
-            Mekanism.packetHandler().sendToServer(new PacketGuiButtonPress(button, tile));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketGuiButtonPress(button, tile));
         }
 
         @Override

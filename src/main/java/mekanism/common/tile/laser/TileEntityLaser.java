@@ -23,6 +23,6 @@ public class TileEntityLaser extends TileEntityBasicLaser {
 
     @Override
     protected long toFire() {
-        return MekanismConfig.usage.laser;
+        return MekanismConfig.COMMON.usage.laser;
     }
 }

@@ -49,16 +49,16 @@ public class TeamRebornStrictEnergyHandler implements IStrictEnergyHandler {
     @Override
     public FloatingLong insertEnergy(int container, FloatingLong amount, TransactionContext t) {
         if (container == 0 && storage.supportsInsertion()) {
-            int toInsert = UnitDisplayUtils.EnergyUnit.FORGE_ENERGY.convertToAsInt(amount.longValue());
+            long toInsert = amount.longValue(); //UnitDisplayUtils.EnergyUnit.FORGE_ENERGY.convertToAsInt(amount.longValue());
             if (toInsert > 0) {
                 long inserted = storage.insert(toInsert, t);
                 if (inserted > 0) {
                     //Only bother converting back if any was inserted
-                    return amount.subtract(UnitDisplayUtils.EnergyUnit.FORGE_ENERGY.convertFrom(inserted));
+                    return FloatingLong.create(inserted); //amount.subtract(UnitDisplayUtils.EnergyUnit.FORGE_ENERGY.convertFrom(inserted));
                 }
             }
         }
-        return amount;
+        return FloatingLong.ZERO;
     }
 
     @Override

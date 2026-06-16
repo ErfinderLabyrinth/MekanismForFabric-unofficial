@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class RobitSpriteUploader extends TextureAtlasHolder implements IdentifiableResourceReloadListener {
+    public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "robit");
 
     public static final ResourceLocation ATLAS_LOCATION = Mekanism.rl("textures/atlas/robit.png");
     public static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(ATLAS_LOCATION);
@@ -34,6 +35,6 @@ public class RobitSpriteUploader extends TextureAtlasHolder implements Identifia
 
     @Override
     public ResourceLocation getFabricId() {
-        return null;
+        return ID;
     }
 }

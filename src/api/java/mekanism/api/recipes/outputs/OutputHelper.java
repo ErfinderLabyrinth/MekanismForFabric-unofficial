@@ -1,5 +1,6 @@
 package mekanism.api.recipes.outputs;
 
+import mekanism.api.AutomationType;
 import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
@@ -239,7 +240,7 @@ public class OutputHelper {
             output.setCount(output.getCount() * operations);
         }
         try(Transaction t=Transaction.openOuter()) {
-            inventorySlot.insert(ItemVariant.of(output), output.getCount(), t);
+            inventorySlot.insert(ItemVariant.of(output), output.getCount(), t, AutomationType.INTERNAL);
             t.commit();
         }
     }

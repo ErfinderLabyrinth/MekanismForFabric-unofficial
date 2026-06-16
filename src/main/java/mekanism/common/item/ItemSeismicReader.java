@@ -29,7 +29,7 @@ import java.util.List;
 public class ItemSeismicReader extends ItemEnergized {
 
     public ItemSeismicReader(Properties properties) {
-        super(() -> MekanismConfig.gear.seismicReaderChargeRate, () -> MekanismConfig.gear.seismicReaderMaxEnergy, properties.rarity(Rarity.UNCOMMON));
+        super(() -> MekanismConfig.COMMON.gear.seismicReaderChargeRate, () -> MekanismConfig.COMMON.gear.seismicReaderMaxEnergy, properties.rarity(Rarity.UNCOMMON));
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ItemSeismicReader extends ItemEnergized {
         } else {
             if (!player.isCreative()) {
                 EnergyStorage energyContainer = ContainerItemContext.forPlayerInteraction(player, hand).find(EnergyStorage.ITEM);
-                long energyUsage = MekanismConfig.gear.seismicReaderEnergyUsage;
+                long energyUsage = MekanismConfig.COMMON.gear.seismicReaderEnergyUsage;
                 try(Transaction t=Transaction.openOuter()) {
                     if (energyContainer == null || energyContainer.extract(energyUsage, t) < energyUsage) {
                         player.sendSystemMessage(MekanismUtils.logFormat(EnumColor.RED, MekanismLang.NEEDS_ENERGY));

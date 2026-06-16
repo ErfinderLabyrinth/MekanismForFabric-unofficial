@@ -79,6 +79,9 @@ public class ClientRegistrationUtil {
         return -1;
     };
     private static final ItemColor BUCKET_ITEM_COLOR = (ItemStack itemStack, int tintIndex) -> {
+        if (tintIndex < 1) {
+            return -1;
+        }
         if (itemStack.getItem() instanceof BucketItem bucket) {
             Fluid fluid = bucket.content;
             for (FluidRegistryObject<?, ?, ?, ?> registeredFluid : MekanismFluids.FLUIDS.getAllFluids()) {

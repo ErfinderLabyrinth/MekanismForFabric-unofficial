@@ -35,7 +35,7 @@ public class ResizableOreFeature extends Feature<ResizableOreFeatureConfig> {
         WorldGenLevel world = context.level();
         ResizableOreFeatureConfig config = context.config();
         float angle = random.nextFloat() * (float) Math.PI;
-        float adjustedSize = config.size().getAsInt() / 8.0F;
+        float adjustedSize = config.size() / 8.0F;
         int i = Mth.ceil((adjustedSize + 1.0F) / 2.0F);
         double sin = Math.sin(angle) * adjustedSize;
         double cos = Math.cos(angle) * adjustedSize;
@@ -64,7 +64,7 @@ public class ResizableOreFeature extends Feature<ResizableOreFeatureConfig> {
           double yMax, int minXStart, int minYStart, int minZStart, int width, int height) {
         BitSet bitset = new BitSet(width * height * width);
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        int size = config.size().getAsInt();
+        int size = config.size();
         double[] adouble = new double[size * 4];
         for (int k = 0; k < size; ++k) {
             float f = k / (float) size;
@@ -98,7 +98,7 @@ public class ResizableOreFeature extends Feature<ResizableOreFeatureConfig> {
         }
         int i = 0;
         try (BulkSectionAccess bulkSectionAccess = new BulkSectionAccess(world)) {
-            float discardChanceOnAirExposure = config.discardChanceOnAirExposure().getAsFloat();
+            float discardChanceOnAirExposure = config.discardChanceOnAirExposure();
             for (int j = 0; j < size; ++j) {
                 int j4 = j * 4;
                 double d1 = adouble[j4 + 3];

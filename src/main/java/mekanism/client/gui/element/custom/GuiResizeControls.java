@@ -83,7 +83,7 @@ public class GuiResizeControls extends GuiSideHolder {
     }
 
     private int getIndex() {
-        return MekanismConfig.client.qioItemViewerSlotsY;
+        return MekanismConfig.CLIENT.client.qioItemViewerSlotsY;
     }
 
     public enum ResizeType {
