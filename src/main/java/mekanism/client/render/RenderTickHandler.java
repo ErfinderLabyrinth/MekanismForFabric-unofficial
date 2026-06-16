@@ -7,6 +7,7 @@ import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.GuiRadialSelector;
 import mekanism.client.render.MekanismRenderer.Model3D;
 import mekanism.client.render.RenderResizableCuboid.FaceDisplay;
+import mekanism.client.render.armor.ICustomArmor;
 import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.client.render.armor.MekaSuitArmor;
 import mekanism.client.render.hud.RadiationOverlay;
@@ -201,7 +202,7 @@ public class RenderTickHandler {
     public boolean renderArm(AbstractClientPlayer player, HumanoidArm arm, PoseStack poseStack, MultiBufferSource multiBufferSource, int packetLight) {
         ItemStack chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
         if (chestStack.getItem() instanceof ISpecialGearGetter armorItem) {
-            MekaSuitArmor armor = (MekaSuitArmor) armorItem.getSpecialGear().getGearModel(ArmorItem.Type.CHESTPLATE);
+            ICustomArmor armor = armorItem.getSpecialGear().getGearModel(ArmorItem.Type.CHESTPLATE);
             PlayerRenderer renderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
             PlayerModel<AbstractClientPlayer> model = renderer.getModel();
             model.setAllVisible(true);
@@ -216,7 +217,9 @@ public class RenderTickHandler {
             model.crouching = false;
             model.swimAmount = 0.0F;
             model.setupAnim(player, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-            armor.renderArm(model, poseStack, multiBufferSource, packetLight, OverlayTexture.NO_OVERLAY, player, chestStack, rightHand);
+            if (armor instanceof MekaSuitArmor mekaSuitArmor) {
+                mekaSuitArmor.renderArm(model, poseStack, multiBufferSource, packetLight, OverlayTexture.NO_OVERLAY, player, chestStack, rightHand);
+            }
             return true;
         }
         return false;
