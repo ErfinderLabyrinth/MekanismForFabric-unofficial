@@ -12,6 +12,7 @@ import mekanism.common.inventory.container.slot.ContainerSlotType;
 import mekanism.common.inventory.slot.BasicInventorySlot;
 import mekanism.common.recipe.IMekanismRecipeTypeProvider;
 import mekanism.common.recipe.lookup.cache.InputRecipeCache.SingleItem;
+import mekanism.common.storage.util.TransactionPredicate;
 import mekanism.common.util.MekanismUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -44,7 +45,7 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
         return foundRecipe == null ? empty : foundRecipe.getOutput(itemStack);
     }
 
-    protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> Predicate<@NotNull ItemStack> getFillOrConvertExtractPredicate(
+    protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> TransactionPredicate<@NotNull ItemStack> getFillOrConvertExtractPredicate(
           IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ContainerItemContext, Storage<CHEMICAL>> handlerFunction,
           Function<ItemStack, STACK> potentialConversionSupplier) {
         return stack -> {
@@ -65,10 +66,10 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
         };
     }
 
-    protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> Predicate<@NotNull ItemStack> getFillOrConvertInsertPredicate(
+    protected static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> TransactionPredicate.WithTransaction<@NotNull ItemStack> getFillOrConvertInsertPredicate(
           IChemicalTank<CHEMICAL, STACK> chemicalTank, Function<@NotNull ContainerItemContext, Storage<CHEMICAL>> handlerFunction,
           Function<ItemStack, STACK> potentialConversionSupplier) {
-        return stack -> {
+        return (stack, transaction) -> {
             if (fillInsertCheck(chemicalTank, handlerFunction.apply(ContainerItemContext.withConstant(stack)))) {
                 return true;
             }
@@ -78,7 +79,7 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
                 return false;
             }
             long canInserted;
-            try(Transaction t=Transaction.openOuter()) {
+            try(Transaction t=Transaction.openNested(transaction)) {
                 canInserted = chemicalTank.insert(conversion.getType(), conversion.getAmount(), t);
             }
             if (canInserted != 0) {
@@ -159,12 +160,17 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
     protected final Supplier<Level> worldSupplier;
     protected final IChemicalTank<CHEMICAL, STACK> chemicalTank;
 
-    protected ChemicalInventorySlot(IChemicalTank<CHEMICAL, STACK> chemicalTank, Supplier<Level> worldSupplier, Predicate<@NotNull ItemStack> canExtract,
-          Predicate<@NotNull ItemStack> canInsert, Predicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
+    protected ChemicalInventorySlot(IChemicalTank<CHEMICAL, STACK> chemicalTank, Supplier<Level> worldSupplier, TransactionPredicate<@NotNull ItemStack> canExtract,
+          TransactionPredicate<@NotNull ItemStack> canInsert, TransactionPredicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
         super(canExtract, canInsert, validator, listener, x, y);
         setSlotType(ContainerSlotType.EXTRA);
         this.chemicalTank = chemicalTank;
         this.worldSupplier = worldSupplier;
+    }
+
+    protected ChemicalInventorySlot(IChemicalTank<CHEMICAL, STACK> chemicalTank, Supplier<Level> worldSupplier, Predicate<@NotNull ItemStack> canExtract,
+          Predicate<@NotNull ItemStack> canInsert, Predicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
+        this(chemicalTank, worldSupplier, TransactionPredicate.of(canExtract), TransactionPredicate.of(canInsert), TransactionPredicate.of(validator), listener, x, y);
     }
 
     @Nullable

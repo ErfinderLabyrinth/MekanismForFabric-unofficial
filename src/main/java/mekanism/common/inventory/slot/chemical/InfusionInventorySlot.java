@@ -10,6 +10,7 @@ import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.api.recipes.ItemStackToInfuseTypeRecipe;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.recipe.MekanismRecipeType;
+import mekanism.common.storage.util.TransactionPredicate;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.world.item.ItemStack;
@@ -56,8 +57,8 @@ public class InfusionInventorySlot extends ChemicalInventorySlot<InfuseType, Inf
         }, listener, x, y);
     }
 
-    private InfusionInventorySlot(IInfusionTank infusionTank, Supplier<Level> worldSupplier, Predicate<@NotNull ItemStack> canExtract,
-          Predicate<@NotNull ItemStack> canInsert, Predicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
+    private InfusionInventorySlot(IInfusionTank infusionTank, Supplier<Level> worldSupplier, TransactionPredicate<@NotNull ItemStack> canExtract,
+            TransactionPredicate<@NotNull ItemStack> canInsert, TransactionPredicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
         super(infusionTank, worldSupplier, canExtract, canInsert, validator, listener, x, y);
     }
 

@@ -11,6 +11,8 @@ import mekanism.common.inventory.container.slot.ContainerSlotType;
 import mekanism.common.inventory.container.slot.InventoryContainerSlot;
 import mekanism.common.inventory.container.slot.SlotOverlay;
 import mekanism.common.inventory.warning.ISupportsWarning;
+import mekanism.common.storage.util.TransactionBiPredicate;
+import mekanism.common.storage.util.TransactionPredicate;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.RegistryUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -68,9 +70,9 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
      * instead.
      */
     protected SimpleSingleStackStorage current = new SimpleSingleStackStorage();
-    private final BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canExtract;
-    private final BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canInsert;
-    private final Predicate<@NotNull ItemStack> validator;
+    private final TransactionBiPredicate<@NotNull ItemStack, @NotNull AutomationType> canExtract;
+    private final TransactionBiPredicate<@NotNull ItemStack, @NotNull AutomationType> canInsert;
+    private final TransactionPredicate<@NotNull ItemStack> validator;
     private final int limit;
     @Nullable
     private final IContentsListener listener;
@@ -83,19 +85,30 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
     @Nullable
     private Consumer<ISupportsWarning<?>> warningAdder;
 
-    protected BasicInventorySlot(Predicate<@NotNull ItemStack> canExtract, Predicate<@NotNull ItemStack> canInsert, Predicate<@NotNull ItemStack> validator,
+    protected BasicInventorySlot(TransactionPredicate<@NotNull ItemStack> canExtract, TransactionPredicate<@NotNull ItemStack> canInsert, TransactionPredicate<@NotNull ItemStack> validator,
           @Nullable IContentsListener listener, int x, int y) {
-        this((stack, automationType) -> automationType == AutomationType.MANUAL || canExtract.test(stack), (stack, automationType) -> canInsert.test(stack),
+        this(TransactionBiPredicate.withTransaction((stack, automationType, transaction) -> automationType == AutomationType.MANUAL || canExtract.test(stack, transaction)), TransactionBiPredicate.withTransaction((stack, automationType, transaction) -> canInsert.test(stack, transaction)),
               validator, listener, x, y);
     }
 
-    protected BasicInventorySlot(BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canExtract, BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canInsert,
-          Predicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
+    protected BasicInventorySlot(Predicate<@NotNull ItemStack> canExtract, Predicate<@NotNull ItemStack> canInsert, Predicate<@NotNull ItemStack> validator,
+                                 @Nullable IContentsListener listener, int x, int y) {
+        this((stack, automationType) -> automationType == AutomationType.MANUAL || canExtract.test(stack), (stack, automationType) -> canInsert.test(stack),
+                validator, listener, x, y);
+    }
+
+    protected BasicInventorySlot(TransactionBiPredicate<@NotNull ItemStack, @NotNull AutomationType> canExtract, TransactionBiPredicate<@NotNull ItemStack, @NotNull AutomationType> canInsert,
+                                 TransactionPredicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
         this(DEFAULT_LIMIT, canExtract, canInsert, validator, listener, x, y);
     }
 
-    protected BasicInventorySlot(int limit, BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canExtract,
-          BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canInsert, Predicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
+    protected BasicInventorySlot(BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canExtract, BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canInsert,
+                                 Predicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
+        this(DEFAULT_LIMIT, canExtract, canInsert, validator, listener, x, y);
+    }
+
+    protected BasicInventorySlot(int limit, TransactionBiPredicate<@NotNull ItemStack, @NotNull AutomationType> canExtract,
+                                 TransactionBiPredicate<@NotNull ItemStack, @NotNull AutomationType> canInsert, TransactionPredicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
         this.limit = limit;
         this.canExtract = canExtract;
         this.canInsert = canInsert;
@@ -103,6 +116,11 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
         this.listener = listener;
         this.x = x;
         this.y = y;
+    }
+
+    protected BasicInventorySlot(int limit, BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canExtract,
+          BiPredicate<@NotNull ItemStack, @NotNull AutomationType> canInsert, Predicate<@NotNull ItemStack> validator, @Nullable IContentsListener listener, int x, int y) {
+        this(limit, TransactionBiPredicate.of(canExtract), TransactionBiPredicate.of(canInsert), TransactionPredicate.of(validator), listener, x, y);
     }
 
     @Override
@@ -143,6 +161,11 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
 
     @Override
     public boolean isItemValid(ItemStack stack) {
+        return validator.test(stack);
+    }
+
+    @Override
+    public boolean isItemValid(ItemStack stack, TransactionContext transaction) {
         return validator.test(stack);
     }
 
@@ -281,7 +304,7 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
     public long insert(ItemVariant resource, long amount, TransactionContext transaction, AutomationType automationType) {
         updateSnapshots(transaction);
         ItemStack stack = resource.toStack((int) Math.min(amount, Integer.MAX_VALUE));
-        if (resource.isBlank() || amount == 0 || !isItemValid(stack) || !canInsert.test(stack, automationType)) {
+        if (resource.isBlank() || amount == 0 || !isItemValid(stack, transaction) || !canInsert.test(stack, automationType, transaction)) {
             //"Fail quick" if the given stack is empty, or we can never insert the item or currently are unable to insert it
             return 0;
         }
@@ -317,7 +340,7 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
 
     public long extract(ItemVariant resource, long amount, TransactionContext transaction, AutomationType type) {
         updateSnapshots(transaction);
-        if (isEmpty() || amount < 1 || !canExtract.test(current.getStack(), type)) {
+        if (isEmpty() || amount < 1 || !canExtract.test(current.getStack(), type, transaction)) {
             //"Fail quick" if we don't can never extract from this slot, have an item stored, or the amount being requested is less than one
             return 0;
         }

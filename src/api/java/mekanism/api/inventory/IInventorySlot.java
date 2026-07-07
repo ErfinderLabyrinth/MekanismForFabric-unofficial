@@ -78,7 +78,7 @@ public interface IInventorySlot extends NBTSerializable<CompoundTag>, IContentsL
     default long insert(ItemVariant resource, long amount, TransactionContext transaction, AutomationType automationType) {
         updateSnapshots(transaction);
         ItemStack stack = resource.toStack((int)Math.max(Integer.MAX_VALUE, amount));
-        if (resource.isBlank() || amount == 0 || !isItemValid(stack)) {
+        if (resource.isBlank() || amount == 0 || !isItemValid(stack, transaction)) {
             //"Fail quick" if the given stack is empty, or we can never insert the item or currently are unable to insert it
             return 0;
         }
@@ -179,6 +179,10 @@ public interface IInventorySlot extends NBTSerializable<CompoundTag>, IContentsL
      * {@link IInventorySlot} can never insert the {@link ItemStack} in any situation.
      */
     boolean isItemValid(ItemStack stack);
+
+    default boolean isItemValid(ItemStack stack, TransactionContext context) {
+        return isItemValid(stack);
+    }
 
     /**
      * Returns a slot for use in auto adding slots to a container.
