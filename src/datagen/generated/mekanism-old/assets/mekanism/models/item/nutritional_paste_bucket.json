@@ -1,5 +1,0 @@
-{
-  "parent": "forge:item/bucket",
-  "fluid": "mekanism:nutritional_paste",
-  "loader": "forge:fluid_container"
-}

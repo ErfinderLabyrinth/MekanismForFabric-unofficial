@@ -56,7 +56,7 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
 
     public final <T> BUILDER addForced(Function<T, ResourceLocation> locationGetter, T... elements) {
         for (T element : elements) {
-            builder.add(new ForcedTagEntry(TagEntry.element(locationGetter.apply(element))));
+            builder.add(new MekanismForcedTagEntry(TagEntry.element(locationGetter.apply(element))));
         }
         return self();
     }
@@ -97,7 +97,7 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
         return self();
     }
 
-    public class MekanismForcedTagEntry extends TagEntry {
+    public static class MekanismForcedTagEntry extends TagEntry {
         TagEntry origin;
         private MekanismForcedTagEntry(TagEntry origin) {
             super(origin.id, origin.tag, origin.required);

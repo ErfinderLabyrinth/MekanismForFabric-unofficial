@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": "#mekanism:spawn_ores",
-  "features": "mekanism:salt",
-  "step": "underground_ores"
-}
