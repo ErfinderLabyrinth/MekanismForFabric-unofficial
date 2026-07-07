@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,14 +37,14 @@ public class FluidNetwork extends DynamicBufferedNetwork<Storage<FluidVariant>, 
     //TODO: Make fluid storage support storing as longs?
     private int intCapacity;
 
-    public FluidNetwork(UUID networkID) {
-        super(networkID);
+    public FluidNetwork(UUID networkID, Level world) {
+        super(networkID, world);
         fluidTank = VariableCapacityFluidTank.create(this::getCapacityAsInt, BasicFluidTank.alwaysTrueBi, BasicFluidTank.alwaysTrueBi, BasicFluidTank.alwaysTrue, this);
         fluidTanks = Collections.singletonList(fluidTank);
     }
 
-    public FluidNetwork(Collection<FluidNetwork> networks) {
-        this(UUID.randomUUID());
+    public FluidNetwork(Collection<FluidNetwork> networks, Level world) {
+        this(UUID.randomUUID(), world);
         adoptAllAndRegister(networks);
     }
 

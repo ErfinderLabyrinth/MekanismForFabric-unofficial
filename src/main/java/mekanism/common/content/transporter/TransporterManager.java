@@ -142,7 +142,7 @@ public class TransporterManager {
             }
             if (needsSimulation) {
                 long simulatedRemainder;
-                try(Transaction t = Transaction.openOuter()) {
+                try(Transaction t = Transaction.isOpen() ? Transaction.openNested(Transaction.getCurrentUnsafe()) : Transaction.openOuter()) {
                     simulatedRemainder = stack.amount() - handler.insert(stack.getResource(), stack.amount(), t);
                 }
                 long accepted = stack.amount() - simulatedRemainder;
@@ -287,7 +287,10 @@ public class TransporterManager {
      * Information about the inventory, keeps track of the size of a stack a slot will have, and a cache of what {@link IItemHandler#getStackInSlot(int)} returns (as it
      * has to call it anyway to get the stack size). This cache allows potentially expensive {@link IItemHandler#getStackInSlot(int)} implementations to only have to be
      * called once instead of potentially many times as well as allowing for lazily caching slot limits.
+     * @deprecated incompactible with fabric transfer api
      */
+
+    @Deprecated
     private static class InventoryInfo {
 
         private final List<BigItemStack> inventory;
@@ -309,7 +312,7 @@ public class TransporterManager {
                 inventory.add(stack);
                 actualStackSizes.add(stack.amount());
                 stackSizes.add(stack.amount());
-                slotLimits.add(stack.getCapacity());
+                slotLimits.add(view.getCapacity());
                 slots++;
             }
         }

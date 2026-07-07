@@ -51,6 +51,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -66,6 +67,10 @@ import java.util.List;
 import java.util.UUID;
 
 public abstract class BlockMekanism extends Block {
+    @Override
+    public RenderShape getRenderShape(BlockState blockState) {
+        return super.getRenderShape(blockState);
+    }
 
     protected BlockMekanism(BlockBehaviour.Properties properties) {
         super(BlockStateHelper.applyLightLevelAdjustments(properties));

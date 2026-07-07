@@ -7,6 +7,7 @@ import mekanism.common.lib.math.Range3D;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,8 +29,8 @@ public abstract class DynamicBufferedNetwork<ACCEPTOR, NETWORK extends DynamicBu
     private long lastMarkDirtyTime;
     public float currentScale;
 
-    protected DynamicBufferedNetwork(UUID networkID) {
-        super(networkID);
+    protected DynamicBufferedNetwork(UUID networkID, Level world) {
+        super(networkID, world);
     }
 
     protected abstract float computeContentScale();

@@ -30,6 +30,7 @@ import mekanism.common.util.MekanismUtils;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,8 +51,8 @@ public class BoxedChemicalNetwork extends DynamicBufferedNetwork<BoxedChemicalHa
     public BoxedChemical lastChemical = BoxedChemical.EMPTY;
     private long prevTransferAmount;
 
-    public BoxedChemicalNetwork(UUID networkID) {
-        super(networkID);
+    public BoxedChemicalNetwork(UUID networkID, Level world) {
+        super(networkID, world);
         chemicalTank = MergedChemicalTank.create(
               VariableCapacityChemicalTankBuilder.GAS.createAllValid(this::getCapacity, this),
               VariableCapacityChemicalTankBuilder.INFUSION.createAllValid(this::getCapacity, this),
@@ -64,8 +65,8 @@ public class BoxedChemicalNetwork extends DynamicBufferedNetwork<BoxedChemicalHa
         slurryTanks = chemicalTank.getSlurryTank();
     }
 
-    public BoxedChemicalNetwork(Collection<BoxedChemicalNetwork> networks) {
-        this(UUID.randomUUID());
+    public BoxedChemicalNetwork(Collection<BoxedChemicalNetwork> networks, Level world) {
+        this(UUID.randomUUID(), world);
         adoptAllAndRegister(networks);
     }
 

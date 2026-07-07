@@ -258,6 +258,16 @@ public class ClientRegistration {
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.STRUCTURAL_GLASS.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.SUPERCHARGED_COIL.getBlock(), RenderType.cutout());
 
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.BASIC_INDUCTION_CELL.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ADVANCED_INDUCTION_CELL.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELITE_INDUCTION_CELL.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ULTIMATE_INDUCTION_CELL.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.BASIC_INDUCTION_PROVIDER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ADVANCED_INDUCTION_PROVIDER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELITE_INDUCTION_PROVIDER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ULTIMATE_INDUCTION_PROVIDER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.INDUCTION_PORT.getBlock(), RenderType.cutout());
+
         for(BlockRegistryObject<?,?> block : MekanismBlocks.getFactoryBlocks()) {
             BlockRenderLayerMap.INSTANCE.putBlock(block.getBlock(), RenderType.cutout());
         }

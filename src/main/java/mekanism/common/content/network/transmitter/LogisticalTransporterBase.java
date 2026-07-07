@@ -272,12 +272,12 @@ public abstract class LogisticalTransporterBase extends Transmitter<Storage<Item
 
     @Override
     public InventoryNetwork createEmptyNetworkWithID(UUID networkID) {
-        return new InventoryNetwork(networkID);
+        return new InventoryNetwork(networkID, getTileWorld());
     }
 
     @Override
     public InventoryNetwork createNetworkByMerging(Collection<InventoryNetwork> networks) {
-        return new InventoryNetwork(networks);
+        return new InventoryNetwork(networks, getTileWorld());
     }
 
     @NotNull
@@ -420,7 +420,7 @@ public abstract class LogisticalTransporterBase extends Transmitter<Storage<Item
     }
 
     @NotNull
-    private TransitResponse updateTransit(boolean doEmit, TransporterStack stack, TransitResponse response) {
+    public TransitResponse updateTransit(boolean doEmit, TransporterStack stack, TransitResponse response) {
         if (!response.isEmpty()) {
             stack.itemStack = response.getStack();
             if (doEmit) {

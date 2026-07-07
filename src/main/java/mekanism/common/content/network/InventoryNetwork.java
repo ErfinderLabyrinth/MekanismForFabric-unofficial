@@ -33,13 +33,13 @@ public class InventoryNetwork extends DynamicNetwork<Storage<ItemVariant>, Inven
 
     private final Map<BlockPos, LogisticalTransporterBase> positionedTransmitters = new Object2ObjectOpenHashMap<>();
 
-    public InventoryNetwork(UUID networkID) {
-        super(networkID);
+    public InventoryNetwork(UUID networkID, Level world) {
+        super(networkID, world);
     }
 
-    public InventoryNetwork(Collection<InventoryNetwork> networks) {
-        this(UUID.randomUUID());
-        adoptAllAndRegister(networks);
+    public InventoryNetwork(Collection<InventoryNetwork> networks, Level world) {
+        this(UUID.randomUUID(), world);
+        adoptAllAndRegister(networks); //Prevent an Exception in isRemote()
     }
 
     public List<AcceptorData> calculateAcceptors(TransitRequest request, TransporterStack stack, Long2ObjectMap<ChunkAccess> chunkMap,
@@ -104,7 +104,7 @@ public class InventoryNetwork extends DynamicNetwork<Storage<ItemVariant>, Inven
 
     @Override
     protected void addTransmitterFromCommit(LogisticalTransporterBase transmitter) {
-        super.addTransmitterFromCommit(transmitter);
+             super.addTransmitterFromCommit(transmitter);
         positionedTransmitters.put(transmitter.getTilePos(), transmitter);
     }
 

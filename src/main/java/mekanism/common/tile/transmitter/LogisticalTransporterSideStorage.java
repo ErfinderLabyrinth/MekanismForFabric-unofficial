@@ -11,15 +11,16 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.core.BlockPos;
+import oshi.util.tuples.Pair;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class LogisticalTransporterSideStorage extends SnapshotParticipant<List<BigItemStack>> implements Storage<ItemVariant> {
+public class LogisticalTransporterSideStorage extends SnapshotParticipant<List<Pair<TransporterStack, TransitRequest.TransitResponse>>> implements Storage<ItemVariant> {
     final TileEntityLogisticalTransporterBase tileEntityLogisticalTransporterBase;
     final BlockPos fromPos;
-    List<BigItemStack> pendingItems = new ArrayList<>();
+    List<Pair<TransporterStack, TransitRequest.TransitResponse>> pendingItems = new ArrayList<>();
 
     public LogisticalTransporterSideStorage(TileEntityLogisticalTransporterBase tileEntityLogisticalTransporterBase, BlockPos fromPos, ConnectionType connectionType) {
         this.tileEntityLogisticalTransporterBase = tileEntityLogisticalTransporterBase;
@@ -45,6 +46,7 @@ public class LogisticalTransporterSideStorage extends SnapshotParticipant<List<B
         if (response.isEmpty()) {
             return 0;
         }
+        pendingItems.add(new Pair<>(stack, response));
         return response.getSendingAmount();
     }
 
@@ -64,12 +66,12 @@ public class LogisticalTransporterSideStorage extends SnapshotParticipant<List<B
     }
 
     @Override
-    protected List<BigItemStack> createSnapshot() {
+    protected List<Pair<TransporterStack, TransitRequest.TransitResponse>> createSnapshot() {
         return new ArrayList<>(pendingItems);
     }
 
     @Override
-    protected void readSnapshot(List<BigItemStack> snapshot) {
+    protected void readSnapshot(List<Pair<TransporterStack, TransitRequest.TransitResponse>> snapshot) {
         pendingItems = snapshot;
     }
 
@@ -78,9 +80,8 @@ public class LogisticalTransporterSideStorage extends SnapshotParticipant<List<B
         super.onFinalCommit();
 
         LogisticalTransporterBase transmitter = tileEntityLogisticalTransporterBase.getTransmitter();
-        for (BigItemStack pendingItem : pendingItems) {
-            TransitRequest request = getRequest(transmitter.tier.getPullAmount(), pendingItem);
-            transmitter.insertUnchecked(fromPos, request, transmitter.getColor(), true, 1);
+        for (Pair<TransporterStack, TransitRequest.TransitResponse> pendingItem : pendingItems) {
+            transmitter.updateTransit(true, pendingItem.getA(), pendingItem.getB());
         }
 
         pendingItems.clear();

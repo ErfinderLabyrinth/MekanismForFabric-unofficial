@@ -21,14 +21,15 @@ public abstract class DynamicNetwork<ACCEPTOR, NETWORK extends DynamicNetwork<AC
     protected final Set<TRANSMITTER> transmitters = new ObjectOpenHashSet<>();
     protected final Set<TRANSMITTER> transmittersToAdd = new ObjectOpenHashSet<>();
     protected final NetworkAcceptorCache<ACCEPTOR> acceptorCache = new NetworkAcceptorCache<>();
-    @Nullable
+    @Nullable // Is this still the case?
     protected Level world;
     private final UUID uuid;
     @Nullable
     private CompatibleTransmitterValidator<ACCEPTOR, NETWORK, TRANSMITTER> transmitterValidator;
 
-    protected DynamicNetwork(UUID networkID) {
+    protected DynamicNetwork(UUID networkID, Level world) {
         this.uuid = networkID;
+        this.world = world;
     }
 
     public UUID getUUID() {
@@ -93,7 +94,10 @@ public abstract class DynamicNetwork<ACCEPTOR, NETWORK extends DynamicNetwork<AC
     }
 
     public boolean isRemote() {
-        return world == null ? FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT : world.isClientSide;
+        if (world == null) {
+            throw new IllegalStateException("isRemote() is not possible without having a world");
+        }
+        return world.isClientSide;
     }
 
     public void invalidate(@Nullable TRANSMITTER triggerTransmitter) {

@@ -107,7 +107,7 @@ public final class TransporterUtils {
         }
         Storage<ItemVariant> itemStorage = ItemStorage.SIDED.find(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
         if (itemStorage != null) {
-            try (Transaction t = Transaction.openOuter()) {
+            try(Transaction t = Transaction.isOpen() ? Transaction.openNested(Transaction.getCurrentUnsafe()) : Transaction.openOuter()) {
                 long transfered = itemStorage.insert(itemStack.getResource(), itemStack.amount(), t);
                 if (transfered != 0) {
                     return true;

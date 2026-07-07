@@ -33,7 +33,7 @@ public class InsertableSlot extends Slot implements IInsertableSlot {
     @Override
     public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
         snapshotParticipant.updateSnapshots(transaction);
-        ItemStack stack = resource.toStack((int)Math.max(maxAmount, Integer.MAX_VALUE));
+        ItemStack stack = resource.toStack((int)Math.min(maxAmount, Integer.MAX_VALUE));
         if (resource.isBlank() || maxAmount == 0 || !mayPlace(stack)) {
             //TODO: Should we even be checking isItemValid
             //"Fail quick" if the given stack is empty or we are not valid for the slot

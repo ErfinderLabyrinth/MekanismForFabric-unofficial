@@ -78,6 +78,7 @@ public class TileTransitRequest extends TransitRequest {
                     long ret = 0;
                     try(Transaction t = Transaction.openOuter()) {
                         ret = handler.extract(slot.getResource(), toUse, t);
+                        t.commit();
                     }
                     boolean stackable = InventoryUtils.areItemsStackable(itemStack, slot.getResource().toStack((int)ret));
                     if (!stackable || ret != toUse) { // be loud if an InvStack's prediction doesn't line up

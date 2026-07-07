@@ -1,6 +1,8 @@
 package mekanism.client.render.obj;
 
+import mekanism.client.mixinhelper.BlockModelHolder;
 import mekanism.client.model.CustomGeometry;
+import mekanism.client.model.obj.ObjModel;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -12,11 +14,11 @@ import java.util.function.Function;
 
 public class TransmitterModel extends CustomGeometry {
 
-    private final UnbakedModel internal;
+    private final ObjModel internal;
     @Nullable
-    private final UnbakedModel glass;
+    private final ObjModel glass;
 
-    public TransmitterModel(UnbakedModel internalModel, @Nullable UnbakedModel glass) {
+    public TransmitterModel(ObjModel internalModel, @Nullable ObjModel glass) {
         this.internal = internalModel;
         this.glass = glass;
     }
@@ -24,14 +26,14 @@ public class TransmitterModel extends CustomGeometry {
     @Override
     public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
                            ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
-        return new TransmitterBakedModel(internal, glass, baker, spriteGetter, modelTransform, overrides, modelLocation);
+        return new TransmitterBakedModel(internal.bake(blockModel, spriteGetter), glass == null ? null : glass.bake(blockModel, spriteGetter), baker, spriteGetter, modelTransform, overrides, modelLocation, blockModel, alreadyBaked);
     }
 
     @Override
     public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
-        internal.resolveParents(modelGetter);
-        if (glass != null) {
-            glass.resolveParents(modelGetter);
-        }
+//        internal.resolveParents(modelGetter);
+//        if (glass != null) {
+//            glass.resolveParents(modelGetter);
+//        }
     }
 }

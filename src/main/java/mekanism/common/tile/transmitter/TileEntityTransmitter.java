@@ -89,16 +89,11 @@ public abstract class TileEntityTransmitter extends TileEntityUpdateable impleme
         return getTransmitter().getReducedUpdateTag(super.getReducedUpdateTag());
     }
 
-//    @Override
-//    public void handleUpdateTag(@NotNull CompoundTag tagSupplier) {
-//        super.handleUpdateTag(tagSupplier);
-//        getTransmitter().handleUpdateTag(tagSupplier);
-//    }
-
     @Override
     public void handleUpdatePacket(@NotNull CompoundTag tag) {
         super.handleUpdatePacket(tag);
-        //Delay requesting the model data update and actually updating the packet until we have finished parsing the update tagSupplier
+        getTransmitter().handleUpdateTag(tag);
+
         updateModelData();
     }
 

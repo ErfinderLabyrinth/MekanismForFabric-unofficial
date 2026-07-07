@@ -246,12 +246,12 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
 
     @Override
     public BoxedChemicalNetwork createEmptyNetworkWithID(UUID networkID) {
-        return new BoxedChemicalNetwork(networkID);
+        return new BoxedChemicalNetwork(networkID, getTileWorld());
     }
 
     @Override
     public BoxedChemicalNetwork createNetworkByMerging(Collection<BoxedChemicalNetwork> toMerge) {
-        return new BoxedChemicalNetwork(toMerge);
+        return new BoxedChemicalNetwork(toMerge, getTileWorld());
     }
 
     @Override

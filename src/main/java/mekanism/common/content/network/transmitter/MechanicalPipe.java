@@ -200,12 +200,12 @@ public class MechanicalPipe extends BufferedTransmitter<Storage<FluidVariant>, F
 
     @Override
     public FluidNetwork createEmptyNetworkWithID(UUID networkID) {
-        return new FluidNetwork(networkID);
+        return new FluidNetwork(networkID, getTileWorld());
     }
 
     @Override
     public FluidNetwork createNetworkByMerging(Collection<FluidNetwork> networks) {
-        return new FluidNetwork(networks);
+        return new FluidNetwork(networks, getTileWorld());
     }
 
     @Override

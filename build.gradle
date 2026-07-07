@@ -498,9 +498,6 @@ dependencies {
 
     include modApi("teamreborn:energy:${teamreborn_energy_version}")
 
-    include modApi("dev.felnull:special-model-loader:1.2.0") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
     include modImplementation("de.siphalor.amecs.amecs-key-modifiers:amecs-key-modifiers-mc1.20.0:1.0.2")
 
     annotationProcessor project(":annotation-processor")

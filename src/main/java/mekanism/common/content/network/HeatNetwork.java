@@ -9,6 +9,7 @@ import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -20,12 +21,12 @@ public class HeatNetwork extends DynamicNetwork<IHeatHandler, HeatNetwork, Therm
     private double heatLost;
     private double heatTransferred;
 
-    public HeatNetwork(UUID networkID) {
-        super(networkID);
+    public HeatNetwork(UUID networkID, Level world) {
+        super(networkID, world);
     }
 
-    public HeatNetwork(Collection<HeatNetwork> networks) {
-        this(UUID.randomUUID());
+    public HeatNetwork(Collection<HeatNetwork> networks, Level world) {
+        this(UUID.randomUUID(), world);
         adoptAllAndRegister(networks);
     }
 

@@ -51,9 +51,9 @@ public class RenderFluidTank extends MekanismTileEntityRenderer<TileEntityFluidT
                   MekanismRenderer.calculateGlowLight(light, fluid), overlayLight, FaceDisplay.FRONT, getCamera(), tile.getBlockPos());
         }
         if (!tile.valveFluid.isEmpty() && !MekanismUtils.lighterThanAirGas(tile.valveFluid)) {
-            /*MekanismRenderer.renderObject(getValveModel(tile.valveFluid, fluidScale), matrix, buffer,
+            MekanismRenderer.renderObject(getValveModel(tile.valveFluid, fluidScale), matrix, buffer,
                   MekanismRenderer.getColorARGB(tile.valveFluid), MekanismRenderer.calculateGlowLight(light, tile.valveFluid), overlayLight, FaceDisplay.FRONT,
-                  getCamera(), tile.getBlockPos());*/
+                  getCamera(), tile.getBlockPos());
         }
     }
 

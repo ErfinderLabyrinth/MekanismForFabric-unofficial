@@ -17,6 +17,7 @@ import mekanism.common.util.text.EnergyDisplay;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
@@ -30,14 +31,14 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
     private FloatingLong prevTransferAmount = FloatingLong.ZERO;
     private FloatingLong floatingLongCapacity = FloatingLong.ZERO;
 
-    public EnergyNetwork(UUID networkID) {
-        super(networkID);
+    public EnergyNetwork(UUID networkID, Level world) {
+        super(networkID, world);
         energyContainer = VariableCapacityEnergyContainer.create(this::getCapacity, BasicEnergyContainer.alwaysTrue, BasicEnergyContainer.alwaysTrue, this);
         energyContainers = Collections.singletonList(energyContainer);
     }
 
-    public EnergyNetwork(Collection<EnergyNetwork> networks) {
-        this(UUID.randomUUID());
+    public EnergyNetwork(Collection<EnergyNetwork> networks, Level world) {
+        this(UUID.randomUUID(), world);
         adoptAllAndRegister(networks);
     }
 

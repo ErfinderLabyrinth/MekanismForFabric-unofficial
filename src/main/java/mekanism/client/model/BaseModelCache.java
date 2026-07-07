@@ -1,11 +1,10 @@
 package mekanism.client.model;
 
-import dev.felnull.specialmodelloader.api.SpecialModelLoaderAPI;
-import dev.felnull.specialmodelloader.api.model.ModelOption;
-import dev.felnull.specialmodelloader.api.model.obj.ObjModelOption;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import mekanism.client.mixinhelper.CustomGeometryHolder;
 import mekanism.client.mixinhelper.ModelManagerModelBakeryGetter;
+import mekanism.client.model.obj.ObjModel;
+import mekanism.client.model.obj.ObjParser;
 import mekanism.client.render.lib.Quad;
 import mekanism.client.render.lib.QuadUtils;
 import mekanism.client.render.lib.Vertex;
@@ -25,8 +24,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class BaseModelCache {
@@ -141,22 +142,21 @@ public class BaseModelCache {
         @Override
         protected void reload(ModelBakery modelBakery, Map<ResourceLocation, BakedModel> bakedRegistry) {
             super.reload(modelBakery, bakedRegistry);
-            UnbakedModel unbakedModel = null; //new ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
+            ObjModel unbakedModel = null; //new ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
             try {
-                unbakedModel = SpecialModelLoaderAPI.getInstance().getObjLoader().loadModel(Minecraft.getInstance().getResourceManager(), rl, ObjModelOption.of(ModelOption.of(true, null, null, ItemTransforms.NO_TRANSFORMS), true));
-            } catch (ModelProviderException e) {
+                unbakedModel = ObjParser.load(Minecraft.getInstance().getResourceManager().open(rl), rl.withPath(rl.getPath().substring(0, rl.getPath().lastIndexOf('/'))));
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            UnbakedModel finalUnbakedModel = unbakedModel;
+            ObjModel finalUnbakedModel = unbakedModel;
             model = new CustomGeometry() {
                 @Override
                 public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
-                    return finalUnbakedModel.bake(baker, spriteGetter, modelTransform, modelLocation);
+                    return finalUnbakedModel.bake(blockModel, spriteGetter).wrapper(Set.of(), alreadyBaked);
                 }
 
                 @Override
                 public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
-                    finalUnbakedModel.resolveParents(modelGetter);
                 }
             };
         }

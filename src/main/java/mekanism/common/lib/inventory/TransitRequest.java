@@ -121,7 +121,7 @@ public abstract class TransitRequest {
                 try (Transaction t = Transaction.openOuter()) {
                     long result = inventory.insert(toInsert.getResource(), toInsert.getAmount(), t);
                     t.commit();
-                    toInsert = toInsert.copyWithCount(result);
+                    toInsert = toInsert.copyWithCount(toInsert.getAmount() - result);
                 }
                 if (TransporterManager.didEmit(origInsert, toInsert)) {
                     return createResponse(TransporterManager.getToUse(origInsert, toInsert), data);

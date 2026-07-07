@@ -158,7 +158,7 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
 
     @Override
     public EnergyNetwork createNetworkByMerging(Collection<EnergyNetwork> networks) {
-        return new EnergyNetwork(networks);
+        return new EnergyNetwork(networks, getTileWorld());
     }
 
     @Override
@@ -168,7 +168,7 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
 
     @Override
     public EnergyNetwork createEmptyNetworkWithID(UUID networkID) {
-        return new EnergyNetwork(networkID);
+        return new EnergyNetwork(networkID, getTileWorld());
     }
 
     @NotNull
