@@ -5,15 +5,17 @@ import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.Collection;
 
-public class EnergyAcceptorTarget extends Target<IStrictEnergyHandler, FloatingLong, FloatingLong> {
+public class EnergyAcceptorTarget extends Target<EnergyStorage, Long, Long> {
 
     public EnergyAcceptorTarget() {
     }
 
-    public EnergyAcceptorTarget(Collection<IStrictEnergyHandler> allHandlers) {
+    public EnergyAcceptorTarget(Collection<EnergyStorage> allHandlers) {
         super(allHandlers);
     }
 
@@ -22,12 +24,17 @@ public class EnergyAcceptorTarget extends Target<IStrictEnergyHandler, FloatingL
     }
 
     @Override
-    protected void acceptAmount(IStrictEnergyHandler handler, SplitInfo<FloatingLong> splitInfo, FloatingLong amount) {
-        splitInfo.send(amount.subtract(handler.insertEnergy(amount, Action.EXECUTE)));
+    protected void acceptAmount(EnergyStorage handler, SplitInfo<Long> splitInfo, Long amount) {
+        try(Transaction t=Transaction.openOuter()) {
+            splitInfo.send(amount - handler.insert(amount, t));
+            t.commit();
+        }
     }
 
     @Override
-    protected FloatingLong simulate(IStrictEnergyHandler handler, FloatingLong energyToSend) {
-        return energyToSend.subtract(handler.insertEnergy(energyToSend, Action.SIMULATE));
+    protected Long simulate(EnergyStorage handler, Long energyToSend) {
+        try(Transaction t=Transaction.openOuter()) {
+            return energyToSend - handler.insert(energyToSend, t);
+        }
     }
 }

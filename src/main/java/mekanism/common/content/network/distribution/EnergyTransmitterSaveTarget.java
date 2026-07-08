@@ -7,7 +7,7 @@ import mekanism.common.lib.distribution.Target;
 
 import java.util.Collection;
 
-public class EnergyTransmitterSaveTarget extends Target<EnergyTransmitterSaveTarget.SaveHandler, FloatingLong, FloatingLong> {
+public class EnergyTransmitterSaveTarget extends Target<EnergyTransmitterSaveTarget.SaveHandler, Long, Long> {
 
     public EnergyTransmitterSaveTarget(Collection<UniversalCable> transmitters) {
         super(transmitters.size());
@@ -15,12 +15,12 @@ public class EnergyTransmitterSaveTarget extends Target<EnergyTransmitterSaveTar
     }
 
     @Override
-    protected void acceptAmount(EnergyTransmitterSaveTarget.SaveHandler transmitter, SplitInfo<FloatingLong> splitInfo, FloatingLong amount) {
+    protected void acceptAmount(EnergyTransmitterSaveTarget.SaveHandler transmitter, SplitInfo<Long> splitInfo, Long amount) {
         transmitter.acceptAmount(splitInfo, amount);
     }
 
     @Override
-    protected FloatingLong simulate(EnergyTransmitterSaveTarget.SaveHandler transmitter, FloatingLong energyToSend) {
+    protected Long simulate(EnergyTransmitterSaveTarget.SaveHandler transmitter, Long energyToSend) {
         return transmitter.simulate(energyToSend);
     }
 
@@ -39,14 +39,14 @@ public class EnergyTransmitterSaveTarget extends Target<EnergyTransmitterSaveTar
             this.transmitter = transmitter;
         }
 
-        protected void acceptAmount(SplitInfo<FloatingLong> splitInfo, FloatingLong amount) {
-            amount = amount.min(transmitter.getCapacityAsFloatingLong().subtract(currentStored));
+        protected void acceptAmount(SplitInfo<Long> splitInfo, Long amount) {
+            amount = Long.min(amount, transmitter.getCapacity() - currentStored);
             currentStored = currentStored + amount.longValue();
             splitInfo.send(amount);
         }
 
-        protected FloatingLong simulate(FloatingLong energyToSend) {
-            return energyToSend.copy().min(transmitter.getCapacityAsFloatingLong().subtract(currentStored));
+        protected Long simulate(Long energyToSend) {
+            return Long.min(energyToSend, transmitter.getCapacity() - currentStored);
         }
 
         protected void saveShare() {

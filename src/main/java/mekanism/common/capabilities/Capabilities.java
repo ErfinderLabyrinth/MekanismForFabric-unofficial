@@ -13,6 +13,7 @@ import mekanism.api.heat.IHeatHandler;
 import mekanism.api.radiation.capability.IRadiationEntity;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.merged.IMergedHandler;
+import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.item.ItemEnergized;
 import mekanism.common.lib.radiation.capability.DefaultRadiationEntity;
 import mekanism.common.storage.item.ItemStorageHandler;
@@ -49,7 +50,9 @@ public class Capabilities {
     public static final BlockApiLookup<IHeatHandler, Direction> HEAT_HANDLER_BLOCK = BlockApiLookup.get(new ResourceLocation(Mekanism.MODID, "heat_handler"), IHeatHandler.class, Direction.class);
 
 //    public static final Capability<IStrictEnergyHandler> STRICT_ENERGY = CapabilityManager.get(new CapabilityToken<>() {});
+    @Deprecated
     public static final ItemApiLookup<IStrictEnergyHandler, ContainerItemContext> STRICT_ENERGY_ITEM = ItemApiLookup.get(new ResourceLocation(Mekanism.MODID, "strict_energy"), IStrictEnergyHandler.class, ContainerItemContext.class);
+    @Deprecated
     public static final BlockApiLookup<IStrictEnergyHandler, Direction> STRICT_ENERGY_BLOCK = BlockApiLookup.get(new ResourceLocation(Mekanism.MODID, "strict_energy"), IStrictEnergyHandler.class, Direction.class);
 
 //    public static final Capability<IConfigurable> CONFIGURABLE = CapabilityManager.get(new CapabilityToken<>() {});

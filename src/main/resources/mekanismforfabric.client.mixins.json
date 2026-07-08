@@ -13,6 +13,7 @@
     "BlockModelDeserializerMixin",
     "BlockModelMixin",
     "BlockRenderDispatcherMixin",
+    "ClientLevelMixin",
     "ClientPacketListenerMixin",
     "ElytraLayerMixin",
     "FaceBakeryMixin",

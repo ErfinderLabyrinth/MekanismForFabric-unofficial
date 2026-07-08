@@ -44,6 +44,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -293,7 +294,7 @@ public class InventoryFrequency extends Frequency implements /*IMekanismInventor
         if (toSend != 0) {
             EnergyAcceptorTarget target = new EnergyAcceptorTarget(expected);
             typesToEject.put(TransmissionType.ENERGY, (tile, side) -> {
-                IStrictEnergyHandler energyHandler = EnergyCompatUtils.getLazyStrictEnergyHandler(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
+                EnergyStorage energyHandler = EnergyStorage.SIDED.find(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
                 if (energyHandler != null) {
                     target.addHandler(energyHandler);
                 }
@@ -301,7 +302,7 @@ public class InventoryFrequency extends Frequency implements /*IMekanismInventor
             transferHandlers.add(() -> {
                 if (target.getHandlerCount() > 0) {
                     try(Transaction t = Transaction.openOuter()) {
-                        storedEnergy.extract(EmitUtils.sendToAcceptors(target, FloatingLong.create(toSend)).longValue(), t);
+                        storedEnergy.extract(EmitUtils.sendToAcceptors(target, toSend), t);
                         t.commit();
                     }
                 }

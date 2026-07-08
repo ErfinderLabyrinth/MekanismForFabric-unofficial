@@ -6,6 +6,8 @@ import mekanism.common.MekanismLang;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.registration.impl.SoundEventRegistryObject;
 import mekanism.common.registries.MekanismSounds;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
@@ -52,7 +54,7 @@ public final class HolidayManager {
 
     public static SoundEventRegistryObject<SoundEvent> filterSound(SoundEventRegistryObject<SoundEvent> sound) {
         //Only filter sounds when on the client
-        if (MekanismConfig.CLIENT.client.isLoaded() && MekanismConfig.CLIENT.client.holidays) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && MekanismConfig.CLIENT.client.holidays) {
             for (Holiday holiday : holidays) {
                 if (holiday.isToday()) {
                     return holiday.filterSound(sound);

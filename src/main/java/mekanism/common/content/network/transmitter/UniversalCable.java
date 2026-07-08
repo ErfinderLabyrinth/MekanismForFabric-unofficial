@@ -31,7 +31,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, EnergyNetwork, Long, UniversalCable> implements IMekanismStrictEnergyHandler,
+public class UniversalCable extends BufferedTransmitter<EnergyStorage, EnergyNetwork, Long, UniversalCable> implements IMekanismStrictEnergyHandler,
       IUpgradeableTransmitter<UniversalCableUpgradeData> {
 
     public final CableTier tier;
@@ -52,7 +52,7 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
     }
 
     @Override
-    protected BlockApiLookup<IStrictEnergyHandler, Direction> getAcceptorCacheLookup() {
+    protected BlockApiLookup<EnergyStorage, Direction> getAcceptorCacheLookup() {
         return null;
     }
 
@@ -75,13 +75,16 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
     public void pullFromAcceptors() {
         Set<Direction> connections = getConnections(ConnectionType.PULL);
         if (!connections.isEmpty()) {
-            for (IStrictEnergyHandler connectedAcceptor : getAcceptorCache().getConnectedAcceptors(connections)) {
-                FloatingLong received = connectedAcceptor.extractEnergy(FloatingLong.create(getAvailablePull()), Action.SIMULATE);
+            for (EnergyStorage connectedAcceptor : getAcceptorCache().getConnectedAcceptors(connections)) {
+                long received;
+                try(Transaction t=Transaction.openOuter()) {
+                    received = connectedAcceptor.extract(getAvailablePull(), t);
+                }
                 try(Transaction t = Transaction.openOuter()) {
-                    if (!received.isZero() && takeEnergy(received.longValue(), t) == 0) {
+                    if (received != 0 && takeEnergy(received, t) == 0) {
                         //If we received some energy and are able to insert it all
+                        connectedAcceptor.extract(received, t);
                         t.commit();
-                        connectedAcceptor.extractEnergy(received, Action.EXECUTE);
                     }
                 }
             }

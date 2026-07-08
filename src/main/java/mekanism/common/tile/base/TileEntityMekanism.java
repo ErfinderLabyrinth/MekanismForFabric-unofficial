@@ -768,14 +768,14 @@ public abstract class TileEntityMekanism extends TileEntityUpdateable implements
         return updateTag;
     }
 
-//    @Override
-//    public void handleUpdateTag(@NotNull CompoundTag tagSupplier) {
-//        super.handleUpdateTag(tagSupplier);
-//        for (ITileComponent component : components) {
-//            component.readFromUpdateTag(tagSupplier);
-//        }
-//        radiationScale = tagSupplier.getFloat(NBTConstants.RADIATION);
-//    }
+    @Override
+    public void handleUpdateTag(@NotNull CompoundTag tagSupplier) {
+        super.handleUpdateTag(tagSupplier);
+        for (ITileComponent component : components) {
+            component.readFromUpdateTag(tagSupplier);
+        }
+        radiationScale = tagSupplier.getFloat(NBTConstants.RADIATION);
+    }
 
     public void onNeighborChange(Block block, BlockPos neighborPos) {
         if (!isRemote()) {

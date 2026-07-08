@@ -1,5 +1,6 @@
 package mekanism.common.content.network.distribution;
 
+import com.google.common.primitives.Longs;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.math.FloatingLong;
@@ -10,7 +11,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.Collection;
 
-public class EnergySaveTarget extends Target<EnergySaveTarget.SaveHandler, FloatingLong, FloatingLong> {
+public class EnergySaveTarget extends Target<EnergySaveTarget.SaveHandler, Long, Long> {
 
     public EnergySaveTarget() {
     }
@@ -24,12 +25,12 @@ public class EnergySaveTarget extends Target<EnergySaveTarget.SaveHandler, Float
     }
 
     @Override
-    protected void acceptAmount(EnergySaveTarget.SaveHandler handler, SplitInfo<FloatingLong> splitInfo, FloatingLong amount) {
+    protected void acceptAmount(EnergySaveTarget.SaveHandler handler, SplitInfo<Long> splitInfo, Long amount) {
         handler.acceptAmount(splitInfo, amount);
     }
 
     @Override
-    protected FloatingLong simulate(EnergySaveTarget.SaveHandler handler, FloatingLong energyToSend) {
+    protected Long simulate(EnergySaveTarget.SaveHandler handler, Long energyToSend) {
         return handler.simulate(energyToSend);
     }
 
@@ -47,20 +48,20 @@ public class EnergySaveTarget extends Target<EnergySaveTarget.SaveHandler, Float
     public static class SaveHandler {
 
         private final EnergyStorage delegate;
-        private FloatingLong currentStored = FloatingLong.ZERO;
+        private Long currentStored = 0L;
 
         public SaveHandler(EnergyStorage delegate) {
             this.delegate = delegate;
         }
 
-        protected void acceptAmount(SplitInfo<FloatingLong> splitInfo, FloatingLong amount) {
-            amount = amount.min(FloatingLong.create(delegate.getCapacity()).subtract(currentStored));
-            currentStored = currentStored.plusEqual(amount);
+        protected void acceptAmount(SplitInfo<Long> splitInfo, Long amount) {
+            amount = Long.min(amount, delegate.getCapacity() - currentStored);
+            currentStored = Math.addExact(currentStored.longValue(), amount);
             splitInfo.send(amount);
         }
 
-        protected FloatingLong simulate(FloatingLong energyToSend) {
-            return energyToSend.copy().min(FloatingLong.create(delegate.getCapacity()).subtract(currentStored));
+        protected Long simulate(Long energyToSend) {
+            return Long.min(energyToSend, delegate.getCapacity() - currentStored);
         }
 
         protected void save() {

@@ -68,7 +68,7 @@ public class ModuleChargeDistributionUnit implements ICustomModule<ModuleChargeD
                 armor.set(i, storages.get(i).getStack());
             }
         }
-        EmitUtils.sendToAcceptors(saveTarget, total);
+        EmitUtils.sendToAcceptors(saveTarget, total.longValue());
         saveTarget.save();
     }
 

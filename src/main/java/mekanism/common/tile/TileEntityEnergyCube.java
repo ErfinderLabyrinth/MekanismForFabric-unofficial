@@ -159,7 +159,7 @@ public class TileEntityEnergyCube extends TileEntityConfigurableMachine {
     }
 
     @Override
-    public void load(@NotNull CompoundTag tag) {
+    public void handleUpdateTag(@NotNull CompoundTag tag) {
         ConfigInfo config = getConfig().getConfig(TransmissionType.ENERGY);
         DataType[] currentConfig = new DataType[EnumUtils.SIDES.length];
         if (config != null) {
@@ -167,7 +167,7 @@ public class TileEntityEnergyCube extends TileEntityConfigurableMachine {
                 currentConfig[side.ordinal()] = config.getDataType(side);
             }
         }
-        super.load(tag);
+        super.handleUpdateTag(tag);
         NBTUtils.setFloatIfPresent(tag, NBTConstants.SCALE, scale -> prevScale = scale);
         if (config != null) {
             for (RelativeSide side : EnumUtils.SIDES) {

@@ -8,6 +8,7 @@ import mekanism.common.integration.energy.EnergyCompatUtils;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import team.reborn.energy.api.EnergyStorage;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -31,7 +32,7 @@ public final class CableUtils {
             try(Transaction t=Transaction.openOuter()) {
                 simulatedExtract = energyContainer.extract(maxOutput, t);
             }
-            long amountExtract = emit(outputSides, FloatingLong.create(simulatedExtract), from).longValue();
+            long amountExtract = emit(outputSides, simulatedExtract, from);
             try(Transaction t=Transaction.openOuter()) {
                 energyContainer.extract(amountExtract, t);
                 t.commit();
@@ -48,14 +49,14 @@ public final class CableUtils {
      *
      * @return the amount of energy emitted
      */
-    public static FloatingLong emit(Set<Direction> sides, FloatingLong energyToSend, BlockEntity from) {
-        if (energyToSend.isZero() || sides.isEmpty()) {
-            return FloatingLong.ZERO;
+    public static long emit(Set<Direction> sides, Long energyToSend, BlockEntity from) {
+        if (energyToSend == 0 || sides.isEmpty()) {
+            return 0;
         }
         EnergyAcceptorTarget target = new EnergyAcceptorTarget(6);
         EmitUtils.forEachSide(from.getLevel(), from.getBlockPos(), sides, (level, pos, side) -> {
             //Insert to access side and collect the cap if it is present
-            IStrictEnergyHandler energyHandler = EnergyCompatUtils.getLazyStrictEnergyHandler(level, pos, side.getOpposite());
+            EnergyStorage energyHandler = EnergyStorage.SIDED.find(level, pos, side.getOpposite());
             if (energyHandler != null) {
                 target.addHandler(energyHandler);
             }
@@ -63,6 +64,6 @@ public final class CableUtils {
         if (target.getHandlerCount() > 0) {
             return EmitUtils.sendToAcceptors(target, energyToSend);
         }
-        return FloatingLong.ZERO;
+        return 0;
     }
 }

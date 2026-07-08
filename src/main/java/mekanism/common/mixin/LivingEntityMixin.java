@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin implements LivingEntityExtension {
     @Unique
-    float swimSpeedModifier;
+    float swimSpeedModifier = 1;
 
     @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;moveRelative(FLnet/minecraft/world/phys/Vec3;)V"))
     private float applySwimSpeedModifier(float swimSpeed) {

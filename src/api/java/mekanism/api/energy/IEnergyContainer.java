@@ -169,7 +169,7 @@ public interface IEnergyContainer extends NBTSerializable<CompoundTag>, IContent
         if (isEmpty() || amount == 0) {
             return 0;
         }
-        long ret = getEnergy() - amount;
+        long ret = Math.min(getEnergy(), amount);
         if (ret != 0) {
             // Note: this also will mark that the contents changed
             setEnergy(getEnergy() - ret, transaction);

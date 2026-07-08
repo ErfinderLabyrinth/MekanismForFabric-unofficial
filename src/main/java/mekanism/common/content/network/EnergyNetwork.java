@@ -24,7 +24,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 
-public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, EnergyNetwork, Long, UniversalCable> implements IMekanismStrictEnergyHandler {
+public class EnergyNetwork extends DynamicBufferedNetwork<EnergyStorage, EnergyNetwork, Long, UniversalCable> implements IMekanismStrictEnergyHandler {
 
     private final List<IEnergyContainer> energyContainers;
     public final VariableCapacityEnergyContainer energyContainer;
@@ -119,20 +119,20 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
         super.updateSaveShares(triggerTransmitter);
         if (!isEmpty()) {
             EnergyTransmitterSaveTarget saveTarget = new EnergyTransmitterSaveTarget(transmitters);
-            EmitUtils.sendToAcceptors(saveTarget, FloatingLong.create(energyContainer.getEnergy()));
+            EmitUtils.sendToAcceptors(saveTarget, energyContainer.getEnergy());
             saveTarget.saveShare();
         }
     }
 
-    private FloatingLong tickEmit(FloatingLong energyToSend) {
-        Collection<Map<Direction, Optional<IStrictEnergyHandler>>> acceptorValues = acceptorCache.getAcceptorValues();
+    private long tickEmit(long energyToSend) {
+        Collection<Map<Direction, Optional<EnergyStorage>>> acceptorValues = acceptorCache.getAcceptorValues();
         EnergyAcceptorTarget target = new EnergyAcceptorTarget(acceptorValues.size() * 2);
-        for (Map<Direction, Optional<IStrictEnergyHandler>> acceptors : acceptorValues) {
-            for (Optional<IStrictEnergyHandler> lazyAcceptor : acceptors.values()) {
+        for (Map<Direction, Optional<EnergyStorage>> acceptors : acceptorValues) {
+            for (Optional<EnergyStorage> lazyAcceptor : acceptors.values()) {
                 lazyAcceptor.ifPresent(acceptor -> {
                     boolean shouldAdd;
                     try(Transaction t = Transaction.openOuter()) {
-                        shouldAdd = acceptor.insertEnergy(energyToSend, t).smallerThan(energyToSend);
+                        shouldAdd = acceptor.insert(energyToSend, t) < energyToSend;
                     }
                     if (shouldAdd) {
                         target.addHandler(acceptor);
@@ -140,7 +140,7 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
                 });
             }
         }
-        return EmitUtils.sendToAcceptors(target, energyToSend.copy());
+        return EmitUtils.sendToAcceptors(target, energyToSend);
     }
 
     @Override
@@ -158,7 +158,7 @@ public class EnergyNetwork extends DynamicBufferedNetwork<IStrictEnergyHandler, 
         if (energyContainer.isEmpty()) {
             prevTransferAmount = FloatingLong.ZERO;
         } else {
-            prevTransferAmount = tickEmit(FloatingLong.create(energyContainer.getEnergy()));
+            prevTransferAmount = FloatingLong.create(tickEmit(energyContainer.getEnergy()));
             try(Transaction t = Transaction.openOuter()) {
                 energyContainer.extract(prevTransferAmount.longValue(), t);
             }

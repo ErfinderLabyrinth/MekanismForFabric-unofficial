@@ -86,8 +86,8 @@ public class EmitUtils {
      *
      * @return The amount that actually got sent
      */
-    public static <HANDLER, TARGET extends Target<HANDLER, FloatingLong, FloatingLong>> FloatingLong sendToAcceptors(TARGET availableTargets, FloatingLong amountToSplit) {
-        return sendToAcceptors(availableTargets, new FloatingLongSplitInfo(amountToSplit, availableTargets.getHandlerCount()), amountToSplit);
+    public static <HANDLER, TARGET extends Target<HANDLER, Long, Long>> Long sendToAcceptors(TARGET availableTargets, Long amountToSplit) {
+        return sendToAcceptors(availableTargets, new LongSplitInfo(amountToSplit, availableTargets.getHandlerCount()), amountToSplit);
     }
 
     /**

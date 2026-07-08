@@ -168,6 +168,7 @@ public class ItemAtomicDisassembler extends DiggerItem implements CreativeTabDef
                 t.commit();
             }
         }
+        entityliving.setItemInHand(InteractionHand.MAIN_HAND, storage.getStack());
         return true;
     }
 

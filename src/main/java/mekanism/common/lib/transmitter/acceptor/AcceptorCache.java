@@ -97,7 +97,7 @@ public class AcceptorCache<ACCEPTOR> extends AbstractAcceptorCache<ACCEPTOR, Acc
      * @apiNote Only call this from the server side
      */
     public boolean isItemAcceptorAndListen(@Nullable Level level, BlockPos pos, Direction side) {
-        Storage<ItemVariant> acceptor = ItemStorage.SIDED.find(level, pos, side);
+        Storage<ItemVariant> acceptor = ItemStorage.SIDED.find(level, pos, side.getOpposite());
         if (acceptor != null) {
             //Update the cached acceptor and if it changed, add a listener to it to listen for invalidation
             updateCachedAcceptorAndListen(side, level, pos, Optional.of((ACCEPTOR) acceptor));
@@ -107,7 +107,7 @@ public class AcceptorCache<ACCEPTOR> extends AbstractAcceptorCache<ACCEPTOR, Acc
     }
 
     public boolean isAcceptorAndListen(@Nullable Level level, BlockPos pos, Direction side, BlockApiLookup<ACCEPTOR, Direction> lookup) {
-        ACCEPTOR acceptor = lookup.find(level, pos, side);
+        ACCEPTOR acceptor = lookup.find(level, pos, side.getOpposite());
         if (acceptor != null) {
             //Update the cached acceptor and if it changed, add a listener to it to listen for invalidation
             updateCachedAcceptorAndListen(side, level, pos, Optional.of(acceptor));
