@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:sawing",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:dark_oak_door"
+    }
+  },
+  "mainOutput": {
+    "count": 2,
+    "item": "minecraft:dark_oak_planks"
+  }
+}

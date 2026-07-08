@@ -678,6 +678,6 @@ public class WorldUtils {
      * @param chunkPos Pos to convert.
      */
     public static BlockPos getBlockPosFromChunkPos(long chunkPos) {
-        return new BlockPos((int) chunkPos, 0, (int) (chunkPos >> 32));
+        return new BlockPos((int) chunkPos * 16, 0, (int) (chunkPos >> 32) * 16); //TODO Original without * 16
     }
 }

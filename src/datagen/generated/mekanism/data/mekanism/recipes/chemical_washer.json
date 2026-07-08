@@ -1,0 +1,28 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "B": {
+      "item": "mekanism:basic_fluid_tank"
+    },
+    "C": {
+      "tag": "forge:circuits/ultimate"
+    },
+    "I": {
+      "tag": "forge:ingots/refined_obsidian"
+    },
+    "T": {
+      "item": "mekanism:basic_chemical_tank"
+    },
+    "X": {
+      "item": "mekanism:steel_casing"
+    }
+  },
+  "pattern": [
+    "IBI",
+    "CXC",
+    "ITI"
+  ],
+  "result": {
+    "item": "mekanism:chemical_washer"
+  }
+}

@@ -115,8 +115,8 @@ public class TileEntityRadioactiveWasteBarrel extends TileEntityMekanism impleme
     }
 
     @Override
-    public void handleUpdatePacket(@NotNull CompoundTag tag) {
-        super.handleUpdatePacket(tag);
+    public void handleUpdateTag(@NotNull CompoundTag tag) {
+        super.handleUpdateTag(tag);
         NBTUtils.setCompoundIfPresent(tag, NBTConstants.GAS_STORED, nbt -> gasTank.deserializeNBT(nbt));
         NBTUtils.setIntIfPresent(tag, NBTConstants.PROGRESS, val -> processTicks = val);
     }

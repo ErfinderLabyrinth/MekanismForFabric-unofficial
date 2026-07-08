@@ -1,0 +1,17 @@
+{
+  "type": "mekanism:combining",
+  "extraInput": {
+    "ingredient": {
+      "item": "minecraft:cobblestone"
+    }
+  },
+  "mainInput": {
+    "amount": 8,
+    "ingredient": {
+      "tag": "forge:raw_materials/uranium"
+    }
+  },
+  "output": {
+    "item": "mekanism:uranium_ore"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "parent": "mekanism:item_transport",
+  "criteria": {
+    "diversion_transporter": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "mekanism:diversion_transporter"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.mekanism.diversion_item_transport.description"
+    },
+    "icon": {
+      "item": "mekanism:diversion_transporter"
+    },
+    "title": {
+      "translate": "advancements.mekanism.diversion_item_transport.title"
+    }
+  },
+  "sends_telemetry_event": true
+}

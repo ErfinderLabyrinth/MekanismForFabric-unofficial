@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:diamond_pickaxe"
+    },
+    "A": {
+      "tag": "forge:alloys/elite"
+    },
+    "H": {
+      "tag": "forge:pellets/polonium"
+    },
+    "P": {
+      "item": "mekanism:module_base"
+    },
+    "s": {
+      "item": "minecraft:diamond_shovel"
+    },
+    "x": {
+      "item": "minecraft:diamond_axe"
+    }
+  },
+  "pattern": [
+    "A#A",
+    "xPs",
+    "HHH"
+  ],
+  "result": {
+    "item": "mekanism:module_vein_mining_unit"
+  }
+}

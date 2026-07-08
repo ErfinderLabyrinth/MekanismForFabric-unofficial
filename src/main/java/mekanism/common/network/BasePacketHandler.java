@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
@@ -125,18 +126,14 @@ public abstract class BasePacketHandler {
     }
 
     public <MSG extends IMekanismPacket> void sendToAllTracking(MSG message, BlockEntity tile) {
-        for (ServerPlayer player : PlayerLookup.tracking(tile)) {
-            sendTo(message, player);
-        }
+        sendToAllTracking(message, tile.getLevel(), tile.getBlockPos());
     }
 
     public <MSG extends IMekanismPacket> void sendToAllTracking(MSG message, Level world, BlockPos pos) {
-        if (!(world instanceof ServerLevel serverLevel)) {
-            return;
-        }
-
-        for (ServerPlayer player : PlayerLookup.tracking(serverLevel, pos)) {
-            sendTo(message, player);
+        if (world instanceof ServerLevel level) {
+            //If we have a ServerWorld just directly figure out the ChunkPos to not require looking up the chunk
+            // This provides a decent performance boost over using the packet distributor
+            level.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false).forEach(p -> sendTo(message, p));
         }
     }
 

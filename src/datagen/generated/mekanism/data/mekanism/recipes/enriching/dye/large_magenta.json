@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:lilac"
+    }
+  },
+  "output": {
+    "count": 4,
+    "item": "minecraft:magenta_dye"
+  }
+}

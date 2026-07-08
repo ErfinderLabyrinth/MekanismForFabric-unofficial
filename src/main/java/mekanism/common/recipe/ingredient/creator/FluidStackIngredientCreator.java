@@ -210,7 +210,7 @@ public class FluidStackIngredientCreator implements IFluidStackIngredientCreator
         @Override
         public void write(FriendlyByteBuf buffer) {
             buffer.writeEnum(IngredientType.SINGLE);
-            fluidInstance.writeToPacket(buffer);
+            fluidInstance.writeToBuffer(buffer);
         }
 
         @Override

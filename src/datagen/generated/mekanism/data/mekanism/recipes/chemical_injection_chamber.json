@@ -1,0 +1,25 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "#": {
+      "item": "mekanism:purification_chamber"
+    },
+    "A": {
+      "tag": "mekanism:alloys/reinforced"
+    },
+    "C": {
+      "tag": "forge:circuits/elite"
+    },
+    "I": {
+      "tag": "c:gold_ingots"
+    }
+  },
+  "pattern": [
+    "ACA",
+    "I#I",
+    "ACA"
+  ],
+  "result": {
+    "item": "mekanism:chemical_injection_chamber"
+  }
+}

@@ -2,6 +2,8 @@ package mekanism.client.model.obj;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.phys.Vec2;
@@ -11,6 +13,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public final class ObjBaker {
+    private static final Material MISSING = new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation());
 
     public static BakedObjModel bake(
             ObjModel model,
@@ -32,7 +35,7 @@ public final class ObjBaker {
 
                     mekanism.client.model.obj.Material mat = model.getMaterial(face.material);
                     TextureAtlasSprite sprite = sprites.apply(
-                            owner.getMaterial(mat != null && mat.mapKd != null
+                            owner == null ? MISSING : owner.getMaterial(mat != null && mat.mapKd != null
                                     ? mat.mapKd
                                     : face.material)
                     );

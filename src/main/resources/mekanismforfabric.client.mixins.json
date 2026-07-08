@@ -36,6 +36,7 @@
   },
   "mixins": [
     "ChunkMapMixin",
-    "ChunkSerializerMixin"
+    "ChunkSerializerMixin",
+    "LevelChunkMixin"
   ]
 }

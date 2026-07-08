@@ -1,0 +1,17 @@
+{
+  "type": "mekanism:combining",
+  "extraInput": {
+    "ingredient": {
+      "tag": "c:white_dyes"
+    }
+  },
+  "mainInput": {
+    "ingredient": {
+      "tag": "c:green_dyes"
+    }
+  },
+  "output": {
+    "count": 4,
+    "item": "minecraft:lime_dye"
+  }
+}

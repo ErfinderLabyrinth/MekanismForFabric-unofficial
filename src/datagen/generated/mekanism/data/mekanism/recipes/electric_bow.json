@@ -1,0 +1,23 @@
+{
+  "type": "mekanism:mek_data",
+  "category": "equipment",
+  "key": {
+    "#": {
+      "item": "minecraft:string"
+    },
+    "A": {
+      "tag": "mekanism:alloys/infused"
+    },
+    "E": {
+      "item": "mekanism:energy_tablet"
+    }
+  },
+  "pattern": [
+    "#A ",
+    "# E",
+    "#A "
+  ],
+  "result": {
+    "item": "mekanism:electric_bow"
+  }
+}

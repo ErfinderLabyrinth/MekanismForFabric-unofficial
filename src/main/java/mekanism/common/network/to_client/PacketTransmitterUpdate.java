@@ -79,7 +79,7 @@ public class PacketTransmitterUpdate implements IMekanismPacket {
         buffer.writeFloat(scale);
         NetworkUtil.log("Sending '{}' update message for network with id {}", tramsmittionType, networkID);
         if (tramsmittionType == TramsmittionType.FLUID) {
-            fluidStack.writeToPacket(buffer);
+            fluidStack.writeToBuffer(buffer);
         } else if (tramsmittionType == TramsmittionType.CHEMICAL) {
             chemical.write(buffer);
         }

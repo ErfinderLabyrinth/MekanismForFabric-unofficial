@@ -96,8 +96,8 @@ public class TileEntityInternalMultiblock extends TileEntityMekanism implements 
     }
 
     @Override
-    public void handleUpdatePacket(@NotNull CompoundTag tag) {
-        super.handleUpdatePacket(tag);
+    public void handleUpdateTag(@NotNull CompoundTag tag) {
+        super.handleUpdateTag(tag);
         NBTUtils.setUUIDIfPresentElse(tag, NBTConstants.INVENTORY_ID, this::setMultiblock, () -> multiblockUUID = null);
     }
 }

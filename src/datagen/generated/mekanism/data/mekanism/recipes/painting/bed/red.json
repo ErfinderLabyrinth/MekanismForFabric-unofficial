@@ -1,0 +1,21 @@
+{
+  "type": "mekanism:painting",
+  "chemicalInput": {
+    "amount": 256,
+    "pigment": "mekanism:red"
+  },
+  "itemInput": {
+    "ingredient": {
+      "fabric:type": "fabric:difference",
+      "base": {
+        "tag": "mekanism:colorable/beds"
+      },
+      "subtracted": {
+        "item": "minecraft:red_bed"
+      }
+    }
+  },
+  "output": {
+    "item": "minecraft:red_bed"
+  }
+}

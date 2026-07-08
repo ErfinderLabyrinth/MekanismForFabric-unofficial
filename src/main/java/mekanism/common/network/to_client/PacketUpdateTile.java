@@ -40,7 +40,7 @@ public class PacketUpdateTile implements IMekanismPacket {
                 Mekanism.logger.warn("Update tile packet received for position: {} in world: {}, but no valid tile was found.", pos,
                       world.dimension().location());
             } else {
-                tile.handleUpdatePacket(updateTag);
+                tile.handleUpdateTag(updateTag);
             }
         }
     }

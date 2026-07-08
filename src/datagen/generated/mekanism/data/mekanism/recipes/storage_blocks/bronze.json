@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "forge:ingots/bronze"
+    },
+    "P": {
+      "item": "mekanism:ingot_bronze"
+    }
+  },
+  "pattern": [
+    "###",
+    "#P#",
+    "###"
+  ],
+  "result": {
+    "item": "mekanism:block_bronze"
+  }
+}

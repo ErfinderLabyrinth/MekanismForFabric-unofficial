@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:compressing",
+  "chemicalInput": {
+    "amount": 1,
+    "gas": "mekanism:osmium"
+  },
+  "itemInput": {
+    "ingredient": {
+      "tag": "forge:dusts/refined_obsidian"
+    }
+  },
+  "output": {
+    "item": "mekanism:ingot_refined_obsidian"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:dandelion"
+    }
+  },
+  "output": {
+    "count": 2,
+    "item": "minecraft:yellow_dye"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:pigment_extracting",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:blue_orchid"
+    }
+  },
+  "output": {
+    "amount": 768,
+    "pigment": "mekanism:light_blue"
+  }
+}

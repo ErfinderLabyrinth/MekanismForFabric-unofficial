@@ -1,0 +1,22 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "#": {
+      "tag": "c:lapis"
+    },
+    "E": {
+      "item": "mekanism:energy_tablet"
+    },
+    "S": {
+      "tag": "forge:ingots/steel"
+    }
+  },
+  "pattern": [
+    "S#S",
+    "SES",
+    "SSS"
+  ],
+  "result": {
+    "item": "mekanism:seismic_reader"
+  }
+}

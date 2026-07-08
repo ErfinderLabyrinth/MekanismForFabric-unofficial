@@ -1,0 +1,16 @@
+{
+  "type": "mekanism:sawing",
+  "input": {
+    "ingredient": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "mainOutput": {
+    "count": 6,
+    "item": "minecraft:stick"
+  },
+  "secondaryChance": 0.25,
+  "secondaryOutput": {
+    "item": "mekanism:sawdust"
+  }
+}

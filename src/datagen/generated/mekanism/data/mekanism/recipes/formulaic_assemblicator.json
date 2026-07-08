@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "c:chests"
+    },
+    "C": {
+      "tag": "forge:circuits/basic"
+    },
+    "P": {
+      "item": "minecraft:crafting_table"
+    },
+    "S": {
+      "tag": "forge:ingots/steel"
+    },
+    "X": {
+      "item": "mekanism:steel_casing"
+    }
+  },
+  "pattern": [
+    "SPS",
+    "CXC",
+    "S#S"
+  ],
+  "result": {
+    "item": "mekanism:formulaic_assemblicator"
+  }
+}

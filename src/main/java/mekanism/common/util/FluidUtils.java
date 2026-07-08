@@ -193,7 +193,7 @@ public final class FluidUtils {
             } else {
                 long amountInserted;
                 try(Transaction t=Transaction.openOuter()) {
-                    amountInserted = fluidTank.insert(fluidInItem.variant(), fluidTank.getAmount(), t);
+                    amountInserted = fluidTank.insert(fluidInItem.variant(), fluidInItem.amount(), t);
                 }
                 long storedAmount = fluidInItem.amount();
                 if (amountInserted != 0) {

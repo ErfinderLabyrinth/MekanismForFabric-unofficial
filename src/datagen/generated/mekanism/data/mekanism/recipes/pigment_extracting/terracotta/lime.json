@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:pigment_extracting",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:lime_terracotta"
+    }
+  },
+  "output": {
+    "amount": 24,
+    "pigment": "mekanism:lime"
+  }
+}

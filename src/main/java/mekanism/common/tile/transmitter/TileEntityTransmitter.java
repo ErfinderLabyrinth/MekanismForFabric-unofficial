@@ -90,8 +90,8 @@ public abstract class TileEntityTransmitter extends TileEntityUpdateable impleme
     }
 
     @Override
-    public void handleUpdatePacket(@NotNull CompoundTag tag) {
-        super.handleUpdatePacket(tag);
+    public void handleUpdateTag(@NotNull CompoundTag tag) {
+        super.handleUpdateTag(tag);
         getTransmitter().handleUpdateTag(tag);
 
         updateModelData();

@@ -1,0 +1,22 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "#": {
+      "item": "mekanism:basic_energy_cube"
+    },
+    "E": {
+      "item": "mekanism:energy_tablet"
+    },
+    "L": {
+      "tag": "forge:dusts/lithium"
+    }
+  },
+  "pattern": [
+    "LEL",
+    "E#E",
+    "LEL"
+  ],
+  "result": {
+    "item": "mekanism:basic_induction_cell"
+  }
+}

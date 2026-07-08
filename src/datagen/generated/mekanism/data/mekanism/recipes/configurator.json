@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "minecraft:stick"
+    },
+    "A": {
+      "tag": "mekanism:alloys/infused"
+    },
+    "E": {
+      "item": "mekanism:energy_tablet"
+    },
+    "I": {
+      "tag": "c:lapis"
+    }
+  },
+  "pattern": [
+    " I ",
+    "AEA",
+    " # "
+  ],
+  "result": {
+    "item": "mekanism:configurator"
+  }
+}

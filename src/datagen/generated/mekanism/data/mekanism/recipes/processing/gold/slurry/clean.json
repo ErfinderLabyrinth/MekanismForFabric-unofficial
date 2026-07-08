@@ -1,0 +1,15 @@
+{
+  "type": "mekanism:washing",
+  "fluidInput": {
+    "amount": 5,
+    "tagSupplier": "minecraft:water"
+  },
+  "output": {
+    "amount": 1,
+    "slurry": "minecraft:clean_gold"
+  },
+  "slurryInput": {
+    "amount": 1,
+    "slurry": "minecraft:dirty_gold"
+  }
+}

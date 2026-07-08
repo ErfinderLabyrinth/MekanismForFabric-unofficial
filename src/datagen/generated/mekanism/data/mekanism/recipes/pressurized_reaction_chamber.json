@@ -1,0 +1,31 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "#": {
+      "item": "mekanism:dynamic_tank"
+    },
+    "A": {
+      "tag": "mekanism:alloys/infused"
+    },
+    "C": {
+      "tag": "forge:circuits/basic"
+    },
+    "P": {
+      "item": "mekanism:enrichment_chamber"
+    },
+    "S": {
+      "tag": "forge:ingots/steel"
+    },
+    "T": {
+      "item": "mekanism:basic_chemical_tank"
+    }
+  },
+  "pattern": [
+    "SAS",
+    "CPC",
+    "T#T"
+  ],
+  "result": {
+    "item": "mekanism:pressurized_reaction_chamber"
+  }
+}

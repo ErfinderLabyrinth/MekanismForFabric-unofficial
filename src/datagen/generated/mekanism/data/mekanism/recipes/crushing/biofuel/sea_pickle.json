@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:crushing",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:sea_pickle"
+    }
+  },
+  "output": {
+    "count": 5,
+    "item": "mekanism:bio_fuel"
+  }
+}

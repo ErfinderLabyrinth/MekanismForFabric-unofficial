@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "tag": "minecraft:diamond_ores"
+    }
+  },
+  "output": {
+    "count": 2,
+    "item": "minecraft:diamond"
+  }
+}

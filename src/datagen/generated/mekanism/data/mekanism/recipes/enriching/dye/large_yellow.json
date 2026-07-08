@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:sunflower"
+    }
+  },
+  "output": {
+    "count": 4,
+    "item": "minecraft:yellow_dye"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "A": {
+      "tag": "mekanism:alloys/reinforced"
+    },
+    "C": {
+      "tag": "forge:circuits/elite"
+    },
+    "P": {
+      "item": "mekanism:advanced_bin"
+    },
+    "_": {
+      "item": "minecraft:cobblestone"
+    }
+  },
+  "pattern": [
+    "_C_",
+    "APA",
+    "___"
+  ],
+  "result": {
+    "item": "mekanism:elite_bin"
+  }
+}

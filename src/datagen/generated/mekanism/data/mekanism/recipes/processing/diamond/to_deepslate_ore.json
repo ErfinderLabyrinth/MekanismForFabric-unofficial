@@ -1,0 +1,17 @@
+{
+  "type": "mekanism:combining",
+  "extraInput": {
+    "ingredient": {
+      "item": "minecraft:cobbled_deepslate"
+    }
+  },
+  "mainInput": {
+    "amount": 5,
+    "ingredient": {
+      "tag": "forge:dusts/diamond"
+    }
+  },
+  "output": {
+    "item": "minecraft:deepslate_diamond_ore"
+  }
+}

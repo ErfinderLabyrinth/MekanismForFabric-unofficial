@@ -165,8 +165,8 @@ public class TileEntityBoundingBlock extends TileEntityUpdateable implements IUp
     }
 
     @Override
-    public void handleUpdatePacket(CompoundTag tag) {
-        super.handleUpdatePacket(tag);
+    public void handleUpdateTag(CompoundTag tag) {
+        super.handleUpdateTag(tag);
         NBTUtils.setBlockPosIfPresent(tag, NBTConstants.MAIN, pos -> mainPos = pos);
         currentRedstoneLevel = tag.getInt(NBTConstants.REDSTONE);
         receivedCoords = tag.getBoolean(NBTConstants.RECEIVED_COORDS);

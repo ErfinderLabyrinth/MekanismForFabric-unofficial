@@ -1,0 +1,22 @@
+{
+  "type": "mekanism:mek_data",
+  "key": {
+    "#": {
+      "tag": "c:diamonds"
+    },
+    "E": {
+      "item": "mekanism:basic_energy_cube"
+    },
+    "S": {
+      "tag": "forge:ingots/steel"
+    }
+  },
+  "pattern": [
+    "SSS",
+    "SE#",
+    "SSS"
+  ],
+  "result": {
+    "item": "mekanism:laser_amplifier"
+  }
+}

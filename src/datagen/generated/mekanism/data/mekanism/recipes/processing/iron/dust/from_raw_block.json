@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:enriching",
+  "input": {
+    "ingredient": {
+      "tag": "c:raw_iron_blocks"
+    }
+  },
+  "output": {
+    "count": 12,
+    "item": "mekanism:dust_iron"
+  }
+}

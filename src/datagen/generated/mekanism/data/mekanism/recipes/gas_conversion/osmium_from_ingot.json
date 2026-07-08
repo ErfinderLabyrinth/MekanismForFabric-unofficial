@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:gas_conversion",
+  "input": {
+    "ingredient": {
+      "tag": "forge:ingots/osmium"
+    }
+  },
+  "output": {
+    "amount": 200,
+    "gas": "mekanism:osmium"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "mekanism:crushing",
+  "input": {
+    "ingredient": {
+      "item": "minecraft:sugar_cane"
+    }
+  },
+  "output": {
+    "count": 4,
+    "item": "mekanism:bio_fuel"
+  }
+}

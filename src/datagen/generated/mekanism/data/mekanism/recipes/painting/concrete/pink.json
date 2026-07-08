@@ -1,0 +1,21 @@
+{
+  "type": "mekanism:painting",
+  "chemicalInput": {
+    "amount": 32,
+    "pigment": "mekanism:pink"
+  },
+  "itemInput": {
+    "ingredient": {
+      "fabric:type": "fabric:difference",
+      "base": {
+        "tag": "mekanism:colorable/concrete"
+      },
+      "subtracted": {
+        "item": "minecraft:pink_concrete"
+      }
+    }
+  },
+  "output": {
+    "item": "minecraft:pink_concrete"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "parent": "mekanism:antimatter",
+  "criteria": {
+    "antiprotonic_nucleosynthesizer": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "mekanism:antiprotonic_nucleosynthesizer"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.mekanism.nucleosynthesizer.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "item": "mekanism:antiprotonic_nucleosynthesizer"
+    },
+    "title": {
+      "translate": "advancements.mekanism.nucleosynthesizer.title"
+    }
+  },
+  "sends_telemetry_event": true
+}

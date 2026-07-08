@@ -115,8 +115,8 @@ public class TileEntityQIODriveArray extends TileEntityQIOComponent implements I
     }
 
     @Override
-    public void handleUpdatePacket(CompoundTag updateTag) {
-        super.handleUpdatePacket(updateTag);
+    public void handleUpdateTag(CompoundTag updateTag) {
+        super.handleUpdateTag(updateTag);
         byte[] status = updateTag.getByteArray(NBTConstants.DRIVES);
         if (!Arrays.equals(status, driveStatus)) {
             driveStatus = status;

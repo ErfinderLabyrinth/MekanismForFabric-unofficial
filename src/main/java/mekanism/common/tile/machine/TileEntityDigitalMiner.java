@@ -1217,8 +1217,8 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
     }
 
     @Override
-    public void handleUpdatePacket(@NotNull CompoundTag tag) {
-        super.handleUpdatePacket(tag);
+    public void handleUpdateTag(@NotNull CompoundTag tag) {
+        super.handleUpdateTag(tag);
         NBTUtils.setIntIfPresent(tag, NBTConstants.RADIUS, this::setRadius);//the client is allowed to use whatever server sends
         NBTUtils.setIntIfPresent(tag, NBTConstants.MIN, this::setMinY);
         NBTUtils.setIntIfPresent(tag, NBTConstants.MAX, this::setMaxY);

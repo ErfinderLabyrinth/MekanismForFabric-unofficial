@@ -1,0 +1,21 @@
+{
+  "type": "mekanism:painting",
+  "chemicalInput": {
+    "amount": 256,
+    "pigment": "mekanism:yellow"
+  },
+  "itemInput": {
+    "ingredient": {
+      "fabric:type": "fabric:difference",
+      "base": {
+        "tag": "mekanism:colorable/candle"
+      },
+      "subtracted": {
+        "item": "minecraft:yellow_candle"
+      }
+    }
+  },
+  "output": {
+    "item": "minecraft:yellow_candle"
+  }
+}

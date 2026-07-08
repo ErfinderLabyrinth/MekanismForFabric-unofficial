@@ -110,11 +110,6 @@ public class FluidStack {
         return variant.getFluid();
     }
 
-    public void writeToPacket(FriendlyByteBuf buffer) {
-        buffer.writeNbt(writeToNBT(variant.toNbt()));
-        buffer.writeLongLE(amount);
-    }
-
     public boolean isFluidStackIdentical(FluidStack fluidStack) {
         return variant.equals(fluidStack.variant) && amount == fluidStack.amount();
     }
