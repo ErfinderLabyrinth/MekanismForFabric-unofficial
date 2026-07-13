@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
+import mekanism.api.NBTConstants;
 import mekanism.api.event.MekanismTeleportEvent;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
@@ -28,14 +29,17 @@ import mekanism.common.item.ItemEnergized;
 import mekanism.common.lib.attribute.AttributeCache;
 import mekanism.common.lib.radial.IGenericRadialModeItem;
 import mekanism.common.lib.radial.data.NestingRadialData;
+import mekanism.common.mixinhelper.CustomEnchantmentsItem;
 import mekanism.common.network.to_client.PacketPortalFX;
 import mekanism.common.registries.MekanismModules;
+import mekanism.common.util.ItemDataUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.StorageUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.item.base.SingleStackStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -54,6 +58,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -71,7 +77,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem, IBlastingItem, IGenericRadialModeItem {
+public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem, IBlastingItem, IGenericRadialModeItem, CustomEnchantmentsItem {
 
     private static final ResourceLocation RADIAL_ID = Mekanism.rl("meka_tool");
 
@@ -133,22 +139,22 @@ public class ItemMekaTool extends ItemEnergized implements IModuleContainerItem,
 //        return super.isNotReplaceableByPickAction(stack, player, inventorySlot) || ItemDataUtils.hasData(stack, NBTConstants.MODULES, Tag.TAG_COMPOUND);
 //    }
 
-//    @Override
-//    public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
-//        if (stack.isEmpty()) {
-//            return 0;
-//        }
-//        //Enchantments in our data
-//        ListTag enchantments = ItemDataUtils.getList(stack, NBTConstants.ENCHANTMENTS);
-//        return Math.max(MekanismUtils.getEnchantmentLevel(enchantments, enchantment), super.getEnchantmentLevel(stack, enchantment));
-//    }
-//
-//    @Override
-//    public Map<Enchantment, Integer> getAllEnchantments(ItemStack stack) {
-//        Map<Enchantment, Integer> enchantments = EnchantmentHelper.deserializeEnchantments(ItemDataUtils.getList(stack, NBTConstants.ENCHANTMENTS));
-//        super.getAllEnchantments(stack).forEach((enchantment, level) -> enchantments.merge(enchantment, level, Math::max));
-//        return enchantments;
-//    }
+    @Override
+    public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment, int originalLevel) {
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        //Enchantments in our data
+        ListTag enchantments = ItemDataUtils.getList(stack, NBTConstants.ENCHANTMENTS);
+        return Math.max(MekanismUtils.getEnchantmentLevel(enchantments, enchantment), originalLevel);
+    }
+
+    @Override
+    public Map<Enchantment, Integer> getAllEnchantments(ItemStack stack, Map<Enchantment, Integer> originalEnchantments) {
+        Map<Enchantment, Integer> enchantments = EnchantmentHelper.deserializeEnchantments(ItemDataUtils.getList(stack, NBTConstants.ENCHANTMENTS));
+        originalEnchantments.forEach((enchantment, level) -> enchantments.merge(enchantment, level, Math::max));
+        return enchantments;
+    }
 
     @NotNull
     @Override

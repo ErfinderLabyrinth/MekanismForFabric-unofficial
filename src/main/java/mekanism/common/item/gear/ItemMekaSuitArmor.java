@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.math.LongMath;
 import mekanism.api.FluidStack;
+import mekanism.api.NBTConstants;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
@@ -40,6 +41,7 @@ import mekanism.common.item.interfaces.IJetpackItem;
 import mekanism.common.item.interfaces.IModeItem;
 import mekanism.common.lib.attribute.AttributeCache;
 import mekanism.common.lib.attribute.IAttributeRefresher;
+import mekanism.common.mixinhelper.CustomEnchantmentsItem;
 import mekanism.common.mixinhelper.ElytraFlyable;
 import mekanism.common.mixinhelper.WalkableOnPowderSnow;
 import mekanism.common.registration.impl.CreativeTabDeferredRegister.ICustomCreativeTabContents;
@@ -52,6 +54,8 @@ import mekanism.common.storage.item.GasItemStorage;
 import mekanism.common.storage.item.ItemStorageHandler;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.util.ChemicalUtil;
+import mekanism.common.util.ItemDataUtils;
+import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.StorageUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -62,6 +66,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -79,6 +84,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.NotNull;
@@ -88,11 +95,12 @@ import team.reborn.energy.api.EnergyStorage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContainerItem, IModeItem, IJetpackItem, IAttributeRefresher, ICustomCreativeTabContents, ISpecialGear, ISpecialGearGetter, WalkableOnPowderSnow, ItemStorageHandler, ElytraFlyable, IRadiationShielding, ILaserDissipation {
+public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContainerItem, IModeItem, IJetpackItem, IAttributeRefresher, ICustomCreativeTabContents, ISpecialGear, ISpecialGearGetter, WalkableOnPowderSnow, ItemStorageHandler, ElytraFlyable, IRadiationShielding, ILaserDissipation, CustomEnchantmentsItem {
 
     private static final MekaSuitMaterial MEKASUIT_MATERIAL = new MekaSuitMaterial();
 
@@ -214,22 +222,22 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
 //        return super.isNotReplaceableByPickAction(stack, player, inventorySlot) || ItemDataUtils.hasData(stack, NBTConstants.MODULES, Tag.TAG_COMPOUND);
 //    }
 
-//    @Override
-//    public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
-//        if (stack.isEmpty()) {
-//            return 0;
-//        }
-//        //Enchantments in our data
-//        ListTag enchantments = ItemDataUtils.getList(stack, NBTConstants.ENCHANTMENTS);
-//        return Math.max(MekanismUtils.getEnchantmentLevel(enchantments, enchantment), super.getEnchantmentLevel(stack, enchantment));
-//    }
+    @Override
+    public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment, int originalLevel) {
+        if (stack.isEmpty()) {
+            return 0;
+        }
+        //Enchantments in our data
+        ListTag enchantments = ItemDataUtils.getList(stack, NBTConstants.ENCHANTMENTS);
+        return Math.max(MekanismUtils.getEnchantmentLevel(enchantments, enchantment), originalLevel);
+    }
 
-//    @Override
-//    public Map<Enchantment, Integer> getAllEnchantments(ItemStack stack) {
-//        Map<Enchantment, Integer> enchantments = EnchantmentHelper.deserializeEnchantments(ItemDataUtils.getList(stack, NBTConstants.ENCHANTMENTS));
-//        super.getAllEnchantments(stack).forEach((enchantment, level) -> enchantments.merge(enchantment, level, Math::max));
-//        return enchantments;
-//    }
+    @Override
+    public Map<Enchantment, Integer> getAllEnchantments(ItemStack stack, Map<Enchantment, Integer> originalEnchantments) {
+        Map<Enchantment, Integer> enchantments = EnchantmentHelper.deserializeEnchantments(ItemDataUtils.getList(stack, NBTConstants.ENCHANTMENTS));
+        originalEnchantments.forEach((enchantment, level) -> enchantments.merge(enchantment, level, Math::max));
+        return enchantments;
+    }
 
     @Override
     public void addItems(CreativeModeTab.Output tabOutput) {

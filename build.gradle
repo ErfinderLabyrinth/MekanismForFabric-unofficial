@@ -354,6 +354,10 @@ loom {
         }
     }
 
+    for(run in runs) {
+        run.vmArg("-XX:+AllowEnhancedClassRedefinition")
+    }
+
     mods {
         mekanism {
             sourceSet sourceSets.main

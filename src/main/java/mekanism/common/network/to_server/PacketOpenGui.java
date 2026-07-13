@@ -48,7 +48,7 @@ public class PacketOpenGui implements IMekanismPacket {
     }
 
     public enum GuiType {
-        MODULE_TWEAKER(() -> new ContainerProvider(MekanismLang.MODULE_TWEAKER, (id, inv, player) -> MekanismContainerTypes.MODULE_TWEAKER.get().create(id, inv), buffer -> {}),
+        MODULE_TWEAKER(() -> new ContainerProvider(MekanismLang.MODULE_TWEAKER, (id, inv, player) -> new ModuleTweakerContainer(id, inv), buffer -> {}),
               ModuleTweakerContainer::hasTweakableItem);
 
         private final Supplier<MenuProvider> containerSupplier;

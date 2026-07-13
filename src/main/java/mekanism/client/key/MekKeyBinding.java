@@ -57,9 +57,4 @@ public class MekKeyBinding extends KeyMapping {
             lastState = state;
         }
     }
-
-    @Override
-    public boolean isDown() {
-        return isDown && isToggleable();
-    }
 }

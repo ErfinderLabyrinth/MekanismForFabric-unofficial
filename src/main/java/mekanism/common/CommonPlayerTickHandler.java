@@ -80,10 +80,10 @@ public class CommonPlayerTickHandler {
         if (!stack.isEmpty()) {
             IModule<ModuleHydrostaticRepulsorUnit> module = IModuleHelper.INSTANCE.load(stack, MekanismModules.HYDROSTATIC_REPULSOR_UNIT);
             if (module != null && module.isEnabled() && module.getCustomInstance().isSwimBoost(module, player)) {
-                return 1F;
+                return 2F;
             }
         }
-        return 0;
+        return 1;
     }
 
     public void tickEnd(Player player) {
