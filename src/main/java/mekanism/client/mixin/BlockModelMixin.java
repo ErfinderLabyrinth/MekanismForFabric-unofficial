@@ -43,7 +43,7 @@ public class BlockModelMixin implements CustomGeometryHolder, RenderTypeHolder {
         while (currentBlockModel != null) {
             CustomGeometry geometry = ((CustomGeometryHolder)currentBlockModel).getCustomGeometry();
             if (geometry != null) {
-                cir.setReturnValue(geometry.bake((BlockModel)(Object)this, modelBaker, function, modelState, blockModel.getItemOverrides(modelBaker, blockModel), resourceLocation, cir.getReturnValue()));
+                cir.setReturnValue(geometry.bake((BlockModel)(Object)this, null, modelBaker, function, modelState, blockModel.getItemOverrides(modelBaker, blockModel), resourceLocation, cir.getReturnValue()));
                 return;
             }
             currentBlockModel = currentBlockModel.parent;

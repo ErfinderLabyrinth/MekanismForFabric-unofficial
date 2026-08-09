@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,11 +35,19 @@ public final class ObjBaker {
                 for (Face face : obj.getFaces()) {
 
                     mekanism.client.model.obj.Material mat = model.getMaterial(face.material);
-                    TextureAtlasSprite sprite = sprites.apply(
-                            owner == null ? MISSING : owner.getMaterial(mat != null && mat.mapKd != null
-                                    ? mat.mapKd
-                                    : face.material)
-                    );
+                    String materialId = mat != null && mat.mapKd != null
+                            ? mat.mapKd
+                            : face.material;
+                    Material material = MISSING;
+                    if(materialId.startsWith("#") && owner != null) {
+                        material = owner.getMaterial(materialId);
+                    } else {
+                        ResourceLocation materialLocation = ResourceLocation.tryParse(materialId);
+                        if(materialLocation != null) {
+                            material = new Material(TextureAtlas.LOCATION_BLOCKS, materialLocation);
+                        }
+                    }
+                    TextureAtlasSprite sprite = sprites.apply(material);
 
                     if (face.vertices.size() < 3)
                         continue;

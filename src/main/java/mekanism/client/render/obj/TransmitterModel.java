@@ -1,6 +1,5 @@
 package mekanism.client.render.obj;
 
-import mekanism.client.mixinhelper.BlockModelHolder;
 import mekanism.client.model.CustomGeometry;
 import mekanism.client.model.obj.ObjModel;
 import net.minecraft.client.renderer.block.model.BlockModel;
@@ -10,6 +9,7 @@ import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
 import java.util.function.Function;
 
 public class TransmitterModel extends CustomGeometry {
@@ -24,7 +24,7 @@ public class TransmitterModel extends CustomGeometry {
     }
 
     @Override
-    public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
+    public BakedModel bake(BlockModel blockModel, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
                            ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
         return new TransmitterBakedModel(internal.bake(blockModel, spriteGetter), glass == null ? null : glass.bake(blockModel, spriteGetter), baker, spriteGetter, modelTransform, overrides, modelLocation, blockModel, alreadyBaked);
     }

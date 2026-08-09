@@ -9,13 +9,11 @@ import mekanism.client.render.lib.Quad;
 import mekanism.client.render.lib.QuadUtils;
 import mekanism.client.render.lib.Vertex;
 import mekanism.common.Mekanism;
-import net.fabricmc.fabric.api.client.model.ModelProviderException;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.core.Direction;
@@ -105,7 +103,7 @@ public class BaseModelCache {
         protected CustomGeometry model;
 
         protected final ResourceLocation rl;
-        private final Map<Object, BakedModel> bakedMap = new Object2ObjectOpenHashMap<>();
+        private final Map<Set<String>, BakedModel> bakedMap = new Object2ObjectOpenHashMap<>();
 
         protected MekanismModelData(ResourceLocation rl) {
             this.rl = rl;
@@ -118,13 +116,17 @@ public class BaseModelCache {
         protected void setup(ModelLoadingPlugin.Context context) {
         }
 
-        public BakedModel bake(Object config, BlockModel blockModel) {
+        public BakedModel bake(Set<String> config, BlockModel blockModel) {
             return bakedMap.computeIfAbsent(config, c -> {
                 ModelBaker baker = ((ModelManagerModelBakeryGetter)Minecraft.getInstance().getModelManager()).getModelBakery().new ModelBakerImpl(
                       (modelLoc, material) -> material.sprite(),
                       rl
                 );
-                return model.bake(blockModel, baker, Material::sprite, BlockModelRotation.X0_Y0, ItemOverrides.EMPTY, rl, blockModel.bake(baker, Material::sprite, BlockModelRotation.X0_Y0, rl));
+                BakedModel bakedModel = null;
+                if(blockModel != null) {
+                    bakedModel = blockModel.bake(baker, Material::sprite, BlockModelRotation.X0_Y0, rl);
+                }
+                return model.bake(blockModel, c, baker, Material::sprite, BlockModelRotation.X0_Y0, ItemOverrides.EMPTY, rl, bakedModel);
             });
         }
 
@@ -134,6 +136,7 @@ public class BaseModelCache {
     }
 
     public static class OBJModelData extends MekanismModelData {
+        private ObjModel objModel;
 
         protected OBJModelData(ResourceLocation rl) {
             super(rl);
@@ -148,17 +151,22 @@ public class BaseModelCache {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            objModel = unbakedModel;
             ObjModel finalUnbakedModel = unbakedModel;
             model = new CustomGeometry() {
                 @Override
-                public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
-                    return finalUnbakedModel.bake(blockModel, spriteGetter).wrapper(Set.of(), alreadyBaked);
+                public BakedModel bake(BlockModel blockModel, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
+                    return finalUnbakedModel.bake(blockModel, spriteGetter).wrapper(parts, alreadyBaked);
                 }
 
                 @Override
                 public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
                 }
             };
+        }
+
+        public ObjModel getObjModel() {
+            return objModel;
         }
 
         protected boolean useDiffuseLighting() {

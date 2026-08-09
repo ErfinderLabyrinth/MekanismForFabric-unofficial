@@ -29,8 +29,8 @@ public class EnergyCubeGeometry extends CustomGeometry {
     }
 
     @Override
-    public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
-          ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
+    public BakedModel bake(BlockModel blockModel, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
+                           ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
         //TODO
 
         TextureAtlasSprite particle = spriteGetter.apply(blockModel.getMaterial("particle"));

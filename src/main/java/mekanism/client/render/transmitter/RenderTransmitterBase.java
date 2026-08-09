@@ -58,7 +58,7 @@ public abstract class RenderTransmitterBase<TRANSMITTER extends TileEntityTransm
             );
             //Note: We get model and then bake as we use different parameters and are caching after modifying
             List<BakedQuad> bakedQuads = MekanismModelCache.INSTANCE.TRANSMITTER_CONTENTS.getModel()
-                  .bake(null, baker, material -> modelData.icon,
+                  .bake(null, null, baker, material -> modelData.icon,
                         BlockModelRotation.X0_Y0, ItemOverrides.EMPTY, MODEL_LOCATION, null)
                   .getQuads(null, null, world.getRandom());
             List<Quad> unpackedQuads = QuadUtils.unpack(bakedQuads);

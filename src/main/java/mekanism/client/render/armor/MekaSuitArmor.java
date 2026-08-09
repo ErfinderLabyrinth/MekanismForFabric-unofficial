@@ -193,11 +193,11 @@ public class MekaSuitArmor implements ICustomArmor {
         //Note: We need to use a new list to not accidentally pollute the cached bake quads with the LED quads that we match them with
         // this also means that we can avoid even baking the data against empty part lists entirely
         if (!parts.isEmpty()) {
-//            quads.addAll(data.bake(new MekaSuitModelConfiguration(parts)).getQuads(null, null, random));
+            quads.addAll(data.bake(parts, null).getQuads(null, null, random));
         }
         if (!ledParts.isEmpty()) {
-//            List<BakedQuad> ledQuads = data.bake(new MekaSuitModelConfiguration(ledParts)).getQuads(null, null, random);
-//            quads.addAll(QuadUtils.transformBakedQuads(ledQuads, QuadTransformation.fullbright));
+            List<BakedQuad> ledQuads = data.bake(ledParts, null).getQuads(null, null, random);
+            quads.addAll(QuadUtils.transformBakedQuads(ledQuads, QuadTransformation.fullbright));
         }
         if (transform != null) {
             quads = QuadUtils.transformBakedQuads(quads, transform);
@@ -389,26 +389,26 @@ public class MekaSuitArmor implements ICustomArmor {
 
         Map<ModelPos, Set<String>> armorQuadsToRender = new EnumMap<>(ModelPos.class);
         Map<ModelPos, Set<String>> armorLEDQuadsToRender = new EnumMap<>(ModelPos.class);
-//        for (String name : MekanismModelCache.INSTANCE.MEKASUIT.getModel().getRootComponentNames()) {
-//            if (!checkEquipment(type, name)) {
-//                // skip if it's the wrong equipment type
-//                continue;
-//            } else if (name.startsWith(EXCLUSIVE_TAG)) {
-//                if (wornParts.contains(adjacentType)) {
-//                    // skip if the part is exclusive and the adjacent part is present
-//                    continue;
-//                }
-//            } else if (name.startsWith(SHARED_TAG) && wornParts.contains(adjacentType) && adjacentType.ordinal() > type.ordinal()) {
-//                // skip if the part is shared and the shared part already rendered
-//                continue;
-//            }
-//            ModelPos pos = ModelPos.get(name);
-//            if (pos == null) {
-//                Mekanism.logger.warn("MekaSuit part '{}' is invalid. Ignoring.", name);
-//            } else if (!ignored.contains(name)) {
-//                addQuadsToRender(pos, name, overrides, armorQuadsToRender, armorLEDQuadsToRender, specialQuadsToRender, specialLEDQuadsToRender);
-//            }
-//        }
+        for (String name : MekanismModelCache.INSTANCE.MEKASUIT.getObjModel().getGroup("default").getRawObjects().keySet()) {
+            if (!checkEquipment(type, name)) {
+                // skip if it's the wrong equipment type
+                continue;
+            } else if (name.startsWith(EXCLUSIVE_TAG)) {
+                if (wornParts.contains(adjacentType)) {
+                    // skip if the part is exclusive and the adjacent part is present
+                    continue;
+                }
+            } else if (name.startsWith(SHARED_TAG) && wornParts.contains(adjacentType) && adjacentType.ordinal() > type.ordinal()) {
+                // skip if the part is shared and the shared part already rendered
+                continue;
+            }
+            ModelPos pos = ModelPos.get(name);
+            if (pos == null) {
+                Mekanism.logger.warn("MekaSuit part '{}' is invalid. Ignoring.", name);
+            } else if (!ignored.contains(name)) {
+                addQuadsToRender(pos, name, overrides, armorQuadsToRender, armorLEDQuadsToRender, specialQuadsToRender, specialLEDQuadsToRender);
+            }
+        }
 
         Map<ModelPos, List<BakedQuad>> opaqueMap = new EnumMap<>(ModelPos.class);
         Map<ModelPos, List<BakedQuad>> transparentMap = new EnumMap<>(ModelPos.class);

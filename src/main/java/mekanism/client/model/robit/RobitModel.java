@@ -13,9 +13,11 @@ import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 public class RobitModel extends CustomGeometry {
@@ -25,9 +27,9 @@ public class RobitModel extends CustomGeometry {
     }
 
     @Override
-    public BakedModel bake(BlockModel blockModel, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
+    public BakedModel bake(BlockModel blockModel, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
                            ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
-        return new RobitBakedModel(super.bake(blockModel, baker, spriteGetter, modelTransform, overrides, modelLocation, alreadyBaked));
+        return new RobitBakedModel(super.bake(blockModel, parts, baker, spriteGetter, modelTransform, overrides, modelLocation, alreadyBaked));
     }
 
     /**

@@ -1,21 +1,21 @@
 package mekanism.client.model.composite;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.datafixers.util.Either;
 import mekanism.client.mixinhelper.RenderTypeHolder;
 import mekanism.client.model.CustomGeometry;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class CompositeGeometry extends CustomGeometry {
@@ -32,7 +32,7 @@ public class CompositeGeometry extends CustomGeometry {
     }
 
     @Override
-    public BakedModel bake(BlockModel origin, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
+    public BakedModel bake(BlockModel origin, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
 //        BlockModel fullModel = new BlockModel(origin.parentLocation, combine(origin.getElements(), getElements()), combine(origin.textureMap, getTextureMap()), origin.hasAmbientOcclusion(), origin.getGuiLight(), origin.getTransforms(), origin.getOverrides());
         List<BakedModel> children = new ArrayList<>();
         List<BakedModel> childrenCutout = new ArrayList<>();
