@@ -1,4 +1,4 @@
-package mekanism.common.mixin;
+package mekanism.client.mixin;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractBlockRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;

@@ -4,6 +4,7 @@
   "package": "mekanism.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "AbstractBlockRenderContextMixin",
     "AbstractContainerScreenMixin",
     "BlockElementDeserializerMixin",
     "BlockElementFaceDeserializerMixin",
@@ -20,6 +21,7 @@
     "FogRendererMixin",
     "GuiGraphicsMixin",
     "GuiMixin",
+    "HumanoidArmorLayerMixin",
     "ItemModelGeneratorMixin",
     "ItemRendererMixin",
     "LevelRendererMixin",
@@ -34,10 +36,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "mixins": [
-    "ChunkMapMixin",
-    "ChunkSerializerMixin",
-    "LevelChunkMixin"
-  ]
+  }
 }

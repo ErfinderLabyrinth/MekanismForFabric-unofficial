@@ -57,6 +57,7 @@ import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.ItemDataUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.StorageUtils;
+import net.fabricmc.fabric.api.entity.event.v1.FabricElytraItem;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -100,7 +101,7 @@ import java.util.UUID;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContainerItem, IModeItem, IJetpackItem, IAttributeRefresher, ICustomCreativeTabContents, ISpecialGear, ISpecialGearGetter, WalkableOnPowderSnow, ItemStorageHandler, ElytraFlyable, IRadiationShielding, ILaserDissipation, CustomEnchantmentsItem {
+public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContainerItem, IModeItem, IJetpackItem, IAttributeRefresher, ICustomCreativeTabContents, ISpecialGear, ISpecialGearGetter, WalkableOnPowderSnow, ItemStorageHandler, FabricElytraItem, IRadiationShielding, ILaserDissipation, CustomEnchantmentsItem {
 
     private static final MekaSuitMaterial MEKASUIT_MATERIAL = new MekaSuitMaterial();
 
@@ -388,6 +389,16 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
     }
 
     @Override
+    public boolean useCustomElytra(LivingEntity entity, ItemStack chestStack, boolean tickElytra) {
+        if(canElytraFly(chestStack, entity)) {
+            if(tickElytra) {
+                elytraFlightTick(chestStack, entity, entity.getFallFlyingTicks());
+            }
+            return true;
+        }
+        return false;
+    }
+
     public boolean canElytraFly(ItemStack stack, LivingEntity entity) {
         if (getType() == ArmorItem.Type.CHESTPLATE && !entity.isShiftKeyDown()) {
             //Don't allow elytra flight if the player is sneaking. This lets the player exit elytra flight early
@@ -403,7 +414,6 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
         return false;
     }
 
-    @Override
     public boolean elytraFlightTick(ItemStack stack, LivingEntity entity, int flightTicks) {
         //Note: As canElytraFly is checked just before this we don't bother validating ahead of time we have the energy
         // or that we are the correct slot

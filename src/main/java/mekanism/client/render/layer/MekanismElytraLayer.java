@@ -26,7 +26,7 @@ public class MekanismElytraLayer<T extends LivingEntity, M extends HumanoidModel
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(T entity) {
+    public ResourceLocation getElytraTexture() {
         return HDPE_ELYTRA;
     }
 }

@@ -1,4 +1,4 @@
-package mekanism.client.mixin;
+package mekanism.common.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import mekanism.common.Mekanism;

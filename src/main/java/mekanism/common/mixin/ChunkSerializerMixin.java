@@ -1,4 +1,4 @@
-package mekanism.client.mixin;
+package mekanism.common.mixin;
 
 import mekanism.common.Mekanism;
 import net.minecraft.nbt.CompoundTag;

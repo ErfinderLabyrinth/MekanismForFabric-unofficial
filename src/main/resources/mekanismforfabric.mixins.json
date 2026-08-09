@@ -4,12 +4,15 @@
   "package": "mekanism.common.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ChunkMapMixin",
+    "ChunkSerializerMixin",
     "DataGeneratorMixin",
     "EnchantmentHelperMixin",
     "EntityMixin",
     "ExplosionMixin",
     "HashCacheMixin",
     "ItemPredicateMekanismAddonMixin",
+    "LevelChunkMixin",
     "LivingEntityMixin",
     "PersistentEntitySectionManagerMixin",
     "PiglinAiMixin",
@@ -19,8 +22,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "client": [
-    "AbstractBlockRenderContextMixin"
-  ]
+  }
 }
