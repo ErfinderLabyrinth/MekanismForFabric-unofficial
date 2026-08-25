@@ -8,8 +8,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Predicate;
-
 @NothingNullByDefault
 public class MaterialCreator extends BaseMekanismMaterial {
     public transient BaseMekanismMaterial fallBack;
@@ -48,26 +46,6 @@ public class MaterialCreator extends BaseMekanismMaterial {
     public MaterialCreator(BaseMekanismMaterial materialDefaults) {
         fallBack = materialDefaults;
         attackDamage = materialDefaults.getAttackDamageBonus();
-        //Note: Damage predicate to allow for tools to go negative to the value of the base tier so that a tool
-        // can effectively have zero damage for things like the hoe
-        Predicate<Object> damageModifierPredicate = value -> {
-            if (value instanceof Double) {
-                double val = (double) value;
-                float actualValue;
-                if (val > Float.MAX_VALUE) {
-                    actualValue = Float.MAX_VALUE;
-                } else if (val < -Float.MAX_VALUE) {
-                    //Note: Float.MIN_VALUE is the smallest positive value a float can represent
-                    // the smallest value a float can represent overall is -Float.MAX_VALUE
-                    actualValue = -Float.MAX_VALUE;
-                } else {
-                    actualValue = (float) val;
-                }
-                float baseDamage = attackDamage;
-                return actualValue >= -baseDamage && actualValue <= Float.MAX_VALUE - baseDamage;
-            }
-            return false;
-        };
         shieldDurability = materialDefaults.getShieldDurability();
         swordDamage = materialDefaults.getSwordDamage();
         swordAtkSpeed = materialDefaults.getSwordAtkSpeed();

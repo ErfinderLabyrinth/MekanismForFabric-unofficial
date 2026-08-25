@@ -5,7 +5,7 @@ import me.shedaniel.autoconfig.annotation.Config;
 @Config(name = "usage")
 public class UsageConfig extends BaseMekanismConfig {
 
-    private static final String TELEPORTER_CATEGORY = "teleporter";
+//    private static final String TELEPORTER_CATEGORY = "teleporter";
 
     public long enrichmentChamber = 50;
     public long osmiumCompressor = 100;

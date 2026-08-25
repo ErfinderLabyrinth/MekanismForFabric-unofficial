@@ -16,25 +16,12 @@ public class VanillaPaxelMaterialCreator implements IPaxelMaterial {
 
     public VanillaPaxelMaterialCreator(VanillaPaxelMaterial materialDefaults) {
         this.fallback = materialDefaults;
-        //Note: Damage predicate to allow for tools to go negative to the value of the base tier so that a tool
-        // can effectively have zero damage for things like the hoe
         paxelDamage = materialDefaults.getPaxelDamage();
         paxelAtkSpeed = materialDefaults.getPaxelAtkSpeed();
         paxelEfficiency = materialDefaults.getPaxelEfficiency();
         paxelEnchantability = materialDefaults.getPaxelEnchantability();
         paxelMaxUses = materialDefaults.getPaxelMaxUses();
     }
-
-    /*public VanillaPaxelMaterialCreator(VanillaPaxelMaterial materialDefaults, ToolsConfig.VanillaPaxelMaterialConfig config) {
-        this.fallback = materialDefaults;
-        //Note: Damage predicate to allow for tools to go negative to the value of the base tier so that a tool
-        // can effectively have zero damage for things like the hoe
-        paxelDamage = config.paxelDamage;
-        paxelAtkSpeed = config.paxelAtkSpeed;
-        paxelEfficiency = config.paxelEfficiency;
-        paxelEnchantability = config.paxelEnchantability;
-        paxelMaxUses = config.paxelMaxUses;
-    }*/
 
     public Tiers getVanillaTier() {
         return fallback.getVanillaTier();

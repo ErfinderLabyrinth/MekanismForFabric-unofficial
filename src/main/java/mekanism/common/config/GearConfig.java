@@ -2,8 +2,6 @@ package mekanism.common.config;
 
 import me.shedaniel.autoconfig.annotation.Config;
 import mekanism.common.item.gear.ItemMekaSuitArmor;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterials;
 
@@ -12,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Config(name = "gear")
 public class GearConfig extends BaseMekanismConfig {
-
+/*
     private static final String DISASSEMBLER_CATEGORY = "atomic_disassembler";
     private static final String CONFIGURATOR_CATEGORY = "configurator";
     private static final String ELECTRIC_BOW_CATEGORY = "electric_bow";
@@ -29,7 +27,7 @@ public class GearConfig extends BaseMekanismConfig {
     private static final String MEKATOOL_CATEGORY = "mekatool";
     private static final String MEKASUIT_CATEGORY = "mekasuit";
     private static final String MEKASUIT_DAMAGE_CATEGORY = "damage_absorption";
-
+*/
     //Atomic Disassembler
     public long disassemblerEnergyUsage = 10;
     public long disassemblerEnergyUsageWeapon = 2_000;

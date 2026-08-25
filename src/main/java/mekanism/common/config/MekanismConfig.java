@@ -2,9 +2,9 @@ package mekanism.common.config;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.autoconfig.annotation.ConfigEntry.Gui.CollapsibleObject;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
-import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 
 public class MekanismConfig {
 
@@ -54,17 +54,17 @@ public class MekanismConfig {
 
     @Config(name = "mekanism")
     public static class Common extends PartitioningSerializer.GlobalData {
-        public CommonConfig common;
-        public GeneralConfig general;
-        public GearConfig gear;
-        public StorageConfig storage;
-        public TierConfig tiers;
-        public UsageConfig usage;
-        public WorldConfig world;
+        @CollapsibleObject public CommonConfig common;
+        @CollapsibleObject public GeneralConfig general;
+        @CollapsibleObject public GearConfig gear;
+        @CollapsibleObject public StorageConfig storage;
+        @CollapsibleObject public TierConfig tiers;
+        @CollapsibleObject public UsageConfig usage;
+        @CollapsibleObject public WorldConfig world;
     }
 
     @Config(name = "mekanism")
     public static class Client extends PartitioningSerializer.GlobalData {
-        public ClientConfig client;
+        @CollapsibleObject public ClientConfig client;
     }
 }

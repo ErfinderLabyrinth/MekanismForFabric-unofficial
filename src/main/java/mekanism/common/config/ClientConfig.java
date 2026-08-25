@@ -11,12 +11,12 @@ import java.util.Map;
 
 @Config(name = "client")
 public class ClientConfig extends BaseMekanismConfig {
-
+/*
     private static final String PARTICLE_CATEGORY = "particle";
     private static final String GUI_CATEGORY = "gui";
     private static final String GUI_WINDOW_CATEGORY = "window";
     private static final String QIO_CATEGORY = "qio";
-
+*/
     public boolean enablePlayerSounds = true;
     public boolean enableMachineSounds = true;
     public boolean whiteRadialText = false;

@@ -1,7 +1,6 @@
 package mekanism.common.config;
 
 import me.shedaniel.autoconfig.annotation.Config;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.tier.ChemicalTankTier;
 import mekanism.common.tier.EnergyCubeTier;
 import mekanism.common.tier.FluidTankTier;
@@ -13,7 +12,7 @@ import java.util.Map;
 
 @Config(name = "general")
 public class GeneralConfig extends BaseMekanismConfig {
-
+/*
     private static final String CONVERSION_CATEGORY = "energy_conversion";
 
     private static final String EJECT_CATEGORY = "auto_eject";
@@ -30,6 +29,7 @@ public class GeneralConfig extends BaseMekanismConfig {
     private static final String RADIATION_CATEGORY = "radiation";
     private static final String PREFILLED_CATEGORY = "prefilled";
     private static final String NUTRITIONAL_PASTE_CATEGORY = "nutritional_paste";
+*/
 
     public boolean logPackets = false;
     public boolean allowChunkloading = true;

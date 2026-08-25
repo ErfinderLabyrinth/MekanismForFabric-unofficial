@@ -4,7 +4,7 @@ import me.shedaniel.autoconfig.annotation.Config;
 
 @Config(name = "tier")
 public class TierConfig extends BaseMekanismConfig {
-
+/*
     private static final String ENERGY_CUBE_CATEGORY = "energy_cubes";
     private static final String FLUID_TANK_CATEGORY = "fluid_tanks";
     private static final String CHEMICAL_TANK_CATEGORY = "chemical_tanks";
@@ -16,7 +16,7 @@ public class TierConfig extends BaseMekanismConfig {
     private static final String CHEMICAL_CATEGORY = "chemical";
     private static final String ITEMS_CATEGORY = "items";
     private static final String HEAT_CATEGORY = "heat";
-
+*/
     TierConfig() {
 //        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 //        builder.comment("Tier Config. This config is synced from server to client.").push("tier");

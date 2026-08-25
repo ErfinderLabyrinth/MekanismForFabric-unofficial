@@ -246,7 +246,7 @@ def setupTasks(SourceSet sourceSet) {
         setGroup("process resources")
         duplicatesStrategy(DuplicatesStrategy.FAIL)
         //exclude('META-INF/mods.toml')
-        from("${projectDir}") { include 'logo.png' }
+        from("${projectDir}") { include 'logo_square.png' }
         //Depend on the compile task so that we can map the computer methods as needed
         dependsOn(compileTask)
         //finalizedBy(replaceResourceTask)

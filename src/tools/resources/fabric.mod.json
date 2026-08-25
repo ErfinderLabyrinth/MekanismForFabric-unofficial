@@ -13,11 +13,16 @@
     "pupnewfster",
     "dizzyd"
   ],
+  "contributors": [
+    "unpairedbracket",
+    "CyanideX",
+    "Ridanisaurus"
+  ],
   "contact": {
     "repo": "https://github.com/Erfinderlabyrinth/MekanismForFabric"
   },
   "license": "MIT",
-  "icon": "logo.png",
+  "icon": "logo_square.png",
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -28,6 +33,9 @@
     ],
     "fabric-datagen": [
       "mekanism.tools.common.ToolsDataGenerator"
+    ],
+    "modmenu": [
+      "mekanism.tools.client.integration.modmenu.ToolsModMenuIntegration"
     ]
   },
   "mixins": [],
