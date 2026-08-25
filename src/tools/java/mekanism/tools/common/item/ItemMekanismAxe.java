@@ -1,19 +1,9 @@
 package mekanism.tools.common.item;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import java.util.List;
-import mekanism.common.lib.attribute.AttributeCache;
-import mekanism.common.lib.attribute.IAttributeRefresher;
 import mekanism.tools.common.IHasRepairType;
 import mekanism.tools.common.material.MaterialCreator;
 import mekanism.tools.common.util.ToolsUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -24,15 +14,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemMekanismAxe extends AxeItem implements IHasRepairType, IAttributeRefresher {
+import java.util.List;
+
+public class ItemMekanismAxe extends AxeItem implements IHasRepairType {
 
     private final MaterialCreator material;
-    private final AttributeCache attributeCache;
 
     public ItemMekanismAxe(MaterialCreator material, Item.Properties properties) {
-        super(material, material.getAxeDamage(), material.getAxeAtkSpeed(), properties);
+        super(material, material.getAxeDamage(), material.getAxeAtkSpeed(), properties.durability(material.getUses()));
         this.material = material;
-        this.attributeCache = new AttributeCache(this, material.attackDamage, material.axeDamage, material.axeAtkSpeed);
     }
 
     @Override
@@ -58,24 +48,7 @@ public class ItemMekanismAxe extends AxeItem implements IHasRepairType, IAttribu
     }
 
     @Override
-    public int getMaxDamage(ItemStack stack) {
-        return getTier().getUses();
-    }
-
-    @Override
     public boolean canBeDepleted() {
         return getTier().getUses() > 0;
-    }
-
-    @NotNull
-    @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(@NotNull EquipmentSlot slot, @NotNull ItemStack stack) {
-        return slot == EquipmentSlot.MAINHAND ? attributeCache.get() : ImmutableMultimap.of();
-    }
-
-    @Override
-    public void addToBuilder(ImmutableMultimap.Builder<Attribute, AttributeModifier> builder) {
-        builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", getAttackDamage(), Operation.ADDITION));
-        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", material.getAxeAtkSpeed(), Operation.ADDITION));
     }
 }

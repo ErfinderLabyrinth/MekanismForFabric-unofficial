@@ -2,32 +2,24 @@ package mekanism.tools.common;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import java.util.ArrayList;
-import java.util.Collection;
+import mekanism.api.MekanismAPI;
 import mekanism.common.Mekanism;
 import mekanism.common.base.IModModule;
-import mekanism.common.config.MekanismModConfig;
 import mekanism.common.lib.Version;
 import mekanism.tools.common.config.MekanismToolsConfig;
 import mekanism.tools.common.material.BaseMekanismMaterial;
 import mekanism.tools.common.registries.ToolsCreativeTabs;
 import mekanism.tools.common.registries.ToolsItems;
 import mekanism.tools.common.registries.ToolsRecipeSerializers;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.TierSortingRegistry;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod(MekanismTools.MODID)
-public class MekanismTools implements IModModule {
+import java.util.Collection;
+
+public class MekanismTools implements IModModule, ModInitializer {
 
     public static final String MODID = "mekanismtools";
 
@@ -36,43 +28,28 @@ public class MekanismTools implements IModModule {
     /**
      * MekanismTools version number
      */
-    public final Version versionNumber;
+    public Version versionNumber;
 
-    public MekanismTools() {
+    public void onInitialize() {
         Mekanism.addModule(instance = this);
-        MekanismToolsConfig.registerConfigs(ModLoadingContext.get());
+        MekanismToolsConfig.registerConfig();
         //Register the listener for special mob spawning (mobs with Mekanism armor/tools)
-        MinecraftForge.EVENT_BUS.addListener(MobEquipmentHelper::onLivingSpecialSpawn);
 
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::onConfigLoad);
-        ToolsItems.ITEMS.register(modEventBus);
-        ToolsCreativeTabs.CREATIVE_TABS.register(modEventBus);
-        ToolsRecipeSerializers.RECIPE_SERIALIZERS.register(modEventBus);
+        ToolsItems.register();
+        ToolsCreativeTabs.register();
+        ToolsRecipeSerializers.register();
         //Set our version number to match the mods.toml file, which matches the one in our build.gradle
-        versionNumber = new Version(ModLoadingContext.get().getActiveContainer());
+        versionNumber = new Version(FabricLoader.getInstance().getModContainer(MekanismAPI.MEKANISM_MODID).get());
+
+        commonSetup();
     }
 
     public static ResourceLocation rl(String path) {
         return new ResourceLocation(MekanismTools.MODID, path);
     }
 
-    private void onConfigLoad(ModConfigEvent configEvent) {
-        //Note: We listen to both the initial load and the reload, to make sure that we fix any accidentally
-        // cached values from calls before the initial loading
-        ModConfig config = configEvent.getConfig();
-        //Make sure it is for the same modid as us
-        if (config.getModId().equals(MODID) && config instanceof MekanismModConfig mekConfig) {
-            mekConfig.clearCache(configEvent);
-        }
-    }
-
-    private void commonSetup(FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> {
-            //Ensure our tags are all initialized
-            ToolsTags.init();
-        });
+    private void commonSetup() {
+        ToolsTags.init();
         registerTiers(MekanismToolsConfig.tools.bronze, MekanismToolsConfig.tools.lapisLazuli, MekanismToolsConfig.tools.osmium, MekanismToolsConfig.tools.steel,
               MekanismToolsConfig.tools.refinedGlowstone, MekanismToolsConfig.tools.refinedObsidian);
         Mekanism.logger.info("Loaded 'Mekanism: Tools' module.");
@@ -91,7 +68,7 @@ public class MekanismTools implements IModModule {
             //If the tier is equivalent to another tier then the equivalent one should be placed in the after list
             // and if it is equivalent to a vanilla tier (like all ours are when equivalent), the next tier
             // should also specify the next tier in the before list
-            TierSortingRegistry.registerTier(tier, rl(tier.getRegistryPrefix()), new ArrayList<>(equivalent), new ArrayList<>(vanillaNext));
+            //TierSortingRegistry.registerTier(tier, rl(tier.getRegistryPrefix()), new ArrayList<>(equivalent), new ArrayList<>(vanillaNext));
         }
     }
 

@@ -2,13 +2,16 @@ package mekanism.tools.client;
 
 import mekanism.client.texture.BaseSpriteSourceProvider;
 import mekanism.tools.common.MekanismTools;
-import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.client.renderer.texture.atlas.SpriteSource;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.List;
 
 public class ToolsSpriteSourceProvider extends BaseSpriteSourceProvider {
-
-    public ToolsSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-        super(output, MekanismTools.MODID, fileHelper);
+    protected static final ResourceLocation SHIELD_PATTERNS_ATLAS = new ResourceLocation("shield_patterns");
+    public ToolsSpriteSourceProvider(FabricDataOutput output) {
+        super(output, MekanismTools.MODID);
     }
 
     @Override

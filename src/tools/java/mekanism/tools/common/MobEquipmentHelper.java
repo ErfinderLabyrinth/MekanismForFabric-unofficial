@@ -1,12 +1,13 @@
 package mekanism.tools.common;
 
 import mekanism.api.providers.IItemProvider;
-import mekanism.common.config.value.CachedFloatValue;
 import mekanism.tools.common.config.MekanismToolsConfig;
 import mekanism.tools.common.config.ToolsConfig.ArmorSpawnChanceConfig;
 import mekanism.tools.common.registries.ToolsItems;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Drowned;
@@ -17,7 +18,6 @@ import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
 
 public class MobEquipmentHelper {
 
@@ -40,29 +40,28 @@ public class MobEquipmentHelper {
         return entity instanceof Zombie && !(entity instanceof Drowned) && !(entity instanceof ZombifiedPiglin);
     }
 
-    public static void onLivingSpecialSpawn(MobSpawnEvent.FinalizeSpawn event) {
-        LivingEntity entity = event.getEntity();
+    public static void onLivingSpecialSpawn(LivingEntity entity, ServerLevel level, DifficultyInstance difficulty) {
         boolean isZombie = isZombie(entity);
         if (isZombie || entity instanceof Skeleton || entity instanceof Stray || entity instanceof Piglin) {
             //Don't bother calculating random numbers unless the instanceof checks pass
-            RandomSource random = event.getLevel().getRandom();
-            boolean isHard = event.getDifficulty().getDifficulty() == Difficulty.HARD;
-            float difficultyMultiplier = event.getDifficulty().getSpecialMultiplier();
+            RandomSource random = level.getRandom();
+            boolean isHard = difficulty.getDifficulty() == Difficulty.HARD;
+            float difficultyMultiplier = difficulty.getSpecialMultiplier();
             GearType gearType = null;
-            if (random.nextFloat() < MekanismToolsConfig.tools.armorSpawnChance.get() * difficultyMultiplier) {
+            if (random.nextFloat() < MekanismToolsConfig.tools.armorSpawnChance * difficultyMultiplier) {
                 //We can only spawn refined glowstone armor on piglins
                 gearType = getGearType(entity instanceof Piglin ? 0 : random.nextInt(6));
                 setEntityArmorWithChance(random, entity, isHard, difficultyMultiplier, gearType);
             }
             if (isZombie) {
-                CachedFloatValue spawnChance = isHard ? MekanismToolsConfig.tools.weaponSpawnChanceHard : MekanismToolsConfig.tools.weaponSpawnChance;
-                if (random.nextFloat() < spawnChance.get()) {
+                float spawnChance = isHard ? MekanismToolsConfig.tools.weaponSpawnChanceHard : MekanismToolsConfig.tools.weaponSpawnChance;
+                if (random.nextFloat() < spawnChance) {
                     if (gearType == null) {
                         gearType = getGearType(random.nextInt(6));
                     }
-                    if (gearType.spawnChance.canSpawnWeapon.get()) {
-                        IItemProvider weapon = random.nextFloat() < gearType.spawnChance.swordWeight.get() ? gearType.sword : gearType.shovel;
-                        setStackIfEmpty(entity, random, gearType.spawnChance.weaponEnchantmentChance.get(), difficultyMultiplier, EquipmentSlot.MAINHAND, weapon);
+                    if (gearType.spawnChance.canSpawnWeapon) {
+                        IItemProvider weapon = random.nextFloat() < gearType.spawnChance.swordWeight ? gearType.sword : gearType.shovel;
+                        setStackIfEmpty(entity, random, gearType.spawnChance.weaponEnchantmentChance, difficultyMultiplier, EquipmentSlot.MAINHAND, weapon);
                     }
                 }
             }
@@ -82,27 +81,27 @@ public class MobEquipmentHelper {
 
     private static void setEntityArmorWithChance(RandomSource random, LivingEntity entity, boolean isHard, float difficultyMultiplier, GearType gearType) {
         ArmorSpawnChanceConfig chanceConfig = gearType.spawnChance();
-        float stopChance = isHard ? chanceConfig.multiplePieceChanceHard.get() : chanceConfig.multiplePieceChance.get();
-        if (random.nextFloat() < chanceConfig.bootsChance.get()) {
-            setStackIfEmpty(entity, random, chanceConfig.armorEnchantmentChance.get(), difficultyMultiplier, EquipmentSlot.FEET, gearType.boots);
+        float stopChance = isHard ? chanceConfig.multiplePieceChanceHard : chanceConfig.multiplePieceChance;
+        if (random.nextFloat() < chanceConfig.bootsChance) {
+            setStackIfEmpty(entity, random, chanceConfig.armorEnchantmentChance, difficultyMultiplier, EquipmentSlot.FEET, gearType.boots);
             if (random.nextFloat() < stopChance) {
                 return;
             }
         }
-        if (random.nextFloat() < chanceConfig.leggingsChance.get()) {
-            setStackIfEmpty(entity, random, chanceConfig.armorEnchantmentChance.get(), difficultyMultiplier, EquipmentSlot.LEGS, gearType.leggings);
+        if (random.nextFloat() < chanceConfig.leggingsChance) {
+            setStackIfEmpty(entity, random, chanceConfig.armorEnchantmentChance, difficultyMultiplier, EquipmentSlot.LEGS, gearType.leggings);
             if (random.nextFloat() < stopChance) {
                 return;
             }
         }
-        if (random.nextFloat() < chanceConfig.chestplateChance.get()) {
-            setStackIfEmpty(entity, random, chanceConfig.armorEnchantmentChance.get(), difficultyMultiplier, EquipmentSlot.CHEST, gearType.chestplate);
+        if (random.nextFloat() < chanceConfig.chestplateChance) {
+            setStackIfEmpty(entity, random, chanceConfig.armorEnchantmentChance, difficultyMultiplier, EquipmentSlot.CHEST, gearType.chestplate);
             if (random.nextFloat() < stopChance) {
                 return;
             }
         }
-        if (random.nextFloat() < chanceConfig.helmetChance.get()) {
-            setStackIfEmpty(entity, random, chanceConfig.armorEnchantmentChance.get(), difficultyMultiplier, EquipmentSlot.HEAD, gearType.helmet);
+        if (random.nextFloat() < chanceConfig.helmetChance) {
+            setStackIfEmpty(entity, random, chanceConfig.armorEnchantmentChance, difficultyMultiplier, EquipmentSlot.HEAD, gearType.helmet);
         }
     }
 

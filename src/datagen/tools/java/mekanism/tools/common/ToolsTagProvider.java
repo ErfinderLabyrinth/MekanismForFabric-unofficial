@@ -1,26 +1,25 @@
 package mekanism.tools.common;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Predicate;
 import mekanism.api.providers.IItemProvider;
 import mekanism.common.tag.BaseTagProvider;
 import mekanism.common.tag.IntrinsicMekanismTagBuilder;
 import mekanism.tools.common.item.ItemMekanismPaxel;
 import mekanism.tools.common.item.ItemMekanismPickaxe;
 import mekanism.tools.common.registries.ToolsItems;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 public class ToolsTagProvider extends BaseTagProvider {
 
-    public ToolsTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
-        super(output, lookupProvider, MekanismTools.MODID, existingFileHelper);
+    public ToolsTagProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, lookupProvider, MekanismTools.MODID);
     }
 
     @Override
@@ -78,7 +77,6 @@ public class ToolsTagProvider extends BaseTagProvider {
     }
 
     private void addPaxels() {
-        getItemBuilder(Tags.Items.TOOLS).add(ToolsTags.Items.TOOLS_PAXELS);
         getItemBuilder(ItemTags.TOOLS).add(ToolsTags.Items.TOOLS_PAXELS);
         getItemBuilder(ToolsTags.Items.TOOLS_PAXELS).add(
               //Vanilla Paxels
@@ -196,7 +194,7 @@ public class ToolsTagProvider extends BaseTagProvider {
     }
 
     private void addShields() {
-        getItemBuilder(Tags.Items.TOOLS_SHIELDS).add(
+        getItemBuilder(ConventionalItemTags.SHIELDS).add(
               ToolsTags.Items.TOOLS_SHIELDS_BRONZE,
               ToolsTags.Items.TOOLS_SHIELDS_LAPIS_LAZULI,
               ToolsTags.Items.TOOLS_SHIELDS_OSMIUM,
@@ -213,14 +211,14 @@ public class ToolsTagProvider extends BaseTagProvider {
     }
 
     private void addHelmets() {
-        getItemBuilder(Tags.Items.ARMORS_HELMETS).add(
-              ToolsTags.Items.ARMORS_HELMETS_BRONZE,
-              ToolsTags.Items.ARMORS_HELMETS_LAPIS_LAZULI,
-              ToolsTags.Items.ARMORS_HELMETS_OSMIUM,
-              ToolsTags.Items.ARMORS_HELMETS_REFINED_GLOWSTONE,
-              ToolsTags.Items.ARMORS_HELMETS_REFINED_OBSIDIAN,
-              ToolsTags.Items.ARMORS_HELMETS_STEEL
-        );
+//        getItemBuilder(Tags.Items.ARMORS_HELMETS).add(
+//              ToolsTags.Items.ARMORS_HELMETS_BRONZE,
+//              ToolsTags.Items.ARMORS_HELMETS_LAPIS_LAZULI,
+//              ToolsTags.Items.ARMORS_HELMETS_OSMIUM,
+//              ToolsTags.Items.ARMORS_HELMETS_REFINED_GLOWSTONE,
+//              ToolsTags.Items.ARMORS_HELMETS_REFINED_OBSIDIAN,
+//              ToolsTags.Items.ARMORS_HELMETS_STEEL
+//        );
         addToTag(ToolsTags.Items.ARMORS_HELMETS_BRONZE, ToolsItems.BRONZE_HELMET);
         addToTag(ToolsTags.Items.ARMORS_HELMETS_LAPIS_LAZULI, ToolsItems.LAPIS_LAZULI_HELMET);
         addToTag(ToolsTags.Items.ARMORS_HELMETS_OSMIUM, ToolsItems.OSMIUM_HELMET);
@@ -230,14 +228,14 @@ public class ToolsTagProvider extends BaseTagProvider {
     }
 
     private void addChestplates() {
-        getItemBuilder(Tags.Items.ARMORS_CHESTPLATES).add(
-              ToolsTags.Items.ARMORS_CHESTPLATES_BRONZE,
-              ToolsTags.Items.ARMORS_CHESTPLATES_LAPIS_LAZULI,
-              ToolsTags.Items.ARMORS_CHESTPLATES_OSMIUM,
-              ToolsTags.Items.ARMORS_CHESTPLATES_REFINED_GLOWSTONE,
-              ToolsTags.Items.ARMORS_CHESTPLATES_REFINED_OBSIDIAN,
-              ToolsTags.Items.ARMORS_CHESTPLATES_STEEL
-        );
+//        getItemBuilder(Tags.Items.ARMORS_CHESTPLATES).add(
+//              ToolsTags.Items.ARMORS_CHESTPLATES_BRONZE,
+//              ToolsTags.Items.ARMORS_CHESTPLATES_LAPIS_LAZULI,
+//              ToolsTags.Items.ARMORS_CHESTPLATES_OSMIUM,
+//              ToolsTags.Items.ARMORS_CHESTPLATES_REFINED_GLOWSTONE,
+//              ToolsTags.Items.ARMORS_CHESTPLATES_REFINED_OBSIDIAN,
+//              ToolsTags.Items.ARMORS_CHESTPLATES_STEEL
+//        );
         addToTag(ToolsTags.Items.ARMORS_CHESTPLATES_BRONZE, ToolsItems.BRONZE_CHESTPLATE);
         addToTag(ToolsTags.Items.ARMORS_CHESTPLATES_LAPIS_LAZULI, ToolsItems.LAPIS_LAZULI_CHESTPLATE);
         addToTag(ToolsTags.Items.ARMORS_CHESTPLATES_OSMIUM, ToolsItems.OSMIUM_CHESTPLATE);
@@ -247,14 +245,14 @@ public class ToolsTagProvider extends BaseTagProvider {
     }
 
     private void addLeggings() {
-        getItemBuilder(Tags.Items.ARMORS_LEGGINGS).add(
-              ToolsTags.Items.ARMORS_LEGGINGS_BRONZE,
-              ToolsTags.Items.ARMORS_LEGGINGS_LAPIS_LAZULI,
-              ToolsTags.Items.ARMORS_LEGGINGS_OSMIUM,
-              ToolsTags.Items.ARMORS_LEGGINGS_REFINED_GLOWSTONE,
-              ToolsTags.Items.ARMORS_LEGGINGS_REFINED_OBSIDIAN,
-              ToolsTags.Items.ARMORS_LEGGINGS_STEEL
-        );
+//        getItemBuilder(Tags.Items.ARMORS_LEGGINGS).add(
+//              ToolsTags.Items.ARMORS_LEGGINGS_BRONZE,
+//              ToolsTags.Items.ARMORS_LEGGINGS_LAPIS_LAZULI,
+//              ToolsTags.Items.ARMORS_LEGGINGS_OSMIUM,
+//              ToolsTags.Items.ARMORS_LEGGINGS_REFINED_GLOWSTONE,
+//              ToolsTags.Items.ARMORS_LEGGINGS_REFINED_OBSIDIAN,
+//              ToolsTags.Items.ARMORS_LEGGINGS_STEEL
+//        );
         addToTag(ToolsTags.Items.ARMORS_LEGGINGS_BRONZE, ToolsItems.BRONZE_LEGGINGS);
         addToTag(ToolsTags.Items.ARMORS_LEGGINGS_LAPIS_LAZULI, ToolsItems.LAPIS_LAZULI_LEGGINGS);
         addToTag(ToolsTags.Items.ARMORS_LEGGINGS_OSMIUM, ToolsItems.OSMIUM_LEGGINGS);
@@ -264,14 +262,14 @@ public class ToolsTagProvider extends BaseTagProvider {
     }
 
     private void addBoots() {
-        getItemBuilder(Tags.Items.ARMORS_BOOTS).add(
-              ToolsTags.Items.ARMORS_BOOTS_BRONZE,
-              ToolsTags.Items.ARMORS_BOOTS_LAPIS_LAZULI,
-              ToolsTags.Items.ARMORS_BOOTS_OSMIUM,
-              ToolsTags.Items.ARMORS_BOOTS_REFINED_GLOWSTONE,
-              ToolsTags.Items.ARMORS_BOOTS_REFINED_OBSIDIAN,
-              ToolsTags.Items.ARMORS_BOOTS_STEEL
-        );
+//        getItemBuilder(Tags.Items.ARMORS_BOOTS).add(
+//              ToolsTags.Items.ARMORS_BOOTS_BRONZE,
+//              ToolsTags.Items.ARMORS_BOOTS_LAPIS_LAZULI,
+//              ToolsTags.Items.ARMORS_BOOTS_OSMIUM,
+//              ToolsTags.Items.ARMORS_BOOTS_REFINED_GLOWSTONE,
+//              ToolsTags.Items.ARMORS_BOOTS_REFINED_OBSIDIAN,
+//              ToolsTags.Items.ARMORS_BOOTS_STEEL
+//        );
         addToTag(ToolsTags.Items.ARMORS_BOOTS_BRONZE, ToolsItems.BRONZE_BOOTS);
         addToTag(ToolsTags.Items.ARMORS_BOOTS_LAPIS_LAZULI, ToolsItems.LAPIS_LAZULI_BOOTS);
         addToTag(ToolsTags.Items.ARMORS_BOOTS_OSMIUM, ToolsItems.OSMIUM_BOOTS);

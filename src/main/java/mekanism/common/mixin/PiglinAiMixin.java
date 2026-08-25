@@ -2,7 +2,7 @@ package mekanism.common.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import mekanism.common.item.gear.ItemMekaSuitArmor;
+import mekanism.common.mixinhelper.PiglinNeutralizingArmor;
 import mekanism.common.registries.MekanismItems;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
@@ -24,7 +24,7 @@ public class PiglinAiMixin {
 
     @Inject(method = "isWearingGold", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getItem()Lnet/minecraft/world/item/Item;"), cancellable = true)
     private static void addMekaSuit(LivingEntity livingEntity, CallbackInfoReturnable<Boolean> cir, @Local ItemStack stack) {
-        if (stack.getItem() instanceof ItemMekaSuitArmor) {
+        if (stack.getItem() instanceof PiglinNeutralizingArmor armor && armor.makesPiglinsNeutral(stack, livingEntity)) {
             cir.setReturnValue(true);
         }
     }

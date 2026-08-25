@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "mekanism",
-  "version": "${mod_version}",
-  "name": "MekanismForFabric",
-  "description": "",
+  "id": "mekanismtools",
+  "version": "${version}",
+  "name": "MekanismForFabric: Tools",
+  "description": "Tools module for Mekanism",
   "authors": [
     "Erfinderlabyrinth",
     "skippyall",
@@ -21,26 +21,20 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "mekanism.client.MekanismClient"
+      "mekanism.tools.client.ToolsClientRegistration"
     ],
     "main": [
-      "mekanism.common.Mekanism"
+      "mekanism.tools.common.MekanismTools"
     ],
     "fabric-datagen": [
-      "mekanism.common.MekanismDataGenerator"
-    ],
-    "modmenu": [
-
+      "mekanism.tools.common.ToolsDataGenerator"
     ]
   },
-  "mixins": [
-    "mekanismforfabric.client.mixins.json",
-    "mekanismforfabric.mixins.json"
-  ],
+  "mixins": [],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "${minecraft_version}"
-  },
-  "accessWidener": "mekanism.accesswidener"
+    "minecraft": "${minecraft_version}",
+    "mekanism": "${mod_version}"
+  }
 }

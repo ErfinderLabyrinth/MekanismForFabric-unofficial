@@ -3,12 +3,12 @@ package mekanism.tools.client.render.item;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
-import java.util.List;
 import mekanism.api.NBTConstants;
 import mekanism.client.render.item.MekanismISTER;
 import mekanism.common.Mekanism;
 import mekanism.common.util.RegistryUtils;
 import mekanism.tools.client.ShieldTextures;
+import mekanism.tools.common.MekanismTools;
 import mekanism.tools.common.registries.ToolsItems;
 import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -27,8 +28,10 @@ import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import org.jetbrains.annotations.NotNull;
 
-public class RenderMekanismShieldItem extends MekanismISTER {
+import java.util.List;
 
+public class RenderMekanismShieldItem extends MekanismISTER {
+    public static final ResourceLocation ID = MekanismTools.rl("shield");
     public static final RenderMekanismShieldItem RENDERER = new RenderMekanismShieldItem();
 
     private ShieldModel shieldModel;
@@ -71,5 +74,10 @@ public class RenderMekanismShieldItem extends MekanismISTER {
             shieldModel.renderToBuffer(matrix, buffer, light, overlayLight, 1, 1, 1, 1);
         }
         matrix.popPose();
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 }

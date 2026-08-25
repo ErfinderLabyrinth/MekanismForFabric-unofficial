@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "mekanism",
-  "version": "${mod_version}",
-  "name": "MekanismForFabric",
-  "description": "",
+  "id": "mekanismgenerators",
+  "version": "${version}",
+  "name": "MekanismForFabric: Generators",
+  "description": "Generators module for Mekanism",
   "authors": [
     "Erfinderlabyrinth",
     "skippyall",
@@ -21,26 +21,21 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "mekanism.client.MekanismClient"
+      "mekanism.generators.client.GeneratorsClientRegistration"
     ],
     "main": [
-      "mekanism.common.Mekanism"
+      "mekanism.generators.common.MekanismGenerators"
     ],
     "fabric-datagen": [
-      "mekanism.common.MekanismDataGenerator"
-    ],
-    "modmenu": [
-
+      "mekanism.generators.common.GeneratorsDataGenerator"
     ]
   },
-  "mixins": [
-    "mekanismforfabric.client.mixins.json",
-    "mekanismforfabric.mixins.json"
-  ],
+  "mixins": [],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": "${minecraft_version}",
+    "mekanism": "${mod_version}"
   },
   "accessWidener": "mekanism.accesswidener"
 }

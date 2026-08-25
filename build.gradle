@@ -46,7 +46,7 @@ ext {
     extraTypes = ['datagen', 'gameTest']
 }
 
-processResources {
+tasks.withType(ProcessResources).configureEach {
     inputs.property "version", project.version
 
     filesMatching("fabric.mod.json") {
@@ -122,6 +122,12 @@ for (String name : secondaryModules) {
     }
     sourceSet.compileClasspath += sourceSets.api.output
     sourceSet.compileClasspath += sourceSets.main.output
+    sourceSet.compileClasspath += sourceSets.main.compileClasspath
+
+    sourceSet.runtimeClasspath += project.sourceSets.api.output
+    sourceSet.runtimeClasspath += project.sourceSets.main.output
+    sourceSet.runtimeClasspath += sourceSets.main.runtimeClasspath
+    sourceSet.runtimeClasspath += sourceSets.main.output
     //Create all secondary sourceSets for this module
     setupExtraSourceSets(sourceSet)
 }
@@ -352,6 +358,14 @@ loom {
             property "fabric-api.datagen"
             property "fabric-api.datagen.output-dir", file("src/datagen/generated/mekanism").absolutePath
         }
+
+        for (String name : secondaryModules) {
+            def base = sourceSets.getByName(name)
+            register("${name}Client").configure {
+                inherit client
+                source(base)
+            }
+        }
     }
 
     for(run in runs) {
@@ -367,7 +381,7 @@ loom {
             def base = sourceSets.getByName(name)
             def extra = supportsGameTests ? getExtraSourceSet(base, 'gameTest') : null
 
-            "mekanism${name}" {
+            register("mekanism${name}") {
                 sourceSet base
                 if (supportsGameTests) sourceSet extra
             }
@@ -473,7 +487,7 @@ repositories { RepositoryHandler handler ->
     maven { url "https://maven.terraformersmc.com/releases/" }
     maven { url "https://maven.blamejared.com" }
     maven { url "https://maven.felnull.dev" }
-    maven { url "https://maven.siphalor.de/"}
+    maven { url "https://maven.siphalor.de/" }
 
     mavenCentral()
 }
@@ -501,8 +515,8 @@ dependencies {
     }
 
     include modApi("teamreborn:energy:${teamreborn_energy_version}")
-
-    include modImplementation("de.siphalor.amecs.amecs-key-modifiers:amecs-key-modifiers-mc1.20.0:1.0.2")
+    include modImplementation("de.siphalor.amecs.amecs-key-modifiers:amecs-key-modifiers-mc${amecs_key_modifiers_mc_version}:${amecs_key_modifiers_version}")
+    modImplementation("com.terraformersmc:modmenu:${modmenu_version}")
 
     annotationProcessor project(":annotation-processor")
 

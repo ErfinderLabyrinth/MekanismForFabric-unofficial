@@ -1,8 +1,7 @@
 package mekanism.tools.common;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -37,11 +36,11 @@ public class ToolsTags {
         public static final TagKey<Block> NEEDS_STEEL_TOOL = tag("needs_steel_tool");
 
         private static TagKey<Block> forgeTag(String name) {
-            return BlockTags.create(new ResourceLocation("forge", name));
+            return TagKey.create(Registries.BLOCK, new ResourceLocation("forge", name));
         }
 
         private static TagKey<Block> tag(String name) {
-            return BlockTags.create(MekanismTools.rl(name));
+            return TagKey.create(Registries.BLOCK, MekanismTools.rl(name));
         }
     }
 
@@ -140,7 +139,7 @@ public class ToolsTags {
         public static final TagKey<Item> ARMORS_BOOTS_STEEL = forgeTag("armors/boots/steel");
 
         private static TagKey<Item> forgeTag(String name) {
-            return ItemTags.create(new ResourceLocation("forge", name));
+            return TagKey.create(Registries.ITEM, new ResourceLocation("forge", name));
         }
     }
 }

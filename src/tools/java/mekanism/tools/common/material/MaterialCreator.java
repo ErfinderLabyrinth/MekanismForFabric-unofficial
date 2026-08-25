@@ -1,61 +1,53 @@
 package mekanism.tools.common.material;
 
-import java.util.function.Predicate;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.common.config.IMekanismConfig;
-import mekanism.common.config.value.CachedFloatValue;
-import mekanism.common.config.value.CachedIntValue;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.ForgeConfigSpec;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 @NothingNullByDefault
 public class MaterialCreator extends BaseMekanismMaterial {
+    public transient BaseMekanismMaterial fallBack;
 
-    private final BaseMekanismMaterial fallBack;
+    private final int shieldDurability;
+    public final float swordDamage;
+    public final float swordAtkSpeed;
+    public final float shovelDamage;
+    public final float shovelAtkSpeed;
+    public final float axeDamage;
+    public final float axeAtkSpeed;
+    public final float pickaxeDamage;
+    public final float pickaxeAtkSpeed;
+    public final float hoeDamage;
+    public final float hoeAtkSpeed;
+    public final float paxelDamage;
+    public final float paxelAtkSpeed;
+    private final float paxelEfficiency;
+    private final int paxelEnchantability;
+    private final int paxelMaxUses;
+    private final int toolMaxUses;
+    private final float efficiency;
+    public final float attackDamage;
+    private final int enchantability;
+    public final float toughness;
+    public final float knockbackResistance;
+    private final int bootDurability;
+    private final int leggingDurability;
+    private final int chestplateDurability;
+    private final int helmetDurability;
+    public final int bootArmor;
+    public final int leggingArmor;
+    public final int chestplateArmor;
+    public final int helmetArmor;
 
-    private final CachedIntValue shieldDurability;
-    public final CachedFloatValue swordDamage;
-    public final CachedFloatValue swordAtkSpeed;
-    public final CachedFloatValue shovelDamage;
-    public final CachedFloatValue shovelAtkSpeed;
-    public final CachedFloatValue axeDamage;
-    public final CachedFloatValue axeAtkSpeed;
-    public final CachedFloatValue pickaxeDamage;
-    public final CachedFloatValue pickaxeAtkSpeed;
-    public final CachedFloatValue hoeDamage;
-    public final CachedFloatValue hoeAtkSpeed;
-    public final CachedFloatValue paxelDamage;
-    public final CachedFloatValue paxelAtkSpeed;
-    private final CachedFloatValue paxelEfficiency;
-    private final CachedIntValue paxelEnchantability;
-    private final CachedIntValue paxelMaxUses;
-    private final CachedIntValue toolMaxUses;
-    private final CachedFloatValue efficiency;
-    public final CachedFloatValue attackDamage;
-    private final CachedIntValue enchantability;
-    public final CachedFloatValue toughness;
-    public final CachedFloatValue knockbackResistance;
-    private final CachedIntValue bootDurability;
-    private final CachedIntValue leggingDurability;
-    private final CachedIntValue chestplateDurability;
-    private final CachedIntValue helmetDurability;
-    public final CachedIntValue bootArmor;
-    public final CachedIntValue leggingArmor;
-    public final CachedIntValue chestplateArmor;
-    public final CachedIntValue helmetArmor;
-
-    public MaterialCreator(IMekanismConfig config, ForgeConfigSpec.Builder builder, BaseMekanismMaterial materialDefaults) {
+    public MaterialCreator(BaseMekanismMaterial materialDefaults) {
         fallBack = materialDefaults;
-        String toolKey = getRegistryPrefix();
-        String name = getConfigCommentName();
-        builder.comment("Material Settings for " + name).push(toolKey);
-        attackDamage = CachedFloatValue.wrap(config, builder.comment("Base attack damage of " + name + " items.")
-              .defineInRange(toolKey + "AttackDamage", materialDefaults.getAttackDamageBonus(), 0, Float.MAX_VALUE));
+        attackDamage = materialDefaults.getAttackDamageBonus();
         //Note: Damage predicate to allow for tools to go negative to the value of the base tier so that a tool
         // can effectively have zero damage for things like the hoe
         Predicate<Object> damageModifierPredicate = value -> {
@@ -71,160 +63,130 @@ public class MaterialCreator extends BaseMekanismMaterial {
                 } else {
                     actualValue = (float) val;
                 }
-                float baseDamage = attackDamage.get();
+                float baseDamage = attackDamage;
                 return actualValue >= -baseDamage && actualValue <= Float.MAX_VALUE - baseDamage;
             }
             return false;
         };
-        shieldDurability = CachedIntValue.wrap(config, builder.comment("Maximum durability of " + name + " shields.")
-              .defineInRange(toolKey + "ShieldDurability", materialDefaults.getShieldDurability(), 0, Integer.MAX_VALUE));
-        swordDamage = CachedFloatValue.wrap(config, builder.comment("Attack damage modifier of " + name + " swords.")
-              .define(toolKey + "SwordDamage", (double) materialDefaults.getSwordDamage(), damageModifierPredicate));
-        swordAtkSpeed = CachedFloatValue.wrap(config, builder.comment("Attack speed of " + name + " swords.")
-              .define(toolKey + "SwordAtkSpeed", (double) materialDefaults.getSwordAtkSpeed()));
-        shovelDamage = CachedFloatValue.wrap(config, builder.comment("Attack damage modifier of " + name + " shovels.")
-              .define(toolKey + "ShovelDamage", (double) materialDefaults.getShovelDamage(), damageModifierPredicate));
-        shovelAtkSpeed = CachedFloatValue.wrap(config, builder.comment("Attack speed of " + name + " shovels.")
-              .define(toolKey + "ShovelAtkSpeed", (double) materialDefaults.getShovelAtkSpeed()));
-        axeDamage = CachedFloatValue.wrap(config, builder.comment("Attack damage modifier of " + name + " axes.")
-              .define(toolKey + "AxeDamage", (double) materialDefaults.getAxeDamage(), damageModifierPredicate));
-        axeAtkSpeed = CachedFloatValue.wrap(config, builder.comment("Attack speed of " + name + " axes.")
-              .define(toolKey + "AxeAtkSpeed", (double) materialDefaults.getAxeAtkSpeed()));
-        pickaxeDamage = CachedFloatValue.wrap(config, builder.comment("Attack damage modifier of " + name + " pickaxes.")
-              .define(toolKey + "PickaxeDamage", (double) materialDefaults.getPickaxeDamage(), damageModifierPredicate));
-        pickaxeAtkSpeed = CachedFloatValue.wrap(config, builder.comment("Attack speed of " + name + " pickaxes.")
-              .define(toolKey + "PickaxeAtkSpeed", (double) materialDefaults.getPickaxeAtkSpeed()));
-        hoeDamage = CachedFloatValue.wrap(config, builder.comment("Attack damage modifier of " + name + " hoes.")
-              .define(toolKey + "HoeDamage", (double) materialDefaults.getHoeDamage(), damageModifierPredicate));
-        hoeAtkSpeed = CachedFloatValue.wrap(config, builder.comment("Attack speed of " + name + " hoes.")
-              .define(toolKey + "HoeAtkSpeed", (double) materialDefaults.getHoeAtkSpeed()));
-        toolMaxUses = CachedIntValue.wrap(config, builder.comment("Maximum durability of " + name + " tools.")
-              .defineInRange(toolKey + "ToolMaxUses", materialDefaults.getUses(), 1, Integer.MAX_VALUE));
-        efficiency = CachedFloatValue.wrap(config, builder.comment("Efficiency of " + name + " tools.")
-              .define(toolKey + "Efficiency", (double) materialDefaults.getSpeed()));
-        paxelDamage = CachedFloatValue.wrap(config, builder.comment("Attack damage modifier of " + name + " paxels.")
-              .define(toolKey + "PaxelDamage", (double) materialDefaults.getPaxelDamage(), damageModifierPredicate));
-        paxelAtkSpeed = CachedFloatValue.wrap(config, builder.comment("Attack speed of " + name + " paxels.")
-              .define(toolKey + "PaxelAtkSpeed", (double) materialDefaults.getPaxelAtkSpeed()));
-        paxelEfficiency = CachedFloatValue.wrap(config, builder.comment("Efficiency of " + name + " paxels.")
-              .define(toolKey + "PaxelEfficiency", (double) materialDefaults.getPaxelEfficiency()));
-        paxelEnchantability = CachedIntValue.wrap(config, builder.comment("Natural enchantability factor of " + name + " paxels.")
-              .defineInRange(toolKey + "PaxelEnchantability", materialDefaults.getPaxelEnchantability(), 0, Integer.MAX_VALUE));
-        paxelMaxUses = CachedIntValue.wrap(config, builder.comment("Maximum durability of " + name + " paxels.")
-              .defineInRange(toolKey + "PaxelMaxUses", materialDefaults.getPaxelMaxUses(), 1, Integer.MAX_VALUE));
-        enchantability = CachedIntValue.wrap(config, builder.comment("Natural enchantability factor of " + name + " items.")
-              .defineInRange(toolKey + "Enchantability", materialDefaults.getCommonEnchantability(), 0, Integer.MAX_VALUE));
-        toughness = CachedFloatValue.wrap(config, builder.comment("Base armor toughness value of " + name + " armor.")
-              .defineInRange(toolKey + "Toughness", materialDefaults.getToughness(), 0, Float.MAX_VALUE));
-        knockbackResistance = CachedFloatValue.wrap(config, builder.comment("Base armor knockback resistance value of " + name + " armor.")
-              .defineInRange(toolKey + "KnockbackResistance", materialDefaults.getKnockbackResistance(), 0, Float.MAX_VALUE));
-        bootDurability = CachedIntValue.wrap(config, builder.comment("Maximum durability of " + name + " boots.")
-              .defineInRange(toolKey + "BootDurability", materialDefaults.getDurabilityForType(ArmorItem.Type.BOOTS), 1, Integer.MAX_VALUE));
-        leggingDurability = CachedIntValue.wrap(config, builder.comment("Maximum durability of " + name + " leggings.")
-              .defineInRange(toolKey + "LeggingDurability", materialDefaults.getDurabilityForType(ArmorItem.Type.LEGGINGS), 1, Integer.MAX_VALUE));
-        chestplateDurability = CachedIntValue.wrap(config, builder.comment("Maximum durability of " + name + " chestplates.")
-              .defineInRange(toolKey + "ChestplateDurability", materialDefaults.getDurabilityForType(ArmorItem.Type.CHESTPLATE), 1, Integer.MAX_VALUE));
-        helmetDurability = CachedIntValue.wrap(config, builder.comment("Maximum durability of " + name + " helmets.")
-              .defineInRange(toolKey + "HelmetDurability", materialDefaults.getDurabilityForType(ArmorItem.Type.HELMET), 1, Integer.MAX_VALUE));
-        bootArmor = CachedIntValue.wrap(config, builder.comment("Protection value of " + name + " boots.")
-              .defineInRange(toolKey + "BootArmor", materialDefaults.getDefenseForType(ArmorItem.Type.BOOTS), 0, Integer.MAX_VALUE));
-        leggingArmor = CachedIntValue.wrap(config, builder.comment("Protection value of " + name + " leggings.")
-              .defineInRange(toolKey + "LeggingArmor", materialDefaults.getDefenseForType(ArmorItem.Type.LEGGINGS), 0, Integer.MAX_VALUE));
-        chestplateArmor = CachedIntValue.wrap(config, builder.comment("Protection value of " + name + " chestplates.")
-              .defineInRange(toolKey + "ChestplateArmor", materialDefaults.getDefenseForType(ArmorItem.Type.CHESTPLATE), 0, Integer.MAX_VALUE));
-        helmetArmor = CachedIntValue.wrap(config, builder.comment("Protection value of " + name + " helmets.")
-              .defineInRange(toolKey + "HelmetArmor", materialDefaults.getDefenseForType(ArmorItem.Type.HELMET), 0, Integer.MAX_VALUE));
-        builder.pop();
+        shieldDurability = materialDefaults.getShieldDurability();
+        swordDamage = materialDefaults.getSwordDamage();
+        swordAtkSpeed = materialDefaults.getSwordAtkSpeed();
+        shovelDamage = materialDefaults.getShovelDamage();
+        shovelAtkSpeed = materialDefaults.getShovelAtkSpeed();
+        axeDamage = materialDefaults.getAxeDamage();
+        axeAtkSpeed = materialDefaults.getAxeAtkSpeed();
+        pickaxeDamage = materialDefaults.getPickaxeDamage();
+        pickaxeAtkSpeed = materialDefaults.getPickaxeAtkSpeed();
+        hoeDamage = materialDefaults.getHoeDamage();
+        hoeAtkSpeed = materialDefaults.getHoeAtkSpeed();
+        toolMaxUses = materialDefaults.getUses();
+        efficiency = materialDefaults.getSpeed();
+        paxelDamage = materialDefaults.getPaxelDamage();
+        paxelAtkSpeed = materialDefaults.getPaxelAtkSpeed();
+        paxelEfficiency = materialDefaults.getPaxelEfficiency();
+        paxelEnchantability = materialDefaults.getPaxelEnchantability();
+        paxelMaxUses = materialDefaults.getPaxelMaxUses();
+        enchantability = materialDefaults.getCommonEnchantability();
+        toughness = materialDefaults.getToughness();
+        knockbackResistance = materialDefaults.getKnockbackResistance();
+        bootDurability = materialDefaults.getDurabilityForType(ArmorItem.Type.BOOTS);
+        leggingDurability = materialDefaults.getDurabilityForType(ArmorItem.Type.LEGGINGS);
+        chestplateDurability = materialDefaults.getDurabilityForType(ArmorItem.Type.CHESTPLATE);
+        helmetDurability = materialDefaults.getDurabilityForType(ArmorItem.Type.HELMET);
+        bootArmor = materialDefaults.getDefenseForType(ArmorItem.Type.BOOTS);
+        leggingArmor = materialDefaults.getDefenseForType(ArmorItem.Type.LEGGINGS);
+        chestplateArmor = materialDefaults.getDefenseForType(ArmorItem.Type.CHESTPLATE);
+        helmetArmor = materialDefaults.getDefenseForType(ArmorItem.Type.HELMET);
     }
 
     @Override
     public int getShieldDurability() {
-        return shieldDurability.getOrDefault();
+        return shieldDurability;
     }
 
     @Override
     public float getSwordDamage() {
-        return swordDamage.getOrDefault();
+        return swordDamage;
     }
 
     @Override
     public float getSwordAtkSpeed() {
-        return swordAtkSpeed.getOrDefault();
+        return swordAtkSpeed;
     }
 
     @Override
     public float getShovelDamage() {
-        return shovelDamage.getOrDefault();
+        return shovelDamage;
     }
 
     @Override
     public float getShovelAtkSpeed() {
-        return shovelAtkSpeed.getOrDefault();
+        return shovelAtkSpeed;
     }
 
     @Override
     public float getAxeDamage() {
-        return axeDamage.getOrDefault();
+        return axeDamage;
     }
 
     @Override
     public float getAxeAtkSpeed() {
-        return axeAtkSpeed.getOrDefault();
+        return axeAtkSpeed;
     }
 
     @Override
     public float getPickaxeDamage() {
-        return pickaxeDamage.getOrDefault();
+        return pickaxeDamage;
     }
 
     @Override
     public float getPickaxeAtkSpeed() {
-        return pickaxeAtkSpeed.getOrDefault();
+        return pickaxeAtkSpeed;
     }
 
     @Override
     public float getHoeDamage() {
-        return hoeDamage.getOrDefault();
+        return hoeDamage;
     }
 
     @Override
     public float getHoeAtkSpeed() {
-        return hoeAtkSpeed.getOrDefault();
+        return hoeAtkSpeed;
     }
 
     @Override
     public int getPaxelMaxUses() {
-        return paxelMaxUses.getOrDefault();
+        return paxelMaxUses;
     }
 
     @Override
     public float getPaxelEfficiency() {
-        return paxelEfficiency.get();
+        return paxelEfficiency;
     }
 
     @Override
     public float getPaxelDamage() {
-        return paxelDamage.getOrDefault();
+        return paxelDamage;
     }
 
     @Override
     public float getPaxelAtkSpeed() {
-        return paxelAtkSpeed.getOrDefault();
+        return paxelAtkSpeed;
     }
 
     @Override
     public int getUses() {
-        return toolMaxUses.getOrDefault();
+        return toolMaxUses;
     }
 
     @Override
     public float getSpeed() {
-        return efficiency.getOrDefault();
+        return efficiency;
     }
 
     @Override
     public float getAttackDamageBonus() {
-        return attackDamage.getOrDefault();
+        return attackDamage;
     }
 
     @Override
@@ -242,26 +204,26 @@ public class MaterialCreator extends BaseMekanismMaterial {
     @Override
     public int getDurabilityForType(ArmorItem.Type armorType) {
         return switch (armorType) {
-            case BOOTS -> bootDurability.getOrDefault();
-            case LEGGINGS -> leggingDurability.getOrDefault();
-            case CHESTPLATE -> chestplateDurability.getOrDefault();
-            case HELMET -> helmetDurability.getOrDefault();
+            case BOOTS -> bootDurability;
+            case LEGGINGS -> leggingDurability;
+            case CHESTPLATE -> chestplateDurability;
+            case HELMET -> helmetDurability;
         };
     }
 
     @Override
     public int getDefenseForType(ArmorItem.Type armorType) {
         return switch (armorType) {
-            case BOOTS -> bootArmor.getOrDefault();
-            case LEGGINGS -> leggingArmor.getOrDefault();
-            case CHESTPLATE -> chestplateArmor.getOrDefault();
-            case HELMET -> helmetArmor.getOrDefault();
+            case BOOTS -> bootArmor;
+            case LEGGINGS -> leggingArmor;
+            case CHESTPLATE -> chestplateArmor;
+            case HELMET -> helmetArmor;
         };
     }
 
     @Override
     public int getCommonEnchantability() {
-        return enchantability.get();
+        return enchantability;
     }
 
     @Override
@@ -271,7 +233,7 @@ public class MaterialCreator extends BaseMekanismMaterial {
 
     @Override
     public float getToughness() {
-        return toughness.getOrDefault();
+        return toughness;
     }
 
     @Override
@@ -304,11 +266,11 @@ public class MaterialCreator extends BaseMekanismMaterial {
 
     @Override
     public int getPaxelEnchantability() {
-        return paxelEnchantability.get();
+        return paxelEnchantability;
     }
 
     @Override
     public float getKnockbackResistance() {
-        return knockbackResistance.getOrDefault();
+        return knockbackResistance;
     }
 }

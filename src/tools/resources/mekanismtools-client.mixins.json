@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "mekanism.tools.client.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "HumanoidArmorLayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

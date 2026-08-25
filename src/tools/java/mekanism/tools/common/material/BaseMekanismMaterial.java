@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 public abstract class BaseMekanismMaterial extends IItemTierHelper implements IArmorMaterialHelper, IPaxelMaterial {
 
     @Nullable
-    @Override
     public abstract TagKey<Block> getTag();//Force this to be implemented
 
     public abstract int getShieldDurability();

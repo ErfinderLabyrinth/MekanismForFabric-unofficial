@@ -7,7 +7,6 @@ import mekanism.api.FluidStack;
 import mekanism.api.NBTConstants;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.ICustomModule.ModuleDamageAbsorbInfo;
@@ -42,7 +41,7 @@ import mekanism.common.item.interfaces.IModeItem;
 import mekanism.common.lib.attribute.AttributeCache;
 import mekanism.common.lib.attribute.IAttributeRefresher;
 import mekanism.common.mixinhelper.CustomEnchantmentsItem;
-import mekanism.common.mixinhelper.ElytraFlyable;
+import mekanism.common.mixinhelper.PiglinNeutralizingArmor;
 import mekanism.common.mixinhelper.WalkableOnPowderSnow;
 import mekanism.common.registration.impl.CreativeTabDeferredRegister.ICustomCreativeTabContents;
 import mekanism.common.registries.MekanismFluids;
@@ -84,7 +83,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
@@ -101,7 +104,7 @@ import java.util.UUID;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContainerItem, IModeItem, IJetpackItem, IAttributeRefresher, ICustomCreativeTabContents, ISpecialGear, ISpecialGearGetter, WalkableOnPowderSnow, ItemStorageHandler, FabricElytraItem, IRadiationShielding, ILaserDissipation, CustomEnchantmentsItem {
+public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContainerItem, IModeItem, IJetpackItem, IAttributeRefresher, ICustomCreativeTabContents, ISpecialGear, ISpecialGearGetter, WalkableOnPowderSnow, ItemStorageHandler, FabricElytraItem, IRadiationShielding, ILaserDissipation, CustomEnchantmentsItem, PiglinNeutralizingArmor {
 
     private static final MekaSuitMaterial MEKASUIT_MATERIAL = new MekaSuitMaterial();
 
@@ -648,6 +651,11 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
     @Override
     public ISpecialGear getSpecialGear() {
         return RenderPropertiesProvider.mekaSuit();
+    }
+
+    @Override
+    public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer) {
+        return true;
     }
 
     private static class FoundArmorDetails {

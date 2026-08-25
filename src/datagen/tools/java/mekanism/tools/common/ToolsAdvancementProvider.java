@@ -1,7 +1,5 @@
 package mekanism.tools.common;
 
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import mekanism.common.advancements.BaseAdvancementProvider;
 import mekanism.tools.common.advancements.ToolsAdvancements;
 import mekanism.tools.common.item.ItemMekanismArmor;
@@ -13,18 +11,20 @@ import mekanism.tools.common.item.ItemMekanismShield;
 import mekanism.tools.common.item.ItemMekanismShovel;
 import mekanism.tools.common.item.ItemMekanismSword;
 import mekanism.tools.common.registries.ToolsItems;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class ToolsAdvancementProvider extends BaseAdvancementProvider {
 
-    public ToolsAdvancementProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-        super(output, existingFileHelper, MekanismTools.MODID);
+    public ToolsAdvancementProvider(FabricDataOutput output) {
+        super(output, MekanismTools.MODID);
     }
 
     @Override

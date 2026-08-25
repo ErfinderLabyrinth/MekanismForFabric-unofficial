@@ -1,6 +1,5 @@
 package mekanism.tools.common.registries;
 
-import java.util.function.BiFunction;
 import mekanism.common.registration.impl.ItemDeferredRegister;
 import mekanism.common.registration.impl.ItemRegistryObject;
 import mekanism.tools.common.MekanismTools;
@@ -20,6 +19,8 @@ import mekanism.tools.common.material.VanillaPaxelMaterialCreator;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
+
+import java.util.function.BiFunction;
 
 public class ToolsItems {
 
@@ -137,9 +138,9 @@ public class ToolsItems {
 
     private static ItemRegistryObject<ItemMekanismPaxel> registerPaxel(VanillaPaxelMaterialCreator material) {
         if (material.getVanillaTier() == Tiers.NETHERITE) {
-            return ITEMS.registerUnburnable(material.getRegistryPrefix() + "_paxel", properties -> new ItemMekanismPaxel(material, properties));
+            return ITEMS.registerUnburnable(MekanismTools.rl(material.getRegistryPrefix() + "_paxel"), properties -> new ItemMekanismPaxel(material, properties));
         }
-        return ITEMS.register(material.getRegistryPrefix() + "_paxel", properties -> new ItemMekanismPaxel(material, properties));
+        return ITEMS.register(MekanismTools.rl(material.getRegistryPrefix() + "_paxel"), properties -> new ItemMekanismPaxel(material, properties));
     }
 
     private static ItemRegistryObject<ItemMekanismArmor> registerArmor(MaterialCreator material, ArmorItem.Type armorType) {
@@ -147,12 +148,12 @@ public class ToolsItems {
     }
 
     private static ItemRegistryObject<ItemMekanismArmor> registerArmor(MaterialCreator material, ArmorItem.Type armorType, ArmorCreator armorCreator) {
-        return ITEMS.register(material.getRegistryPrefix() + "_" + armorType.getName(), () -> armorCreator.create(material, armorType, getBaseProperties(material)));
+        return ITEMS.register(MekanismTools.rl(material.getRegistryPrefix() + "_" + armorType.getName()), () -> armorCreator.create(material, armorType, getBaseProperties(material)));
     }
 
     private static <ITEM extends Item> ItemRegistryObject<ITEM> register(BiFunction<MaterialCreator, Item.Properties, ITEM> itemCreator, String suffix,
           MaterialCreator material) {
-        return ITEMS.register(material.getRegistryPrefix() + suffix, () -> itemCreator.apply(material, getBaseProperties(material)));
+        return ITEMS.register(MekanismTools.rl(material.getRegistryPrefix() + suffix), () -> itemCreator.apply(material, getBaseProperties(material)));
     }
 
     private static Item.Properties getBaseProperties(BaseMekanismMaterial material) {
@@ -162,6 +163,8 @@ public class ToolsItems {
         }
         return properties;
     }
+
+    public static void register() {}
 
     @FunctionalInterface
     private interface ArmorCreator {

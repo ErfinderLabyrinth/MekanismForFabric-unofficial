@@ -1,20 +1,26 @@
 package mekanism.tools.common.config;
 
-import mekanism.common.config.MekanismConfigHelper;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingContext;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 
 public class MekanismToolsConfig {
 
     private MekanismToolsConfig() {
     }
 
-    public static final ToolsConfig tools = new ToolsConfig();
-    public static final ToolsClientConfig toolsClient = new ToolsClientConfig();
+    public static ToolsConfig tools;
+    public static ToolsClientConfig toolsClient;
 
-    public static void registerConfigs(ModLoadingContext modLoadingContext) {
-        ModContainer modContainer = modLoadingContext.getActiveContainer();
-        MekanismConfigHelper.registerConfig(modContainer, tools);
-        MekanismConfigHelper.registerConfig(modContainer, toolsClient);
+    public static void registerClientConfigs() {
+        AutoConfig.register(ToolsClientConfig.class, GsonConfigSerializer::new);
+
+        toolsClient = AutoConfig.getConfigHolder(ToolsClientConfig.class).getConfig();
+    }
+
+    public static void registerConfig() {
+        AutoConfig.register(ToolsConfig.class, GsonConfigSerializer::new);
+
+        tools = AutoConfig.getConfigHolder(ToolsConfig.class).getConfig();
+        tools.resetFallbacks();
     }
 }

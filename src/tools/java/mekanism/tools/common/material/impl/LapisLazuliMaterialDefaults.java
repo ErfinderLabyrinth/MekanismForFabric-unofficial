@@ -2,13 +2,13 @@ package mekanism.tools.common.material.impl;
 
 import mekanism.tools.common.ToolsTags;
 import mekanism.tools.common.material.BaseMekanismMaterial;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -106,7 +106,7 @@ public class LapisLazuliMaterialDefaults extends BaseMekanismMaterial {
     @NotNull
     @Override
     public Ingredient getCommonRepairMaterial() {
-        return Ingredient.of(Tags.Items.GEMS_LAPIS);
+        return Ingredient.of(ConventionalItemTags.LAPIS);
     }
 
     @Override

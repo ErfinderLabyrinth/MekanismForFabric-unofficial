@@ -1,9 +1,20 @@
 package mekanism.client.render;
 
-import mekanism.client.render.armor.*;
+import mekanism.client.render.armor.FreeRunnerArmor;
+import mekanism.client.render.armor.ICustomArmor;
+import mekanism.client.render.armor.ISpecialGear;
+import mekanism.client.render.armor.JetpackArmor;
+import mekanism.client.render.armor.MekaSuitArmor;
+import mekanism.client.render.armor.ScubaMaskArmor;
+import mekanism.client.render.armor.ScubaTankArmor;
 import mekanism.client.render.item.block.RenderEnergyCubeItem;
 import mekanism.client.render.item.block.RenderFluidTankItem;
-import mekanism.client.render.item.gear.*;
+import mekanism.client.render.item.gear.RenderAtomicDisassembler;
+import mekanism.client.render.item.gear.RenderFlameThrower;
+import mekanism.client.render.item.gear.RenderFreeRunners;
+import mekanism.client.render.item.gear.RenderJetpack;
+import mekanism.client.render.item.gear.RenderScubaMask;
+import mekanism.client.render.item.gear.RenderScubaTank;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.item.ArmorItem;
 import org.jetbrains.annotations.NotNull;
@@ -106,7 +117,7 @@ public class RenderPropertiesProvider {
 
     public static class MekRenderProperties {
         private BlockEntityWithoutLevelRenderer renderer;
-        MekRenderProperties(BlockEntityWithoutLevelRenderer renderer) {
+        public MekRenderProperties(BlockEntityWithoutLevelRenderer renderer) {
             this.renderer = renderer;
         }
 

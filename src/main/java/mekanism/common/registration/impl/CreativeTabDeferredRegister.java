@@ -1,6 +1,5 @@
 package mekanism.common.registration.impl;
 
-import mekanism.api.MekanismAPI;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.providers.IItemProvider;
 import mekanism.api.text.ILangEntry;
@@ -27,7 +26,7 @@ public class CreativeTabDeferredRegister extends WrappedDeferredRegister<Creativ
      * @apiNote We manually require the title and icon to be passed so that we ensure all tabs have one.
      */
     public CreativeTabRegistryObject registerMain(ILangEntry title, IItemProvider icon, Consumer<CreativeModeTab.Builder> additionBuild) {
-        return register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, MekanismAPI.MEKANISM_MODID), title, icon, additionBuild);
+        return register(new ResourceLocation(modid, modid), title, icon, additionBuild);
     }
 
     /**
