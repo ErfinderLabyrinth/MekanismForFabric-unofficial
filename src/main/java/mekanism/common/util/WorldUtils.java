@@ -380,7 +380,7 @@ public class WorldUtils {
                 });
             }
         } else {
-            Block.dropResources(state, world, pos, tile, entity, ItemStack.EMPTY, false);
+            Block.dropResources(state, world, pos, tile, entity, ItemStack.EMPTY);
         }
         world.removeBlock(pos, false);
     }

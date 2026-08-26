@@ -103,3 +103,4 @@ accessible field net/minecraft/tags/TagEntry tag Z
 accessible field net/minecraft/tags/TagEntry required Z
 accessible field net/fabricmc/fabric/impl/renderer/VanillaModelEncoder MATERIAL_NO_AO Lnet/fabricmc/fabric/api/renderer/v1/material/RenderMaterial;
 accessible field net/fabricmc/fabric/impl/renderer/VanillaModelEncoder MATERIAL_STANDARD Lnet/fabricmc/fabric/api/renderer/v1/material/RenderMaterial;
+accessible field net/minecraft/client/renderer/item/ItemProperties PROPERTIES Ljava/util/Map;

@@ -10,11 +10,10 @@ import mekanism.client.mixinhelper.RenderTypeHolder;
 import mekanism.client.model.CustomGeometry;
 import mekanism.client.model.composite.CompositeModelLoader;
 import mekanism.client.model.energycube.EnergyCubeModelLoader;
+import mekanism.client.model.item_layers.ItemLayersModelLoader;
 import mekanism.client.model.robit.RobitModel;
 import mekanism.client.render.obj.TransmitterLoader;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,6 +60,9 @@ public class BlockModelDeserializerMixin {
         }
         if (name.equals(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "composite"))) {
             return CompositeModelLoader.INSTANCE.read(object, deserializationContext);
+        }
+        if (name.equals(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "item_layers"))) {
+            return ItemLayersModelLoader.INSTANCE.read(object);
         }
         throw new JsonParseException(String.format(Locale.ENGLISH, "Model loader '%s' not found.", name));
 

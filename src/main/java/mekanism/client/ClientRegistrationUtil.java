@@ -1,5 +1,6 @@
 package mekanism.client;
 
+import com.google.common.collect.Maps;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.providers.IItemProvider;
 import mekanism.api.text.EnumColor;
@@ -30,8 +31,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -164,8 +165,9 @@ public class ClientRegistrationUtil {
         }
     }
 
-    public static void setPropertyOverride(IItemProvider itemProvider, ResourceLocation override, ClampedItemPropertyFunction propertyGetter) {
-        ItemProperties.register(itemProvider.asItem(), override, propertyGetter);
+    public static void setPropertyOverride(IItemProvider itemProvider, ResourceLocation override, ItemPropertyFunction propertyGetter) {
+        Item item = itemProvider.asItem();
+        ItemProperties.PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap()).put(override, propertyGetter);
     }
 
     public static void registerItemColorHandler(ItemColor itemColor, IItemProvider... items) {

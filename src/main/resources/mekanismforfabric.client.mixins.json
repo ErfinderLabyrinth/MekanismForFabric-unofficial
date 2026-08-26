@@ -32,7 +32,8 @@
     "MouseHandlerMixin",
     "PlayerRendererMixin",
     "TextureAtlasMixin",
-    "VanillaModelEncoderMixin"
+    "VanillaModelEncoderMixin",
+    "VertexConsumerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
