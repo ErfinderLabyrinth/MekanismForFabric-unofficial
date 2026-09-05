@@ -18,10 +18,10 @@
       "fabric:type": "fabric:any",
       "ingredients": [
         {
-          "tag": "forge:dusts/coal"
+          "tag": "c:coal_dusts"
         },
         {
-          "tag": "forge:dusts/charcoal"
+          "tag": "c:charcoal_dusts"
         }
       ]
     }

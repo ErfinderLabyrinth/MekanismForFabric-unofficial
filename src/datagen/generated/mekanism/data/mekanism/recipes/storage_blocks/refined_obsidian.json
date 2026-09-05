@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:ingots/refined_obsidian"
+      "tag": "c:refined_obsidian_ingots"
     },
     "P": {
       "item": "mekanism:ingot_refined_obsidian"

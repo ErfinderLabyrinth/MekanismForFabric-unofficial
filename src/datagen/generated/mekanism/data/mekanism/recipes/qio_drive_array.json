@@ -5,13 +5,13 @@
       "tag": "mekanism:personal_storage"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "G": {
       "tag": "c:glass_panes"
     },
     "I": {
-      "tag": "forge:pellets/polonium"
+      "tag": "c:polonium_pellets"
     },
     "T": {
       "item": "mekanism:teleportation_core"

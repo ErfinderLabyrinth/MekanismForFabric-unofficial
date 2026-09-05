@@ -5,7 +5,7 @@
       "tag": "mekanism:alloys/basic"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "I": {
       "tag": "c:iron_ingots"

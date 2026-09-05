@@ -2,13 +2,13 @@
   "type": "mekanism:combining",
   "extraInput": {
     "ingredient": {
-      "item": "minecraft:cobbled_deepslate"
+      "tag": "c:cobbled_deepslates"
     }
   },
   "mainInput": {
     "amount": 8,
     "ingredient": {
-      "tag": "forge:dusts/coal"
+      "tag": "c:coal_dusts"
     }
   },
   "output": {

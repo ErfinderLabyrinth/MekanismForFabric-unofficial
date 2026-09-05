@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tagSupplier": "forge:brine"
+    "tagSupplier": "c:brine"
   },
   "fluidOutput": {
     "amount": 1,

@@ -5,7 +5,7 @@
       "item": "minecraft:stick"
     },
     "O": {
-      "tag": "forge:ingots/osmium"
+      "tag": "c:osmium_ingots"
     }
   },
   "pattern": [

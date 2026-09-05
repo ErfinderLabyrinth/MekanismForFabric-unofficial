@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:storage_blocks/refined_glowstone"
+      "tag": "c:refined_glowstone_blocks"
     },
     "A": {
-      "tag": "forge:alloys/elite"
+      "tag": "c:elite_alloys"
     },
     "D": {
       "item": "minecraft:diamond_block"
     },
     "H": {
-      "tag": "forge:pellets/polonium"
+      "tag": "c:polonium_pellets"
     },
     "P": {
       "item": "mekanism:module_base"

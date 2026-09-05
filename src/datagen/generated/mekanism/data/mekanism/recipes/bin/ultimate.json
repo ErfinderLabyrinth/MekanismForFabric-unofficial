@@ -5,13 +5,13 @@
       "tag": "mekanism:alloys/atomic"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "P": {
       "item": "mekanism:elite_bin"
     },
     "_": {
-      "item": "minecraft:cobblestone"
+      "tag": "c:normal_cobblestones"
     }
   },
   "pattern": [

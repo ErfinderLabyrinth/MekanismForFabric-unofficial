@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#forge:chests/electric",
-    "#forge:chests/personal"
+    "#c:electric_chests",
+    "#c:personal_chests"
   ]
 }

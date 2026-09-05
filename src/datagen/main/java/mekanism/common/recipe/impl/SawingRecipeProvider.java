@@ -7,6 +7,7 @@ import mekanism.common.Mekanism;
 import mekanism.common.recipe.ISubRecipeProvider;
 import mekanism.common.recipe.RecipeProviderUtil;
 import mekanism.common.registries.MekanismItems;
+import mekanism.common.tags.MekanismTags;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.tags.ItemTags;
@@ -161,7 +162,7 @@ class SawingRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "stairs"));
         //Stick
         SawmillRecipeBuilder.sawing(
-              IngredientCreatorAccess.item().from(Items.STICK),
+              IngredientCreatorAccess.item().from(MekanismTags.Items.WOODEN_RODS),
               MekanismItems.SAWDUST.getItemStack()
         ).build(consumer, Mekanism.rl(basePath + "stick"));
         //Buttons

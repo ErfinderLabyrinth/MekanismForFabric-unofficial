@@ -2,13 +2,13 @@
   "type": "mekanism:combining",
   "extraInput": {
     "ingredient": {
-      "item": "minecraft:cobblestone"
+      "tag": "c:normal_cobblestones"
     }
   },
   "mainInput": {
     "amount": 8,
     "ingredient": {
-      "tag": "forge:raw_materials/tin"
+      "tag": "c:raw_tin"
     }
   },
   "output": {

@@ -2,10 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:storage_blocks/lead"
+      "tag": "c:lead_blocks"
     },
     "A": {
-      "tag": "forge:alloys/advanced"
+      "tag": "c:advanced_alloys"
     },
     "H": {
       "item": "mekanism:hdpe_sheet"

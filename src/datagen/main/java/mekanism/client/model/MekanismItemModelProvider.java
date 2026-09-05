@@ -28,7 +28,7 @@ public class MekanismItemModelProvider extends BaseItemModelProvider {
                 generated(itemModelGenerator, item.getValue().asItem());
             } else {
                 //If the texture does not exist fallback to the default texture
-                resource(itemModelGenerator, item.getValue(), item.getRowKey().getRegistryPrefix());
+                resource(itemModelGenerator, item.getValue(), item.getRowKey().getRegistryName());
             }
         }
     }

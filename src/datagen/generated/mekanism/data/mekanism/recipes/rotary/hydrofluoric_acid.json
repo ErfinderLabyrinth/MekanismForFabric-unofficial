@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tagSupplier": "forge:hydrofluoric_acid"
+    "tagSupplier": "c:hydrofluoric_acid"
   },
   "fluidOutput": {
     "amount": 1,

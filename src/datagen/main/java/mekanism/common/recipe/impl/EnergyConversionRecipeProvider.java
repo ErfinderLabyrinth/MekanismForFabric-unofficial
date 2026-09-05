@@ -6,6 +6,7 @@ import mekanism.api.math.FloatingLong;
 import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import mekanism.common.Mekanism;
 import mekanism.common.recipe.ISubRecipeProvider;
+import mekanism.common.tags.MekanismTags;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.tags.TagKey;
@@ -19,7 +20,7 @@ class EnergyConversionRecipeProvider implements ISubRecipeProvider {
         String basePath = "energy_conversion/";
         FloatingLong redstoneEnergy = FloatingLong.createConst(10_000);
         addEnergyConversionRecipe(consumer, basePath, "redstone", ConventionalItemTags.REDSTONE_DUSTS, redstoneEnergy);
-        addEnergyConversionRecipe(consumer, basePath, "redstone_block", Items.REDSTONE_BLOCK, redstoneEnergy.multiply(9));
+        addEnergyConversionRecipe(consumer, basePath, "redstone_block", MekanismTags.Items.REDSTONE_BLOCKS, redstoneEnergy.multiply(9));
     }
 
     private void addEnergyConversionRecipe(Consumer<FinishedRecipe> consumer, String basePath, String name, TagKey<Item> inputTag, FloatingLong output) {

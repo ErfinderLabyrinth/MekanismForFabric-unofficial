@@ -2,7 +2,7 @@
   "type": "mekanism:sawing",
   "input": {
     "ingredient": {
-      "item": "minecraft:stick"
+      "tag": "c:wooden_rods"
     }
   },
   "mainOutput": {

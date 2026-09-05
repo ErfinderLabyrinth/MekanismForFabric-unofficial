@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tagSupplier": "forge:ethene"
+    "tagSupplier": "c:ethene"
   },
   "fluidOutput": {
     "amount": 1,

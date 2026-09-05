@@ -57,7 +57,7 @@ class InfusionConversionRecipeProvider implements ISubRecipeProvider {
 
         //Coal Block
         ItemStackToChemicalRecipeBuilder.infusionConversion(
-              IngredientCreatorAccess.item().from(Items.COAL_BLOCK),
+              IngredientCreatorAccess.item().from(MekanismTags.Items.COAL_BLOCKS),
               MekanismInfuseTypes.CARBON.getStack(90)
         ).build(consumer, Mekanism.rl(basePath + "from_coal_block"));
         //Coal
@@ -92,13 +92,7 @@ class InfusionConversionRecipeProvider implements ISubRecipeProvider {
     private void addInfusionConversionFungiRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //Mushrooms
         ItemStackToChemicalRecipeBuilder.infusionConversion(
-              IngredientCreatorAccess.item().from(Ingredient.of(
-                    Blocks.BROWN_MUSHROOM,
-                    Blocks.RED_MUSHROOM,
-                    //TODO: If these get added to the mushroom tag then we can remove them from here
-                    Blocks.WARPED_FUNGUS,
-                    Blocks.CRIMSON_FUNGUS
-              )),
+              IngredientCreatorAccess.item().from(Ingredient.of(MekanismTags.Items.MUSHROOMS)),
               MekanismInfuseTypes.FUNGI.getStack(10)
         ).build(consumer, Mekanism.rl(basePath + "from_mushrooms"));
     }
@@ -106,7 +100,7 @@ class InfusionConversionRecipeProvider implements ISubRecipeProvider {
     private void addInfusionConversionRedstoneRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //Block
         ItemStackToChemicalRecipeBuilder.infusionConversion(
-              IngredientCreatorAccess.item().from(Items.REDSTONE_BLOCK),
+              IngredientCreatorAccess.item().from(MekanismTags.Items.REDSTONE_BLOCKS),
               MekanismInfuseTypes.REDSTONE.getStack(90)
         ).build(consumer, Mekanism.rl(basePath + "from_block"));
         //Dust

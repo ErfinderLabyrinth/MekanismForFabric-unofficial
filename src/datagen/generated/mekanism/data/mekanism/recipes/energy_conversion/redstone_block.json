@@ -2,7 +2,7 @@
   "type": "mekanism:energy_conversion",
   "input": {
     "ingredient": {
-      "item": "minecraft:redstone_block"
+      "tag": "c:redstone_blocks"
     }
   },
   "output": 90000

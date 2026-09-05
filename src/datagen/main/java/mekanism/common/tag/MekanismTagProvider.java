@@ -100,6 +100,7 @@ public class MekanismTagProvider extends BaseTagProvider {
         addInfuseTags();
         addPellets();
         addColorableItems();
+        addMissingForgeTagsForFabric();
         getBlockBuilder(MekanismTags.Blocks.ATOMIC_DISASSEMBLER_ORE).add(ConventionalBlockTags.ORES).addForced(BlockTags.LOGS);
         addToTag(BlockTags.GUARDED_BY_PIGLINS, MekanismBlocks.REFINED_GLOWSTONE_BLOCK, MekanismBlocks.PERSONAL_BARREL, MekanismBlocks.PERSONAL_CHEST);
         addToTag(BlockTags.HOGLIN_REPELLENTS, MekanismBlocks.TELEPORTER, MekanismBlocks.QUANTUM_ENTANGLOPORTER);
@@ -264,9 +265,7 @@ public class MekanismTagProvider extends BaseTagProvider {
     private void addWrenches() {
         addToTag(MekanismTags.Items.WRENCHES, MekanismItems.CONFIGURATOR);
         //Note: We don't add wrenches to the vanilla tools tag as that is for a different style of tool and used for things like breaking pots
-        getItemBuilder(ItemTags.TOOLS).add(MekanismTags.Items.TOOLS_WRENCH);
-        addToTag(MekanismTags.Items.TOOLS_WRENCH, MekanismItems.CONFIGURATOR);
-        getItemBuilder(MekanismTags.Items.CONFIGURATORS).add(MekanismTags.Items.WRENCHES, MekanismTags.Items.TOOLS_WRENCH);
+        getItemBuilder(MekanismTags.Items.CONFIGURATORS).add(MekanismTags.Items.WRENCHES);
     }
 
     private void addArmor() {
@@ -283,7 +282,7 @@ public class MekanismTagProvider extends BaseTagProvider {
 
     private void addRods() {
         addToTag(MekanismTags.Items.RODS_PLASTIC, MekanismItems.HDPE_STICK);
-//        getItemBuilder(Tags.Items.RODS).add(MekanismTags.Items.RODS_PLASTIC);
+        getItemBuilder(MekanismTags.Items.RODS).add(MekanismTags.Items.RODS_PLASTIC);
     }
 
     private void addFuels() {
@@ -492,6 +491,27 @@ public class MekanismTagProvider extends BaseTagProvider {
               Blocks.LIGHT_GRAY_CONCRETE_POWDER, Blocks.CYAN_CONCRETE_POWDER, Blocks.PURPLE_CONCRETE_POWDER, Blocks.BLUE_CONCRETE_POWDER, Blocks.BROWN_CONCRETE_POWDER,
               Blocks.GREEN_CONCRETE_POWDER, Blocks.RED_CONCRETE_POWDER, Blocks.BLACK_CONCRETE_POWDER);
         getItemBuilder(MekanismTags.Items.COLORABLE_BANNERS).addTyped(color -> BannerBlock.byColor(color).asItem(), DyeColor.values());
+    }
+
+    private void addMissingForgeTagsForFabric() {
+        addToTag(MekanismTags.Items.BRICKS, Items.BRICK);
+        addToTag(MekanismTags.Items.GUNPOWDER, Items.GUNPOWDER);
+        addToTag(MekanismTags.Items.GLOWSTONE_DUSTS, Items.GLOWSTONE_DUST);
+        addToTag(MekanismTags.Items.WHEAT, Items.WHEAT);
+        addToTag(MekanismTags.Items.NORMAL_COBBLESTONES, Items.COBBLESTONE);
+        addToTag(MekanismTags.Items.COBBLED_DEEPSLATES, Items.COBBLED_DEEPSLATE);
+        addToTag(MekanismTags.Items.GRAVELS, Items.GRAVEL);
+        addToTag(MekanismTags.Items.SANDS, Items.SAND);
+        addToTag(MekanismTags.Items.OBSIDIAN, Items.OBSIDIAN);
+        addToTag(MekanismTags.Items.MUSHROOMS, Items.RED_MUSHROOM, Items.BROWN_MUSHROOM, Items.CRIMSON_FUNGUS, Items.WARPED_FUNGUS);
+        addToTag(MekanismTags.Items.NETHER_STARS, Items.NETHER_STAR);
+        addToTag(MekanismTags.Items.LEATHER, Items.LEATHER);
+        addToTag(MekanismTags.Items.ANCIENT_DEBRIS, Items.ANCIENT_DEBRIS);
+        addToTag(MekanismTags.Items.WOODEN_RODS, Items.STICK);
+
+        addToTag(MekanismTags.Items.QUARTZ_BLOCKS, Items.QUARTZ_BLOCK);
+        addToTag(MekanismTags.Items.REDSTONE_BLOCKS, Items.REDSTONE_BLOCK);
+        addToTag(MekanismTags.Items.COAL_BLOCKS, Items.COAL_BLOCK);
     }
 
     private void addBiomes() {

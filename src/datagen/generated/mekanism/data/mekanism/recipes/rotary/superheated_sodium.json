@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tagSupplier": "forge:superheated_sodium"
+    "tagSupplier": "c:superheated_sodium"
   },
   "fluidOutput": {
     "amount": 1,

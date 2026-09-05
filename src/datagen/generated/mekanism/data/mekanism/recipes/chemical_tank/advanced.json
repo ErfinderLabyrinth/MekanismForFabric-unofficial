@@ -5,7 +5,7 @@
       "tag": "mekanism:alloys/infused"
     },
     "O": {
-      "tag": "forge:ingots/osmium"
+      "tag": "c:osmium_ingots"
     },
     "P": {
       "item": "mekanism:basic_chemical_tank"

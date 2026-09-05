@@ -6,10 +6,10 @@
       "item": "minecraft:netherite_boots"
     },
     "A": {
-      "tag": "forge:pellets/polonium"
+      "tag": "c:polonium_pellets"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "E": {
       "item": "mekanism:basic_induction_cell"

@@ -16,7 +16,7 @@
   "itemInput": {
     "amount": 3,
     "ingredient": {
-      "item": "minecraft:stick"
+      "tag": "c:wooden_rods"
     }
   }
 }

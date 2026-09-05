@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "tag": "forge:ingots/refined_glowstone"
+      "tag": "c:refined_glowstone_ingots"
     }
   ],
   "result": {

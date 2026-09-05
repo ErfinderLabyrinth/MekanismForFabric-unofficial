@@ -5,7 +5,7 @@
       "item": "mekanism:hydrogen_bucket"
     },
     "A": {
-      "tag": "forge:alloys/elite"
+      "tag": "c:elite_alloys"
     },
     "H": {
       "item": "mekanism:pellet_polonium"

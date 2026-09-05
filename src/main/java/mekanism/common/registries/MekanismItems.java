@@ -185,7 +185,7 @@ public class MekanismItems {
 
     public static final ItemRegistryObject<Item> BRONZE_INGOT = registerResource(ResourceType.INGOT, MiscResource.BRONZE);
     public static final ItemRegistryObject<Item> REFINED_OBSIDIAN_INGOT = registerUnburnableResource(ResourceType.INGOT, MiscResource.REFINED_OBSIDIAN);
-    public static final ItemRegistryObject<Item> REFINED_GLOWSTONE_INGOT = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, ResourceType.INGOT.getRegistryPrefix() + "_" + MiscResource.REFINED_GLOWSTONE.getRegistrySuffix()), ItemRefinedGlowstoneIngot::new);
+    public static final ItemRegistryObject<Item> REFINED_GLOWSTONE_INGOT = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, ResourceType.INGOT.getRegistryName() + "_" + MiscResource.REFINED_GLOWSTONE.getRegistrySuffix()), ItemRefinedGlowstoneIngot::new);
     public static final ItemRegistryObject<Item> STEEL_INGOT = registerResource(ResourceType.INGOT, MiscResource.STEEL);
 
     public static final ItemRegistryObject<Item> REFINED_OBSIDIAN_NUGGET = registerUnburnableResource(ResourceType.NUGGET, MiscResource.REFINED_OBSIDIAN);
@@ -204,11 +204,11 @@ public class MekanismItems {
     }
 
     private static ItemRegistryObject<Item> registerResource(ResourceType type, IResource resource) {
-        return ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, type.getRegistryPrefix() + "_" + resource.getRegistrySuffix()));
+        return ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, type.getRegistryName() + "_" + resource.getRegistrySuffix()));
     }
 
     private static ItemRegistryObject<Item> registerUnburnableResource(ResourceType type, IResource resource) {
-        return ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, type.getRegistryPrefix() + "_" + resource.getRegistrySuffix()));
+        return ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, type.getRegistryName() + "_" + resource.getRegistrySuffix()));
     }
 
     private static ItemRegistryObject<Item> registerCircuit(BaseTier tier) {

@@ -2,7 +2,7 @@
   "type": "mekanism:enriching",
   "input": {
     "ingredient": {
-      "tag": "forge:dusts/charcoal"
+      "tag": "c:charcoal_dusts"
     }
   },
   "output": {

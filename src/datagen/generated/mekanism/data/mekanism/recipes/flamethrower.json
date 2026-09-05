@@ -3,13 +3,13 @@
   "category": "equipment",
   "key": {
     "#": {
-      "tag": "forge:ingots/bronze"
+      "tag": "c:bronze_ingots"
     },
     "C": {
-      "tag": "forge:circuits/advanced"
+      "tag": "c:advanced_circuits"
     },
     "I": {
-      "tag": "forge:ingots/tin"
+      "tag": "c:tin_ingots"
     },
     "S": {
       "item": "minecraft:flint_and_steel"

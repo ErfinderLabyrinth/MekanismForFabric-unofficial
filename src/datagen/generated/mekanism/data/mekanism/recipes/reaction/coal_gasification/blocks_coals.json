@@ -16,10 +16,10 @@
   "itemInput": {
     "ingredient": [
       {
-        "tag": "forge:storage_blocks/charcoal"
+        "tag": "c:charcoal_blocks"
       },
       {
-        "item": "minecraft:coal_block"
+        "tag": "c:coal_blocks"
       }
     ]
   },

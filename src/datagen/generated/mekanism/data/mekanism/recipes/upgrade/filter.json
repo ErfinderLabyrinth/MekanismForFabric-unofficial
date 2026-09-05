@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:dusts/tin"
+      "tag": "c:tin_dusts"
     },
     "A": {
       "tag": "mekanism:alloys/infused"

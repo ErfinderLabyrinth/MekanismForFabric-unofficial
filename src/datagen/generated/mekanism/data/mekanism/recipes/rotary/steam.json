@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tagSupplier": "forge:steam"
+    "tagSupplier": "c:steam"
   },
   "fluidOutput": {
     "amount": 1,

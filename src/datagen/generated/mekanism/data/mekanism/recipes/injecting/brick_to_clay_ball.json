@@ -6,7 +6,7 @@
   },
   "itemInput": {
     "ingredient": {
-      "item": "minecraft:brick"
+      "tag": "c:bricks"
     }
   },
   "output": {

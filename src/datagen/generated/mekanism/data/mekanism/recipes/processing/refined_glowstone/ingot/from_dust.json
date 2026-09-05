@@ -6,7 +6,7 @@
   },
   "itemInput": {
     "ingredient": {
-      "item": "minecraft:glowstone_dust"
+      "tag": "c:glowstone_dusts"
     }
   },
   "output": {

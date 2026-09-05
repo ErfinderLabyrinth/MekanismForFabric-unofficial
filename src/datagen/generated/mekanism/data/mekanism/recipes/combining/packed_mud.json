@@ -7,7 +7,7 @@
   },
   "mainInput": {
     "ingredient": {
-      "item": "minecraft:wheat"
+      "tag": "c:wheat"
     }
   },
   "output": {

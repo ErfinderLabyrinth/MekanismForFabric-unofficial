@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#forge:barrels/personal",
-    "#forge:chests/personal"
+    "#c:personal_barrels",
+    "#c:personal_chests"
   ]
 }

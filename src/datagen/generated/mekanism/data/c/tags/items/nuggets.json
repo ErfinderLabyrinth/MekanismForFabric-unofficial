@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "#forge:nuggets/osmium",
-    "#forge:nuggets/tin",
-    "#forge:nuggets/lead",
-    "#forge:nuggets/uranium",
-    "#forge:nuggets/bronze",
-    "#forge:nuggets/refined_glowstone",
-    "#forge:nuggets/refined_obsidian",
-    "#forge:nuggets/steel"
+    "#c:osmium_nuggets",
+    "#c:tin_nuggets",
+    "#c:lead_nuggets",
+    "#c:uranium_nuggets",
+    "#c:bronze_nuggets",
+    "#c:refined_glowstone_nuggets",
+    "#c:refined_obsidian_nuggets",
+    "#c:steel_nuggets"
   ]
 }

@@ -33,7 +33,7 @@ class PressurizedReactionRecipeProvider implements ISubRecipeProvider {
         PressurizedReactionRecipeBuilder.reaction(
               IngredientCreatorAccess.item().from(BaseRecipeProvider.createIngredient(
                     MekanismTags.Items.STORAGE_BLOCKS_CHARCOAL,
-                    Items.COAL_BLOCK
+                    MekanismTags.Items.COAL_BLOCKS
               )),
               IngredientCreatorAccess.fluid().from(FluidTags.WATER, 1_000),
               IngredientCreatorAccess.gas().from(MekanismGases.OXYGEN, 1_000),
@@ -100,7 +100,7 @@ class PressurizedReactionRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "planks"));
         //Rods, each worth a 30th of a log.
         PressurizedReactionRecipeBuilder.reaction(
-              IngredientCreatorAccess.item().from(Items.STICK, 3),
+              IngredientCreatorAccess.item().from(MekanismTags.Items.WOODEN_RODS, 3),
               IngredientCreatorAccess.fluid().from(FluidTags.WATER, 10),
               IngredientCreatorAccess.gas().from(MekanismGases.OXYGEN, 10),
               15,

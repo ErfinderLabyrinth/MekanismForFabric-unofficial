@@ -2,13 +2,13 @@
   "type": "mekanism:combining",
   "extraInput": {
     "ingredient": {
-      "item": "minecraft:cobblestone"
+      "tag": "c:normal_cobblestones"
     }
   },
   "mainInput": {
     "amount": 5,
     "ingredient": {
-      "tag": "forge:dusts/diamond"
+      "tag": "c:diamond_dusts"
     }
   },
   "output": {

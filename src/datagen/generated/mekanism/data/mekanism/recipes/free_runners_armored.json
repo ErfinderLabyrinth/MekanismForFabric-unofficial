@@ -2,16 +2,16 @@
   "type": "mekanism:mek_data",
   "key": {
     "#": {
-      "tag": "forge:dusts/diamond"
+      "tag": "c:diamond_dusts"
     },
     "I": {
-      "tag": "forge:ingots/bronze"
+      "tag": "c:bronze_ingots"
     },
     "P": {
       "item": "mekanism:free_runners"
     },
     "S": {
-      "tag": "forge:storage_blocks/steel"
+      "tag": "c:steel_blocks"
     }
   },
   "pattern": [

@@ -5,10 +5,10 @@
       "tag": "mekanism:alloys/basic"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "_": {
-      "item": "minecraft:cobblestone"
+      "tag": "c:normal_cobblestones"
     }
   },
   "pattern": [

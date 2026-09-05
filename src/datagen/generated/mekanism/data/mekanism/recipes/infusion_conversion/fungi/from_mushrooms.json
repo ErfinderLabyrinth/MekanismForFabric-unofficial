@@ -1,20 +1,9 @@
 {
   "type": "mekanism:infusion_conversion",
   "input": {
-    "ingredient": [
-      {
-        "item": "minecraft:brown_mushroom"
-      },
-      {
-        "item": "minecraft:red_mushroom"
-      },
-      {
-        "item": "minecraft:warped_fungus"
-      },
-      {
-        "item": "minecraft:crimson_fungus"
-      }
-    ]
+    "ingredient": {
+      "tag": "c:mushrooms"
+    }
   },
   "output": {
     "amount": 10,

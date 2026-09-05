@@ -2,13 +2,13 @@
   "type": "mekanism:mek_data",
   "key": {
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "I": {
-      "tag": "forge:ingots/tin"
+      "tag": "c:tin_ingots"
     },
     "S": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     },
     "T": {
       "item": "mekanism:basic_chemical_tank"

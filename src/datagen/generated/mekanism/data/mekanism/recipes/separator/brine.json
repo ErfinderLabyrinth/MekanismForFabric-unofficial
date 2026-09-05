@@ -2,7 +2,7 @@
   "type": "mekanism:separating",
   "input": {
     "amount": 10,
-    "tagSupplier": "forge:brine"
+    "tagSupplier": "c:brine"
   },
   "leftGasOutput": {
     "amount": 1,

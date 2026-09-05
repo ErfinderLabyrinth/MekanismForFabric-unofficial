@@ -26,7 +26,7 @@ class ChemicalInjectorRecipeProvider implements ISubRecipeProvider {
         String basePath = "injecting/";
         //Brick -> clay ball
         ItemStackChemicalToItemStackRecipeBuilder.injecting(
-              IngredientCreatorAccess.item().from(Items.BRICK),
+              IngredientCreatorAccess.item().from(MekanismTags.Items.BRICKS),
               IngredientCreatorAccess.gas().from(MekanismTags.Gases.WATER_VAPOR, 1),
               new ItemStack(Items.CLAY_BALL)
         ).build(consumer, Mekanism.rl(basePath + "brick_to_clay_ball"));
@@ -38,7 +38,7 @@ class ChemicalInjectorRecipeProvider implements ISubRecipeProvider {
         ).build(consumer, Mekanism.rl(basePath + "dirt_to_mud"));
         //Gunpowder -> sulfur
         ItemStackChemicalToItemStackRecipeBuilder.injecting(
-              IngredientCreatorAccess.item().from(Items.GUNPOWDER),
+              IngredientCreatorAccess.item().from(MekanismTags.Items.GUNPOWDER),
               IngredientCreatorAccess.gas().from(MekanismGases.HYDROGEN_CHLORIDE, 1),
               MekanismItems.SULFUR_DUST.getItemStack()
         ).build(consumer, Mekanism.rl(basePath + "gunpowder_to_sulfur"));

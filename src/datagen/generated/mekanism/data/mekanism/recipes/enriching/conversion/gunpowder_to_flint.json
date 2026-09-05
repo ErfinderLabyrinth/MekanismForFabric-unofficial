@@ -2,7 +2,7 @@
   "type": "mekanism:enriching",
   "input": {
     "ingredient": {
-      "item": "minecraft:gunpowder"
+      "tag": "c:gunpowder"
     }
   },
   "output": {

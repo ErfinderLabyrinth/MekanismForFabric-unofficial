@@ -3,7 +3,7 @@
   "cookingtime": 200,
   "experience": 0.35,
   "ingredient": {
-    "tag": "forge:dusts/bronze"
+    "tag": "c:bronze_dusts"
   },
   "result": "mekanism:ingot_bronze"
 }

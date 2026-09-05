@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:nuggets/bronze"
+      "tag": "c:bronze_nuggets"
     },
     "P": {
       "item": "mekanism:nugget_bronze"

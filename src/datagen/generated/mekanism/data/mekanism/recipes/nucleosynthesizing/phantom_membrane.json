@@ -7,7 +7,7 @@
   },
   "itemInput": {
     "ingredient": {
-      "item": "minecraft:leather"
+      "tag": "c:leather"
     }
   },
   "output": {

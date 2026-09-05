@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:nuggets/osmium"
+      "tag": "c:osmium_nuggets"
     },
     "P": {
       "item": "mekanism:nugget_osmium"

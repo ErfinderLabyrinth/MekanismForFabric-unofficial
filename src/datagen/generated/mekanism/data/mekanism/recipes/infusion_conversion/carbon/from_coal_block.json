@@ -2,7 +2,7 @@
   "type": "mekanism:infusion_conversion",
   "input": {
     "ingredient": {
-      "item": "minecraft:coal_block"
+      "tag": "c:coal_blocks"
     }
   },
   "output": {

@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tagSupplier": "forge:lithium"
+    "tagSupplier": "c:lithium"
   },
   "fluidOutput": {
     "amount": 1,

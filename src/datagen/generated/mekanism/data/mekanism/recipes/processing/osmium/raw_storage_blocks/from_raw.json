@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:raw_materials/osmium"
+      "tag": "c:raw_osmium"
     },
     "P": {
       "item": "mekanism:raw_osmium"

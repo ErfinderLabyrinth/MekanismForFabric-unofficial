@@ -5,7 +5,7 @@
       "item": "mekanism:sps_casing"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     }
   },
   "pattern": [

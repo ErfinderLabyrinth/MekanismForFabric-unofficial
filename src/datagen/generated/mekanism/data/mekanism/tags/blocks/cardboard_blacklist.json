@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#forge:relocation_not_supported",
+    "#c:movement_restricted",
     "#minecraft:beds",
     "#minecraft:doors"
   ]

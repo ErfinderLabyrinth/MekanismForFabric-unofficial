@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:dusts/gold"
+      "tag": "c:gold_dusts"
     },
     "A": {
       "tag": "mekanism:alloys/infused"

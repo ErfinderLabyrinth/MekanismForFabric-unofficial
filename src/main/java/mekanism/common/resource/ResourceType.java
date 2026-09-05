@@ -7,28 +7,34 @@ public enum ResourceType {
     DIRTY_DUST("dirty_dust"),
     CLUMP("clump"),
     INGOT("ingot"),
-    RAW("raw", "raw_materials"),
+    RAW("raw", "raw", true),
     NUGGET("nugget"),
-    ENRICHED("enriched", "enriched");
+    ENRICHED("enriched", "enriched", true);
 
-    private final String registryPrefix;
+    private final String registryName;
     private final String baseTagPath;
+    private final boolean prefix;
 
-    ResourceType(String prefix) {
-        this(prefix, prefix + "s");
+    ResourceType(String registryName) {
+        this(registryName, registryName + "s", false);
     }
 
-    ResourceType(String prefix, String baseTagPath) {
-        this.registryPrefix = prefix;
+    ResourceType(String registryName, String baseTagPath, boolean prefix) {
+        this.registryName = registryName;
         this.baseTagPath = baseTagPath;
+        this.prefix = prefix;
     }
 
-    public String getRegistryPrefix() {
-        return registryPrefix;
+    public String getRegistryName() {
+        return registryName;
     }
 
     public String getBaseTagPath() {
         return baseTagPath;
+    }
+
+    public boolean isPrefix() {
+        return prefix;
     }
 
     public boolean usedByPrimary(PrimaryResource resource) {

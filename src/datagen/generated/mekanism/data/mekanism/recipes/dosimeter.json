@@ -3,7 +3,7 @@
   "category": "equipment",
   "key": {
     "I": {
-      "tag": "forge:ingots/lead"
+      "tag": "c:lead_ingots"
     },
     "R": {
       "tag": "c:redstone_dusts"

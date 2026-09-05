@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:gems/fluorite"
+      "tag": "c:fluorite"
     },
     "P": {
       "item": "mekanism:fluorite_gem"

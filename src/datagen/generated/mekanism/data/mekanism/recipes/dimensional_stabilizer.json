@@ -5,13 +5,13 @@
       "tag": "mekanism:alloys/atomic"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "D": {
       "item": "minecraft:diamond_block"
     },
     "I": {
-      "tag": "forge:ingots/refined_obsidian"
+      "tag": "c:refined_obsidian_ingots"
     }
   },
   "pattern": [

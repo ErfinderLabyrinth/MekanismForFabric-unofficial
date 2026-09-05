@@ -2,13 +2,13 @@
   "type": "mekanism:combining",
   "extraInput": {
     "ingredient": {
-      "item": "minecraft:cobblestone"
+      "tag": "c:normal_cobblestones"
     }
   },
   "mainInput": {
     "amount": 27,
     "ingredient": {
-      "tag": "forge:dusts/lapis"
+      "tag": "c:lapis_dusts"
     }
   },
   "output": {

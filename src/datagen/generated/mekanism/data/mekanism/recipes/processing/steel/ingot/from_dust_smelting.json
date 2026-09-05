@@ -3,7 +3,7 @@
   "cookingtime": 200,
   "experience": 0.4,
   "ingredient": {
-    "tag": "forge:dusts/steel"
+    "tag": "c:steel_dusts"
   },
   "result": "mekanism:ingot_steel"
 }

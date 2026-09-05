@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tagSupplier": "forge:uranium_oxide"
+    "tagSupplier": "c:uranium_oxide"
   },
   "fluidOutput": {
     "amount": 1,

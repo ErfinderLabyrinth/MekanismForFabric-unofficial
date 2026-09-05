@@ -5,7 +5,7 @@
       "tag": "c:diamonds"
     },
     "I": {
-      "tag": "forge:ingots/lead"
+      "tag": "c:lead_ingots"
     },
     "P": {
       "item": "mekanism:qio_drive_base"

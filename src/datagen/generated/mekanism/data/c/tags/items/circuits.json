@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#c:basic_circuits",
+    "#c:advanced_circuits",
+    "#c:elite_circuits",
+    "#c:ultimate_circuits"
+  ]
+}

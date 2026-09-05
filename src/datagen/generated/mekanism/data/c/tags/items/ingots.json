@@ -1,13 +1,13 @@
 {
   "replace": false,
   "values": [
-    "#forge:ingots/osmium",
-    "#forge:ingots/tin",
-    "#forge:ingots/lead",
-    "#forge:ingots/uranium",
-    "#forge:ingots/bronze",
-    "#forge:ingots/refined_glowstone",
-    "#forge:ingots/refined_obsidian",
-    "#forge:ingots/steel"
+    "#c:osmium_ingots",
+    "#c:tin_ingots",
+    "#c:lead_ingots",
+    "#c:uranium_ingots",
+    "#c:bronze_ingots",
+    "#c:refined_glowstone_ingots",
+    "#c:refined_obsidian_ingots",
+    "#c:steel_ingots"
   ]
 }

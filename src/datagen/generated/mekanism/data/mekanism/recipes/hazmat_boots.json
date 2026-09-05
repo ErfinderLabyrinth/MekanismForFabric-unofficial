@@ -6,7 +6,7 @@
       "tag": "c:black_dyes"
     },
     "I": {
-      "tag": "forge:ingots/lead"
+      "tag": "c:lead_ingots"
     }
   },
   "pattern": [
