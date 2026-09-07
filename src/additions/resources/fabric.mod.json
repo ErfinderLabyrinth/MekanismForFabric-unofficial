@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "mekanismtools",
+  "id": "mekanismadditions",
   "version": "${version}",
-  "name": "MekanismForFabric: Tools",
-  "description": "Tools module for Mekanism",
+  "name": "MekanismForFabric: Additions",
+  "description": "Additions module for Mekanism, contains things that don't quite fit in the other modules.",
   "authors": [
     "Erfinderlabyrinth",
     "skippyall",
@@ -29,7 +29,7 @@
       "mekanism.tools.client.ToolsClientRegistration"
     ],
     "main": [
-      "mekanism.tools.common.MekanismTools"
+      "mekanism.additions.common.MekanismAdditions"
     ],
     "fabric-datagen": [
       "mekanism.tools.common.ToolsDataGenerator"
@@ -39,8 +39,8 @@
     ]
   },
   "mixins": [
-    "mekanismtools.mixins.json",
-    "mekanismtools-client.mixins.json"
+    "mekanismadditions.mixins.json",
+    "mekanismadditions-client.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",

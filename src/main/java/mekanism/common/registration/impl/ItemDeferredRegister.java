@@ -73,6 +73,12 @@ public class ItemDeferredRegister extends WrappedDeferredRegister<Item> {
         return registeredItem;
     }
 
+    public <ENTITY extends Mob> ItemRegistryObject<SpawnEggItem> registerSpawnEgg(EntityTypeRegistryObject<ENTITY> registryObject,
+                                                                                  int primaryColor, int secondaryColor) {
+        return register(registryObject.getRegistryName().withSuffix("_spawn_egg"), props -> new SpawnEggItem(registryObject.getEntityType(), primaryColor,
+                secondaryColor, props));
+    }
+
     public <ENTITY extends Mob> ItemRegistryObject<SpawnEggItem> registerSpawnEgg(ResourceLocation id, EntityType<ENTITY> entityType,
                                                                                   int primaryColor, int secondaryColor) {
         return register(id, props -> new SpawnEggItem(entityType, primaryColor,

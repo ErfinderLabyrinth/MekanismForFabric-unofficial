@@ -13,4 +13,8 @@ public class AdditionsSounds {
     public static final SoundEventDeferredRegister SOUND_EVENTS = new SoundEventDeferredRegister(MekanismAdditions.MODID);
 
     public static final SoundEventRegistryObject<SoundEvent> POP = SOUND_EVENTS.register("entity.balloon.pop");
+
+    public static void register() {
+
+    }
 }

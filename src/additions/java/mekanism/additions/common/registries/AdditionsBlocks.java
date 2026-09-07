@@ -99,4 +99,6 @@ public class AdditionsBlocks {
           String blockTypeSuffix, EnumColor color) {
         return BLOCKS.register(color.getRegistryPrefix() + blockTypeSuffix, () -> blockCreator.apply(color), ItemBlockColoredName::new);
     }
+
+    public static void register() {}
 }

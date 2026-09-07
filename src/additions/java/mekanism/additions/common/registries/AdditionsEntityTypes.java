@@ -30,4 +30,8 @@ public class AdditionsEntityTypes {
     public static final EntityTypeRegistryObject<EntityBabyWitherSkeleton> BABY_WITHER_SKELETON = ENTITY_TYPES.register("baby_wither_skeleton", EntityType.Builder.of(EntityBabyWitherSkeleton::new, MobCategory.MONSTER).fireImmune().sized(0.7F, 2.4F), AbstractSkeleton::createAttributes);
     public static final EntityTypeRegistryObject<EntityBalloon> BALLOON = ENTITY_TYPES.register("balloon", EntityType.Builder.of(EntityBalloon::new, MobCategory.MISC).sized(0.4F, 0.45F));
     public static final EntityTypeRegistryObject<EntityObsidianTNT> OBSIDIAN_TNT = ENTITY_TYPES.register("obsidian_tnt", EntityType.Builder.of(EntityObsidianTNT::new, MobCategory.MISC).fireImmune().sized(0.98F, 0.98F));
+
+    public static void register() {
+
+    }
 }
