@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 @MethodsReturnNonnullByDefault
 public abstract class BaseMekanismMaterial extends IItemTierHelper implements IArmorMaterialHelper, IPaxelMaterial {
 
+    public abstract String getConfigCommentName();
     @Nullable
     public abstract TagKey<Block> getTag();//Force this to be implemented
 

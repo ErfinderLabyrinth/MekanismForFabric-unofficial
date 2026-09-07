@@ -2,6 +2,7 @@ package mekanism.common.config;
 
 public interface IMekanismConfig {
 
+    @Deprecated(forRemoval = true)
     String getFileName();
 
     @Deprecated(forRemoval = true)

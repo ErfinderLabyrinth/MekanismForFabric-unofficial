@@ -15,11 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
@@ -42,8 +38,8 @@ public class ItemMekanismPaxel extends AxeItem implements IHasRepairType {
         this.material = material;
     }
 
-    public ItemMekanismPaxel(VanillaPaxelMaterialCreator material, Item.Properties properties) {
-        super(material.getVanillaTier(), material.getPaxelDamage(), material.getPaxelAtkSpeed(), properties.durability(material.getPaxelMaxUses()));
+    public ItemMekanismPaxel(VanillaPaxelMaterialCreator material, Tier tier, Item.Properties properties) {
+        super(tier, material.getPaxelDamage(), material.getPaxelAtkSpeed(), properties.durability(material.getPaxelMaxUses()));
         this.material = material;
         //Don't add the material's damage as a listener as the vanilla component is not configurable
     }

@@ -7,20 +7,9 @@ import mekanism.additions.common.entity.baby.BabyType;
 import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.api.providers.IEntityTypeProvider;
 import mekanism.common.config.BaseMekanismConfig;
-import mekanism.common.config.IMekanismConfig;
-import mekanism.common.config.value.CachedBooleanValue;
-import mekanism.common.config.value.CachedDoubleValue;
-import mekanism.common.config.value.CachedFloatValue;
-import mekanism.common.config.value.CachedIntValue;
-import mekanism.common.config.value.CachedResourceLocationListValue;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.config.ModConfig.Type;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class AdditionsConfig extends BaseMekanismConfig {
     public final int obsidianTNTDelay = 100;
@@ -39,14 +28,6 @@ public class AdditionsConfig extends BaseMekanismConfig {
 
     private void addBabyTypeConfig(BabyType type, IEntityTypeProvider entityTypeProvider, IEntityTypeProvider parentTypeProvider) {
         spawnConfigs.put(type, new SpawnConfig(entityTypeProvider, parentTypeProvider));
-    }
-
-    public void setTypeProviders() {
-        for(Map.Entry<BabyType, SpawnConfig> entry : spawnConfigs) {
-            entry.getValue().entityTypeProvider = switch (entry.getKey()) {
-
-            }
-        }
     }
 
     @Override

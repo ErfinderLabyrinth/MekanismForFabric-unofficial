@@ -1,20 +1,25 @@
 package mekanism.additions.common.config;
 
-import mekanism.common.config.MekanismConfigHelper;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingContext;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 
 public class MekanismAdditionsConfig {
 
     private MekanismAdditionsConfig() {
     }
 
-    public static final AdditionsConfig additions = new AdditionsConfig();
-    public static final AdditionsClientConfig client = new AdditionsClientConfig();
+    public static AdditionsConfig additions = new AdditionsConfig();
+    public static AdditionsClientConfig additionsClient = new AdditionsClientConfig();
 
-    public static void registerConfigs(ModLoadingContext modLoadingContext) {
-        ModContainer modContainer = modLoadingContext.getActiveContainer();
-        MekanismConfigHelper.registerConfig(modContainer, client);
-        MekanismConfigHelper.registerConfig(modContainer, additions);
+    public static void registerClientConfigs() {
+        AutoConfig.register(AdditionsClientConfig.class, GsonConfigSerializer::new);
+
+        additionsClient = AutoConfig.getConfigHolder(AdditionsClientConfig.class).getConfig();
+    }
+
+    public static void registerConfig() {
+        AutoConfig.register(AdditionsConfig.class, GsonConfigSerializer::new);
+
+        additions = AutoConfig.getConfigHolder(AdditionsConfig.class).getConfig();
     }
 }

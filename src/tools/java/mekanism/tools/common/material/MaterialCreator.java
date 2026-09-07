@@ -9,9 +9,7 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
-public class MaterialCreator extends BaseMekanismMaterial {
-    public transient BaseMekanismMaterial fallBack;
-
+public class MaterialCreator {
     private final int shieldDurability;
     public final float swordDamage;
     public final float swordAtkSpeed;
@@ -44,7 +42,6 @@ public class MaterialCreator extends BaseMekanismMaterial {
     public final int helmetArmor;
 
     public MaterialCreator(BaseMekanismMaterial materialDefaults) {
-        fallBack = materialDefaults;
         attackDamage = materialDefaults.getAttackDamageBonus();
         shieldDurability = materialDefaults.getShieldDurability();
         swordDamage = materialDefaults.getSwordDamage();
@@ -77,109 +74,78 @@ public class MaterialCreator extends BaseMekanismMaterial {
         helmetArmor = materialDefaults.getDefenseForType(ArmorItem.Type.HELMET);
     }
 
-    @Override
     public int getShieldDurability() {
         return shieldDurability;
     }
 
-    @Override
     public float getSwordDamage() {
         return swordDamage;
     }
 
-    @Override
     public float getSwordAtkSpeed() {
         return swordAtkSpeed;
     }
 
-    @Override
     public float getShovelDamage() {
         return shovelDamage;
     }
 
-    @Override
     public float getShovelAtkSpeed() {
         return shovelAtkSpeed;
     }
 
-    @Override
     public float getAxeDamage() {
         return axeDamage;
     }
 
-    @Override
     public float getAxeAtkSpeed() {
         return axeAtkSpeed;
     }
 
-    @Override
     public float getPickaxeDamage() {
         return pickaxeDamage;
     }
 
-    @Override
     public float getPickaxeAtkSpeed() {
         return pickaxeAtkSpeed;
     }
 
-    @Override
     public float getHoeDamage() {
         return hoeDamage;
     }
 
-    @Override
     public float getHoeAtkSpeed() {
         return hoeAtkSpeed;
     }
 
-    @Override
     public int getPaxelMaxUses() {
         return paxelMaxUses;
     }
 
-    @Override
     public float getPaxelEfficiency() {
         return paxelEfficiency;
     }
 
-    @Override
     public float getPaxelDamage() {
         return paxelDamage;
     }
 
-    @Override
     public float getPaxelAtkSpeed() {
         return paxelAtkSpeed;
     }
 
-    @Override
     public int getUses() {
         return toolMaxUses;
     }
 
-    @Override
     public float getSpeed() {
         return efficiency;
     }
 
-    @Override
     public float getAttackDamageBonus() {
         return attackDamage;
     }
 
-    @Override
-    @Deprecated
-    public int getLevel() {
-        return fallBack.getLevel();
-    }
-
-    @Nullable
-    @Override
-    public TagKey<Block> getTag() {
-        return fallBack.getTag();
-    }
-
-    @Override
     public int getDurabilityForType(ArmorItem.Type armorType) {
         return switch (armorType) {
             case BOOTS -> bootDurability;
@@ -189,7 +155,6 @@ public class MaterialCreator extends BaseMekanismMaterial {
         };
     }
 
-    @Override
     public int getDefenseForType(ArmorItem.Type armorType) {
         return switch (armorType) {
             case BOOTS -> bootArmor;
@@ -199,17 +164,10 @@ public class MaterialCreator extends BaseMekanismMaterial {
         };
     }
 
-    @Override
     public int getCommonEnchantability() {
         return enchantability;
     }
 
-    @Override
-    public boolean burnsInFire() {
-        return fallBack.burnsInFire();
-    }
-
-    @Override
     public float getToughness() {
         return toughness;
     }
@@ -242,12 +200,10 @@ public class MaterialCreator extends BaseMekanismMaterial {
         return fallBack.getRegistryPrefix();
     }
 
-    @Override
     public int getPaxelEnchantability() {
         return paxelEnchantability;
     }
 
-    @Override
     public float getKnockbackResistance() {
         return knockbackResistance;
     }

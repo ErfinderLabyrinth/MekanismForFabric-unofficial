@@ -1,6 +1,7 @@
 package mekanism.tools.common.item;
 
 import mekanism.tools.common.IHasRepairType;
+import mekanism.tools.common.item.tier.MekanismTiers;
 import mekanism.tools.common.material.MaterialCreator;
 import mekanism.tools.common.util.ToolsUtils;
 import net.minecraft.network.chat.Component;
@@ -19,14 +20,14 @@ public class ItemMekanismArmor extends ArmorItem implements IHasRepairType {
 
     private final MaterialCreator material;
 
-    public ItemMekanismArmor(MaterialCreator material, ArmorItem.Type armorType, Item.Properties properties) {
+    public ItemMekanismArmor(MekanismTiers material, ArmorItem.Type armorType, Item.Properties properties) {
         super(material, armorType, properties.durability(material.getDurabilityForType(armorType)));
         this.material = material;
         int armorConfig = switch (armorType) {
-            case BOOTS -> material.bootArmor;
-            case LEGGINGS -> material.leggingArmor;
-            case CHESTPLATE -> material.chestplateArmor;
-            case HELMET -> material.helmetArmor;
+            case BOOTS -> material.getBootArmor();
+            case LEGGINGS -> material.getLeggingArmor();
+            case CHESTPLATE -> material.getChestplateArmor();
+            case HELMET -> material.getHelmetArmor();
         };
     }
 

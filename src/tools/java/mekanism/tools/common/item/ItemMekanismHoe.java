@@ -1,6 +1,7 @@
 package mekanism.tools.common.item;
 
 import mekanism.tools.common.IHasRepairType;
+import mekanism.tools.common.item.tier.MekanismTiers;
 import mekanism.tools.common.material.MaterialCreator;
 import mekanism.tools.common.util.ToolsUtils;
 import net.minecraft.network.chat.Component;
@@ -18,9 +19,9 @@ import java.util.List;
 
 public class ItemMekanismHoe extends HoeItem implements IHasRepairType {
 
-    private final MaterialCreator material;
+    private final MekanismTiers material;
 
-    public ItemMekanismHoe(MaterialCreator material, Item.Properties properties) {
+    public ItemMekanismHoe(MekanismTiers material, Item.Properties properties) {
         super(material, (int) material.getHoeDamage(), material.getHoeAtkSpeed(), properties.durability(material.getUses()));
         this.material = material;
     }

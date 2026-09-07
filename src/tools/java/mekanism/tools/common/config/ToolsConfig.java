@@ -65,22 +65,6 @@ public class ToolsConfig extends BaseMekanismConfig {
         steel = new MaterialCreator(new SteelMaterialDefaults());
     }
 
-    public void resetFallbacks() {
-        wood.fallback = new WoodPaxelMaterialDefaults();
-        stone.fallback = new StonePaxelMaterialDefaults();
-        iron.fallback = new IronPaxelMaterialDefaults();
-        diamond.fallback = new DiamondPaxelMaterialDefaults();
-        gold.fallback = new GoldPaxelMaterialDefaults();
-        netherite.fallback = new NetheritePaxelMaterialDefaults();
-
-        bronze.fallBack = new BronzeMaterialDefaults();
-        lapisLazuli.fallBack = new LapisLazuliMaterialDefaults();
-        osmium.fallBack = new OsmiumMaterialDefaults();
-        refinedGlowstone.fallBack = new RefinedGlowstoneMaterialDefaults();
-        refinedObsidian.fallBack = new RefinedObsidianMaterialDefaults();
-        steel.fallBack = new SteelMaterialDefaults();
-    }
-
     @Override
     public String getFileName() {
         return "tools";

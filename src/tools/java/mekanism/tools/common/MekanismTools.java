@@ -7,6 +7,7 @@ import mekanism.common.Mekanism;
 import mekanism.common.base.IModModule;
 import mekanism.common.lib.Version;
 import mekanism.tools.common.config.MekanismToolsConfig;
+import mekanism.tools.common.item.tier.MekanismTiers;
 import mekanism.tools.common.material.BaseMekanismMaterial;
 import mekanism.tools.common.registries.ToolsCreativeTabs;
 import mekanism.tools.common.registries.ToolsItems;
@@ -50,8 +51,8 @@ public class MekanismTools implements IModModule, ModInitializer {
 
     private void commonSetup() {
         ToolsTags.init();
-        registerTiers(MekanismToolsConfig.tools.bronze, MekanismToolsConfig.tools.lapisLazuli, MekanismToolsConfig.tools.osmium, MekanismToolsConfig.tools.steel,
-              MekanismToolsConfig.tools.refinedGlowstone, MekanismToolsConfig.tools.refinedObsidian);
+        registerTiers(MekanismTiers.BRONZE, MekanismTiers.LAPIS_LAZULI, MekanismTiers.OSMIUM, MekanismTiers.STEEL,
+                MekanismTiers.REFINED_OBSIDIAN, MekanismTiers.REFINED_OBSIDIAN);
         Mekanism.logger.info("Loaded 'Mekanism: Tools' module.");
     }
 
