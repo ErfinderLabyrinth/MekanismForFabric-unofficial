@@ -6,7 +6,6 @@ import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.GuiSideHolder;
 import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.gui.element.tab.GuiSecurityTab;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.inventory.container.entity.IEntityContainer;

@@ -3,7 +3,6 @@ package mekanism.common.lib.frequency;
 import mekanism.api.IFrequency;
 import mekanism.api.NBTConstants;
 import mekanism.api.security.SecurityMode;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.NetworkUtil;

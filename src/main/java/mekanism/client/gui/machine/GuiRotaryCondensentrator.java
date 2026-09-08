@@ -14,7 +14,6 @@ import mekanism.client.gui.element.progress.IProgressInfoHandler.IBooleanProgres
 import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
 import mekanism.client.jei.MekanismJEIRecipeType;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.inventory.warning.WarningTracker.WarningType;

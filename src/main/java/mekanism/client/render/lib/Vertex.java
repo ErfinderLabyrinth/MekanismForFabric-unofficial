@@ -1,6 +1,5 @@
 package mekanism.client.render.lib;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import mekanism.common.lib.Color;
 import net.minecraft.client.renderer.texture.OverlayTexture;

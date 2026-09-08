@@ -1,12 +1,7 @@
 package mekanism.common.lib.transmitter.acceptor;
 
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.energy.IStrictEnergyHandler;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.content.network.transmitter.Transmitter;
-import mekanism.common.integration.energy.EnergyCompatUtils;
-import mekanism.common.integration.energy.IEnergyCompat;
-import mekanism.common.integration.energy.StrictEnergyCompat;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

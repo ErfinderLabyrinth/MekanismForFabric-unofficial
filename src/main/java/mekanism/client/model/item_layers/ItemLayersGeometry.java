@@ -2,7 +2,7 @@ package mekanism.client.model.item_layers;
 
 import mekanism.client.model.CustomGeometry;
 
-import java.util.*;
+import java.util.List;
 
 public class ItemLayersGeometry extends CustomGeometry {
     List<Integer> fullLightLayers;

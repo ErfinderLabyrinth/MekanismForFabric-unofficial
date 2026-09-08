@@ -1,7 +1,5 @@
 package mekanism.additions.common.world.modifier;
 
-import java.util.List;
-
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.config.AdditionsConfig;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
@@ -17,6 +15,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 
+import java.util.List;
+
 public class BabyEntitySpawnBiomeModifier {
     public static void modify(BabyType babyType, BiomeSelectionContext biomeSelectionContext, BiomeModificationContext biomeModificationContext) {
         AdditionsConfig.SpawnConfig spawnConfig = MekanismAdditionsConfig.additions.getConfig(babyType);
@@ -25,11 +25,11 @@ public class BabyEntitySpawnBiomeModifier {
             // but we run before after everything to make it easier for another mod to remove us
             ResourceLocation biomeName = biomeSelectionContext.getBiomeKey().location();
             if (!spawnConfig.biomeBlackList.contains(biomeName)) {
-                EntityType<?> parent = spawnConfig.parentTypeProvider.getEntityType();
+                EntityType<?> parent = babyType.getParentTypeProvider().getEntityType();
                 BiomeModificationContext.SpawnSettingsContext mobSpawnSettings = biomeModificationContext.getSpawnSettings();
                 MobSpawnSettings previousSettings = biomeSelectionContext.getBiome().getMobSettings();
                 List<MobSpawnSettings.SpawnerData> monsterSpawns = previousSettings.getMobs(MobCategory.MONSTER).unwrap();
-                for (MobSpawnSettings.SpawnerData spawner : spawnConfig.getSpawnersToAdd(monsterSpawns)) {
+                for (MobSpawnSettings.SpawnerData spawner : babyType.getSpawnersToAdd(monsterSpawns)) {
                     mobSpawnSettings.addSpawn(MobCategory.MONSTER, spawner);
                     MobSpawnSettings.MobSpawnCost parentCost = previousSettings.getMobSpawnCost(parent);
                     if (parentCost == null) {

@@ -1,10 +1,7 @@
 package mekanism.common.util;
 
 import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.energy.IStrictEnergyHandler;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.content.network.distribution.EnergyAcceptorTarget;
-import mekanism.common.integration.energy.EnergyCompatUtils;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;

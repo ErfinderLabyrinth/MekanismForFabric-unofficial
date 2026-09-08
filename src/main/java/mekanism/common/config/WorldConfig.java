@@ -36,16 +36,6 @@ public class WorldConfig extends BaseMekanismConfig {
         //configSpec = builder.build();
     }
 
-    @Override
-    public String getFileName() {
-        return "world";
-    }
-
-    @Override
-    public boolean addToContainer() {
-        return false;
-    }
-
     public OreConfig getOreConfig(OreType oreType) {
         return ores.get(oreType);
         //return new OreVeinConfig(() -> false, 0, 0, 0, new ConfigurableHeightRange(() -> HeightShape.UNIFORM, new ConfigurableVerticalAnchor(() -> AnchorType.ABOVE_BOTTOM, () -> 0), new ConfigurableVerticalAnchor(() -> AnchorType.ABOVE_BOTTOM, () -> 0), () -> 0));

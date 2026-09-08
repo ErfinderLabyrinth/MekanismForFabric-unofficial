@@ -5,7 +5,6 @@ import mekanism.api.text.EnumColor;
 import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.IGuiWrapper;
-import mekanism.common.Mekanism;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.network.to_server.PacketConfigurationUpdate;
 import mekanism.common.network.to_server.PacketConfigurationUpdate.ConfigurationPacket;

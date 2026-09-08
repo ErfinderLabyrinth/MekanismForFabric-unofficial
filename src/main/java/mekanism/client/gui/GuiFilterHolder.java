@@ -6,7 +6,6 @@ import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.button.FilterButton;
 import mekanism.client.gui.element.button.MovableFilterButton;
 import mekanism.client.gui.element.scroll.GuiScrollBar;
-import mekanism.common.Mekanism;
 import mekanism.common.content.filter.*;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.network.to_server.PacketGuiInteract;

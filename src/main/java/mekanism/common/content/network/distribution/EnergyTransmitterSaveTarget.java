@@ -1,6 +1,5 @@
 package mekanism.common.content.network.distribution;
 
-import mekanism.api.math.FloatingLong;
 import mekanism.common.content.network.transmitter.UniversalCable;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;

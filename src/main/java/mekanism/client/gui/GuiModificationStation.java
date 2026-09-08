@@ -8,7 +8,6 @@ import mekanism.client.gui.element.progress.GuiProgress;
 import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.scroll.GuiModuleScrollList;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.network.to_server.PacketRemoveModule;

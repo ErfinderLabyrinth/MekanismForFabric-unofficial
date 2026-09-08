@@ -5,7 +5,6 @@ import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInsetElement;
 import mekanism.client.render.MekanismRenderer;
-import mekanism.common.Mekanism;
 import mekanism.common.network.to_server.PacketGuiInteract;
 import mekanism.common.network.to_server.PacketGuiInteract.GuiInteraction;
 import mekanism.common.tile.base.TileEntityMekanism;

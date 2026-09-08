@@ -4,7 +4,6 @@ import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.button.TranslationButton;
 import mekanism.client.gui.element.text.GuiTextField;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.inventory.container.SelectedWindowData.WindowType;

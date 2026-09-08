@@ -6,7 +6,6 @@ import mekanism.api.security.ISecurityUtils;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.entity.RobitPrideSkinData;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.registries.MekanismRobitSkins;
 import mekanism.common.util.NetworkUtil;

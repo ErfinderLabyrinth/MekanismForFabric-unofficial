@@ -3,7 +3,6 @@ package mekanism.common.content.gear.mekasuit;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;

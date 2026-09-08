@@ -2,7 +2,8 @@ package mekanism.client.model.obj;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 public final class ObjectRenderState {
 

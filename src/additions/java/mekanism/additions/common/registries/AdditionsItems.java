@@ -1,7 +1,5 @@
 package mekanism.additions.common.registries;
 
-import java.util.EnumMap;
-import java.util.Map;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.item.ItemBalloon;
 import mekanism.additions.common.item.ItemWalkieTalkie;
@@ -10,6 +8,9 @@ import mekanism.common.registration.impl.ItemDeferredRegister;
 import mekanism.common.registration.impl.ItemRegistryObject;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.world.item.SpawnEggItem;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class AdditionsItems {
 

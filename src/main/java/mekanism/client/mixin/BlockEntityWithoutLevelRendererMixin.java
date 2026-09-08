@@ -3,7 +3,6 @@ package mekanism.client.mixin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.client.render.armor.ISpecialGearGetter;
-import mekanism.common.item.ItemRobit;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemDisplayContext;

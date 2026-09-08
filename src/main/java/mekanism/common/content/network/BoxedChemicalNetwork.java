@@ -1,6 +1,9 @@
 package mekanism.common.content.network;
 
-import mekanism.api.chemical.*;
+import mekanism.api.chemical.Chemical;
+import mekanism.api.chemical.ChemicalStack;
+import mekanism.api.chemical.ChemicalType;
+import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.infuse.IInfusionTank;

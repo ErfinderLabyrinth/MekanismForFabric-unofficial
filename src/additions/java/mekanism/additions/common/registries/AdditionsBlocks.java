@@ -1,21 +1,9 @@
 package mekanism.additions.common.registries;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.block.BlockGlowPanel;
 import mekanism.additions.common.block.BlockObsidianTNT;
-import mekanism.additions.common.block.plastic.BlockPlastic;
-import mekanism.additions.common.block.plastic.BlockPlasticFence;
-import mekanism.additions.common.block.plastic.BlockPlasticFenceGate;
-import mekanism.additions.common.block.plastic.BlockPlasticRoad;
-import mekanism.additions.common.block.plastic.BlockPlasticSlab;
-import mekanism.additions.common.block.plastic.BlockPlasticStairs;
-import mekanism.additions.common.block.plastic.BlockPlasticTransparent;
-import mekanism.additions.common.block.plastic.BlockPlasticTransparentSlab;
-import mekanism.additions.common.block.plastic.BlockPlasticTransparentStairs;
+import mekanism.additions.common.block.plastic.*;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.common.block.interfaces.IColoredBlock;
@@ -27,6 +15,11 @@ import mekanism.common.util.EnumUtils;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class AdditionsBlocks {
 

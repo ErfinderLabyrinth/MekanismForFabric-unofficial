@@ -3,7 +3,6 @@ package mekanism.common.item;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.ChemicalTankBuilder;
-import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.pigment.Pigment;

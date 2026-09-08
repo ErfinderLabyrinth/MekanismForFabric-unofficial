@@ -121,14 +121,4 @@ public class StorageConfig extends BaseMekanismConfig {
 //        builder.pop();
 //        configSpec = builder.build();
     }
-
-    @Override
-    public String getFileName() {
-        return "machine-storage";
-    }
-
-    @Override
-    public boolean addToContainer() {
-        return false;
-    }
 }

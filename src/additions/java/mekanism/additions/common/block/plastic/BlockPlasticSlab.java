@@ -1,7 +1,5 @@
 package mekanism.additions.common.block.plastic;
 
-import java.util.Optional;
-import java.util.function.UnaryOperator;
 import mekanism.additions.common.block.IStateExtendedFluidLoggable;
 import mekanism.api.text.EnumColor;
 import mekanism.common.block.interfaces.IColoredBlock;
@@ -22,6 +20,9 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public class BlockPlasticSlab extends SlabBlock implements IColoredBlock, IStateExtendedFluidLoggable {
 

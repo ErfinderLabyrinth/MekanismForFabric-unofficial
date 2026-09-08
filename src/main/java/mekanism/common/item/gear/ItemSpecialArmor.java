@@ -32,9 +32,9 @@ public abstract class ItemSpecialArmor extends ArmorItem implements CustomArmorT
 //        return isEnchantable(stack) && super.canApplyAtEnchantingTable(stack, enchantment);
 //    }
 
-    protected boolean areCapabilityConfigsLoaded() {
-        return true;
-    }
+//    protected boolean areCapabilityConfigsLoaded() {
+//        return true;
+//    }
 
 //TODO add support
 //    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {

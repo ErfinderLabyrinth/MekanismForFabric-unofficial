@@ -10,7 +10,6 @@ import mekanism.api.recipes.ingredients.InputIngredient;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
 import mekanism.api.recipes.ingredients.creator.IItemStackIngredientCreator;
 import mekanism.common.Mekanism;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.recipe.ingredient.IMultiIngredient;
 import mekanism.common.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;

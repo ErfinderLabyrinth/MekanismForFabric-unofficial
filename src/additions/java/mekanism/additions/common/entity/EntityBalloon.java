@@ -1,7 +1,5 @@
 package mekanism.additions.common.entity;
 
-import java.util.Optional;
-import java.util.UUID;
 import mekanism.additions.common.AdditionsTags;
 import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.additions.common.registries.AdditionsItems;
@@ -25,26 +23,21 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
-public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData {
+import java.util.Optional;
+import java.util.UUID;
+
+public class EntityBalloon extends Entity {
 
     private static final EntityDataAccessor<Byte> IS_LATCHED = SynchedEntityData.defineId(EntityBalloon.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> LATCHED_X = SynchedEntityData.defineId(EntityBalloon.class, EntityDataSerializers.INT);
@@ -310,10 +303,9 @@ public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData 
         return true;
     }
 
-    @NotNull
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
+        return super.getAddEntityPacket();
     }
 
     @Override
@@ -421,7 +413,7 @@ public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData 
     }
 
     @Override
-    public ItemStack getPickedResult(HitResult target) {
+    public @Nullable ItemStack getPickResult() {
         return AdditionsItems.BALLOONS.get(color).getItemStack();
     }
 }

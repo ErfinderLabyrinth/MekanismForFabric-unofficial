@@ -9,7 +9,6 @@ import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
 import mekanism.common.tier.EnergyCubeTier;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

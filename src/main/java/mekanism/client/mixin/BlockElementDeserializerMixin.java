@@ -2,7 +2,6 @@ package mekanism.client.mixin;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import mekanism.client.mixinhelper.BlockElementExtension;
 import net.minecraft.client.renderer.block.model.BlockElement;

@@ -318,9 +318,4 @@ public class GeneralConfig extends BaseMekanismConfig {
 //        builder.pop();
 //        configSpec = builder.build();
     }
-
-    @Override
-    public String getFileName() {
-        return "general";
-    }
 }

@@ -2,7 +2,6 @@ package mekanism.common.recipe.upgrade.chemical;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTankBuilder;
-import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.ISlurryHandler.IMekanismSlurryHandler;
 import mekanism.api.chemical.slurry.ISlurryTank;

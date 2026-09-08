@@ -9,7 +9,6 @@ import mekanism.common.content.network.FluidNetwork;
 import mekanism.common.lib.transmitter.DynamicBufferedNetwork;
 import mekanism.common.lib.transmitter.DynamicNetwork;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;

@@ -2,8 +2,6 @@ package mekanism.common.inventory.slot.chemical;
 
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.ISlurryTank;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;

@@ -2,7 +2,6 @@ package mekanism.common.content.network;
 
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IMekanismStrictEnergyHandler;
-import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;

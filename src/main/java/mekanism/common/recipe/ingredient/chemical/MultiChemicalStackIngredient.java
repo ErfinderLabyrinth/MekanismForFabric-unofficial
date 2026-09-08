@@ -14,7 +14,6 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
 import mekanism.api.recipes.ingredients.InputIngredient;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.recipe.ingredient.IMultiIngredient;
 import mekanism.common.recipe.ingredient.chemical.ChemicalIngredientDeserializer.IngredientType;
 import mekanism.common.util.NetworkUtil;

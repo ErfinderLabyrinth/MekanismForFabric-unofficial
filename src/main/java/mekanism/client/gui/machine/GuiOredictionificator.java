@@ -9,7 +9,6 @@ import mekanism.client.gui.element.progress.GuiProgress;
 import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.scroll.GuiScrollBar;
 import mekanism.client.gui.element.window.filter.GuiOredictionificatorFilter;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.filter.FilterManager;
 import mekanism.common.content.filter.IFilter;

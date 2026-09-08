@@ -10,6 +10,7 @@ import mekanism.additions.common.loot.AdditionsLootProvider;
 import mekanism.additions.common.recipe.AdditionsRecipeProvider;
 import mekanism.common.BasePackMetadataGenerator;
 import mekanism.common.MekanismDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -19,8 +20,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
-@EventBusSubscriber(modid = MekanismAdditions.MODID, bus = Bus.MOD)
-public class AdditionsDataGenerator {
+public class AdditionsDataGenerator implements DataGeneratorEntrypoint {
 
     private AdditionsDataGenerator() {
     }

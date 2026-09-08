@@ -1,10 +1,8 @@
 package mekanism.client.model.composite;
 
-import mekanism.client.mixinhelper.RenderTypeHolder;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;

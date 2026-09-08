@@ -33,23 +33,21 @@ public class MekanismCreativeTabs {
 
 
     private static void addFilledTanks(CreativeModeTab.Output output, boolean chemical) {
-        if (MekanismConfig.COMMON.general.isLoaded()) {
-            //Fluid Tanks
-            if (MekanismConfig.COMMON.general.prefilledFluidTanks) {
-                int capacity = FluidTankTier.CREATIVE.getStorage();
-                for (Fluid fluid : BuiltInRegistries.FLUID) {
-                    if (fluid.isSource(fluid.defaultFluidState())) {//Only add sources
-                        output.accept(FluidUtils.getForceFilledVariant(MekanismBlocks.CREATIVE_FLUID_TANK.getItemStack(), capacity, () -> fluid));
-                    }
+        //Fluid Tanks
+        if (MekanismConfig.COMMON.general.prefilledFluidTanks) {
+            int capacity = FluidTankTier.CREATIVE.getStorage();
+            for (Fluid fluid : BuiltInRegistries.FLUID) {
+                if (fluid.isSource(fluid.defaultFluidState())) {//Only add sources
+                    output.accept(FluidUtils.getForceFilledVariant(MekanismBlocks.CREATIVE_FLUID_TANK.getItemStack(), capacity, () -> fluid));
                 }
             }
-            if (chemical) {
-                //Chemical Tanks
-                addFilled(() -> MekanismConfig.COMMON.general.prefilledGasTanks, MekanismAPI.gasRegistry(), output);
-                addFilled(() -> MekanismConfig.COMMON.general.prefilledInfusionTanks, MekanismAPI.infuseTypeRegistry(), output);
-                addFilled(() -> MekanismConfig.COMMON.general.prefilledPigmentTanks, MekanismAPI.pigmentRegistry(), output);
-                addFilled(() -> MekanismConfig.COMMON.general.prefilledSlurryTanks, MekanismAPI.slurryRegistry(), output);
-            }
+        }
+        if (chemical) {
+            //Chemical Tanks
+            addFilled(() -> MekanismConfig.COMMON.general.prefilledGasTanks, MekanismAPI.gasRegistry(), output);
+            addFilled(() -> MekanismConfig.COMMON.general.prefilledInfusionTanks, MekanismAPI.infuseTypeRegistry(), output);
+            addFilled(() -> MekanismConfig.COMMON.general.prefilledPigmentTanks, MekanismAPI.pigmentRegistry(), output);
+            addFilled(() -> MekanismConfig.COMMON.general.prefilledSlurryTanks, MekanismAPI.slurryRegistry(), output);
         }
     }
 

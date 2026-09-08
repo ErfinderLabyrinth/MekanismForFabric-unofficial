@@ -7,7 +7,6 @@ import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.bar.GuiTankBar.TankInfoProvider;
 import mekanism.client.jei.interfaces.IJEIIngredientHelper;
 import mekanism.client.render.MekanismRenderer;
-import mekanism.common.Mekanism;
 import mekanism.common.item.ItemGaugeDropper;
 import mekanism.common.network.to_server.PacketDropperUse;
 import mekanism.common.network.to_server.PacketDropperUse.DropperAction;

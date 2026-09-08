@@ -13,7 +13,6 @@ import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.scroll.GuiUpgradeScrollList;
 import mekanism.client.gui.element.slot.GuiVirtualSlot;
 import mekanism.client.gui.element.slot.SlotType;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.SelectedWindowData.WindowType;

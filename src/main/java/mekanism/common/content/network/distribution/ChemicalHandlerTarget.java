@@ -2,7 +2,6 @@ package mekanism.common.content.network.distribution;
 
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.IChemicalHandler;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;

@@ -12,7 +12,6 @@ import mekanism.client.gui.element.tab.GuiQIOFrequencyTab;
 import mekanism.client.gui.element.window.filter.qio.GuiQIOItemStackFilter;
 import mekanism.client.gui.element.window.filter.qio.GuiQIOModIDFilter;
 import mekanism.client.gui.element.window.filter.qio.GuiQIOTagFilter;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.base.TagCache;
 import mekanism.common.content.filter.*;

@@ -2,12 +2,8 @@ package mekanism.common.lib.transmitter.acceptor;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.gas.IGasHandler;
-import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.InfuseType;
-import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.Pigment;
-import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.chemical.BoxedChemicalHandler;

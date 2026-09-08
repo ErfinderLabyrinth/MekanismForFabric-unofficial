@@ -1,6 +1,5 @@
 package mekanism.additions.common.block.plastic;
 
-import java.util.Optional;
 import mekanism.additions.common.block.IStateExtendedFluidLoggable;
 import mekanism.api.text.EnumColor;
 import mekanism.common.block.interfaces.IColoredBlock;
@@ -20,6 +19,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class BlockPlasticFence extends FenceBlock implements IColoredBlock, IStateExtendedFluidLoggable {
 
@@ -86,12 +87,5 @@ public class BlockPlasticFence extends FenceBlock implements IColoredBlock, ISta
     public Optional<SoundEvent> getPickupSound() {
         //Manually declare which getPickupSound we want to be using
         return IStateExtendedFluidLoggable.super.getPickupSound();
-    }
-
-    @NotNull
-    @Override
-    public Optional<SoundEvent> getPickupSound(BlockState state) {
-        //Manually declare which getPickupSound we want to be using
-        return IStateExtendedFluidLoggable.super.getPickupSound(state);
     }
 }

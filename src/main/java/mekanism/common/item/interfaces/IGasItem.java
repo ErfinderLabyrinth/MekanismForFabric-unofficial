@@ -2,7 +2,6 @@ package mekanism.common.item.interfaces;
 
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.gas.IGasHandler.IMekanismGasHandler;
 import mekanism.common.capabilities.Capabilities;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;

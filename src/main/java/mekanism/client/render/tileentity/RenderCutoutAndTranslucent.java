@@ -2,7 +2,6 @@ package mekanism.client.render.tileentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.common.tile.base.TileEntityMekanism;
-import mekanism.common.tile.machine.TileEntityDigitalMiner;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;

@@ -2,7 +2,6 @@ package mekanism.client.gui.qio;
 
 import mekanism.client.MekanismClient;
 import mekanism.client.gui.element.GuiScreenSwitch;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.network.to_server.PacketGuiInteract;

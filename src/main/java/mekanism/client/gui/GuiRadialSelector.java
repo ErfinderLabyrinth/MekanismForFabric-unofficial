@@ -10,7 +10,6 @@ import mekanism.api.radial.mode.IRadialMode;
 import mekanism.api.text.EnumColor;
 import mekanism.client.MekanismClient;
 import mekanism.client.render.lib.ScrollIncrementer;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.radial.IGenericRadialModeItem;

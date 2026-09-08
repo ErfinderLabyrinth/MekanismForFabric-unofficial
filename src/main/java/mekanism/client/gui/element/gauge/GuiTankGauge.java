@@ -4,7 +4,6 @@ import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.jei.interfaces.IJEIIngredientHelper;
-import mekanism.common.Mekanism;
 import mekanism.common.item.ItemGaugeDropper;
 import mekanism.common.network.to_server.PacketDropperUse;
 import mekanism.common.network.to_server.PacketDropperUse.DropperAction;

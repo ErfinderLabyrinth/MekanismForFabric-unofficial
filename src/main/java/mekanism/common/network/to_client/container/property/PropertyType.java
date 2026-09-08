@@ -13,7 +13,6 @@ import mekanism.common.inventory.container.sync.chemical.SyncableInfusionStack;
 import mekanism.common.inventory.container.sync.chemical.SyncablePigmentStack;
 import mekanism.common.inventory.container.sync.chemical.SyncableSlurryStack;
 import mekanism.common.lib.frequency.Frequency;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.to_client.container.property.chemical.GasStackPropertyData;
 import mekanism.common.network.to_client.container.property.chemical.InfusionStackPropertyData;
 import mekanism.common.network.to_client.container.property.chemical.PigmentStackPropertyData;

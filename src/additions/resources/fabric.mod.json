@@ -26,16 +26,16 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "mekanism.tools.client.ToolsClientRegistration"
+      "mekanism.additions.client.AdditionsClient"
     ],
     "main": [
       "mekanism.additions.common.MekanismAdditions"
     ],
     "fabric-datagen": [
-      "mekanism.tools.common.ToolsDataGenerator"
+      "mekanism.additions.common.AdditionsDataGenerator"
     ],
     "modmenu": [
-      "mekanism.tools.client.integration.modmenu.ToolsModMenuIntegration"
+      "mekanism.additions.client.integration.modmenu.ToolsModMenuIntegration"
     ]
   },
   "mixins": [

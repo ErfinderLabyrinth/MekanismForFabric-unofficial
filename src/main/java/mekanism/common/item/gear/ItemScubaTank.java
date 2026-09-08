@@ -4,7 +4,6 @@ import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.providers.IGasProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.client.render.RenderPropertiesProvider;

@@ -13,7 +13,6 @@ import mekanism.client.gui.element.slot.GuiSlot;
 import mekanism.client.gui.element.slot.SlotType;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
 import mekanism.client.gui.element.tab.GuiVisualsTab;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.energy.MinerEnergyContainer;
 import mekanism.common.content.miner.MinerFilter;

@@ -15,7 +15,6 @@ import mekanism.client.gui.element.window.filter.miner.GuiMinerItemStackFilter;
 import mekanism.client.gui.element.window.filter.miner.GuiMinerModIDFilter;
 import mekanism.client.gui.element.window.filter.miner.GuiMinerTagFilter;
 import mekanism.client.jei.interfaces.IJEIGhostTarget.IGhostBlockItemConsumer;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.base.TagCache;
 import mekanism.common.config.MekanismConfig;

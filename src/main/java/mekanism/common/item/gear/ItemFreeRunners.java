@@ -84,11 +84,6 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
         return MekanismConfig.CLIENT.client.energyColor;
     }
 
-    @Override
-    protected boolean areCapabilityConfigsLoaded() {
-        return super.areCapabilityConfigsLoaded() && MekanismConfig.COMMON.gear.isLoaded();
-    }
-
 //    @Override
 //    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {
 //        super.gatherCapabilities(capabilities, stack, nbt);

@@ -9,7 +9,6 @@ import mekanism.api.recipes.ingredients.FluidStackIngredient;
 import mekanism.api.recipes.ingredients.InputIngredient;
 import mekanism.api.recipes.ingredients.creator.IFluidStackIngredientCreator;
 import mekanism.common.Mekanism;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.recipe.ingredient.IMultiIngredient;
 import mekanism.common.tags.TagUtils;
 import mekanism.common.util.NetworkUtil;

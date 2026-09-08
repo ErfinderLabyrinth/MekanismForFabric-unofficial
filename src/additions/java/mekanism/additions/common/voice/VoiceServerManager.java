@@ -1,12 +1,14 @@
 package mekanism.additions.common.voice;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import mekanism.additions.common.config.MekanismAdditionsConfig;
+import mekanism.common.Mekanism;
+import net.minecraft.server.MinecraftServer;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Set;
-import mekanism.additions.common.config.MekanismAdditionsConfig;
-import mekanism.common.Mekanism;
 
 public class VoiceServerManager {
 
@@ -16,12 +18,12 @@ public class VoiceServerManager {
     private boolean foundLocal = false;
     private boolean running;
 
-    public void start() {
+    public void start(MinecraftServer server) {
         Mekanism.logger.info("VoiceServer: Starting up server...");
         try {
             running = true;
-            serverSocket = new ServerSocket(MekanismAdditionsConfig.additions.voicePort.get());
-            (listenThread = new ListenThread()).start();
+            serverSocket = new ServerSocket(MekanismAdditionsConfig.additions.voicePort);
+            (listenThread = new ListenThread(server)).start();
         } catch (Exception ignored) {
         }
     }
@@ -73,9 +75,11 @@ public class VoiceServerManager {
     }
 
     private class ListenThread extends Thread {
+        MinecraftServer server;
 
-        private ListenThread() {
+        private ListenThread(MinecraftServer server) {
             super("VoiceServer Listen Thread");
+            this.server = server;
             setDaemon(true);
         }
 
@@ -84,7 +88,7 @@ public class VoiceServerManager {
             while (running) {
                 try {
                     Socket s = serverSocket.accept();
-                    VoiceConnection connection = new VoiceConnection(s);
+                    VoiceConnection connection = new VoiceConnection(s, server);
                     connection.start();
                     connections.add(connection);
                     Mekanism.logger.info("VoiceServer: Accepted new connection.");

@@ -7,7 +7,6 @@ import mekanism.client.gui.element.bar.GuiVerticalPowerBar;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
 import mekanism.client.gui.element.tab.GuiHeatTab;
 import mekanism.client.gui.element.text.GuiTextField;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.network.to_server.PacketGuiSetEnergy;

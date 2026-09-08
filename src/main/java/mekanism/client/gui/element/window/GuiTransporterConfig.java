@@ -12,7 +12,6 @@ import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.gui.element.button.SideDataButton;
 import mekanism.client.gui.element.slot.GuiSlot;
 import mekanism.client.gui.element.slot.SlotType;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.SelectedWindowData.WindowType;

@@ -1,7 +1,5 @@
 package mekanism.common.network;
 
-import mekanism.common.network.to_client.*;
-import mekanism.common.network.to_client.container.PacketUpdateContainer;
 import mekanism.common.network.to_server.*;
 
 public class PacketHandler extends BasePacketHandler {

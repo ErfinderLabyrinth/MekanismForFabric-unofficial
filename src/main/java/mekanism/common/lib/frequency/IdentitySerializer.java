@@ -2,7 +2,6 @@ package mekanism.common.lib.frequency;
 
 import mekanism.api.NBTConstants;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.NetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

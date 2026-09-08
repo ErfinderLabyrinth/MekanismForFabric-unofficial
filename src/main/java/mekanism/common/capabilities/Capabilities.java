@@ -13,8 +13,6 @@ import mekanism.api.heat.IHeatHandler;
 import mekanism.api.radiation.capability.IRadiationEntity;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.merged.IMergedHandler;
-import mekanism.common.integration.energy.EnergyCompatUtils;
-import mekanism.common.item.ItemEnergized;
 import mekanism.common.lib.radiation.capability.DefaultRadiationEntity;
 import mekanism.common.storage.item.ItemStorageHandler;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;

@@ -1,6 +1,5 @@
 package mekanism.common.network.to_client.container.property.list;
 
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;

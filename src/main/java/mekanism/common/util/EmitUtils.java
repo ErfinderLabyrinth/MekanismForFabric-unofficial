@@ -1,8 +1,6 @@
 package mekanism.common.util;
 
 import mekanism.api.functions.TriConsumer;
-import mekanism.api.math.FloatingLong;
-import mekanism.common.lib.distribution.FloatingLongSplitInfo;
 import mekanism.common.lib.distribution.LongSplitInfo;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;

@@ -13,7 +13,6 @@ import mekanism.client.gui.element.slot.SlotType;
 import mekanism.client.gui.element.text.GuiTextField;
 import mekanism.client.gui.element.window.GuiWindow;
 import mekanism.client.jei.interfaces.IJEIGhostTarget.IGhostIngredientConsumer;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.filter.IFilter;
 import mekanism.common.content.transporter.SorterFilter;

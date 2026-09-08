@@ -10,7 +10,6 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class AdditionsTags {
 
@@ -61,7 +60,7 @@ public class AdditionsTags {
         }
 
         private static TagKey<Item> tag(String name) {
-            return ItemTags.create(MekanismAdditions.rl(name));
+            return TagKey.create(Registries.ITEM, MekanismAdditions.rl(name));
         }
     }
 
@@ -97,7 +96,7 @@ public class AdditionsTags {
         }
 
         private static TagKey<Block> tag(String name) {
-            return BlockTags.create(MekanismAdditions.rl(name));
+            return TagKey.create(Registries.BLOCK, MekanismAdditions.rl(name));
         }
     }
 

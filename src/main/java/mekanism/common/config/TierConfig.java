@@ -174,14 +174,4 @@ public class TierConfig extends BaseMekanismConfig {
 //        }
 //        builder.pop();
 //    }
-
-    @Override
-    public String getFileName() {
-        return "tiers";
-    }
-
-    @Override
-    public boolean addToContainer() {
-        return false;
-    }
 }

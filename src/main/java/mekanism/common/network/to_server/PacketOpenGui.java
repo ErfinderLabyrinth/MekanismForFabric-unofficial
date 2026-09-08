@@ -6,7 +6,6 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.ContainerProvider;
 import mekanism.common.inventory.container.ModuleTweakerContainer;
 import mekanism.common.network.IMekanismPacket;
-import mekanism.common.registries.MekanismContainerTypes;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;

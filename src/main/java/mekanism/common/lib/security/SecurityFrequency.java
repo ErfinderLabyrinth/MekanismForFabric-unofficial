@@ -5,7 +5,6 @@ import mekanism.api.security.SecurityMode;
 import mekanism.common.lib.collection.HashList;
 import mekanism.common.lib.frequency.Frequency;
 import mekanism.common.lib.frequency.FrequencyType;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.NetworkUtil;

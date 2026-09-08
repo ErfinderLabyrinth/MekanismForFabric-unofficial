@@ -23,9 +23,4 @@ public class CommonConfig extends BaseMekanismConfig {
 //        builder.pop();
 //        configSpec = builder.build();
     }
-
-    @Override
-    public String getFileName() {
-        return "common";
-    }
 }

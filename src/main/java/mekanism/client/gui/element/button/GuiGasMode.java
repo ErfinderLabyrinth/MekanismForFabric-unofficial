@@ -2,7 +2,6 @@ package mekanism.client.gui.element.button;
 
 import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
-import mekanism.common.Mekanism;
 import mekanism.common.network.to_server.PacketGuiInteract;
 import mekanism.common.network.to_server.PacketGuiInteract.GuiInteraction;
 import mekanism.common.tile.TileEntityChemicalTank.GasMode;

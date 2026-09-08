@@ -2,8 +2,6 @@ package mekanism.common.inventory.slot.chemical;
 
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.IInfusionTank;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
@@ -20,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @NothingNullByDefault

@@ -14,7 +14,6 @@ import mekanism.common.block.attribute.Attributes.AttributeSecurity;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.energy.item.RateLimitEnergyHandler;
 import mekanism.common.capabilities.security.item.ItemStackSecurityObject;
-import mekanism.common.config.MekanismConfig;
 import mekanism.common.storage.item.EnergyItemStorage;
 import mekanism.common.storage.item.ItemStorageHandler;
 import mekanism.common.util.ItemDataUtils;
@@ -147,13 +146,6 @@ public class ItemBlockMekanism<BLOCK extends Block> extends BlockItem implements
     protected boolean exposesEnergyCap(ItemStack stack) {
         //Only expose it if the block can't stack
         return Attribute.has(block, AttributeEnergy.class) && !stack.isStackable();
-    }
-
-    protected boolean areCapabilityConfigsLoaded(ItemStack stack) {
-        if (exposesEnergyCap(stack)) {
-            return MekanismConfig.COMMON.storage.isLoaded() && MekanismConfig.COMMON.usage.isLoaded();
-        }
-        return true;
     }
 
     @Override

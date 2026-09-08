@@ -6,7 +6,6 @@ import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.tab.GuiMatrixTab.MatrixTab;
 import mekanism.client.render.lib.ColorAtlas.ColorRegistryObject;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.network.to_server.PacketGuiButtonPress;
 import mekanism.common.network.to_server.PacketGuiButtonPress.ClickedTileButton;

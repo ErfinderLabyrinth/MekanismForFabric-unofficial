@@ -1,7 +1,6 @@
 package mekanism.common.network.to_client.container.property;
 
 import mekanism.common.inventory.container.MekanismContainer;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.NetworkUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;

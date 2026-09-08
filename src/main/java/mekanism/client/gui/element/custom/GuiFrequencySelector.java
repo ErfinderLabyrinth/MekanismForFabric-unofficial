@@ -16,7 +16,6 @@ import mekanism.client.gui.element.text.BackgroundType;
 import mekanism.client.gui.element.text.GuiTextField;
 import mekanism.client.gui.element.window.GuiConfirmationDialog;
 import mekanism.client.gui.element.window.GuiConfirmationDialog.DialogType;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.item.FrequencyItemContainer;
 import mekanism.common.lib.frequency.*;

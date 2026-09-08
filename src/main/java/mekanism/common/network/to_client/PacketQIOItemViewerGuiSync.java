@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import mekanism.api.MekanismAPI;
 import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.lib.inventory.HashedItem.UUIDAwareHashedItem;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;

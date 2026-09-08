@@ -1,9 +1,7 @@
 package mekanism.common.content.network.distribution;
 
-import com.google.common.primitives.Longs;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;

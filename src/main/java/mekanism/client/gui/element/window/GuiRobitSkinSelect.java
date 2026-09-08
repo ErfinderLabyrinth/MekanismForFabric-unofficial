@@ -6,7 +6,6 @@ import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.button.TranslationButton;
 import mekanism.client.gui.element.scroll.GuiRobitSkinSelectScroll;
 import mekanism.client.gui.robit.GuiRobitMain;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.inventory.container.MekanismContainer;

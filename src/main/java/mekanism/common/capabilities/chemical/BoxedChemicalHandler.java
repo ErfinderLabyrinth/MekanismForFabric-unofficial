@@ -2,16 +2,10 @@ package mekanism.common.capabilities.chemical;
 
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.ChemicalType;
-import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.chemical.gas.Gas;
-import mekanism.api.chemical.gas.IGasHandler;
-import mekanism.api.chemical.infuse.IInfusionHandler;
 import mekanism.api.chemical.infuse.InfuseType;
-import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.Pigment;
-import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.Slurry;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import org.jetbrains.annotations.Nullable;

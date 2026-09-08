@@ -10,7 +10,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public final class ObjBaker {

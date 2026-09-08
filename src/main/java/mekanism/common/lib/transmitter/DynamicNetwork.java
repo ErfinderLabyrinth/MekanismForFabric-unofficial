@@ -5,8 +5,6 @@ import mekanism.api.text.IHasTextComponent;
 import mekanism.common.content.network.transmitter.Transmitter;
 import mekanism.common.lib.transmitter.acceptor.NetworkAcceptorCache;
 import mekanism.common.util.EnumUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;

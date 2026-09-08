@@ -104,3 +104,8 @@ accessible field net/minecraft/tags/TagEntry required Z
 accessible field net/fabricmc/fabric/impl/renderer/VanillaModelEncoder MATERIAL_NO_AO Lnet/fabricmc/fabric/api/renderer/v1/material/RenderMaterial;
 accessible field net/fabricmc/fabric/impl/renderer/VanillaModelEncoder MATERIAL_STANDARD Lnet/fabricmc/fabric/api/renderer/v1/material/RenderMaterial;
 accessible field net/minecraft/client/renderer/item/ItemProperties PROPERTIES Ljava/util/Map;
+accessible method net/minecraft/world/entity/monster/Creeper explodeCreeper ()V
+accessible field net/minecraft/world/entity/monster/Creeper explosionRadius I
+accessible method net/minecraft/world/entity/monster/Creeper spawnLingeringCloud ()V
+accessible field net/minecraft/world/entity/item/PrimedTnt owner Lnet/minecraft/world/entity/LivingEntity;
+accessible method net/minecraft/world/entity/item/PrimedTnt explode ()V

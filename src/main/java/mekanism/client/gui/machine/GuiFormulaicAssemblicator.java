@@ -12,7 +12,6 @@ import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.slot.GuiSlot;
 import mekanism.client.gui.element.slot.SlotType;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.energy.MachineEnergyContainer;
 import mekanism.common.inventory.container.slot.SlotOverlay;

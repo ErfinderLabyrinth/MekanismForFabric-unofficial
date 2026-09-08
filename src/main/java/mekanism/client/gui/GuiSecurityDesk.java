@@ -14,7 +14,6 @@ import mekanism.client.gui.element.slot.GuiSlot;
 import mekanism.client.gui.element.slot.SlotType;
 import mekanism.client.gui.element.text.BackgroundType;
 import mekanism.client.gui.element.text.GuiTextField;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.lib.security.SecurityFrequency;

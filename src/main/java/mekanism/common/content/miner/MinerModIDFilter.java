@@ -5,7 +5,6 @@ import mekanism.common.base.TagCache;
 import mekanism.common.content.filter.FilterType;
 import mekanism.common.content.filter.IModIDFilter;
 import mekanism.common.lib.WildcardMatcher;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.NetworkUtil;
 import mekanism.common.util.RegistryUtils;
 import net.minecraft.nbt.CompoundTag;

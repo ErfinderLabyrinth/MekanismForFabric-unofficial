@@ -2,7 +2,6 @@ package mekanism.client.mixin;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import mekanism.client.mixinhelper.BlockElementExtension;
-import mekanism.client.mixinhelper.BlockElementParentSetterGetter;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
@@ -15,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;

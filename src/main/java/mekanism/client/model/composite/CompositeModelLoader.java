@@ -2,9 +2,7 @@ package mekanism.client.model.composite;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import mekanism.client.model.energycube.EnergyCubeGeometry;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.resources.model.BakedModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.AbstractMap;

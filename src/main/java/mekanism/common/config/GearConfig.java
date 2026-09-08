@@ -385,14 +385,4 @@ public class GearConfig extends BaseMekanismConfig {
 //        builder.pop();
 //        configSpec = builder.build();
     }
-
-    @Override
-    public String getFileName() {
-        return "gear";
-    }
-
-    @Override
-    public boolean addToContainer() {
-        return false;
-    }
 }

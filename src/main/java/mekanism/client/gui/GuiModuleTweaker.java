@@ -11,7 +11,6 @@ import mekanism.client.gui.element.scroll.GuiModuleScrollList;
 import mekanism.client.gui.element.slot.GuiSlot;
 import mekanism.client.gui.element.slot.SlotType;
 import mekanism.client.gui.element.window.GuiMekaSuitHelmetOptions;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.gear.Module;
 import mekanism.common.content.gear.ModuleConfigItem;

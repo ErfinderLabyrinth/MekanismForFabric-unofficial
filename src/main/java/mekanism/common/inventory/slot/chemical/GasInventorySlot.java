@@ -2,10 +2,8 @@ package mekanism.common.inventory.slot.chemical;
 
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.recipes.ItemStackToGasRecipe;
 import mekanism.common.capabilities.Capabilities;

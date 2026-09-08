@@ -4,12 +4,9 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import mekanism.api.JsonConstants;
-import mekanism.client.mixinhelper.BlockModelHolder;
 import mekanism.client.model.obj.ObjModel;
 import mekanism.client.model.obj.ObjParser;
-import net.fabricmc.fabric.api.client.model.ModelProviderException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 

@@ -9,7 +9,6 @@ import mekanism.common.content.network.transmitter.DiversionTransporter;
 import mekanism.common.content.network.transmitter.DiversionTransporter.DiversionControl;
 import mekanism.common.content.network.transmitter.LogisticalTransporterBase;
 import mekanism.common.content.transporter.TransporterStack;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
 import mekanism.common.util.EnumUtils;

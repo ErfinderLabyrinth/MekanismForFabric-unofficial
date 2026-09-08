@@ -83,11 +83,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
@@ -96,11 +92,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -260,11 +252,6 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
         if (i >= 36 && i < 40 && entity instanceof Player player) {
             onArmorTick(itemStack, level, player);
         }
-    }
-
-    @Override
-    protected boolean areCapabilityConfigsLoaded() {
-        return super.areCapabilityConfigsLoaded() && MekanismConfig.COMMON.gear.isLoaded();
     }
 
     protected void gatherCapabilities(List<Object> capabilities, ItemStack stack, CompoundTag nbt) {

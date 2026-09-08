@@ -5,7 +5,6 @@ import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInsetElement;
 import mekanism.client.render.MekanismRenderer;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.network.to_server.PacketGuiButtonPress;
 import mekanism.common.network.to_server.PacketGuiButtonPress.ClickedItemButton;

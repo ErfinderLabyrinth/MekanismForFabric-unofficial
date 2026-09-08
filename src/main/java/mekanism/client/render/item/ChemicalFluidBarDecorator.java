@@ -2,8 +2,6 @@ package mekanism.client.render.item;
 
 import mekanism.api.FluidStack;
 import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.math.MathUtils;
 import mekanism.client.gui.GuiUtils;
 import mekanism.common.capabilities.Capabilities;

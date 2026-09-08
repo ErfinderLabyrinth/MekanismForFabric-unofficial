@@ -2,8 +2,6 @@ package mekanism.common.inventory.slot.chemical;
 
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.IPigmentTank;
 import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.pigment.PigmentStack;

@@ -1,13 +1,11 @@
 package mekanism.client.mixin;
 
-import com.mojang.datafixers.util.Either;
 import mekanism.client.mixinhelper.BlockElementExtension;
 import mekanism.client.mixinhelper.BlockElementParentSetterGetter;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.BlockElementRotation;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.Block;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

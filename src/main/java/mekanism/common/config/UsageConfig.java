@@ -120,14 +120,4 @@ public class UsageConfig extends BaseMekanismConfig {
 //        builder.pop();
 //        configSpec = builder.build();
     }
-
-    @Override
-    public String getFileName() {
-        return "machine-usage";
-    }
-
-    @Override
-    public boolean addToContainer() {
-        return false;
-    }
 }

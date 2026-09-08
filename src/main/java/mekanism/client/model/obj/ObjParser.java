@@ -5,8 +5,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public final class ObjParser {
 

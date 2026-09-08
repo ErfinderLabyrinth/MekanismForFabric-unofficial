@@ -2,7 +2,6 @@ package mekanism.common.recipe.upgrade.chemical;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTankBuilder;
-import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.pigment.IPigmentHandler;
 import mekanism.api.chemical.pigment.IPigmentHandler.IMekanismPigmentHandler;
 import mekanism.api.chemical.pigment.IPigmentTank;

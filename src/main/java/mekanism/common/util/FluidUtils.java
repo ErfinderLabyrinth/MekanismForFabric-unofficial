@@ -24,7 +24,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
-import team.reborn.energy.api.EnergyStorage;
 
 import java.util.*;
 import java.util.function.IntSupplier;

@@ -6,7 +6,6 @@ import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.gui.element.custom.GuiFrequencySelector;
 import mekanism.client.gui.element.custom.GuiFrequencySelector.IGuiColorFrequencySelector;
 import mekanism.client.gui.element.custom.GuiFrequencySelector.ITileGuiFrequencySelector;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.inventory.container.tile.EmptyTileContainer;

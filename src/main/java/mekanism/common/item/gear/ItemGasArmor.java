@@ -4,7 +4,6 @@ import mekanism.api.chemical.ChemicalTankBuilder;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.providers.IGasProvider;
 import mekanism.common.capabilities.chemical.item.RateLimitGasHandler;
-import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.interfaces.IGasItem;
 import mekanism.common.registration.impl.CreativeTabDeferredRegister.ICustomCreativeTabContents;
 import mekanism.common.storage.item.GasItemStorage;
@@ -57,11 +56,6 @@ public abstract class ItemGasArmor extends ItemSpecialArmor implements IGasItem,
     @Override
     public void addItems(CreativeModeTab.Output tabOutput) {
         tabOutput.accept(ChemicalUtil.getFilledVariant(new ItemStack(this), getMaxGas().getAsLong(), getGasType()));
-    }
-
-    @Override
-    protected boolean areCapabilityConfigsLoaded() {
-        return super.areCapabilityConfigsLoaded() && MekanismConfig.COMMON.gear.isLoaded();
     }
 
 //    @Override

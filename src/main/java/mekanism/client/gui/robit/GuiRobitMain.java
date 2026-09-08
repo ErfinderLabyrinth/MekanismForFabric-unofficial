@@ -12,7 +12,6 @@ import mekanism.client.gui.element.tab.GuiSecurityTab;
 import mekanism.client.gui.element.window.GuiRobitRename;
 import mekanism.client.gui.element.window.GuiRobitSkinSelect;
 import mekanism.client.gui.element.window.GuiWindow;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.inventory.container.entity.robit.MainRobitContainer;

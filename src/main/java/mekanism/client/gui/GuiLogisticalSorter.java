@@ -10,7 +10,6 @@ import mekanism.client.gui.element.window.filter.transporter.GuiSorterFilerSelec
 import mekanism.client.gui.element.window.filter.transporter.GuiSorterItemStackFilter;
 import mekanism.client.gui.element.window.filter.transporter.GuiSorterModIDFilter;
 import mekanism.client.gui.element.window.filter.transporter.GuiSorterTagFilter;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.base.TagCache;
 import mekanism.common.content.filter.IFilter;

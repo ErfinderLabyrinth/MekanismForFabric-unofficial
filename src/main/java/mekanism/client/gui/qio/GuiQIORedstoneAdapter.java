@@ -9,7 +9,6 @@ import mekanism.client.gui.element.slot.SlotType;
 import mekanism.client.gui.element.tab.GuiQIOFrequencyTab;
 import mekanism.client.gui.element.text.GuiTextField;
 import mekanism.client.jei.interfaces.IJEIGhostTarget.IGhostItemConsumer;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.network.to_server.PacketGuiInteract;

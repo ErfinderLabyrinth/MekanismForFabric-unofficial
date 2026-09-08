@@ -6,7 +6,6 @@ import mekanism.client.gui.element.GuiRightArrow;
 import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.gui.element.slot.GuiVirtualSlot;
 import mekanism.client.gui.element.slot.SlotType;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.inventory.container.SelectedWindowData;

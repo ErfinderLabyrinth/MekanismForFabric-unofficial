@@ -21,7 +21,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

@@ -2,7 +2,6 @@ package mekanism.common.network.to_client.container.property;
 
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.lib.frequency.Frequency;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;

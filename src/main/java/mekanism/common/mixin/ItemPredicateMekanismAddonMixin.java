@@ -1,10 +1,8 @@
 package mekanism.common.mixin;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import mekanism.api.FluidStack;

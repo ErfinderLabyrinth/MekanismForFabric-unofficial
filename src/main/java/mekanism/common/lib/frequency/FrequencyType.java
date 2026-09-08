@@ -6,7 +6,6 @@ import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.content.teleporter.TeleporterFrequency;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
 import mekanism.common.lib.security.SecurityFrequency;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.NetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;

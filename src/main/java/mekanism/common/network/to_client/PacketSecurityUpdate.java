@@ -6,7 +6,6 @@ import mekanism.client.MekanismClient;
 import mekanism.common.lib.frequency.FrequencyType;
 import mekanism.common.lib.security.SecurityData;
 import mekanism.common.lib.security.SecurityFrequency;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NetworkUtil;

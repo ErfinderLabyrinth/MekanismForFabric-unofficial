@@ -6,7 +6,6 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.effect.BoltEffect;
 import mekanism.common.lib.effect.BoltEffect.BoltRenderInfo;
 import mekanism.common.lib.effect.BoltEffect.SpawnFunction;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.NetworkUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
