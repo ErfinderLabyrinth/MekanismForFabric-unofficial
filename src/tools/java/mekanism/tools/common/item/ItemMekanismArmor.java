@@ -2,7 +2,6 @@ package mekanism.tools.common.item;
 
 import mekanism.tools.common.IHasRepairType;
 import mekanism.tools.common.item.tier.MekanismTiers;
-import mekanism.tools.common.material.MaterialCreator;
 import mekanism.tools.common.util.ToolsUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ArmorItem;
@@ -18,7 +17,7 @@ import java.util.List;
 
 public class ItemMekanismArmor extends ArmorItem implements IHasRepairType {
 
-    private final MaterialCreator material;
+    private final MekanismTiers material;
 
     public ItemMekanismArmor(MekanismTiers material, ArmorItem.Type armorType, Item.Properties properties) {
         super(material, armorType, properties.durability(material.getDurabilityForType(armorType)));

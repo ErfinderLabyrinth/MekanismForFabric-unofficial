@@ -1,7 +1,6 @@
 package mekanism.tools.common.material;
 
 import mekanism.api.annotations.NothingNullByDefault;
-import net.minecraft.world.item.Tiers;
 
 @NothingNullByDefault
 public class VanillaPaxelMaterialCreator implements IPaxelMaterial {

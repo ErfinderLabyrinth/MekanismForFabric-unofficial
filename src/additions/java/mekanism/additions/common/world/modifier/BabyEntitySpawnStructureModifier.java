@@ -1,6 +1,8 @@
 package mekanism.additions.common.world.modifier;
 
 import com.google.common.collect.ImmutableMap;
+import mekanism.additions.common.config.AdditionsConfig;
+import mekanism.additions.common.config.MekanismAdditionsConfig;
 import mekanism.additions.common.entity.baby.BabyType;
 import mekanism.common.Mekanism;
 import mekanism.common.util.RegistryUtils;
@@ -43,7 +45,7 @@ public class BabyEntitySpawnStructureModifier {
             //Fail quick if there are no overrides for this structure, or it is blacklisted
             ResourceLocation structureName = BuiltInRegistries.STRUCTURE_TYPE.getKey(structure.type());
             if (!spawnConfig.structureBlackList.contains(structureName)) {
-                for (MobSpawnSettings.SpawnerData spawner : spawnConfig.getSpawnersToAdd(spawnerData)) {
+                for (MobSpawnSettings.SpawnerData spawner : babyType.getSpawnersToAdd(spawnerData)) {
                     spawnerData.add(spawner);
                     Mekanism.logger.debug("Adding spawn rate for '{}' in structure '{}', with weight: {}, minSize: {}, maxSize: {}",
                           RegistryUtils.getName(spawner.type), structureName, spawner.getWeight(), spawner.minCount, spawner.maxCount);

@@ -5,18 +5,8 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry.Gui.CollapsibleObject;
 import mekanism.common.config.BaseMekanismConfig;
 import mekanism.tools.common.material.MaterialCreator;
 import mekanism.tools.common.material.VanillaPaxelMaterialCreator;
-import mekanism.tools.common.material.impl.BronzeMaterialDefaults;
-import mekanism.tools.common.material.impl.LapisLazuliMaterialDefaults;
-import mekanism.tools.common.material.impl.OsmiumMaterialDefaults;
-import mekanism.tools.common.material.impl.RefinedGlowstoneMaterialDefaults;
-import mekanism.tools.common.material.impl.RefinedObsidianMaterialDefaults;
-import mekanism.tools.common.material.impl.SteelMaterialDefaults;
-import mekanism.tools.common.material.impl.vanilla.DiamondPaxelMaterialDefaults;
-import mekanism.tools.common.material.impl.vanilla.GoldPaxelMaterialDefaults;
-import mekanism.tools.common.material.impl.vanilla.IronPaxelMaterialDefaults;
-import mekanism.tools.common.material.impl.vanilla.NetheritePaxelMaterialDefaults;
-import mekanism.tools.common.material.impl.vanilla.StonePaxelMaterialDefaults;
-import mekanism.tools.common.material.impl.vanilla.WoodPaxelMaterialDefaults;
+import mekanism.tools.common.material.impl.*;
+import mekanism.tools.common.material.impl.vanilla.*;
 
 @Config(name = "mekanism/tools")
 public class ToolsConfig extends BaseMekanismConfig {

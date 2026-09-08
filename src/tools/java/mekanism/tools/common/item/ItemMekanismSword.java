@@ -1,7 +1,7 @@
 package mekanism.tools.common.item;
 
 import mekanism.tools.common.IHasRepairType;
-import mekanism.tools.common.material.MaterialCreator;
+import mekanism.tools.common.item.tier.MekanismTiers;
 import mekanism.tools.common.util.ToolsUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -17,9 +17,9 @@ import java.util.List;
 
 public class ItemMekanismSword extends SwordItem implements IHasRepairType {
 
-    private final MaterialCreator material;
+    private final MekanismTiers material;
 
-    public ItemMekanismSword(MaterialCreator material, Item.Properties properties) {
+    public ItemMekanismSword(MekanismTiers material, Item.Properties properties) {
         super(material, (int) material.getSwordDamage(), material.getSwordAtkSpeed(), properties
                 .durability(material.getUses())
         );

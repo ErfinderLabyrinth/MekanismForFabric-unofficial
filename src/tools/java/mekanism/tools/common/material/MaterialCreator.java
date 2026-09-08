@@ -1,12 +1,7 @@
 package mekanism.tools.common.material;
 
 import mekanism.api.annotations.NothingNullByDefault;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.block.Block;
-import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
 public class MaterialCreator {
@@ -37,7 +32,7 @@ public class MaterialCreator {
     private final int chestplateDurability;
     private final int helmetDurability;
     public final int bootArmor;
-    public final int leggingArmor;
+    public final int legginsArmor;
     public final int chestplateArmor;
     public final int helmetArmor;
 
@@ -69,7 +64,7 @@ public class MaterialCreator {
         chestplateDurability = materialDefaults.getDurabilityForType(ArmorItem.Type.CHESTPLATE);
         helmetDurability = materialDefaults.getDurabilityForType(ArmorItem.Type.HELMET);
         bootArmor = materialDefaults.getDefenseForType(ArmorItem.Type.BOOTS);
-        leggingArmor = materialDefaults.getDefenseForType(ArmorItem.Type.LEGGINGS);
+        legginsArmor = materialDefaults.getDefenseForType(ArmorItem.Type.LEGGINGS);
         chestplateArmor = materialDefaults.getDefenseForType(ArmorItem.Type.CHESTPLATE);
         helmetArmor = materialDefaults.getDefenseForType(ArmorItem.Type.HELMET);
     }
@@ -158,7 +153,7 @@ public class MaterialCreator {
     public int getDefenseForType(ArmorItem.Type armorType) {
         return switch (armorType) {
             case BOOTS -> bootArmor;
-            case LEGGINGS -> leggingArmor;
+            case LEGGINGS -> legginsArmor;
             case CHESTPLATE -> chestplateArmor;
             case HELMET -> helmetArmor;
         };
@@ -170,34 +165,6 @@ public class MaterialCreator {
 
     public float getToughness() {
         return toughness;
-    }
-
-    @Override
-    public SoundEvent getEquipSound() {
-        return fallBack.getEquipSound();
-    }
-
-    @Override
-    public Ingredient getCommonRepairMaterial() {
-        return fallBack.getCommonRepairMaterial();
-    }
-
-    @Override
-    public String getConfigCommentName() {
-        return fallBack.getConfigCommentName();
-    }
-
-    /**
-     * Only used on the client in vanilla
-     */
-    @Override
-    public String getName() {
-        return fallBack.getName();
-    }
-
-    @Override
-    public String getRegistryPrefix() {
-        return fallBack.getRegistryPrefix();
     }
 
     public int getPaxelEnchantability() {

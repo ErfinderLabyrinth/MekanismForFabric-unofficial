@@ -14,10 +14,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 public class AdditionsClient implements ClientModInitializer {
-
-    private AdditionsClient() {
-    }
-
     private static VoiceClient voiceClient;
 
     @Override

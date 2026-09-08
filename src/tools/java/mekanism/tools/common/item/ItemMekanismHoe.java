@@ -2,7 +2,6 @@ package mekanism.tools.common.item;
 
 import mekanism.tools.common.IHasRepairType;
 import mekanism.tools.common.item.tier.MekanismTiers;
-import mekanism.tools.common.material.MaterialCreator;
 import mekanism.tools.common.util.ToolsUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.HoeItem;

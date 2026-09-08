@@ -21,6 +21,5 @@ public class MekanismToolsConfig {
         AutoConfig.register(ToolsConfig.class, GsonConfigSerializer::new);
 
         tools = AutoConfig.getConfigHolder(ToolsConfig.class).getConfig();
-        tools.resetFallbacks();
     }
 }

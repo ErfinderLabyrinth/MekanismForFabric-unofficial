@@ -2,7 +2,6 @@ package mekanism.tools.common.item;
 
 import mekanism.common.mixinhelper.PiglinNeutralizingArmor;
 import mekanism.tools.common.item.tier.MekanismTiers;
-import mekanism.tools.common.material.MaterialCreator;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;

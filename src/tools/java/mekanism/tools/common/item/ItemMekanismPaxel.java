@@ -2,8 +2,8 @@ package mekanism.tools.common.item;
 
 import mekanism.tools.common.IHasRepairType;
 import mekanism.tools.common.ToolsTags;
+import mekanism.tools.common.item.tier.MekanismTiers;
 import mekanism.tools.common.material.IPaxelMaterial;
-import mekanism.tools.common.material.MaterialCreator;
 import mekanism.tools.common.material.VanillaPaxelMaterialCreator;
 import mekanism.tools.common.util.ToolsUtils;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -33,7 +33,7 @@ import java.util.List;
 public class ItemMekanismPaxel extends AxeItem implements IHasRepairType {
     private final IPaxelMaterial material;
 
-    public ItemMekanismPaxel(MaterialCreator material, Item.Properties properties) {
+    public ItemMekanismPaxel(MekanismTiers material, Item.Properties properties) {
         super(material, material.getPaxelDamage(), material.getPaxelAtkSpeed(), properties.durability(material.getPaxelMaxUses()));
         this.material = material;
     }

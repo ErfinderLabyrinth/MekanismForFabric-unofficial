@@ -1,7 +1,9 @@
 package mekanism.additions.common.config;
 
+import me.shedaniel.autoconfig.annotation.Config;
 import mekanism.common.config.BaseMekanismConfig;
 
+@Config(name = "mekanism/additions-client")
 public class AdditionsClientConfig extends BaseMekanismConfig {
     public boolean voiceKeyIsToggle = false;
 

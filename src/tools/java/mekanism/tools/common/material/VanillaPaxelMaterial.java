@@ -1,8 +1,9 @@
 package mekanism.tools.common.material;
 
-import java.util.Locale;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.item.Tiers;
+
+import java.util.Locale;
 
 @MethodsReturnNonnullByDefault
 public abstract class VanillaPaxelMaterial implements IPaxelMaterial {

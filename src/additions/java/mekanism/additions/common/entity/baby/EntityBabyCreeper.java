@@ -69,7 +69,7 @@ public class EntityBabyCreeper extends Creeper implements IBabyEntity {
      * Modify vanilla's explode method to half the explosion strength of baby creepers, and charged baby creepers
      */
     @Override
-    protected void explodeCreeper() {
+    public void explodeCreeper() {
         if (!level().isClientSide) {
             float f = isPowered() ? 1 : 0.5F;
             dead = true;

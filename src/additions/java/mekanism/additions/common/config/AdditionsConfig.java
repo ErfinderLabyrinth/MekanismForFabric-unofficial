@@ -1,5 +1,6 @@
 package mekanism.additions.common.config;
 
+import me.shedaniel.autoconfig.annotation.Config;
 import mekanism.additions.common.entity.baby.BabyType;
 import mekanism.common.config.BaseMekanismConfig;
 import net.minecraft.resources.ResourceLocation;
@@ -8,10 +9,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
+@Config(name = "mekanism/additions")
 public class AdditionsConfig extends BaseMekanismConfig {
     public final int obsidianTNTDelay = 100;
     public final float obsidianTNTBlastRadius = 12;

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "mekanismadditions",
-  "version": "${version}",
+  "version": "${mod_version}",
   "name": "MekanismForFabric: Additions",
   "description": "Additions module for Mekanism, contains things that don't quite fit in the other modules.",
   "authors": [
@@ -35,7 +35,7 @@
       "mekanism.additions.common.AdditionsDataGenerator"
     ],
     "modmenu": [
-      "mekanism.additions.client.integration.modmenu.ToolsModMenuIntegration"
+      "mekanism.additions.client.integration.modmenu.AdditionsModMenuIntegration"
     ]
   },
   "mixins": [
@@ -47,6 +47,5 @@
     "fabric": "*",
     "minecraft": "${minecraft_version}",
     "mekanism": "${mod_version}"
-  },
-  "accessWidener": "mekanismadditions.accesswidener"
+  }
 }

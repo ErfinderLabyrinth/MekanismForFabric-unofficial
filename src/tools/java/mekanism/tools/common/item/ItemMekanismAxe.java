@@ -1,7 +1,7 @@
 package mekanism.tools.common.item;
 
 import mekanism.tools.common.IHasRepairType;
-import mekanism.tools.common.material.MaterialCreator;
+import mekanism.tools.common.item.tier.MekanismTiers;
 import mekanism.tools.common.util.ToolsUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.AxeItem;
@@ -18,9 +18,9 @@ import java.util.List;
 
 public class ItemMekanismAxe extends AxeItem implements IHasRepairType {
 
-    private final MaterialCreator material;
+    private final MekanismTiers material;
 
-    public ItemMekanismAxe(MaterialCreator material, Item.Properties properties) {
+    public ItemMekanismAxe(MekanismTiers material, Item.Properties properties) {
         super(material, material.getAxeDamage(), material.getAxeAtkSpeed(), properties.durability(material.getUses()));
         this.material = material;
     }
