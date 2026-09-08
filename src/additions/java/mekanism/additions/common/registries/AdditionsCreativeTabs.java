@@ -1,6 +1,5 @@
 package mekanism.additions.common.registries;
 
-import java.util.Map;
 import mekanism.additions.common.AdditionsLang;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.api.providers.IBlockProvider;
@@ -13,6 +12,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+
+import java.util.Map;
 
 public class AdditionsCreativeTabs {
 

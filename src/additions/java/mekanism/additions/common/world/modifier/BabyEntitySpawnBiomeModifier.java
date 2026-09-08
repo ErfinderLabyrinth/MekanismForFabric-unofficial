@@ -1,7 +1,5 @@
 package mekanism.additions.common.world.modifier;
 
-import java.util.List;
-
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.config.AdditionsConfig;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
@@ -16,6 +14,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.MobSpawnSettings;
+
+import java.util.List;
 
 public class BabyEntitySpawnBiomeModifier {
     public static void modify(BabyType babyType, BiomeSelectionContext biomeSelectionContext, BiomeModificationContext biomeModificationContext) {

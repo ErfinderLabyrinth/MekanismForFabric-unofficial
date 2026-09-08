@@ -1,9 +1,10 @@
 package mekanism.additions.common.entity.baby;
 
 import com.mojang.serialization.Codec;
-import java.util.Locale;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 public enum BabyType implements StringRepresentable {
     CREEPER,

@@ -1,9 +1,5 @@
 package mekanism.additions.common.registries;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.block.BlockGlowPanel;
 import mekanism.additions.common.block.BlockObsidianTNT;
@@ -27,6 +23,11 @@ import mekanism.common.util.EnumUtils;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class AdditionsBlocks {
 

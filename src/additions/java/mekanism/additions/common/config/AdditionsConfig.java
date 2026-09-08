@@ -1,8 +1,5 @@
 package mekanism.additions.common.config;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
 import mekanism.additions.common.entity.baby.BabyType;
 import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.api.providers.IEntityTypeProvider;
@@ -10,6 +7,10 @@ import mekanism.common.config.BaseMekanismConfig;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.MobSpawnSettings;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 public class AdditionsConfig extends BaseMekanismConfig {
     public final int obsidianTNTDelay = 100;

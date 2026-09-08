@@ -1,11 +1,12 @@
 package mekanism.additions.common.block.plastic;
 
-import java.util.function.UnaryOperator;
 import mekanism.api.text.EnumColor;
 import mekanism.common.block.interfaces.IColoredBlock;
 import mekanism.common.block.states.BlockStateHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+
+import java.util.function.UnaryOperator;
 
 public class BlockPlastic extends Block implements IColoredBlock {
 
