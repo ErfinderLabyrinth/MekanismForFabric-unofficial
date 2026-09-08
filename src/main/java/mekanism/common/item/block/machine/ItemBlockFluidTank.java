@@ -9,6 +9,7 @@ import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.basic.BlockFluidTank;
+import mekanism.common.block.states.IStateFluidLoggable;
 import mekanism.common.capabilities.fluid.item.RateLimitFluidHandler;
 import mekanism.common.inventory.SimpleSingleStackStorage;
 import mekanism.common.item.interfaces.IModeItem;
@@ -172,7 +173,11 @@ public class ItemBlockFluidTank extends ItemBlockMachine implements IModeItem, R
                                     return InteractionResultHolder.fail(stack);
                                 }
                             }
-                            sound = bucketPickup.getPickupSound();
+                            if(bucketPickup instanceof IStateFluidLoggable fluidLoggable) {
+                                sound = fluidLoggable.getPickupSound(blockState);
+                            } else {
+                                sound = bucketPickup.getPickupSound();
+                            }
                         }
                         if (validFluid(fluidTank, fluidStack)) {
                             uncheckedGrow(fluidTank, fluidStack);
@@ -339,7 +344,11 @@ public class ItemBlockFluidTank extends ItemBlockMachine implements IModeItem, R
                                 return super.execute(source, stack);
                             }
                         }
-                        sound = bucketPickup.getPickupSound();
+                        if(bucketPickup instanceof IStateFluidLoggable fluidLoggable) {
+                            sound = fluidLoggable.getPickupSound(blockState);
+                        } else {
+                            sound = bucketPickup.getPickupSound();
+                        }
                     }
                     if (validFluid(fluidTank, fluidStack)) {
                         tank.uncheckedGrow(fluidTank, fluidStack);

@@ -1,16 +1,18 @@
 package mekanism.additions.common.entity;
 
-import java.util.Optional;
-import java.util.UUID;
 import mekanism.additions.common.AdditionsTags;
+import mekanism.additions.common.network.to_client.PacketSpawnBalloon;
 import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.additions.common.registries.AdditionsItems;
 import mekanism.additions.common.registries.AdditionsSounds;
 import mekanism.api.NBTConstants;
 import mekanism.api.text.EnumColor;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.NBTUtils;
+import mekanism.common.util.NetworkUtil;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.entity.EntityPickInteractionAware;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -38,13 +40,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
-public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData {
+import java.util.Optional;
+import java.util.UUID;
+
+public class EntityBalloon extends Entity implements EntityPickInteractionAware {
 
     private static final EntityDataAccessor<Byte> IS_LATCHED = SynchedEntityData.defineId(EntityBalloon.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> LATCHED_X = SynchedEntityData.defineId(EntityBalloon.class, EntityDataSerializers.INT);
@@ -310,15 +313,15 @@ public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData 
         return true;
     }
 
-    @NotNull
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        writeSpawnData(buf);
+        return ServerPlayNetworking.createS2CPacket(PacketSpawnBalloon.TYPE.getId(), buf);
     }
 
-    @Override
     public void writeSpawnData(FriendlyByteBuf data) {
-        BasePacketHandler.writeVector3d(data, position());
+        NetworkUtil.writeVector3d(data, position());
         data.writeEnum(color);
         if (latched != null) {
             data.writeByte((byte) 1);
@@ -331,9 +334,8 @@ public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData 
         }
     }
 
-    @Override
     public void readSpawnData(FriendlyByteBuf data) {
-        setPos(BasePacketHandler.readVector3d(data));
+        setPos(NetworkUtil.readVector3d(data));
         color = data.readEnum(EnumColor.class);
         byte type = data.readByte();
         if (type == 1) {
@@ -421,7 +423,7 @@ public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData 
     }
 
     @Override
-    public ItemStack getPickedResult(HitResult target) {
+    public ItemStack getPickedStack(Player player, HitResult result) {
         return AdditionsItems.BALLOONS.get(color).getItemStack();
     }
 }

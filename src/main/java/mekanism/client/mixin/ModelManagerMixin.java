@@ -2,7 +2,7 @@ package mekanism.client.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import mekanism.client.mixinhelper.ModelManagerModelBakeryGetter;
-import mekanism.client.model.MekanismModelCache;
+import mekanism.client.model.ModelBakingCompletedEvent;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelManager;
@@ -26,7 +26,7 @@ public class ModelManagerMixin implements ModelManagerModelBakeryGetter {
 
     @Inject(method = "apply", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/ModelBakery;getModelGroups()Lit/unimi/dsi/fastutil/objects/Object2IntMap;", shift = At.Shift.AFTER))
     public void finish(ModelManager.ReloadState reloadState, ProfilerFiller profilerFiller, CallbackInfo ci, @Local ModelBakery modelBakery) {
-        MekanismModelCache.INSTANCE.onBake((ModelManager)(Object)this, modelBakery, bakedRegistry);
+        ModelBakingCompletedEvent.EVENT.invoker().onModelBakingCompleted((ModelManager)(Object)this, modelBakery, bakedRegistry);
         bakery = modelBakery;
     }
 

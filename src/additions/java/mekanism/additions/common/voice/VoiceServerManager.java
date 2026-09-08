@@ -1,26 +1,29 @@
 package mekanism.additions.common.voice;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import mekanism.additions.common.config.MekanismAdditionsConfig;
+import mekanism.common.Mekanism;
+import net.minecraft.server.MinecraftServer;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Set;
-import mekanism.additions.common.config.MekanismAdditionsConfig;
-import mekanism.common.Mekanism;
 
 public class VoiceServerManager {
-
+    private MinecraftServer server;
     private final Set<VoiceConnection> connections = new ObjectOpenHashSet<>();
     private ServerSocket serverSocket;
     private Thread listenThread;
     private boolean foundLocal = false;
     private boolean running;
 
-    public void start() {
+    public void start(MinecraftServer server) {
+        this.server = server;
         Mekanism.logger.info("VoiceServer: Starting up server...");
         try {
             running = true;
-            serverSocket = new ServerSocket(MekanismAdditionsConfig.additions.voicePort.get());
+            serverSocket = new ServerSocket(MekanismAdditionsConfig.additions.voicePort);
             (listenThread = new ListenThread()).start();
         } catch (Exception ignored) {
         }
@@ -84,7 +87,7 @@ public class VoiceServerManager {
             while (running) {
                 try {
                     Socket s = serverSocket.accept();
-                    VoiceConnection connection = new VoiceConnection(s);
+                    VoiceConnection connection = new VoiceConnection(s, server);
                     connection.start();
                     connections.add(connection);
                     Mekanism.logger.info("VoiceServer: Accepted new connection.");

@@ -122,9 +122,8 @@ public interface IStateFluidLoggable extends BucketPickup, LiquidBlockContainer 
         return Optional.empty();
     }
 
-//    @NotNull
-//    @Override
-//    default Optional<SoundEvent> getPickupSound(BlockState state) {
-//        return getFluid(state).getType().getPickupSound();
-//    }
+    @NotNull
+    default Optional<SoundEvent> getPickupSound(BlockState state) {
+        return getFluid(state).getType().getPickupSound();
+    }
 }

@@ -1,13 +1,14 @@
 package mekanism.additions.client;
 
 import io.netty.channel.local.LocalAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import mekanism.additions.client.voice.VoiceClient;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
 import mekanism.common.Mekanism;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 public class AdditionsClient {
 
@@ -24,7 +25,7 @@ public class AdditionsClient {
     }
 
     public static void launch() {
-        if (MekanismAdditionsConfig.additions.voiceServerEnabled.get()) {
+        if (MekanismAdditionsConfig.additions.voiceServerEnabled) {
             ClientPacketListener connection = Minecraft.getInstance().getConnection();
             SocketAddress address = connection == null ? null : connection.getConnection().getRemoteAddress();
             //local connection

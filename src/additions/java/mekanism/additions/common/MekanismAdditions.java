@@ -5,23 +5,20 @@ import mekanism.additions.common.block.BlockObsidianTNT;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
 import mekanism.additions.common.entity.baby.EntityBabyStray;
 import mekanism.additions.common.mixin.ParrotAccessor;
-import mekanism.additions.common.registries.AdditionsBiomeModifierSerializers;
 import mekanism.additions.common.registries.AdditionsBlocks;
 import mekanism.additions.common.registries.AdditionsCreativeTabs;
 import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.additions.common.registries.AdditionsItems;
 import mekanism.additions.common.registries.AdditionsSounds;
-import mekanism.additions.common.registries.AdditionsStructureModifierSerializers;
 import mekanism.additions.common.voice.VoiceServerManager;
-import mekanism.api.MekanismAPI;
-import mekanism.client.model.ModelIndustrialAlarm;
+import mekanism.additions.common.world.modifier.BabyEntitySpawnBiomeModifier;
 import mekanism.common.Mekanism;
 import mekanism.common.base.IModModule;
-import mekanism.common.config.MekanismModConfig;
 import mekanism.common.lib.Version;
 import mekanism.common.registration.impl.EntityTypeRegistryObject;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
@@ -30,22 +27,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.SpawnPlacements;
-import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.NotNull;
 
 public class MekanismAdditions implements IModModule, ModInitializer {
@@ -67,7 +53,7 @@ public class MekanismAdditions implements IModModule, ModInitializer {
     @Override
     public void onInitialize() {
         Mekanism.addModule(instance = this);
-        MekanismAdditionsConfig.registerConfigs();
+        MekanismAdditionsConfig.registerConfig();
         ServerLifecycleEvents.SERVER_STARTING.register(this::serverStarting);
         ServerLifecycleEvents.SERVER_STOPPING.register(this::serverStopping);
 
@@ -76,8 +62,7 @@ public class MekanismAdditions implements IModModule, ModInitializer {
         AdditionsCreativeTabs.register();
         AdditionsEntityTypes.register();
         AdditionsSounds.register();
-        AdditionsBiomeModifierSerializers.register();
-        AdditionsStructureModifierSerializers.register();
+        BabyEntitySpawnBiomeModifier.register();
 
         //Set our version number to match the mods.toml file, which matches the one in our build.gradle
         versionNumber = new Version(FabricLoader.getInstance().getModContainer(MODID).get());
@@ -112,6 +97,8 @@ public class MekanismAdditions implements IModModule, ModInitializer {
                 return super.execute(source, stack);
             }
         });
+
+        FlammableBlockRegistry.getDefaultInstance().add(AdditionsBlocks.OBSIDIAN_TNT.getBlock(), 15, 75);
     }
 
     public static ResourceLocation rl(String path) {
@@ -151,7 +138,7 @@ public class MekanismAdditions implements IModModule, ModInitializer {
             if (voiceManager == null) {
                 voiceManager = new VoiceServerManager();
             }
-            voiceManager.start();
+            voiceManager.start(server);
         }
     }
 

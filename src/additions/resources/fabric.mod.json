@@ -47,5 +47,6 @@
     "fabric": "*",
     "minecraft": "${minecraft_version}",
     "mekanism": "${mod_version}"
-  }
+  },
+  "accessWidener": "mekanismadditions.accesswidener"
 }

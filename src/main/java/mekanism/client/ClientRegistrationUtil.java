@@ -196,6 +196,10 @@ public class ClientRegistrationUtil {
         }
     }
 
+    public static void registerIColoredBlockHandler(IBlockProvider... blocks) {
+        registerBlockColorHandler(COLORED_BLOCK_COLOR, blocks);
+    }
+
     public static void registerIColoredItemHandler(IItemProvider... items) {
         registerItemColorHandler(COLORED_ITEM_COLOR, items);
     }
