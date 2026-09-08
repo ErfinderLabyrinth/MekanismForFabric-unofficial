@@ -1,7 +1,7 @@
 package mekanism.additions.client;
 
 import io.netty.channel.local.LocalAddress;
-import mekanism.additions.client.model.MekanismAdditionsModelLoadingPlugin;
+import mekanism.additions.client.model.AdditionsModelLoadingPlugin;
 import mekanism.additions.client.voice.VoiceClient;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
 import mekanism.common.Mekanism;
@@ -18,7 +18,7 @@ public class AdditionsClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ModelLoadingPlugin.register(new MekanismAdditionsModelLoadingPlugin());
+        ModelLoadingPlugin.register(new AdditionsModelLoadingPlugin());
         MekanismAdditionsConfig.registerClientConfigs();
         AdditionsClientRegistration.init();
 

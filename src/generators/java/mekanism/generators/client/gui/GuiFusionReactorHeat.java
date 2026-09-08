@@ -88,7 +88,7 @@ public class GuiFusionReactorHeat extends GuiFusionReactorInfo {
             return multiblock.getCaseTemp() > 0 && !multiblock.waterTank.isEmpty() && multiblock.steamTank.getStored() < multiblock.steamTank.getCapacity();
         }, ProgressType.SMALL_RIGHT, this, 83, 91));
         addRenderableWidget(new GuiFluidGauge(() -> tile.getMultiblock().waterTank, () -> tile.getFluidTanks(null), GaugeType.SMALL, this, 115, 84));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().steamTank, () -> tile.getGasTanks(null), GaugeType.SMALL, this, 151, 84));
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().steamTank, () -> tile.getGasManager().getHolder(), GaugeType.SMALL, this, 151, 84));
         addRenderableWidget(new GuiEnergyGauge(tile.getMultiblock().energyContainer, GaugeType.SMALL, this, 115, 46));
         addRenderableWidget(new GuiFusionReactorTab(this, tile, FusionReactorTab.FUEL));
         addRenderableWidget(new GuiFusionReactorTab(this, tile, FusionReactorTab.STAT));

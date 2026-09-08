@@ -1,16 +1,18 @@
 package mekanism.defense.common.config;
 
-import mekanism.common.config.MekanismConfigHelper;
-import net.minecraftforge.fml.ModLoadingContext;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 
 public class MekanismDefenseConfig {
 
     private MekanismDefenseConfig() {
     }
 
-    public static final DefenseConfig defense = new DefenseConfig();
+    public static DefenseConfig defense;
 
-    public static void registerConfigs(ModLoadingContext modLoadingContext) {
-        MekanismConfigHelper.registerConfig(modLoadingContext.getActiveContainer(), defense);
+    public static void registerConfigs() {
+        AutoConfig.register(DefenseConfig.class, GsonConfigSerializer::new);
+
+        defense = AutoConfig.getConfigHolder(DefenseConfig.class).getConfig();
     }
 }

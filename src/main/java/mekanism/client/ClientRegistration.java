@@ -170,6 +170,7 @@ public class ClientRegistration {
 
         ModelLoadingPlugin.register(new MekanismModelLoadingPlugin());
         ModelBakingCompletedEvent.EVENT.register(MekanismModelCache.INSTANCE::onBake);
+        TextureAtlasStitchEvent.EVENT.register(MekanismRenderer::onStitch);
 
         addCustomModel(MekanismBlocks.QIO_DRIVE_ARRAY, (orig) -> new DriveArrayBakedModel(orig));
         addCustomModel(MekanismBlocks.DIGITAL_MINER, (orig) -> new DigitalMinerBakedModel(orig));

@@ -1,5 +1,6 @@
 package mekanism.additions.client;
 
+import mekanism.additions.client.model.AdditionsModelCache;
 import mekanism.additions.client.model.ModelBabyCreeper;
 import mekanism.additions.client.render.entity.RenderBabyCreeper;
 import mekanism.additions.client.render.entity.RenderBabyEnderman;
@@ -13,7 +14,9 @@ import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.additions.common.registries.AdditionsItems;
 import mekanism.api.text.EnumColor;
 import mekanism.client.ClientRegistrationUtil;
+import mekanism.client.model.MekanismModelCache;
 import mekanism.client.model.MekanismModelLoadingPlugin;
+import mekanism.client.model.ModelBakingCompletedEvent;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.registration.impl.ItemRegistryObject;
@@ -30,6 +33,7 @@ import java.util.Map;
 
 public class AdditionsClientRegistration {
     public static void init() {
+        ModelBakingCompletedEvent.EVENT.register(AdditionsModelCache.INSTANCE::onBake);
         ClientRegistrationUtil.setPropertyOverride(AdditionsItems.WALKIE_TALKIE, MekanismAdditions.rl("channel"), (stack, world, entity, seed) -> {
             ItemWalkieTalkie item = (ItemWalkieTalkie) stack.getItem();
             return item.getOn(stack) ? item.getChannel(stack) : 0;

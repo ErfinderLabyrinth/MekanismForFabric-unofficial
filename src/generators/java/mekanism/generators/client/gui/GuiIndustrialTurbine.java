@@ -14,6 +14,7 @@ import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiGasGauge;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
 import mekanism.common.MekanismLang;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.tile.TileEntityChemicalTank.GasMode;
@@ -87,21 +88,21 @@ public class GuiIndustrialTurbine extends GuiMekanismTile<TileEntityTurbineCasin
                     return 0;
                 }
                 double rate = Math.min(multiblock.lowerVolume * multiblock.getDispersers() * MekanismGeneratorsConfig.generators.turbineDisperserGasFlow.get(),
-                      multiblock.vents * MekanismGeneratorsConfig.generators.turbineVentGasFlow.get());
+                      multiblock.vents * MekanismGeneratorsConfig.generators.turbineVentGasFlow);
                 if (rate == 0) {
                     return 0;
                 }
                 return Math.min(1, multiblock.lastSteamInput / rate);
             }
         }, 40, 13));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().gasTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.MEDIUM, this, 6, 13));
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().gasTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.MEDIUM, this, 6, 13));
         addRenderableWidget(new GuiEnergyTab(this, () -> {
             EnergyDisplay storing;
             EnergyDisplay producing;
             TurbineMultiblockData multiblock = tile.getMultiblock();
             if (multiblock.isFormed()) {
                 storing = EnergyDisplay.of(multiblock.energyContainer);
-                producing = EnergyDisplay.of((long) (MekanismConfig.COMMON.general.maxEnergyPerSteam / TurbineValidator.MAX_BLADES))
+                producing = EnergyDisplay.of((long) (MekanismConfig.COMMON.general.maxEnergyPerSteam / TurbineValidator.MAX_BLADES)
                       * multiblock.clientFlow * Math.min(multiblock.blades,
                             multiblock.coils * MekanismGeneratorsConfig.generators.turbineBladesPerCoil));
             } else {

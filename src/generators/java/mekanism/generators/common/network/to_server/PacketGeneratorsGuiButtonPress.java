@@ -9,12 +9,12 @@ import mekanism.generators.common.registries.GeneratorsContainerTypes;
 import mekanism.generators.common.tile.fission.TileEntityFissionReactorCasing;
 import mekanism.generators.common.tile.fusion.TileEntityFusionReactorController;
 import mekanism.generators.common.tile.turbine.TileEntityTurbineCasing;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * Used for informing the server that a click happened in a GUI and the gui window needs to change
@@ -36,18 +36,14 @@ public class PacketGeneratorsGuiButtonPress implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        ServerPlayer player = context.getSender();
-        if (player != null) {//If we are on the server (the only time we should be receiving this packet), let forge handle switching the Gui
+    public void handle(Player p, PacketSender sender) {
+        if (p instanceof ServerPlayer player) {//If we are on the server (the only time we should be receiving this packet), let forge handle switching the Gui
             TileEntityMekanism tile = WorldUtils.getTileEntity(TileEntityMekanism.class, player.level(), tilePosition);
             if (tile != null) {
                 MenuProvider provider = tileButton.getProvider(tile, extra);
                 if (provider != null) {
                     //Ensure valid data
-                    NetworkHooks.openScreen(player, provider, buf -> {
-                        buf.writeBlockPos(tilePosition);
-                        buf.writeVarInt(extra);
-                    });
+                    player.openMenu(provider);
                 }
             }
         }
