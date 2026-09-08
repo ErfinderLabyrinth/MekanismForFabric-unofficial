@@ -14,9 +14,14 @@ import mekanism.additions.common.registries.AdditionsItems;
 import mekanism.api.text.EnumColor;
 import mekanism.client.ClientRegistrationUtil;
 import mekanism.client.model.MekanismModelLoadingPlugin;
+import mekanism.client.model.ModelBakingCompletedEvent;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.registration.impl.ItemRegistryObject;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -29,10 +34,6 @@ import net.minecraft.client.renderer.entity.WitherSkeletonRenderer;
 import java.util.Map;
 
 public class AdditionsClientRegistration {
-
-    private AdditionsClientRegistration() {
-    }
-
     public static void init() {
         ClientRegistrationUtil.setPropertyOverride(AdditionsItems.WALKIE_TALKIE, MekanismAdditions.rl("channel"), (stack, world, entity, seed) -> {
             ItemWalkieTalkie item = (ItemWalkieTalkie) stack.getItem();
@@ -42,8 +43,7 @@ public class AdditionsClientRegistration {
         registerRenderers();
         ModelLoadingPlugin.register(new MekanismModelLoadingPlugin());
         registerLayer();
-        registerBlockColorHandlers();
-        registerItemColorHandlers();
+        registerColorHandlers();
     }
 
     public static void registerRenderers() {
@@ -63,20 +63,16 @@ public class AdditionsClientRegistration {
         EntityModelLayerRegistry.registerModelLayer(ModelBabyCreeper.ARMOR_LAYER, () -> ModelBabyCreeper.createBodyLayer(new CubeDeformation(1)));
     }
 
-    public static void registerBlockColorHandlers() {
-        registerIColoredBlocks(true);
-    }
-
-    public static void registerItemColorHandlers() {
-        registerIColoredBlocks(false);
+    public static void registerColorHandlers() {
+        registerIColoredBlocks();
         ItemColor balloonColorHandler = (stack, tintIndex) -> stack.getItem() instanceof ItemBalloon balloon ? MekanismRenderer.getColorARGB(balloon.getColor(), 1) : -1;
         for (ItemRegistryObject<ItemBalloon> balloon : AdditionsItems.BALLOONS.values()) {
-            ClientRegistrationUtil.registerItemColorHandler(balloonColorHandler, balloon);
+            ClientRegistrationUtil.registerItemColorHandler(event, balloonColorHandler, balloon);
         }
     }
 
-    private static void registerIColoredBlocks(boolean isBlock) {
-        registerBlockColorHandles(isBlock, AdditionsBlocks.GLOW_PANELS, AdditionsBlocks.PLASTIC_BLOCKS,
+    private static void registerIColoredBlocks() {
+        registerBlockColorHandles(AdditionsBlocks.GLOW_PANELS, AdditionsBlocks.PLASTIC_BLOCKS,
               AdditionsBlocks.SLICK_PLASTIC_BLOCKS, AdditionsBlocks.PLASTIC_GLOW_BLOCKS, AdditionsBlocks.REINFORCED_PLASTIC_BLOCKS, AdditionsBlocks.PLASTIC_ROADS,
               AdditionsBlocks.TRANSPARENT_PLASTIC_BLOCKS, AdditionsBlocks.PLASTIC_STAIRS, AdditionsBlocks.PLASTIC_SLABS, AdditionsBlocks.PLASTIC_FENCES,
               AdditionsBlocks.PLASTIC_FENCE_GATES, AdditionsBlocks.PLASTIC_GLOW_STAIRS, AdditionsBlocks.PLASTIC_GLOW_SLABS, AdditionsBlocks.TRANSPARENT_PLASTIC_STAIRS,
@@ -84,10 +80,11 @@ public class AdditionsClientRegistration {
     }
 
     @SafeVarargs
-    private static void registerBlockColorHandles(boolean isBlock, Map<EnumColor, ? extends BlockRegistryObject<?, ?>>... blocks) {
+    private static void registerBlockColorHandles(Map<EnumColor, ? extends BlockRegistryObject<?, ?>>... blocks) {
         for (Map<EnumColor, ? extends BlockRegistryObject<?, ?>> blockMap : blocks) {
             for (BlockRegistryObject<?, ?> block : blockMap.values()) {
-                ClientRegistrationUtil.registerIColoredBlockHandler(isBlock, block);
+                ClientRegistrationUtil.registerIColoredBlockHandler(block);
+                ClientRegistrationUtil.registerIColoredItemHandler(block);
             }
         }
     }

@@ -11,7 +11,7 @@ import java.net.SocketException;
 import java.util.Set;
 
 public class VoiceServerManager {
-
+    private MinecraftServer server;
     private final Set<VoiceConnection> connections = new ObjectOpenHashSet<>();
     private ServerSocket serverSocket;
     private Thread listenThread;
@@ -19,11 +19,12 @@ public class VoiceServerManager {
     private boolean running;
 
     public void start(MinecraftServer server) {
+        this.server = server;
         Mekanism.logger.info("VoiceServer: Starting up server...");
         try {
             running = true;
             serverSocket = new ServerSocket(MekanismAdditionsConfig.additions.voicePort);
-            (listenThread = new ListenThread(server)).start();
+            (listenThread = new ListenThread()).start();
         } catch (Exception ignored) {
         }
     }
@@ -75,11 +76,8 @@ public class VoiceServerManager {
     }
 
     private class ListenThread extends Thread {
-        MinecraftServer server;
-
-        private ListenThread(MinecraftServer server) {
+        private ListenThread() {
             super("VoiceServer Listen Thread");
-            this.server = server;
             setDaemon(true);
         }
 

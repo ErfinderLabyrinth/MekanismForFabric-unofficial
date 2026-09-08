@@ -7,7 +7,6 @@ import mekanism.common.block.states.BlockStateHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -15,7 +14,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
-public class BlockPlasticTransparent extends BlockPlastic {
+public class BlockPlasticTransparent extends BlockPlastic implements CustomBeaconColor {
 
     public BlockPlasticTransparent(EnumColor color) {
         super(color, properties -> properties.strength(5, 6).noOcclusion().isValidSpawn(AttributeMobSpawn.NEVER_PREDICATE)
@@ -46,7 +45,7 @@ public class BlockPlasticTransparent extends BlockPlastic {
     }
 
     @Override
-    public float[] getBeaconColorMultiplier(BlockState state, LevelReader world, BlockPos pos, BlockPos beaconPos) {
+    public float[] getCustomBeaconColor() {
         return getColor().getRgbCodeFloat();
     }
 

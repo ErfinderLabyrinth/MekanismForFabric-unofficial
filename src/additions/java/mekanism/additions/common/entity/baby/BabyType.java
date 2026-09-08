@@ -11,7 +11,6 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Locale;
 
 public enum BabyType implements StringRepresentable {
     CREEPER(AdditionsEntityTypes.BABY_CREEPER, () -> EntityType.CREEPER),

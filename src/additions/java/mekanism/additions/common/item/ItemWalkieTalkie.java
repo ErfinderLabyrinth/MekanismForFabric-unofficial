@@ -29,7 +29,7 @@ public class ItemWalkieTalkie extends Item implements IModeItem {
     public void appendHoverText(@NotNull ItemStack stack, Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
         tooltip.add(OnOff.of(getOn(stack), true).getTextComponent());
         tooltip.add(AdditionsLang.CHANNEL.translateColored(EnumColor.DARK_AQUA, EnumColor.GRAY, getChannel(stack)));
-        if (!MekanismAdditionsConfig.additions.voiceServerEnabled.get()) {
+        if (!MekanismAdditionsConfig.additions.voiceServerEnabled) {
             tooltip.add(AdditionsLang.WALKIE_DISABLED.translateColored(EnumColor.DARK_RED));
         }
     }
@@ -46,8 +46,8 @@ public class ItemWalkieTalkie extends Item implements IModeItem {
     }
 
     @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, @NotNull ItemStack newStack, boolean slotChanged) {
-        return slotChanged || oldStack.getItem() != newStack.getItem();
+    public boolean allowNbtUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
+        return false;
     }
 
     public void setOn(ItemStack itemStack, boolean on) {

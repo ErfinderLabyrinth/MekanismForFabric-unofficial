@@ -4,7 +4,13 @@
   "package": "mekanism.additions.common.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ParrotAccessor"
+    "BeaconBlockEntityMixin",
+    "FireBlockMixin",
+    "FlintAndSteelDispenseItemBehaviorMixin",
+    "ParrotAccessor",
+    "PrimedTntAccessor",
+    "StructureMixin",
+    "TntBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

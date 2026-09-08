@@ -91,11 +91,4 @@ public class BlockPlasticSlab extends SlabBlock implements IColoredBlock, IState
         //Manually declare which getPickupSound we want to be using
         return IStateExtendedFluidLoggable.super.getPickupSound();
     }
-
-    @NotNull
-    @Override
-    public Optional<SoundEvent> getPickupSound(BlockState state) {
-        //Manually declare which getPickupSound we want to be using
-        return IStateExtendedFluidLoggable.super.getPickupSound(state);
-    }
 }

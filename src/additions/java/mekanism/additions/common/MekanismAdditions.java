@@ -5,14 +5,20 @@ import mekanism.additions.common.block.BlockObsidianTNT;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
 import mekanism.additions.common.entity.baby.EntityBabyStray;
 import mekanism.additions.common.mixin.ParrotAccessor;
-import mekanism.additions.common.registries.*;
+import mekanism.additions.common.registries.AdditionsBlocks;
+import mekanism.additions.common.registries.AdditionsCreativeTabs;
+import mekanism.additions.common.registries.AdditionsEntityTypes;
+import mekanism.additions.common.registries.AdditionsItems;
+import mekanism.additions.common.registries.AdditionsSounds;
 import mekanism.additions.common.voice.VoiceServerManager;
+import mekanism.additions.common.world.modifier.BabyEntitySpawnBiomeModifier;
 import mekanism.common.Mekanism;
 import mekanism.common.base.IModModule;
 import mekanism.common.lib.Version;
 import mekanism.common.registration.impl.EntityTypeRegistryObject;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
@@ -56,8 +62,7 @@ public class MekanismAdditions implements IModModule, ModInitializer {
         AdditionsCreativeTabs.register();
         AdditionsEntityTypes.register();
         AdditionsSounds.register();
-        AdditionsBiomeModifierSerializers.register();
-        AdditionsStructureModifierSerializers.register();
+        BabyEntitySpawnBiomeModifier.register();
 
         //Set our version number to match the mods.toml file, which matches the one in our build.gradle
         versionNumber = new Version(FabricLoader.getInstance().getModContainer(MODID).get());
@@ -92,6 +97,8 @@ public class MekanismAdditions implements IModModule, ModInitializer {
                 return super.execute(source, stack);
             }
         });
+
+        FlammableBlockRegistry.getDefaultInstance().add(AdditionsBlocks.OBSIDIAN_TNT.getBlock(), 15, 75);
     }
 
     public static ResourceLocation rl(String path) {
