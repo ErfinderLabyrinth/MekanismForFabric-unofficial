@@ -67,6 +67,8 @@ public class MekanismGenerators implements ModInitializer, IModModule {
         Mekanism.addModule(instance = this);
         MekanismGeneratorsConfig.registerConfigs();
 
+        packetHandler = new GeneratorsPacketHandler();
+
         commonSetup();
         imcQueue();
 
@@ -81,7 +83,6 @@ public class MekanismGenerators implements ModInitializer, IModModule {
         GeneratorsModules.register();
         //Set our version number to match the mods.toml file, which matches the one in our build.gradle
         versionNumber = new Version(FabricLoader.getInstance().getModContainer(MODID).get());
-        packetHandler = new GeneratorsPacketHandler();
     }
 
     public static GeneratorsPacketHandler packetHandler() {
