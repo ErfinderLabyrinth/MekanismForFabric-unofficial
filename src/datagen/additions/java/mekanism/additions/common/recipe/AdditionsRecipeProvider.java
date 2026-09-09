@@ -1,7 +1,5 @@
 package mekanism.additions.common.recipe;
 
-import java.util.List;
-import java.util.function.Consumer;
 import mekanism.additions.common.AdditionsTags;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.block.BlockGlowPanel;
@@ -29,15 +27,18 @@ import mekanism.common.registries.MekanismPigments;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.resource.ResourceType;
 import mekanism.common.tags.MekanismTags;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.world.item.DyeColor;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 @NothingNullByDefault
 public class AdditionsRecipeProvider extends BaseRecipeProvider {
@@ -56,7 +57,7 @@ public class AdditionsRecipeProvider extends BaseRecipeProvider {
           TripleLine.of(PLASTIC_SHEET_CHAR, Pattern.DYE, PLASTIC_SHEET_CHAR),
           TripleLine.of(Pattern.GLOWSTONE, PLASTIC_SHEET_CHAR, Pattern.GLOWSTONE));
 
-    public AdditionsRecipeProvider(PackOutput output) {
+    public AdditionsRecipeProvider(FabricDataOutput output) {
         super(output, MekanismAdditions.MODID);
     }
 
@@ -105,17 +106,17 @@ public class AdditionsRecipeProvider extends BaseRecipeProvider {
         EnumColor color = result.asItem().getColor();
         String colorString = color.getRegistryPrefix();
         Ingredient recolorInput = difference(AdditionsTags.Items.BALLOONS, result);
-        DyeColor dye = color.getDyeColor();
-        if (dye != null) {
+        TagKey<Item> dyeTag = PigmentExtractingRecipeProvider.DYES.get(color);
+        if (dyeTag != null) {
             ExtendedShapelessRecipeBuilder.shapelessRecipe(result, 2)
-                  .addIngredient(MekanismTags.Items.LEATHER)
-                  .addIngredient(MekanismTags.Items.STRING)
-                  .addIngredient(color.getTag())
+                  .addIngredient(MekanismTags.Items.LEATHERS)
+                  .addIngredient(MekanismTags.Items.STRINGS)
+                  .addIngredient(dyeTag)
                   .category(RecipeCategory.DECORATIONS)
                   .build(consumer, MekanismAdditions.rl(basePath + colorString));
             ExtendedShapelessRecipeBuilder.shapelessRecipe(result)
                   .addIngredient(recolorInput)
-                  .addIngredient(dye.getTag())
+                  .addIngredient(dyeTag)
                   .category(RecipeCategory.DECORATIONS)
                   .build(consumer, MekanismAdditions.rl(basePath + "recolor/" + colorString));
         }
@@ -134,14 +135,14 @@ public class AdditionsRecipeProvider extends BaseRecipeProvider {
 
     private void registerGlowPanel(Consumer<FinishedRecipe> consumer, BlockRegistryObject<? extends IColoredBlock, ?> result, String basePath) {
         EnumColor color = result.getBlock().getColor();
-        DyeColor dye = color.getDyeColor();
-        if (dye != null) {
+        TagKey<Item> dyeTag = PigmentExtractingRecipeProvider.DYES.get(color);
+        if (dyeTag != null) {
             ExtendedShapedRecipeBuilder.shapedRecipe(result, 2)
                   .pattern(GLOW_PANEL)
                   .key(PLASTIC_SHEET_CHAR, MekanismItems.HDPE_SHEET)
-                  .key(GLASS_PANES_CHAR, Tags.Items.GLASS_PANES)
-                  .key(Pattern.GLOWSTONE, Tags.Items.DUSTS_GLOWSTONE)
-                  .key(Pattern.DYE, dye.getTag())
+                  .key(GLASS_PANES_CHAR, ConventionalItemTags.GLASS_PANES)
+                  .key(Pattern.GLOWSTONE, MekanismTags.Items.GLOWSTONE_DUSTS)
+                  .key(Pattern.DYE, dyeTag)
                   .category(RecipeCategory.BUILDING_BLOCKS)
                   .build(consumer, MekanismAdditions.rl(basePath + color.getRegistryPrefix()));
         }

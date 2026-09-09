@@ -1,7 +1,5 @@
 package mekanism.additions.common.recipe;
 
-import java.util.Map;
-import java.util.function.Consumer;
 import mekanism.additions.common.AdditionsTags;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.registries.AdditionsBlocks;
@@ -16,6 +14,9 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class PlasticStairsRecipeProvider implements ISubRecipeProvider {
 

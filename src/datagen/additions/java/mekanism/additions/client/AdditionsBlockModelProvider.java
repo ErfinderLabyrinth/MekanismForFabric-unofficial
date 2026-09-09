@@ -3,9 +3,7 @@ package mekanism.additions.client;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.client.model.BaseBlockModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.models.BlockModelGenerators;
-import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class AdditionsBlockModelProvider extends BaseBlockModelProvider {
 

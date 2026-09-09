@@ -14,7 +14,6 @@ import mekanism.common.registration.impl.PigmentRegistryObject;
 import mekanism.common.registries.MekanismPigments;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -37,7 +36,7 @@ public class PigmentExtractingRecipeProvider implements ISubRecipeProvider {
     private static final long WOOL_RATE = DYE_RATE * 3 / 4;//192
     private static final long CARPET_RATE = WOOL_RATE * 2 / 3;//128
 
-    private static final Map<EnumColor, TagKey<Item>> DYES = new EnumMap<>(EnumColor.class);
+    public static final Map<EnumColor, TagKey<Item>> DYES = new EnumMap<>(EnumColor.class);
     static final Map<EnumColor, ItemLike> CANDLES = new EnumMap<>(EnumColor.class);
     static final Map<EnumColor, ItemLike> CONCRETE = new EnumMap<>(EnumColor.class);
     static final Map<EnumColor, ItemLike> CONCRETE_POWDER = new EnumMap<>(EnumColor.class);

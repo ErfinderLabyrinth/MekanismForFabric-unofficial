@@ -2,14 +2,14 @@ package mekanism.additions.client;
 
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.client.texture.BaseSpriteSourceProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
-import net.minecraft.data.PackOutput;
 
 import java.util.List;
 
 public class AdditionsSpriteSourceProvider extends BaseSpriteSourceProvider {
 
-    public AdditionsSpriteSourceProvider(PackOutput output) {
+    public AdditionsSpriteSourceProvider(FabricDataOutput output) {
         super(output, MekanismAdditions.MODID);
     }
 

@@ -1,8 +1,5 @@
 package mekanism.additions.client;
 
-import java.util.Map;
-import java.util.Optional;
-
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.block.BlockGlowPanel;
 import mekanism.additions.common.block.plastic.BlockPlasticFenceGate;
@@ -14,26 +11,28 @@ import mekanism.common.item.block.ItemBlockColoredName;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.Direction;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
+import net.minecraft.data.models.blockstates.Variant;
+import net.minecraft.data.models.blockstates.VariantProperties;
 import net.minecraft.data.models.model.ModelTemplate;
-import net.minecraft.data.models.model.TextureMapping;
-import net.minecraft.data.models.model.TexturedModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.world.level.block.state.properties.Half;
-import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraft.world.level.block.state.properties.StairsShape;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+
+import java.util.Map;
+import java.util.Optional;
 
 public class AdditionsBlockStateProvider extends BaseBlockStateProvider<AdditionsBlockModelProvider> {
 
     public AdditionsBlockStateProvider(FabricDataOutput output) {
         super(output, MekanismAdditions.MODID, AdditionsBlockModelProvider::new);
+    }
+
+    @Override
+    public void generateItemModels(ItemModelGenerators itemModelGenerator) {
+        AdditionsItemModelProvider.generateItemModels(itemModelGenerator);
     }
 
     @Override
@@ -59,8 +58,23 @@ public class AdditionsBlockStateProvider extends BaseBlockStateProvider<Addition
         ResourceLocation model = modLoc("block/glow_panel");
         for (BlockRegistryObject<BlockGlowPanel, ItemBlockColoredName> blockRO : AdditionsBlocks.GLOW_PANELS.values()) {
             BlockGlowPanel glowPanel = blockRO.getBlock();
-            gen.blockStateOutput.accept(BlockModelGenerators.createRotatedVariant(glowPanel, model));
+            gen.blockStateOutput.accept(
+                    MultiVariantGenerator.multiVariant(
+                            glowPanel,
+                            Variant.variant().with(VariantProperties.MODEL, model)
+                    ).with(createDefaultUpFacingDispatch())
+            );
         }
+    }
+
+    public static PropertyDispatch createDefaultUpFacingDispatch() {
+        return PropertyDispatch.property(BlockStateProperties.FACING)
+                .select(Direction.DOWN, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R180))
+                .select(Direction.EAST, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                .select(Direction.NORTH, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90))
+                .select(Direction.SOUTH, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                .select(Direction.UP, Variant.variant())
+                .select(Direction.WEST, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270));
     }
 
     private ModelTemplate modelTemplate(ResourceLocation model) {

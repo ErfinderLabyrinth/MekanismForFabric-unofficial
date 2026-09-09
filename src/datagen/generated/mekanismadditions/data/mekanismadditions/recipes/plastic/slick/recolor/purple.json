@@ -3,7 +3,7 @@
   "category": "building",
   "key": {
     "#": {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
         "tag": "mekanismadditions:plastic_blocks/slick"
       },
@@ -12,7 +12,7 @@
       }
     },
     "D": {
-      "tag": "forge:dyes/purple"
+      "tag": "c:purple_dyes"
     }
   },
   "pattern": [

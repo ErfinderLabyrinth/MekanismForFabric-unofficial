@@ -186,6 +186,8 @@ SourceSet setupExtraSourceSet(SourceSet baseSourceSet, String extra) {
         //If the base sourceSet is main it already is the extra source set and has a reference to the base one from before this if statement
         extraSourceSet.compileClasspath += getExtraSourceSet(project.sourceSets.main, extra).output
         extraSourceSet.compileClasspath += baseSourceSet.output
+        extraSourceSet.runtimeClasspath += getExtraSourceSet(project.sourceSets.main, extra).output
+        extraSourceSet.runtimeClasspath += baseSourceSet.output
     }
     return extraSourceSet
 }
@@ -364,6 +366,19 @@ loom {
             register("${name}Client").configure {
                 inherit client
                 source(base)
+            }
+            register("${name}Server").configure {
+                inherit server
+                source(base)
+            }
+            register("${name}Datagen").configure {
+                source sourceSets.getByName("datagen${name.capitalize()}")
+
+                client()
+                property "fabric-api.datagen"
+                property "fabric-api.datagen.output-dir", file("src/datagen/generated/mekanism${name}").absolutePath
+
+                property("fabric-api.datagen.modid", "mekanism${name}")
             }
         }
     }

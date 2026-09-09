@@ -1,16 +1,17 @@
 package mekanism.additions.common.loot;
 
-import java.util.List;
 import mekanism.common.loot.BaseLootProvider;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+
+import java.util.List;
 
 public class AdditionsLootProvider extends BaseLootProvider {
 
-    public AdditionsLootProvider(PackOutput output) {
+    public AdditionsLootProvider(FabricDataOutput output) {
         super(output, List.of(
-              new SubProviderEntry(AdditionsBlockLootTables::new, LootContextParamSets.BLOCK),
-              new SubProviderEntry(AdditionsEntityLootTables::new, LootContextParamSets.ENTITY)
+              new SubProviderEntry(() -> new AdditionsBlockLootTables(output), LootContextParamSets.BLOCK),
+              new SubProviderEntry(() -> new AdditionsEntityLootTables(output), LootContextParamSets.ENTITY)
         ));
     }
 }

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import mekanism.api.providers.IItemProvider;
 import mekanism.common.DataGenJsonConstants;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricAdvancementProvider;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
@@ -98,5 +99,9 @@ public abstract class BaseAdvancementProvider implements DataProvider {
         return items.stream()
               .filter(itemProvider -> matcher.test(itemProvider.asItem()))
               .toArray(ItemLike[]::new);
+    }
+
+    public Advancement createPlaceHolder(ResourceLocation id) {
+        return Advancement.Builder.advancement().build(id);
     }
 }

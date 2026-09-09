@@ -3,16 +3,16 @@
   "category": "building",
   "key": {
     "#": {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
-        "tag": "forge:fence_gates/plastic"
+        "tag": "c:plastic_fence_gates"
       },
       "subtracted": {
         "item": "mekanismadditions:magenta_plastic_fence_gate"
       }
     },
     "D": {
-      "tag": "forge:dyes/magenta"
+      "tag": "c:pink_dyes"
     }
   },
   "pattern": [

@@ -207,10 +207,11 @@ public class MekanismTags {
         public static final TagKey<Item> OBSIDIAN = cTag("obsidian");
         public static final TagKey<Item> MUSHROOMS = cTag("mushrooms");
         public static final TagKey<Item> NETHER_STARS = cTag("nether_stars");
-        public static final TagKey<Item> LEATHER = cTag("leather");
-        public static final TagKey<Item> STRING = cTag("string");
+        public static final TagKey<Item> LEATHERS = cTag("leathers");
+        public static final TagKey<Item> STRINGS = cTag("strings");
         public static final TagKey<Item> ANCIENT_DEBRIS = cTag("ancient_debris");
         public static final TagKey<Item> WOODEN_RODS = cTag("wooden_rods");
+        public static final TagKey<Item> SLIME_BALLS = cTag("slime_balls");
 
         public static final TagKey<Item> QUARTZ_BLOCKS = cTag("quartz_blocks");
         public static final TagKey<Item> REDSTONE_BLOCKS = cTag("redstone_blocks");
