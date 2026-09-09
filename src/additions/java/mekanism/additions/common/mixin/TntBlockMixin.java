@@ -13,7 +13,8 @@ import org.spongepowered.asm.mixin.Mixin;
 public class TntBlockMixin {
     @WrapMethod(method = "explode(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/LivingEntity;)V")
     private static void explode(Level level, BlockPos blockPos, LivingEntity livingEntity, Operation<Void> original) {
-        if(level.getBlockState(blockPos).getBlock() instanceof BlockObsidianTNT) {
+        if(BlockObsidianTNT.OBSIDIAN_TNT_EXPLODING.get() || level.getBlockState(blockPos).getBlock() instanceof BlockObsidianTNT) {
+            BlockObsidianTNT.OBSIDIAN_TNT_EXPLODING.remove();
             BlockObsidianTNT.explode(level, blockPos, livingEntity);
         } else {
             original.call(level, blockPos, livingEntity);

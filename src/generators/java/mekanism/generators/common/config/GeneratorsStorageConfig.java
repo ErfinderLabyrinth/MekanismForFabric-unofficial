@@ -1,14 +1,17 @@
 package mekanism.generators.common.config;
 
+import me.shedaniel.autoconfig.annotation.Config;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.config.BaseMekanismConfig;
 
+@Config(name = "mekanism/generators-storage")
+
 public class GeneratorsStorageConfig extends BaseMekanismConfig {
-    public FloatingLong heatGenerator = FloatingLong.createConst(160_000);
-    public FloatingLong bioGenerator = FloatingLong.createConst(160_000);
-    public FloatingLong solarGenerator = FloatingLong.createConst(96_000);
-    public FloatingLong advancedSolarGenerator = FloatingLong.createConst(200_000);
-    public FloatingLong windGenerator = FloatingLong.createConst(200_000);
+    public long heatGenerator = 160_000;
+    public long bioGenerator = 160_000;
+    public long solarGenerator = 96_000;
+    public long advancedSolarGenerator = 200_000;
+    public long windGenerator = 200_000;
 
     GeneratorsStorageConfig() {
 //        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();

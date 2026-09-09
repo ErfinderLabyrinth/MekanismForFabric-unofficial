@@ -43,9 +43,9 @@ public class MekanismGenerators implements ModInitializer, IModModule {
 
     public static final String MODID = "mekanismgenerators";
     private static final ConfigBasedCachedSupplier<Long> ETHENE_ENERGY_DENSITY = new ConfigBasedCachedSupplier<>(() -> {
-        FloatingLong energy = MekanismGeneratorsConfig.generators.bioGeneration.multiply(2)
-              .timesEqual(MekanismGeneratorsConfig.generators.ethyleneDensityMultiplier);
-        return energy.plusEqual(MekanismConfig.COMMON.general.FROM_H2).longValue();
+        long energy = MekanismGeneratorsConfig.generators.bioGeneration * 2
+              * MekanismGeneratorsConfig.generators.ethyleneDensityMultiplier;
+        return energy + MekanismConfig.COMMON.general.FROM_H2;
     });
 
     public static MekanismGenerators instance;

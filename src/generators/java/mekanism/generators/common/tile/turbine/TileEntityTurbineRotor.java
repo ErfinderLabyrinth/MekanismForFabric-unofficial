@@ -184,15 +184,15 @@ public class TileEntityTurbineRotor extends TileEntityInternalMultiblock impleme
         nbtTags.putInt(NBTConstants.POSITION, getPosition());
     }
 
-    @NotNull
-    @Override
-    public AABB getRenderBoundingBox() {
-        if (blades == 0 || radius == -1) {
-            //If there are no blades default to the collision box of the rotor
-            return super.getRenderBoundingBox();
-        }
-        return new AABB(worldPosition.offset(-radius, 0, -radius), worldPosition.offset(1 + radius, 1, 1 + radius));
-    }
+//    @NotNull
+//    @Override
+//    public AABB getRenderBoundingBox() {
+//        if (blades == 0 || radius == -1) {
+//            //If there are no blades default to the collision box of the rotor
+//            return super.getRenderBoundingBox();
+//        }
+//        return new AABB(worldPosition.offset(-radius, 0, -radius), worldPosition.offset(1 + radius, 1, 1 + radius));
+//    }
 
     @NotNull
     @Override

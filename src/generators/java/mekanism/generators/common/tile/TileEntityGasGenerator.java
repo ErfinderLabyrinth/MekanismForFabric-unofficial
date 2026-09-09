@@ -1,7 +1,5 @@
 package mekanism.generators.common.tile;
 
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.RelativeSide;
 import mekanism.api.chemical.ChemicalTankBuilder;
@@ -25,12 +23,14 @@ import mekanism.common.inventory.container.slot.SlotOverlay;
 import mekanism.common.inventory.container.sync.SyncableDouble;
 import mekanism.common.inventory.container.sync.SyncableFloatingLong;
 import mekanism.common.inventory.container.sync.SyncableInt;
+import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.inventory.slot.chemical.GasInventorySlot;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.MekanismUtils;
 import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.registries.GeneratorsBlocks;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +45,7 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
     public FuelTank fuelTank;
     private long burnTicks;
     private int maxBurnTicks;
-    private FloatingLong generationRate = FloatingLong.ZERO;
+    private long generationRate = 0;
     private double gasUsedLastTick;
 
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getFuelItem", docPlaceholder = "fuel item slot")
@@ -54,7 +54,7 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
     EnergyInventorySlot energySlot;
 
     public TileEntityGasGenerator(BlockPos pos, BlockState state) {
-        super(GeneratorsBlocks.GAS_BURNING_GENERATOR, pos, state, MekanismConfig.general.FROM_H2);
+        super(GeneratorsBlocks.GAS_BURNING_GENERATOR, pos, state, () -> MekanismConfig.COMMON.general.FROM_H2);
     }
 
     @NotNull
@@ -82,7 +82,12 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
         energySlot.drainContainer();
         fuelSlot.fillTank();
 
-        if (!fuelTank.isEmpty() && MekanismUtils.canFunction(this) && getEnergyContainer().insert(generationRate, Action.SIMULATE, AutomationType.INTERNAL).isZero()) {
+        boolean canInserted;
+        try(Transaction t = Transaction.openOuter()) {
+            canInserted = getEnergyContainer().insert(generationRate, t) == generationRate;
+        }
+
+        if (!fuelTank.isEmpty() && MekanismUtils.canFunction(this) && canInserted) {
             setActive(true);
             if (!fuelTank.isEmpty()) {
                 fuelTank.getType().ifAttributePresent(Fuel.class, fuel -> {
@@ -93,12 +98,15 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
             }
 
             long toUse = getToUse();
-            FloatingLong toUseGeneration = generationRate.multiply(toUse);
-            updateMaxOutputRaw(MekanismConfig.general.FROM_H2.get().max(toUseGeneration));
+            long toUseGeneration = generationRate * toUse;
+            updateMaxOutputRaw(Math.max(MekanismConfig.COMMON.general.FROM_H2, toUseGeneration));
 
             long total = burnTicks + fuelTank.getStored() * maxBurnTicks;
             total -= toUse;
-            getEnergyContainer().insert(toUseGeneration, Action.EXECUTE, AutomationType.INTERNAL);
+            try(Transaction t = Transaction.openOuter()) {
+                getEnergyContainer().insert(toUseGeneration, t);
+                t.commit();
+            }
             if (!fuelTank.isEmpty()) {
                 //TODO: Improve this as it is sort of hacky
                 fuelTank.setStack(new GasStack(fuelTank.getStack(), total / maxBurnTicks));
@@ -117,21 +125,21 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
     private void reset() {
         burnTicks = 0;
         maxBurnTicks = 0;
-        generationRate = FloatingLong.ZERO;
-        updateMaxOutputRaw(MekanismConfig.general.FROM_H2.get());
+        generationRate = 0;
+        updateMaxOutputRaw(MekanismConfig.COMMON.general.FROM_H2);
     }
 
     private long getToUse() {
-        if (generationRate.isZero() || fuelTank.isEmpty()) {
+        if (generationRate == 0 || fuelTank.isEmpty()) {
             return 0;
         }
         long max = (long) Math.ceil(256 * (fuelTank.getStored() / (double) fuelTank.getCapacity()));
         max = Math.min(maxBurnTicks * fuelTank.getStored() + burnTicks, max);
-        max = Math.min(getEnergyContainer().getNeeded().divide(generationRate).intValue(), max);
+        max = Math.min(getEnergyContainer().getNeeded() / generationRate, max);
         return max;
     }
 
-    public FloatingLong getGenerationRate() {
+    public long getGenerationRate() {
         return generationRate;
     }
 
@@ -157,7 +165,7 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
     @Override
     public void addContainerTrackers(MekanismContainer container) {
         super.addContainerTrackers(container);
-        container.track(SyncableFloatingLong.create(this::getGenerationRate, value -> generationRate = value));
+        container.track(SyncableLong.create(this::getGenerationRate, value -> generationRate = value));
         container.track(syncableMaxOutput());
         container.track(SyncableDouble.create(this::getUsed, value -> gasUsedLastTick = value));
         container.track(SyncableInt.create(this::getMaxBurnTicks, value -> maxBurnTicks = value));
@@ -165,8 +173,8 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
 
     //Methods relating to IComputerTile
     @Override
-    FloatingLong getProductionRate() {
-        return getGenerationRate().multiply(getUsed()).multiply(getMaxBurnTicks());
+    long getProductionRate() {
+        return (long) (getGenerationRate() * getUsed() * getMaxBurnTicks());
     }
     //End methods IComputerTile
 
@@ -174,7 +182,7 @@ public class TileEntityGasGenerator extends TileEntityGenerator {
     private class FuelTank extends VariableCapacityGasTank {
 
         protected FuelTank(@Nullable IContentsListener listener) {
-            super(MekanismGeneratorsConfig.generators.gbgTankCapacity, ChemicalTankBuilder.GAS.notExternal, ChemicalTankBuilder.GAS.alwaysTrueBi,
+            super(() -> MekanismGeneratorsConfig.generators.gbgTankCapacity, ChemicalTankBuilder.GAS.notExternal, ChemicalTankBuilder.GAS.alwaysTrueBi,
                   gas -> gas.has(Fuel.class), null, listener);
         }
 

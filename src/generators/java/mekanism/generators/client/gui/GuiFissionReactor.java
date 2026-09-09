@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.List;
 import mekanism.api.text.EnumColor;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.GuiBigLight;
 import mekanism.client.gui.element.GuiInnerScreen;
@@ -16,6 +17,7 @@ import mekanism.client.gui.element.gauge.GuiHybridGauge;
 import mekanism.client.gui.element.graph.GuiDoubleGraph;
 import mekanism.client.gui.element.tab.GuiHeatTab;
 import mekanism.common.MekanismLang;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
@@ -66,21 +68,21 @@ public class GuiFissionReactor extends GuiMekanismTile<TileEntityFissionReactorC
                   GeneratorsLang.FISSION_DAMAGE.translate(tile.getDamageColor(), tile.getDamageString())
             );
         }).spacing(2).jeiCategories(GeneratorsJEIRecipeType.FISSION));
-        addRenderableWidget(new GuiHybridGauge(() -> tile.getMultiblock().gasCoolantTank, () -> tile.getMultiblock().getGasTanks(null),
-              () -> tile.getMultiblock().fluidCoolantTank, () -> tile.getMultiblock().getFluidTanks(null), GaugeType.STANDARD, this, 6, 13)
+        addRenderableWidget(new GuiHybridGauge(() -> tile.getMultiblock().gasCoolantTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()),
+              () -> tile.getMultiblock().fluidCoolantTank, () -> new ListHolder<>(tile.getMultiblock().getFluidTanks()), GaugeType.STANDARD, this, 6, 13)
               .setLabel(GeneratorsLang.FISSION_COOLANT_TANK.translateColored(EnumColor.AQUA)));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().fuelTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 25, 13)
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().fuelTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 25, 13)
               .setLabel(GeneratorsLang.FISSION_FUEL_TANK.translateColored(EnumColor.DARK_GREEN)));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().heatedCoolantTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 152, 13)
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().heatedCoolantTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 152, 13)
               .setLabel(GeneratorsLang.FISSION_HEATED_COOLANT_TANK.translateColored(EnumColor.ORANGE)));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().wasteTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 171, 13)
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().wasteTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 171, 13)
               .setLabel(GeneratorsLang.FISSION_WASTE_TANK.translateColored(EnumColor.BROWN)));
         addRenderableWidget(new GuiHeatTab(this, () -> {
             Component environment = MekanismUtils.getTemperatureDisplay(tile.getMultiblock().lastEnvironmentLoss, TemperatureUnit.KELVIN, false);
             return Collections.singletonList(MekanismLang.DISSIPATED_RATE.translate(environment));
         }));
         activateButton = addRenderableWidget(new TranslationButton(this, 6, 75, 81, 16, GeneratorsLang.FISSION_ACTIVATE,
-              () -> MekanismGenerators.packetHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.FISSION_ACTIVE, tile, 1)), null,
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.FISSION_ACTIVE, tile, 1)), null,
               () -> EnumColor.DARK_GREEN) {
             @Override
             public void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -101,7 +103,7 @@ public class GuiFissionReactor extends GuiMekanismTile<TileEntityFissionReactorC
             }
         });
         scramButton = addRenderableWidget(new TranslationButton(this, 89, 75, 81, 16, GeneratorsLang.FISSION_SCRAM,
-              () -> MekanismGenerators.packetHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.FISSION_ACTIVE, tile, 0)), null,
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.FISSION_ACTIVE, tile, 0)), null,
               () -> EnumColor.DARK_RED));
         addRenderableWidget(new GuiBigLight(this, 173, 76, tile.getMultiblock()::isActive));
         addRenderableWidget(new GuiDynamicHorizontalRateBar(this, new IBarInfoHandler() {

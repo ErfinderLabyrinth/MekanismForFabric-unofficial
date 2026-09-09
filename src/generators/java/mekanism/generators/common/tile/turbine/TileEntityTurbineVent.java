@@ -1,18 +1,24 @@
 package mekanism.generators.common.tile.turbine;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import mekanism.api.IContentsListener;
+import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
 import mekanism.common.lib.multiblock.IMultiblockEjector;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.FluidUtils;
 import mekanism.generators.common.content.turbine.TurbineMultiblockData;
 import mekanism.generators.common.registries.GeneratorsBlocks;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class TileEntityTurbineVent extends TileEntityTurbineCasing implements IMultiblockEjector {
 
@@ -25,9 +31,18 @@ public class TileEntityTurbineVent extends TileEntityTurbineCasing implements IM
     @NotNull
     @Override
     protected IFluidTankHolder getInitialFluidTanks(IContentsListener listener) {
-        return side -> {
-            TurbineMultiblockData multiblock = getMultiblock();
-            return multiblock.isFormed() ? multiblock.ventTanks : Collections.emptyList();
+        return new IFluidTankHolder() {
+            @Override
+            public @NotNull Storage<FluidVariant> getTanks(@Nullable Direction side) {
+                TurbineMultiblockData multiblock = getMultiblock();
+                return multiblock.isFormed() ? new CombinedStorage<>(multiblock.ventTanks) : Storage.empty();
+            }
+
+            @Override
+            public List<IExtendedFluidTank> getAll() {
+                TurbineMultiblockData multiblock = getMultiblock();
+                return multiblock.isFormed() ? multiblock.ventTanks : Collections.emptyList();
+            }
         };
     }
 

@@ -1,7 +1,10 @@
 package mekanism.generators.common.config;
 
+import me.shedaniel.autoconfig.annotation.Config;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.config.BaseMekanismConfig;
+
+@Config(name = "mekanism/generators-gear")
 
 public class GeneratorsGearConfig extends BaseMekanismConfig {
 

@@ -1,5 +1,6 @@
 package mekanism.generators.common.config;
 
+import me.shedaniel.autoconfig.annotation.Config;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.config.BaseMekanismConfig;
 import mekanism.generators.common.content.fission.FissionReactorMultiblockData;
@@ -9,6 +10,8 @@ import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.ArrayList;
 import java.util.List;
+
+@Config(name = "mekanism/generators-generator")
 
 public class GeneratorsConfig extends BaseMekanismConfig {
 
@@ -25,7 +28,7 @@ public class GeneratorsConfig extends BaseMekanismConfig {
 
     public long advancedSolarGeneration = 300;
 
-    public FloatingLong bioGeneration = FloatingLong.createConst(350);
+    public long bioGeneration = 350;
     public long bioTankCapacity = 24 * FluidConstants.BUCKET;
 
     public double heatGeneration = 200;
@@ -36,7 +39,7 @@ public class GeneratorsConfig extends BaseMekanismConfig {
 
     public long gbgTankCapacity = 18L * FluidConstants.BUCKET;
     public int ethyleneBurnTicks = 40;
-    public FloatingLong ethyleneDensityMultiplier = FloatingLong.createConst(40);
+    public long ethyleneDensityMultiplier = 40;
 
     public long solarGeneration = 50;
     public int turbineBladesPerCoil = 4;
@@ -47,8 +50,8 @@ public class GeneratorsConfig extends BaseMekanismConfig {
     public int condenserRate = 64_000;
 
     public double energyPerFusionFuel = 10_000_000;
-    public FloatingLong windGenerationMin = FloatingLong.createConst(60);
-    public FloatingLong windGenerationMax = FloatingLong.createConst(480);
+    public long windGenerationMin = 60;
+    public long windGenerationMax = 480;
     public int windGenerationMinY = 24;
     public int windGenerationMaxY = DimensionType.MAX_Y;
     public List<ResourceLocation> windGenerationDimBlacklist = new ArrayList<>();

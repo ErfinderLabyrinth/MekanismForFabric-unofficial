@@ -37,9 +37,9 @@ public class GuiTurbineStats extends GuiMekanismTile<TileEntityTurbineCasing, Em
             TurbineMultiblockData multiblock = tile.getMultiblock();
             if (multiblock.isFormed()) {
                 storing = EnergyDisplay.of(multiblock.energyContainer);
-                producing = EnergyDisplay.of(MekanismConfig.general.maxEnergyPerSteam.get().divide(TurbineValidator.MAX_BLADES)
-                      .multiply(multiblock.clientFlow * Math.min(multiblock.blades,
-                            multiblock.coils * MekanismGeneratorsConfig.generators.turbineBladesPerCoil.get())));
+                producing = EnergyDisplay.of((long) (MekanismConfig.COMMON.general.maxEnergyPerSteam / TurbineValidator.MAX_BLADES
+                                      * (multiblock.clientFlow * Math.min(multiblock.blades,
+                                            multiblock.coils * MekanismGeneratorsConfig.generators.turbineBladesPerCoil))));
             } else {
                 storing = EnergyDisplay.ZERO;
                 producing = EnergyDisplay.ZERO;
@@ -58,10 +58,10 @@ public class GuiTurbineStats extends GuiMekanismTile<TileEntityTurbineCasing, Em
             int dispersers = multiblock.getDispersers();
             int vents = multiblock.vents;
             drawString(guiGraphics, GeneratorsLang.TURBINE_TANK_VOLUME.translate(lowerVolume), 8, 26, titleTextColor());
-            boolean dispersersLimiting = lowerVolume * dispersers * MekanismGeneratorsConfig.generators.turbineDisperserGasFlow.get()
-                                         < vents * MekanismGeneratorsConfig.generators.turbineVentGasFlow.get();
-            boolean ventsLimiting = lowerVolume * dispersers * MekanismGeneratorsConfig.generators.turbineDisperserGasFlow.get()
-                                    > vents * MekanismGeneratorsConfig.generators.turbineVentGasFlow.get();
+            boolean dispersersLimiting = lowerVolume * dispersers * MekanismGeneratorsConfig.generators.turbineDisperserGasFlow
+                                         < vents * MekanismGeneratorsConfig.generators.turbineVentGasFlow;
+            boolean ventsLimiting = lowerVolume * dispersers * MekanismGeneratorsConfig.generators.turbineDisperserGasFlow
+                                    > vents * MekanismGeneratorsConfig.generators.turbineVentGasFlow;
             drawString(guiGraphics, GeneratorsLang.TURBINE_STEAM_FLOW.translate(), 8, 40, subheadingTextColor());
             drawString(guiGraphics, GeneratorsLang.TURBINE_DISPERSERS.translate(dispersers, dispersersLimiting ? limiting : ""), 14, 49, titleTextColor());
             drawString(guiGraphics, GeneratorsLang.TURBINE_VENTS.translate(vents, ventsLimiting ? limiting : ""), 14, 58, titleTextColor());

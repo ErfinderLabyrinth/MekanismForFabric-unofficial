@@ -10,6 +10,7 @@ import mekanism.client.gui.element.progress.GuiProgress;
 import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.MekanismRenderer.FluidTextureType;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.inventory.container.tile.EmptyTileContainer;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
@@ -87,7 +88,7 @@ public class GuiFusionReactorHeat extends GuiFusionReactorInfo {
             FusionReactorMultiblockData multiblock = tile.getMultiblock();
             return multiblock.getCaseTemp() > 0 && !multiblock.waterTank.isEmpty() && multiblock.steamTank.getStored() < multiblock.steamTank.getCapacity();
         }, ProgressType.SMALL_RIGHT, this, 83, 91));
-        addRenderableWidget(new GuiFluidGauge(() -> tile.getMultiblock().waterTank, () -> tile.getFluidTanks(null), GaugeType.SMALL, this, 115, 84));
+        addRenderableWidget(new GuiFluidGauge(() -> tile.getMultiblock().waterTank, () -> tile.getFluidManager().getHolder(), GaugeType.SMALL, this, 115, 84));
         addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().steamTank, () -> tile.getGasManager().getHolder(), GaugeType.SMALL, this, 151, 84));
         addRenderableWidget(new GuiEnergyGauge(tile.getMultiblock().energyContainer, GaugeType.SMALL, this, 115, 46));
         addRenderableWidget(new GuiFusionReactorTab(this, tile, FusionReactorTab.FUEL));

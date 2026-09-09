@@ -1,10 +1,12 @@
 package mekanism.generators.client.gui;
 
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiGasGauge;
 import mekanism.client.gui.element.progress.GuiProgress;
 import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.text.GuiTextField;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.inventory.container.tile.EmptyTileContainer;
 import mekanism.common.util.text.InputValidator;
 import mekanism.generators.client.gui.element.GuiFusionReactorTab;
@@ -30,9 +32,9 @@ public class GuiFusionReactorFuel extends GuiFusionReactorInfo {
     @Override
     protected void addGuiElements() {
         super.addGuiElements();
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().deuteriumTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.SMALL, this, 25, 64));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().fuelTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 79, 50));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().tritiumTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.SMALL, this, 133, 64));
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().deuteriumTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.SMALL, this, 25, 64));
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().fuelTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 79, 50));
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().tritiumTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.SMALL, this, 133, 64));
         addRenderableWidget(new GuiProgress(() -> tile.getMultiblock().isBurning(), ProgressType.SMALL_RIGHT, this, 47, 76));
         addRenderableWidget(new GuiProgress(() -> tile.getMultiblock().isBurning(), ProgressType.SMALL_LEFT, this, 101, 76));
         addRenderableWidget(new GuiFusionReactorTab(this, tile, FusionReactorTab.HEAT));
@@ -54,7 +56,7 @@ public class GuiFusionReactorFuel extends GuiFusionReactorInfo {
 
     private void setInjection() {
         if (!injectionRateField.getText().isEmpty()) {
-            MekanismGenerators.packetHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.INJECTION_RATE, tile, Integer.parseInt(injectionRateField.getText())));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.INJECTION_RATE, tile, Integer.parseInt(injectionRateField.getText())));
             injectionRateField.setText("");
         }
     }

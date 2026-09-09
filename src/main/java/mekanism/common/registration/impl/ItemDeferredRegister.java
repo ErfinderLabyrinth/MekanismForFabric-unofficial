@@ -32,6 +32,11 @@ public class ItemDeferredRegister extends WrappedDeferredRegister<Item> {
         this.modid = modid;
     }
 
+    public ItemRegistryObject<Item> register(String name) {
+        return register(new ResourceLocation(modid, name));
+    }
+
+
     public ItemRegistryObject<Item> register(ResourceLocation id) {
         return register(id, Item::new);
     }
@@ -57,6 +62,10 @@ public class ItemDeferredRegister extends WrappedDeferredRegister<Item> {
     public ItemRegistryObject<ItemModule> registerModule(ModuleRegistryObject<?> moduleDataSupplier) {
         //Note: We use the internal helper just in case we end up needing to know it is an ItemModule instead of just an Item somewhere
         return register(new ResourceLocation(modid, "module_" + moduleDataSupplier.getInternalRegistryName()), () -> ModuleHelper.get().createModuleItem(moduleDataSupplier, new Item.Properties()));
+    }
+
+    public <ITEM extends Item> ItemRegistryObject<ITEM> register(String name, Function<Item.Properties, ITEM> sup) {
+        return register(new ResourceLocation(modid, name), sup);
     }
 
     public <ITEM extends Item> ItemRegistryObject<ITEM> register(ResourceLocation id, Function<Item.Properties, ITEM> sup) {

@@ -82,8 +82,8 @@ public class AdditionsClientRegistration {
     private static void registerBlockColorHandles(Map<EnumColor, ? extends BlockRegistryObject<?, ?>>... blocks) {
         for (Map<EnumColor, ? extends BlockRegistryObject<?, ?>> blockMap : blocks) {
             for (BlockRegistryObject<?, ?> block : blockMap.values()) {
-                ClientRegistrationUtil.registerIColoredBlockHandler(block);
-                ClientRegistrationUtil.registerIColoredItemHandler(block);
+                ClientRegistrationUtil.registerIColoredBlockHandler(true, block);
+                ClientRegistrationUtil.registerIColoredBlockHandler(false, block);
             }
         }
     }

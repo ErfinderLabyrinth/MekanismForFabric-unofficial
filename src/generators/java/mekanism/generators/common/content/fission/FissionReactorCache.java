@@ -18,7 +18,7 @@ public class FissionReactorCache extends MultiblockCache<FissionReactorMultibloc
     private double getRateLimit() {
         if (rateLimit == -1) {
             //If it never got set it to the default
-            return MekanismGeneratorsConfig.generators.defaultBurnRate.get();
+            return MekanismGeneratorsConfig.generators.defaultBurnRate;
         }
         //Otherwise, return the actual so that it can be manually set down to zero
         return rateLimit;

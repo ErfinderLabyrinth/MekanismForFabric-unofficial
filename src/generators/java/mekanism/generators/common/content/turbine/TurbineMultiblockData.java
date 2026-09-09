@@ -230,19 +230,19 @@ public class TurbineMultiblockData extends MultiblockData {
     }
 
     @ComputerMethod
-    public double getProductionRate() {
+    public long getProductionRate() {
         double energyMultiplier = (MekanismConfig.COMMON.general.maxEnergyPerSteam / TurbineValidator.MAX_BLADES)
                * Math.min(blades, coils * MekanismGeneratorsConfig.generators.turbineBladesPerCoil);
-        return energyMultiplier * clientFlow;
+        return (long) (energyMultiplier * clientFlow);
     }
 
     @ComputerMethod
-    public double getMaxProduction() {
+    public long getMaxProduction() {
         double energyMultiplier = (MekanismConfig.COMMON.general.maxEnergyPerSteam / TurbineValidator.MAX_BLADES)
               * Math.min(blades, coils * MekanismGeneratorsConfig.generators.turbineBladesPerCoil);
         double rate = lowerVolume * (getDispersers() * MekanismGeneratorsConfig.generators.turbineDisperserGasFlow);
         rate = Math.min(rate, vents * MekanismGeneratorsConfig.generators.turbineVentGasFlow);
-        return energyMultiplier * rate;
+        return (long) (energyMultiplier * rate);
     }
 
     @ComputerMethod

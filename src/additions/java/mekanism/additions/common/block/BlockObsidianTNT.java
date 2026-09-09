@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockObsidianTNT extends TntBlock implements IStateFluidLoggable {
-
+    public static final ThreadLocal<Boolean> OBSIDIAN_TNT_EXPLODING = ThreadLocal.withInitial(() -> false);
     private static final VoxelShape bounds = VoxelShapeUtils.combine(
           box(0, 0, 0, 16, 3, 16),//Wooden1
           box(0, 8, 0, 16, 11, 16),//Wooden2

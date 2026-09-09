@@ -7,6 +7,7 @@ import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiGasGauge;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
 import mekanism.common.MekanismLang;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.util.text.EnergyDisplay;
 import mekanism.generators.common.GeneratorsLang;
@@ -27,9 +28,9 @@ public class GuiGasGenerator extends GuiMekanismTile<TileEntityGasGenerator, Mek
     protected void addGuiElements() {
         super.addGuiElements();
         addRenderableWidget(new GuiEnergyTab(this, () -> List.of(
-              GeneratorsLang.PRODUCING_AMOUNT.translate(EnergyDisplay.of(tile.getGenerationRate().multiply(tile.getUsed()).multiply(tile.getMaxBurnTicks()))),
+              GeneratorsLang.PRODUCING_AMOUNT.translate(EnergyDisplay.of((long) (tile.getGenerationRate() * tile.getUsed() * tile.getMaxBurnTicks()))),
               MekanismLang.MAX_OUTPUT.translate(EnergyDisplay.of(tile.getMaxOutput())))));
-        addRenderableWidget(new GuiGasGauge(() -> tile.fuelTank, () -> tile.getGasTanks(null), GaugeType.WIDE, this, 55, 18));
+        addRenderableWidget(new GuiGasGauge(() -> tile.fuelTank, () -> new ListHolder<>(tile.getGasTanks()), GaugeType.WIDE, this, 55, 18));
         addRenderableWidget(new GuiVerticalPowerBar(this, tile.getEnergyContainer(), 164, 15));
     }
 
