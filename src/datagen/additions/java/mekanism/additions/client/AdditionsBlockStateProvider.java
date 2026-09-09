@@ -10,9 +10,16 @@ import mekanism.client.state.BaseBlockStateProvider;
 import mekanism.common.item.block.ItemBlockColoredName;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.core.Direction;
 import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
+import net.minecraft.data.models.blockstates.Variant;
+import net.minecraft.data.models.blockstates.VariantProperties;
 import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +28,11 @@ public class AdditionsBlockStateProvider extends BaseBlockStateProvider<Addition
 
     public AdditionsBlockStateProvider(FabricDataOutput output) {
         super(output, MekanismAdditions.MODID, AdditionsBlockModelProvider::new);
+    }
+
+    @Override
+    public void generateItemModels(ItemModelGenerators itemModelGenerator) {
+        AdditionsItemModelProvider.generateItemModels(itemModelGenerator);
     }
 
     @Override
@@ -46,8 +58,23 @@ public class AdditionsBlockStateProvider extends BaseBlockStateProvider<Addition
         ResourceLocation model = modLoc("block/glow_panel");
         for (BlockRegistryObject<BlockGlowPanel, ItemBlockColoredName> blockRO : AdditionsBlocks.GLOW_PANELS.values()) {
             BlockGlowPanel glowPanel = blockRO.getBlock();
-            gen.blockStateOutput.accept(BlockModelGenerators.createRotatedVariant(glowPanel, model));
+            gen.blockStateOutput.accept(
+                    MultiVariantGenerator.multiVariant(
+                            glowPanel,
+                            Variant.variant().with(VariantProperties.MODEL, model)
+                    ).with(createDefaultUpFacingDispatch())
+            );
         }
+    }
+
+    public static PropertyDispatch createDefaultUpFacingDispatch() {
+        return PropertyDispatch.property(BlockStateProperties.FACING)
+                .select(Direction.DOWN, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R180))
+                .select(Direction.EAST, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                .select(Direction.NORTH, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90))
+                .select(Direction.SOUTH, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                .select(Direction.UP, Variant.variant())
+                .select(Direction.WEST, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270));
     }
 
     private ModelTemplate modelTemplate(ResourceLocation model) {

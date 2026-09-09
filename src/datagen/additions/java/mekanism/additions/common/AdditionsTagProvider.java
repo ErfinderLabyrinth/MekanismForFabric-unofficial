@@ -60,7 +60,7 @@ public class AdditionsTagProvider extends BaseTagProvider {
     }
 
     private void addDamageTypes() {
-        getDamageTypeBuilder(AdditionsTags.DamageTypes.BALLOON_INVULNERABLE).add(
+        getDamageTypeBuilder(AdditionsTags.DamageTypes.BALLOON_INVULNERABLE).addForced(
               DamageTypeTags.IS_FALL
         ).add(
               DamageTypes.DROWN,

@@ -9,10 +9,6 @@ import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
 public class ToolsDataGenerator implements DataGeneratorEntrypoint {
-
-    private ToolsDataGenerator() {
-    }
-
     public void onInitializeDataGenerator(FabricDataGenerator gen) {
         MekanismDataGenerator.bootstrapConfigs(MekanismTools.MODID);
         FabricDataGenerator.Pack pack = gen.createPack();

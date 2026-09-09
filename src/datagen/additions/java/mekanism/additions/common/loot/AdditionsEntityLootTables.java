@@ -2,7 +2,9 @@ package mekanism.additions.common.loot;
 
 import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.common.loot.table.BaseEntityLootTables;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
@@ -22,12 +24,17 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWit
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
+import java.util.function.BiConsumer;
+
 public class AdditionsEntityLootTables extends BaseEntityLootTables {
+    protected AdditionsEntityLootTables(FabricDataOutput output) {
+        super(output);
+    }
 
     @Override
-    public void generate() {
+    public void generate(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
         //Copy of vanilla's creeper drops
-        add(AdditionsEntityTypes.BABY_CREEPER, LootTable.lootTable()
+        add(biConsumer, AdditionsEntityTypes.BABY_CREEPER, LootTable.lootTable()
               .withPool(
                     LootPool.lootPool()
                           .setRolls(ConstantValue.exactly(1))
@@ -41,7 +48,7 @@ public class AdditionsEntityLootTables extends BaseEntityLootTables {
               )
         );
         //Copy of vanilla's enderman drops
-        add(AdditionsEntityTypes.BABY_ENDERMAN, LootTable.lootTable()
+        add(biConsumer, AdditionsEntityTypes.BABY_ENDERMAN, LootTable.lootTable()
               .withPool(LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1))
                     .add(LootItem.lootTableItem(Items.ENDER_PEARL)
@@ -51,9 +58,9 @@ public class AdditionsEntityLootTables extends BaseEntityLootTables {
               )
         );
         //Copy of vanilla's skeleton drops
-        add(AdditionsEntityTypes.BABY_SKELETON, skeletonDrops());
+        add(biConsumer, AdditionsEntityTypes.BABY_SKELETON, skeletonDrops());
         //Copy of vanilla's stray drops
-        add(AdditionsEntityTypes.BABY_STRAY, skeletonDrops()
+        add(biConsumer, AdditionsEntityTypes.BABY_STRAY, skeletonDrops()
               .withPool(LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1))
                     .add(LootItem.lootTableItem(Items.TIPPED_ARROW)
@@ -65,7 +72,7 @@ public class AdditionsEntityLootTables extends BaseEntityLootTables {
               )
         );
         //Copy of vanilla's wither skeleton drops
-        add(AdditionsEntityTypes.BABY_WITHER_SKELETON, LootTable.lootTable()
+        add(biConsumer, AdditionsEntityTypes.BABY_WITHER_SKELETON, LootTable.lootTable()
               .withPool(LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1))
                     .add(LootItem.lootTableItem(Items.COAL)

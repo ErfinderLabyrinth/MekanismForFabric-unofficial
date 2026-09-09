@@ -11,7 +11,7 @@ public class AdditionsLootProvider extends BaseLootProvider {
     public AdditionsLootProvider(FabricDataOutput output) {
         super(output, List.of(
               new SubProviderEntry(() -> new AdditionsBlockLootTables(output), LootContextParamSets.BLOCK),
-              new SubProviderEntry(AdditionsEntityLootTables::new, LootContextParamSets.ENTITY)
+              new SubProviderEntry(() -> new AdditionsEntityLootTables(output), LootContextParamSets.ENTITY)
         ));
     }
 }

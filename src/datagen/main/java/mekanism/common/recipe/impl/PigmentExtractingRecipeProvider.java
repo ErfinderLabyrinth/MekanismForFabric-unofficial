@@ -14,7 +14,6 @@ import mekanism.common.registration.impl.PigmentRegistryObject;
 import mekanism.common.registries.MekanismPigments;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
