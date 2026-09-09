@@ -4,8 +4,9 @@ import mekanism.api.chemical.ChemicalTags;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.common.Mekanism;
 import mekanism.common.tags.LazyTagLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 
@@ -30,14 +31,14 @@ public class GeneratorTags {
         private Fluids() {
         }
 
-        public static final TagKey<Fluid> BIOETHANOL = forgeTag("bioethanol");
-        public static final LazyTagLookup<Fluid> BIOETHANOL_LOOKUP = LazyTagLookup.create(ForgeRegistries.FLUIDS, BIOETHANOL);
-        public static final TagKey<Fluid> DEUTERIUM = forgeTag("deuterium");
-        public static final TagKey<Fluid> FUSION_FUEL = forgeTag("fusion_fuel");
-        public static final TagKey<Fluid> TRITIUM = forgeTag("tritium");
+        public static final TagKey<Fluid> BIOETHANOL = cTag("bioethanol");
+        public static final LazyTagLookup<Fluid> BIOETHANOL_LOOKUP = LazyTagLookup.create(BuiltInRegistries.FLUID, BIOETHANOL);
+        public static final TagKey<Fluid> DEUTERIUM = cTag("deuterium");
+        public static final TagKey<Fluid> FUSION_FUEL = cTag("fusion_fuel");
+        public static final TagKey<Fluid> TRITIUM = cTag("tritium");
 
-        private static TagKey<Fluid> forgeTag(String name) {
-            return FluidTags.create(new ResourceLocation("forge", name));
+        private static TagKey<Fluid> cTag(String name) {
+            return TagKey.create(Registries.FLUID, new ResourceLocation("c", name));
         }
     }
 

@@ -57,9 +57,18 @@ public abstract class BaseSoundProvider implements DataProvider {
         Map<ResourceLocation, SoundEventBuilder> soundEventRegistrations = new HashMap<>();
         registerSounds(soundEventRegistrations::put);
 
-        JsonElement json = new JsonArray();//TODO
+        Map<String, JsonObject> namespaceToJson = new HashMap<>();
+        for(Map.Entry<ResourceLocation, SoundEventBuilder> entry : soundEventRegistrations.entrySet()) {
+            namespaceToJson.computeIfAbsent(entry.getKey().getNamespace(), n -> new JsonObject())
+                    .add(entry.getKey().getPath(), entry.getValue().toJson());
+        }
 
-        return DataProvider.saveStable(cachedOutput, json, soundPathProvider.json(new ResourceLocation(modid, "sounds")));
+        CompletableFuture<?>[] futures = new CompletableFuture<?>[namespaceToJson.size()];
+        int i = 0;
+        for(Map.Entry<String, JsonObject> entry : namespaceToJson.entrySet()) {
+            futures[i] = DataProvider.saveStable(cachedOutput, entry.getValue(), soundPathProvider.json(new ResourceLocation(entry.getKey(), "sounds")));
+        }
+        return CompletableFuture.allOf(futures);
     }
 
     protected abstract void registerSounds(BiConsumer<ResourceLocation, SoundEventBuilder> creator);
