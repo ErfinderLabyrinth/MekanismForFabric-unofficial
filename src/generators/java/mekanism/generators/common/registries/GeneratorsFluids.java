@@ -26,4 +26,8 @@ public class GeneratorsFluids {
     private static FluidRegistryObject<MekanismFluidType, Source, Flowing, LiquidBlock, BucketItem> registerLiquidGas(String name, int tint) {
         return FLUIDS.register(name, renderProperties -> renderProperties.tint(tint));
     }
+
+    public static void register() {
+
+    }
 }

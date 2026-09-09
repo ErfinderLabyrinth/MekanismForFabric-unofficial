@@ -81,4 +81,8 @@ public class GeneratorsBlocks {
     private static <BLOCK extends Block & IHasDescription> BlockRegistryObject<BLOCK, ItemBlockTooltip<BLOCK>> registerTooltipBlock(String name, Supplier<BLOCK> blockCreator) {
         return BLOCKS.registerDefaultProperties(name, blockCreator, ItemBlockTooltip::new);
     }
+
+    public static void register() {
+
+    }
 }

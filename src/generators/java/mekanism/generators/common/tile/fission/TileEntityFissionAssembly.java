@@ -53,6 +53,7 @@ public class TileEntityFissionAssembly extends TileEntityInternalMultiblock {
             if (multiblockPairing != null && multiblockPairing.master != null) {
                 FissionReactorMultiblockData multiblock = multiblockPairing.master.getMultiblock();
                 if (multiblock.isFormed() && multiblock.isBurning()) {
+                    // Implementation needed in FuelAssemblyBakedModel
                     return ModelData.builder().with(GLOWING, null).build();
                 }
             }

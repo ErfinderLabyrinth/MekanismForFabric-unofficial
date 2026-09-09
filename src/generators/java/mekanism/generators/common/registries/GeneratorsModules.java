@@ -23,4 +23,8 @@ public class GeneratorsModules {
     //Pants
     public static final ModuleRegistryObject<ModuleGeothermalGeneratorUnit> GEOTHERMAL_GENERATOR_UNIT = MODULES.register("geothermal_generator_unit",
           ModuleGeothermalGeneratorUnit::new, () -> GeneratorsItems.MODULE_GEOTHERMAL_GENERATOR.asItem(), builder -> builder.maxStackSize(8).rarity(Rarity.RARE));
+
+    public static void register() {
+
+    }
 }

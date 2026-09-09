@@ -173,11 +173,11 @@ public class FusionReactorMultiblockData extends MultiblockData {
         tag.putBoolean(NBTConstants.BURNING, isBurning());
     }
 
-    public void addTemperatureFromEnergyInput(FloatingLong energyAdded) {
+    public void addTemperatureFromEnergyInput(long energyAdded) {
         if (isBurning()) {
-            setPlasmaTemp(getPlasmaTemp() + energyAdded.divide(plasmaHeatCapacity).doubleValue());
+            setPlasmaTemp(getPlasmaTemp() + energyAdded / plasmaHeatCapacity);
         } else {
-            setPlasmaTemp(getPlasmaTemp() + energyAdded.divide(plasmaHeatCapacity).multiply(10).doubleValue());
+            setPlasmaTemp(getPlasmaTemp() + energyAdded / plasmaHeatCapacity * 10);
         }
     }
 

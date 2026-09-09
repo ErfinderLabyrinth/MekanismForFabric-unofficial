@@ -45,4 +45,8 @@ public class GeneratorsCreativeTabs {
              CreativeTabDeferredRegister.addToDisplay(event, GeneratorsItems.HOHLRAUM, GeneratorsItems.SOLAR_PANEL);
          }
     }
+
+    public static void register() {
+
+    }
 }

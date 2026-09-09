@@ -84,5 +84,5 @@ public abstract class TileEntityGenerator extends TileEntityMekanism implements 
     }
 
     @ComputerMethod(methodDescription = "Get the amount of energy produced by this generator in the last tick.")
-    abstract FloatingLong getProductionRate();
+    abstract long getProductionRate();
 }
