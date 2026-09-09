@@ -1,8 +1,5 @@
 package mekanism.additions.client;
 
-import java.util.Map;
-import java.util.Optional;
-
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.registries.AdditionsBlocks;
 import mekanism.additions.common.registries.AdditionsItems;
@@ -14,6 +11,9 @@ import net.minecraft.data.models.model.ModelLocationUtils;
 import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Map;
+import java.util.Optional;
 
 public class AdditionsItemModelProvider extends BaseItemModelProvider {
 

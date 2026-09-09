@@ -365,6 +365,17 @@ loom {
                 inherit client
                 source(base)
             }
+            register("${name}Server").configure {
+                inherit server
+                source(base)
+            }
+            register("${name}Datagen").configure {
+                source sourceSets.getByName("datagen${name.capitalize()}")
+
+                client()
+                property "fabric-api.datagen"
+                property "fabric-api.datagen.output-dir", file("src/datagen/generated/mekanism${name}").absolutePath
+            }
         }
     }
 

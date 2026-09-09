@@ -2,7 +2,6 @@ package mekanism.common.tag;
 
 import com.google.common.collect.Table.Cell;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -28,7 +27,6 @@ import mekanism.common.registries.MekanismSlurries;
 import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.resource.BlockResourceInfo;
 import mekanism.common.resource.IResource;
-import mekanism.common.resource.MiscResource;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.resource.ResourceType;
 import mekanism.common.resource.ore.OreBlockType;
@@ -37,7 +35,6 @@ import mekanism.common.tags.MekanismTags;
 import mekanism.common.tags.TagUtils;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBlockTags;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
-import net.fabricmc.fabric.impl.datagen.ForcedTagEntry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
@@ -505,9 +502,11 @@ public class MekanismTagProvider extends BaseTagProvider {
         addToTag(MekanismTags.Items.OBSIDIAN, Items.OBSIDIAN);
         addToTag(MekanismTags.Items.MUSHROOMS, Items.RED_MUSHROOM, Items.BROWN_MUSHROOM, Items.CRIMSON_FUNGUS, Items.WARPED_FUNGUS);
         addToTag(MekanismTags.Items.NETHER_STARS, Items.NETHER_STAR);
-        addToTag(MekanismTags.Items.LEATHER, Items.LEATHER);
+        addToTag(MekanismTags.Items.LEATHERS, Items.LEATHER);
+        addToTag(MekanismTags.Items.STRINGS, Items.STRING);
         addToTag(MekanismTags.Items.ANCIENT_DEBRIS, Items.ANCIENT_DEBRIS);
         addToTag(MekanismTags.Items.WOODEN_RODS, Items.STICK);
+        addToTag(MekanismTags.Items.SLIME_BALLS, Items.SLIME_BALL);
 
         addToTag(MekanismTags.Items.QUARTZ_BLOCKS, Items.QUARTZ_BLOCK);
         addToTag(MekanismTags.Items.REDSTONE_BLOCKS, Items.REDSTONE_BLOCK);

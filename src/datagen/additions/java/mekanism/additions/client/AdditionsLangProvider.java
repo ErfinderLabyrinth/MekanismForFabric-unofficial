@@ -1,6 +1,5 @@
 package mekanism.additions.client;
 
-import java.util.Map;
 import mekanism.additions.common.AdditionsLang;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.advancements.AdditionsAdvancements;
@@ -14,7 +13,8 @@ import mekanism.api.text.EnumColor;
 import mekanism.client.lang.BaseLanguageProvider;
 import mekanism.common.registration.impl.ItemRegistryObject;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.minecraft.data.PackOutput;
+
+import java.util.Map;
 
 public class AdditionsLangProvider extends BaseLanguageProvider {
 

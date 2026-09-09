@@ -1,6 +1,5 @@
 package mekanism.additions.common;
 
-import java.util.function.Consumer;
 import mekanism.additions.common.advancements.AdditionsAdvancements;
 import mekanism.additions.common.registries.AdditionsBlocks;
 import mekanism.additions.common.registries.AdditionsEntityTypes;
@@ -9,6 +8,7 @@ import mekanism.api.datagen.recipe.RecipeCriterion;
 import mekanism.api.providers.IEntityTypeProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.common.advancements.BaseAdvancementProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.FrameType;
@@ -16,15 +16,15 @@ import net.minecraft.advancements.critereon.DamagePredicate;
 import net.minecraft.advancements.critereon.EntityHurtPlayerTrigger;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.KilledTrigger;
-import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
 
 public class AdditionsAdvancementProvider extends BaseAdvancementProvider {
 
-    public AdditionsAdvancementProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-        super(output, existingFileHelper, MekanismAdditions.MODID);
+    public AdditionsAdvancementProvider(FabricDataOutput output) {
+        super(output, MekanismAdditions.MODID);
     }
 
     @Override

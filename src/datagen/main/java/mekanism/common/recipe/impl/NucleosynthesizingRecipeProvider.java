@@ -86,7 +86,7 @@ class NucleosynthesizingRecipeProvider implements ISubRecipeProvider {
               750
         ).build(consumer, Mekanism.rl(basePath + "enchanted_golden_apple"));
         NucleosynthesizingRecipeBuilder.nucleosynthesizing(
-              IngredientCreatorAccess.item().from(MekanismTags.Items.LEATHER),
+              IngredientCreatorAccess.item().from(MekanismTags.Items.LEATHERS),
               IngredientCreatorAccess.gas().from(MekanismGases.ANTIMATTER, 3),
               new ItemStack(Items.PHANTOM_MEMBRANE),
               750
