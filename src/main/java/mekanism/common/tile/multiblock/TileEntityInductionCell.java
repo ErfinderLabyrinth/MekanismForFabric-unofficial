@@ -9,8 +9,11 @@ import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
 import mekanism.common.tier.InductionCellTier;
 import mekanism.common.tile.prefab.TileEntityInternalMultiblock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
 public class TileEntityInductionCell extends TileEntityInternalMultiblock {
 
@@ -21,6 +24,11 @@ public class TileEntityInductionCell extends TileEntityInternalMultiblock {
         super(blockProvider, pos, state);
         //Never externally expose the energy capability
         //addDisabledCapabilities(EnergyCompatUtils.getEnabledEnergyCapabilities());
+    }
+
+    @Override
+    public EnergyStorage getEnergyContainer(@Nullable Direction side) {
+        return null;
     }
 
     @NotNull

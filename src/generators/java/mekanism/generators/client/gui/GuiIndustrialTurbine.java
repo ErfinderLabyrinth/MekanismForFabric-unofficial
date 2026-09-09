@@ -29,6 +29,7 @@ import mekanism.generators.common.content.turbine.TurbineValidator;
 import mekanism.generators.common.tile.turbine.TileEntityTurbineCasing;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,8 +70,8 @@ public class GuiIndustrialTurbine extends GuiMekanismTile<TileEntityTurbineCasin
             @Override
             public double getLevel() {
                 TurbineMultiblockData multiblock = tile.getMultiblock();
-                if (multiblock.isFormed()) {
-                    return multiblock.energyContainer.getEnergy().divideToLevel(multiblock.energyContainer.getMaxEnergy());
+                if (multiblock.isFormed() && multiblock.energyContainer.getMaxEnergy() != 0) {
+                    return Mth.clamp((double) multiblock.energyContainer.getEnergy() / multiblock.energyContainer.getMaxEnergy(), 0, 1);
                 }
                 return 1;
             }
@@ -87,7 +88,7 @@ public class GuiIndustrialTurbine extends GuiMekanismTile<TileEntityTurbineCasin
                 if (!multiblock.isFormed()) {
                     return 0;
                 }
-                double rate = Math.min(multiblock.lowerVolume * multiblock.getDispersers() * MekanismGeneratorsConfig.generators.turbineDisperserGasFlow.get(),
+                double rate = Math.min(multiblock.lowerVolume * multiblock.getDispersers() * MekanismGeneratorsConfig.generators.turbineDisperserGasFlow,
                       multiblock.vents * MekanismGeneratorsConfig.generators.turbineVentGasFlow);
                 if (rate == 0) {
                     return 0;

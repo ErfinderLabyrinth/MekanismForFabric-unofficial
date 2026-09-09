@@ -1,23 +1,46 @@
 package mekanism.generators.common.tile.fusion;
 
+import mekanism.api.chemical.gas.Gas;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.generators.common.content.fusion.FusionReactorMultiblockData;
 import mekanism.generators.common.registries.GeneratorsBlocks;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
 public class TileEntityFusionReactorController extends TileEntityFusionReactorBlock {
 
     public TileEntityFusionReactorController(BlockPos pos, BlockState state) {
         super(GeneratorsBlocks.FUSION_REACTOR_CONTROLLER, pos, state);
         //Never allow the gas handler, fluid handler, or energy cap to be enabled here even though internally we can handle both of them
-        addDisabledCapabilities(Capabilities.GAS_HANDLER, ForgeCapabilities.FLUID_HANDLER, Capabilities.HEAT_HANDLER);
-        addDisabledCapabilities(EnergyCompatUtils.getEnabledEnergyCapabilities());
-        addSemiDisabledCapability(ForgeCapabilities.ITEM_HANDLER, () -> !getMultiblock().isFormed());
+//        addDisabledCapabilities(Capabilities.GAS_HANDLER, ForgeCapabilities.FLUID_HANDLER, Capabilities.HEAT_HANDLER);
+//        addDisabledCapabilities(EnergyCompatUtils.getEnabledEnergyCapabilities());
+//        addSemiDisabledCapability(ForgeCapabilities.ITEM_HANDLER, () -> !getMultiblock().isFormed());
         delaySupplier = NO_DELAY;
+    }
+
+    @Override
+    public Storage<Gas> getGasStorage(@Nullable Direction side) {
+        return null;
+    }
+
+    @Override
+    public EnergyStorage getEnergyContainer(@Nullable Direction side) {
+        return null;
+    }
+
+    @Override
+    public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
+        if (!getMultiblock().isFormed()) {
+            return null;
+        }
+        return super.getItemStorage(side);
     }
 
     @Override

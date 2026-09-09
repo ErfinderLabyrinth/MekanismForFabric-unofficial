@@ -14,12 +14,16 @@ import mekanism.common.network.to_client.PacketSecurityUpdate;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.interfaces.IBoundingBlock;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -34,6 +38,11 @@ public class TileEntitySecurityDesk extends TileEntityMekanism implements IBound
         // people unintentionally. We also disable the security object capability so that we only provide access to the security desk as an
         // "owner object" which means that all access checks will be handled as requiring the owner
 //        addDisabledCapabilities(ForgeCapabilities.ITEM_HANDLER, Capabilities.SECURITY_OBJECT);
+    }
+
+    @Override
+    public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
+        return null;
     }
 
     @NotNull

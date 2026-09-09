@@ -46,6 +46,7 @@ import mekanism.common.tile.interfaces.ITileFilterHolder;
 import mekanism.common.tile.transmitter.TileEntityLogisticalTransporterBase;
 import mekanism.common.util.*;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -131,6 +132,11 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         radius = DEFAULT_RADIUS;
         //Return some capabilities as disabled, and handle them with offset capabilities instead
 //        addDisabledCapabilities(ForgeCapabilities.ITEM_HANDLER);
+    }
+
+    @Override
+    public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
+        return null;
     }
 
     @NotNull

@@ -42,18 +42,18 @@ public class GeneratorsConfig extends BaseMekanismConfig {
     public final int turbineBladesPerCoil = 4;
     public final double turbineVentGasFlow = 32_000D;
     public final double turbineDisperserGasFlow = 1_280D;
-    public final FloatingLong turbineEnergyCapacityPerVolume = FloatingLong.createConst(16_000_000L);
+    public final long turbineEnergyCapacityPerVolume = 16_000_000L;
     public final long turbineGasPerTank = 64L * FluidConstants.BUCKET;
     public final int condenserRate = 64_000;
 
-    public final FloatingLong energyPerFusionFuel = FloatingLong.createConst(10_000_000);
+    public final double energyPerFusionFuel = 10_000_000;
     public final FloatingLong windGenerationMin = FloatingLong.createConst(60);
     public final FloatingLong windGenerationMax = FloatingLong.createConst(480);
     public final int windGenerationMinY = 24;
     public final int windGenerationMaxY = DimensionType.MAX_Y;
     public final List<ResourceLocation> windGenerationDimBlacklist = new ArrayList<>();
 
-    public final FloatingLong energyPerFissionFuel = FloatingLong.createConst(1_000_000);
+    public final double energyPerFissionFuel = 1_000_000d;
     public final double fissionCasingHeatCapacity = 1_000D;
     public final double fissionSurfaceAreaTarget = 4D;
     public final boolean fissionMeltdownsEnabled = true;
@@ -74,7 +74,7 @@ public class GeneratorsConfig extends BaseMekanismConfig {
     public final double fusionCasingThermalConductivity = 0.1D;
     public final double fusionWaterHeatingRatio = 0.3D;
     public final long fusionFuelCapacity = FluidConstants.BUCKET;
-    public final FloatingLong fusionEnergyCapacity = FloatingLong.createConst(1_000_000_000);
+    public final long fusionEnergyCapacity = 1_000_000_000;
     public final long fusionWaterPerInjection = 1_000 * FluidConstants.BUCKET;
     public final long fusionSteamPerInjection = 100L * BASE_MAX_WATER;
 

@@ -317,9 +317,7 @@ public abstract class TileEntityMultiblock<T extends MultiblockData> extends Til
     @Override
     public void addContainerTrackers(MekanismContainer container) {
         super.addContainerTrackers(container);
-        if (getMultiblock() instanceof IContainerSyncable) {
-            ((IContainerSyncable) getMultiblock()).addSyncables(container::track, "default");
-        }
+        getMultiblock().addSyncables(container::track, "default");
     }
 
 //    @NotNull

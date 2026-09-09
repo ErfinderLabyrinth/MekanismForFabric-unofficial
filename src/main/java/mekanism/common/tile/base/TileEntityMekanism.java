@@ -1073,9 +1073,8 @@ public abstract class TileEntityMekanism extends TileEntityUpdateable implements
         return null;
     }
 
-    @NotNull
     @Override
-    public final EnergyStorage getEnergyContainer(@Nullable Direction side) {
+    public EnergyStorage getEnergyContainer(@Nullable Direction side) {
         return energyHandlerManager.getContainer(side);
     }
 

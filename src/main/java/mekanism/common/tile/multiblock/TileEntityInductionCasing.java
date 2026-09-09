@@ -8,9 +8,13 @@ import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.registries.MekanismContainerTypes;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class TileEntityInductionCasing extends TileEntityMultiblock<MatrixMultiblockData> {
 
@@ -21,6 +25,11 @@ public class TileEntityInductionCasing extends TileEntityMultiblock<MatrixMultib
 
     public TileEntityInductionCasing(IBlockProvider blockProvider, BlockPos pos, BlockState state) {
         super(blockProvider, pos, state);
+    }
+
+    @Override
+    public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
+        return null;
     }
 
     @NotNull

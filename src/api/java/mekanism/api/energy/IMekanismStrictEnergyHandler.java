@@ -6,7 +6,6 @@ import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-@NothingNullByDefault
 public interface IMekanismStrictEnergyHandler extends IContentsListener {
 
     /**
