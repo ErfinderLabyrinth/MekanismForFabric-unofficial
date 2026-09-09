@@ -6,7 +6,7 @@
       "item": "mekanism:hdpe_sheet"
     },
     "D": {
-      "tag": "forge:dyes/purple"
+      "tag": "c:purple_dyes"
     }
   },
   "pattern": [

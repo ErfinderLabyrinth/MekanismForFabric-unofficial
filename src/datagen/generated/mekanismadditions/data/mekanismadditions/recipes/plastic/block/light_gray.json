@@ -6,7 +6,7 @@
       "item": "mekanism:hdpe_sheet"
     },
     "D": {
-      "tag": "forge:dyes/light_gray"
+      "tag": "c:light_gray_dyes"
     }
   },
   "pattern": [
