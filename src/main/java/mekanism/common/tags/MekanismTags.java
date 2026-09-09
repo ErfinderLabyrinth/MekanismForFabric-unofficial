@@ -208,6 +208,7 @@ public class MekanismTags {
         public static final TagKey<Item> MUSHROOMS = cTag("mushrooms");
         public static final TagKey<Item> NETHER_STARS = cTag("nether_stars");
         public static final TagKey<Item> LEATHER = cTag("leather");
+        public static final TagKey<Item> STRING = cTag("string");
         public static final TagKey<Item> ANCIENT_DEBRIS = cTag("ancient_debris");
         public static final TagKey<Item> WOODEN_RODS = cTag("wooden_rods");
 

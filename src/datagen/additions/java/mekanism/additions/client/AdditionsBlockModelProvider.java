@@ -2,18 +2,20 @@ package mekanism.additions.client;
 
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.client.model.BaseBlockModelProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class AdditionsBlockModelProvider extends BaseBlockModelProvider {
 
     //TODO: Add helpers for the color block stuff
-    public AdditionsBlockModelProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-        super(output, MekanismAdditions.MODID, existingFileHelper);
+    public AdditionsBlockModelProvider(FabricDataOutput output) {
+        super(output, MekanismAdditions.MODID);
     }
 
     @Override
-    protected void registerModels() {
+    public void generateBlockStateModels(BlockModelGenerators blockStateModelGenerator) {
 
     }
 }

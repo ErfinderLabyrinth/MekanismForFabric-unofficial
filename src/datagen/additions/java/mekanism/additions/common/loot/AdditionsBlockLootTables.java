@@ -2,6 +2,7 @@ package mekanism.additions.common.loot;
 
 import mekanism.additions.common.registries.AdditionsBlocks;
 import mekanism.common.loot.table.BaseBlockLootTables;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TntBlock;
@@ -12,6 +13,9 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePrope
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 public class AdditionsBlockLootTables extends BaseBlockLootTables {
+    public AdditionsBlockLootTables(FabricDataOutput output) {
+        super(output);
+    }
 
     @Override
     public void generate() {
@@ -28,7 +32,6 @@ public class AdditionsBlockLootTables extends BaseBlockLootTables {
     private void registerObsidianTNT() {
         Block tnt = AdditionsBlocks.OBSIDIAN_TNT.getBlock();
         add(tnt, LootTable.lootTable().withPool(applyExplosionCondition(tnt, LootPool.lootPool()
-                    .name("main")
                     .setRolls(ConstantValue.exactly(1))
                     .add(LootItem.lootTableItem(tnt)
                           .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(tnt)

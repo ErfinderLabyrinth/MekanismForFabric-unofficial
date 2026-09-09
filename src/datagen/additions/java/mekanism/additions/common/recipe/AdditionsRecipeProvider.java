@@ -56,8 +56,8 @@ public class AdditionsRecipeProvider extends BaseRecipeProvider {
           TripleLine.of(PLASTIC_SHEET_CHAR, Pattern.DYE, PLASTIC_SHEET_CHAR),
           TripleLine.of(Pattern.GLOWSTONE, PLASTIC_SHEET_CHAR, Pattern.GLOWSTONE));
 
-    public AdditionsRecipeProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-        super(output, existingFileHelper, MekanismAdditions.MODID);
+    public AdditionsRecipeProvider(PackOutput output) {
+        super(output, MekanismAdditions.MODID);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class AdditionsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(OBSIDIAN_CHAR, OBSIDIAN_CHAR, OBSIDIAN_CHAR),
                     TripleLine.of(TNT_CHAR, TNT_CHAR, TNT_CHAR),
                     TripleLine.of(OBSIDIAN_CHAR, OBSIDIAN_CHAR, OBSIDIAN_CHAR))
-              ).key(OBSIDIAN_CHAR, Tags.Items.OBSIDIAN)
+              ).key(OBSIDIAN_CHAR, MekanismTags.Items.OBSIDIAN)
               .key(TNT_CHAR, Blocks.TNT)
               .category(RecipeCategory.REDSTONE)
               .build(consumer);
@@ -108,9 +108,9 @@ public class AdditionsRecipeProvider extends BaseRecipeProvider {
         DyeColor dye = color.getDyeColor();
         if (dye != null) {
             ExtendedShapelessRecipeBuilder.shapelessRecipe(result, 2)
-                  .addIngredient(Tags.Items.LEATHER)
-                  .addIngredient(Tags.Items.STRING)
-                  .addIngredient(dye.getTag())
+                  .addIngredient(MekanismTags.Items.LEATHER)
+                  .addIngredient(MekanismTags.Items.STRING)
+                  .addIngredient(color.getTag())
                   .category(RecipeCategory.DECORATIONS)
                   .build(consumer, MekanismAdditions.rl(basePath + colorString));
             ExtendedShapelessRecipeBuilder.shapelessRecipe(result)

@@ -2,13 +2,15 @@ package mekanism.additions.client;
 
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.client.texture.BaseSpriteSourceProvider;
+import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
+
+import java.util.List;
 
 public class AdditionsSpriteSourceProvider extends BaseSpriteSourceProvider {
 
-    public AdditionsSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-        super(output, MekanismAdditions.MODID, fileHelper);
+    public AdditionsSpriteSourceProvider(PackOutput output) {
+        super(output, MekanismAdditions.MODID);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package mekanism.additions.client;
 
 import java.util.Map;
+import java.util.Optional;
+
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.block.BlockGlowPanel;
 import mekanism.additions.common.block.plastic.BlockPlasticFenceGate;
@@ -10,8 +12,14 @@ import mekanism.api.providers.IBlockProvider;
 import mekanism.client.state.BaseBlockStateProvider;
 import mekanism.common.item.block.ItemBlockColoredName;
 import mekanism.common.registration.impl.BlockRegistryObject;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.models.BlockModelGenerators;
+import net.minecraft.data.models.model.ModelTemplate;
+import net.minecraft.data.models.model.TextureMapping;
+import net.minecraft.data.models.model.TexturedModel;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
@@ -24,62 +32,65 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class AdditionsBlockStateProvider extends BaseBlockStateProvider<AdditionsBlockModelProvider> {
 
-    public AdditionsBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-        super(output, MekanismAdditions.MODID, existingFileHelper, AdditionsBlockModelProvider::new);
+    public AdditionsBlockStateProvider(FabricDataOutput output) {
+        super(output, MekanismAdditions.MODID, AdditionsBlockModelProvider::new);
     }
 
     @Override
-    protected void registerStatesAndModels() {
-        glowPanels();
-        coloredBlocks(AdditionsBlocks.PLASTIC_BLOCKS, "block");
-        coloredBlocks(AdditionsBlocks.SLICK_PLASTIC_BLOCKS, "slick");
-        coloredBlocks(AdditionsBlocks.PLASTIC_GLOW_BLOCKS, "glow");
-        coloredBlocks(AdditionsBlocks.REINFORCED_PLASTIC_BLOCKS, "reinforced");
-        coloredBlocks(AdditionsBlocks.PLASTIC_ROADS, "road");
-        coloredBlocks(AdditionsBlocks.TRANSPARENT_PLASTIC_BLOCKS, "transparent");
-        coloredSlabs(AdditionsBlocks.PLASTIC_SLABS, "", "block");
-        coloredStairs(AdditionsBlocks.PLASTIC_STAIRS, "");
-        coloredFences(AdditionsBlocks.PLASTIC_FENCES, "");
-        coloredFenceGates(AdditionsBlocks.PLASTIC_FENCE_GATES, "");
-        coloredSlabs(AdditionsBlocks.PLASTIC_GLOW_SLABS, "glow_", "glow");
-        coloredStairs(AdditionsBlocks.PLASTIC_GLOW_STAIRS, "glow_");
-        coloredSlabs(AdditionsBlocks.TRANSPARENT_PLASTIC_SLABS, "transparent_", "transparent");
-        coloredStairs(AdditionsBlocks.TRANSPARENT_PLASTIC_STAIRS, "transparent_");
+    public void generateBlockStateModels(BlockModelGenerators gen) {
+        glowPanels(gen);
+        coloredBlocks(gen, AdditionsBlocks.PLASTIC_BLOCKS, "block");
+        coloredBlocks(gen, AdditionsBlocks.SLICK_PLASTIC_BLOCKS, "slick");
+        coloredBlocks(gen, AdditionsBlocks.PLASTIC_GLOW_BLOCKS, "glow");
+        coloredBlocks(gen, AdditionsBlocks.REINFORCED_PLASTIC_BLOCKS, "reinforced");
+        coloredBlocks(gen, AdditionsBlocks.PLASTIC_ROADS, "road");
+        coloredBlocks(gen, AdditionsBlocks.TRANSPARENT_PLASTIC_BLOCKS, "transparent");
+        coloredSlabs(gen, AdditionsBlocks.PLASTIC_SLABS, "", "block");
+        coloredStairs(gen, AdditionsBlocks.PLASTIC_STAIRS, "");
+        coloredFences(gen, AdditionsBlocks.PLASTIC_FENCES, "");
+        coloredFenceGates(gen, AdditionsBlocks.PLASTIC_FENCE_GATES, "");
+        coloredSlabs(gen, AdditionsBlocks.PLASTIC_GLOW_SLABS, "glow_", "glow");
+        coloredStairs(gen, AdditionsBlocks.PLASTIC_GLOW_STAIRS, "glow_");
+        coloredSlabs(gen, AdditionsBlocks.TRANSPARENT_PLASTIC_SLABS, "transparent_", "transparent");
+        coloredStairs(gen, AdditionsBlocks.TRANSPARENT_PLASTIC_STAIRS, "transparent_");
     }
 
-    private void glowPanels() {
-        ModelFile model = models().getExistingFile(modLoc("block/glow_panel"));
+    private void glowPanels(BlockModelGenerators gen) {
+        ResourceLocation model = modLoc("block/glow_panel");
         for (BlockRegistryObject<BlockGlowPanel, ItemBlockColoredName> blockRO : AdditionsBlocks.GLOW_PANELS.values()) {
             BlockGlowPanel glowPanel = blockRO.getBlock();
-            directionalBlock(glowPanel, state -> model, 180, glowPanel.getFluidLoggedProperty());
+            gen.blockStateOutput.accept(BlockModelGenerators.createRotatedVariant(glowPanel, model));
         }
     }
 
-    private void coloredBlocks(Map<?, ? extends IBlockProvider> blocks, String modelName) {
-        ConfiguredModel model = new ConfiguredModel(models().getExistingFile(modLoc("block/plastic/" + modelName)));
+    private ModelTemplate modelTemplate(ResourceLocation model) {
+        return new ModelTemplate(Optional.of(model), Optional.empty());
+    }
+
+    private void coloredBlocks(BlockModelGenerators gen, Map<?, ? extends IBlockProvider> blocks, String modelName) {
+        ResourceLocation model = modLoc("block/plastic/" + modelName);
         for (IBlockProvider block : blocks.values()) {
-            getVariantBuilder(block).partialState().addModels(model);
+            gen.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(block.getBlock(), model));
         }
     }
 
-    private void coloredSlabs(Map<?, ? extends IBlockProvider> slabs, String existingPrefix, String doubleType) {
-        ConfiguredModel bottomModel = new ConfiguredModel(models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "slab")));
-        ConfiguredModel topModel = new ConfiguredModel(models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "slab_top")));
-        ConfiguredModel doubleModel = new ConfiguredModel(models().getExistingFile(modLoc("block/plastic/" + doubleType)));
+    private void coloredSlabs(BlockModelGenerators gen, Map<?, ? extends IBlockProvider> slabs, String existingPrefix, String doubleType) {
+        ResourceLocation bottomModel = modLoc("block/plastic/" + existingPrefix + "slab");
+        ResourceLocation topModel = modLoc("block/plastic/" + existingPrefix + "slab_top");
+        ResourceLocation doubleModel = modLoc("block/plastic/" + doubleType);
         for (IBlockProvider slab : slabs.values()) {
-            getVariantBuilder(slab)
-                  .partialState().with(SlabBlock.TYPE, SlabType.BOTTOM).addModels(bottomModel)
-                  .partialState().with(SlabBlock.TYPE, SlabType.TOP).addModels(topModel)
-                  .partialState().with(SlabBlock.TYPE, SlabType.DOUBLE).addModels(doubleModel);
+            gen.blockStateOutput.accept(BlockModelGenerators.createSlab(slab.getBlock(), bottomModel, topModel, doubleModel));
         }
     }
 
-    private void coloredStairs(Map<?, ? extends BlockRegistryObject<? extends BlockPlasticStairs, ?>> stairs, String existingPrefix) {
-        ModelFile stairsModel = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "stairs"));
-        ModelFile stairsInner = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "stairs_inner"));
-        ModelFile stairsOuter = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "stairs_outer"));
+    private void coloredStairs(BlockModelGenerators gen, Map<?, ? extends BlockRegistryObject<? extends BlockPlasticStairs, ?>> stairs, String existingPrefix) {
+        ResourceLocation stairsModel = modLoc("block/plastic/" + existingPrefix + "stairs");
+        ResourceLocation stairsInner = modLoc("block/plastic/" + existingPrefix + "stairs_inner");
+        ResourceLocation stairsOuter = modLoc("block/plastic/" + existingPrefix + "stairs_outer");
+
         for (BlockRegistryObject<? extends BlockPlasticStairs, ?> stair : stairs.values()) {
-            BlockPlasticStairs block = stair.getBlock();
+            gen.blockStateOutput.accept(BlockModelGenerators.createStairs(stair.getBlock(), stairsInner, stairsModel, stairsOuter));
+            /*BlockPlasticStairs block = stair.getBlock();
             //Copy of BlockStateProvider#stairsBlock, except also ignores our fluid logging extension
             getVariantBuilder(block).forAllStatesExcept(state -> {
                 Direction facing = state.getValue(StairBlock.FACING);
@@ -100,25 +111,26 @@ public class AdditionsBlockStateProvider extends BaseBlockStateProvider<Addition
                       .rotationY(yRot)
                       .uvLock(uvlock)
                       .build();
-            }, StairBlock.WATERLOGGED, block.getFluidLoggedProperty());
+            }, StairBlock.WATERLOGGED, block.getFluidLoggedProperty());*/
         }
     }
 
-    private void coloredFences(Map<?, ? extends IBlockProvider> fences, String existingPrefix) {
-        ModelFile post = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "fence_post"));
-        ModelFile side = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "fence_side"));
+    private void coloredFences(BlockModelGenerators gen, Map<?, ? extends IBlockProvider> fences, String existingPrefix) {
+        ResourceLocation post = modLoc("block/plastic/" + existingPrefix + "fence_post");
+        ResourceLocation side = modLoc("block/plastic/" + existingPrefix + "fence_side");
         for (IBlockProvider fence : fences.values()) {
-            fourWayMultipart(getMultipartBuilder(fence.getBlock()).part().modelFile(post).addModel().end(), side);
+            gen.blockStateOutput.accept(BlockModelGenerators.createFence(fence.getBlock(), post, side));
         }
     }
 
-    private void coloredFenceGates(Map<?, ? extends BlockRegistryObject<? extends BlockPlasticFenceGate, ?>> fenceGates, String existingPrefix) {
-        ModelFile gate = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "fence_gate"));
-        ModelFile gateOpen = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "fence_gate_open"));
-        ModelFile gateWall = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "fence_gate_wall"));
-        ModelFile gateWallOpen = models().getExistingFile(modLoc("block/plastic/" + existingPrefix + "fence_gate_wall_open"));
+    private void coloredFenceGates(BlockModelGenerators gen, Map<?, ? extends BlockRegistryObject<? extends BlockPlasticFenceGate, ?>> fenceGates, String existingPrefix) {
+        ResourceLocation gate = modLoc("block/plastic/" + existingPrefix + "fence_gate");
+        ResourceLocation gateOpen = modLoc("block/plastic/" + existingPrefix + "fence_gate_open");
+        ResourceLocation gateWall = modLoc("block/plastic/" + existingPrefix + "fence_gate_wall");
+        ResourceLocation gateWallOpen = modLoc("block/plastic/" + existingPrefix + "fence_gate_wall_open");
         for (BlockRegistryObject<? extends BlockPlasticFenceGate, ?> fenceGate : fenceGates.values()) {
-            BlockPlasticFenceGate block = fenceGate.getBlock();
+            gen.blockStateOutput.accept(BlockModelGenerators.createFenceGate(fenceGate.getBlock(), gateOpen, gate, gateWallOpen, gateWall, true));
+            /*BlockPlasticFenceGate block = fenceGate.getBlock();
             getVariantBuilder(block).forAllStatesExcept(state -> {
                 ModelFile model = gate;
                 if (state.getValue(FenceGateBlock.IN_WALL)) {
@@ -132,7 +144,7 @@ public class AdditionsBlockStateProvider extends BaseBlockStateProvider<Addition
                       .rotationY((int) state.getValue(FenceGateBlock.FACING).toYRot())
                       .uvLock(true)
                       .build();
-            }, FenceGateBlock.POWERED, block.getFluidLoggedProperty());
+            }, FenceGateBlock.POWERED, block.getFluidLoggedProperty());*/
         }
     }
 }

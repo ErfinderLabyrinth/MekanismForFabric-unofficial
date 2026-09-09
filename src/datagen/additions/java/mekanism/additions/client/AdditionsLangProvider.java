@@ -23,82 +23,82 @@ public class AdditionsLangProvider extends BaseLanguageProvider {
     }
 
     @Override
-    protected void addTranslations() {
-        addItems();
-        addBlocks();
-        addEntities();
-        addSubtitles();
-        addAdvancements();
-        addMisc();
+    public void generateTranslations(TranslationBuilder builder) {
+        addItems(builder);
+        addBlocks(builder);
+        addEntities(builder);
+        addSubtitles(builder);
+        addAdvancements(builder);
+        addMisc(builder);
     }
 
-    private void addItems() {
-        add(AdditionsItems.BABY_CREEPER_SPAWN_EGG, "Baby Creeper Spawn Egg");
-        add(AdditionsItems.BABY_ENDERMAN_SPAWN_EGG, "Baby Enderman Spawn Egg");
-        add(AdditionsItems.BABY_SKELETON_SPAWN_EGG, "Baby Skeleton Spawn Egg");
-        add(AdditionsItems.BABY_STRAY_SPAWN_EGG, "Baby Stray Spawn Egg");
-        add(AdditionsItems.BABY_WITHER_SKELETON_SPAWN_EGG, "Baby Wither Skeleton Spawn Egg");
-        add(AdditionsItems.WALKIE_TALKIE, "Walkie-Talkie");
+    private void addItems(TranslationBuilder builder) {
+        add(builder, AdditionsItems.BABY_CREEPER_SPAWN_EGG, "Baby Creeper Spawn Egg");
+        add(builder, AdditionsItems.BABY_ENDERMAN_SPAWN_EGG, "Baby Enderman Spawn Egg");
+        add(builder, AdditionsItems.BABY_SKELETON_SPAWN_EGG, "Baby Skeleton Spawn Egg");
+        add(builder, AdditionsItems.BABY_STRAY_SPAWN_EGG, "Baby Stray Spawn Egg");
+        add(builder, AdditionsItems.BABY_WITHER_SKELETON_SPAWN_EGG, "Baby Wither Skeleton Spawn Egg");
+        add(builder, AdditionsItems.WALKIE_TALKIE, "Walkie-Talkie");
         for (Map.Entry<EnumColor, ItemRegistryObject<ItemBalloon>> entry : AdditionsItems.BALLOONS.entrySet()) {
-            add(entry.getValue(), entry.getKey().getEnglishName() + " Balloon");
+            add(builder, entry.getValue(), entry.getKey().getEnglishName() + " Balloon");
         }
     }
 
-    private void addBlocks() {
-        add(AdditionsBlocks.OBSIDIAN_TNT, "Obsidian TNT");
-        addColoredBlocks(AdditionsBlocks.GLOW_PANELS, "Glow Panel");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_BLOCKS, "Plastic Block");
-        addColoredBlocks(AdditionsBlocks.SLICK_PLASTIC_BLOCKS, "Slick Plastic Block");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_GLOW_BLOCKS, "Glow Plastic Block");
-        addColoredBlocks(AdditionsBlocks.REINFORCED_PLASTIC_BLOCKS, "Reinforced Plastic Block");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_ROADS, "Plastic Road");
-        addColoredBlocks(AdditionsBlocks.TRANSPARENT_PLASTIC_BLOCKS, "Transparent Plastic Block");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_STAIRS, "Plastic Stairs");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_SLABS, "Plastic Slab");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_FENCES, "Plastic Barrier");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_FENCE_GATES, "Plastic Gate");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_GLOW_STAIRS, "Glow Plastic Stairs");
-        addColoredBlocks(AdditionsBlocks.PLASTIC_GLOW_SLABS, "Glow Plastic Slab");
-        addColoredBlocks(AdditionsBlocks.TRANSPARENT_PLASTIC_STAIRS, "Transparent Plastic Stairs");
-        addColoredBlocks(AdditionsBlocks.TRANSPARENT_PLASTIC_SLABS, "Transparent Plastic Slab");
+    private void addBlocks(TranslationBuilder builder) {
+        add(builder, AdditionsBlocks.OBSIDIAN_TNT, "Obsidian TNT");
+        addColoredBlocks(builder, AdditionsBlocks.GLOW_PANELS, "Glow Panel");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_BLOCKS, "Plastic Block");
+        addColoredBlocks(builder, AdditionsBlocks.SLICK_PLASTIC_BLOCKS, "Slick Plastic Block");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_GLOW_BLOCKS, "Glow Plastic Block");
+        addColoredBlocks(builder, AdditionsBlocks.REINFORCED_PLASTIC_BLOCKS, "Reinforced Plastic Block");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_ROADS, "Plastic Road");
+        addColoredBlocks(builder, AdditionsBlocks.TRANSPARENT_PLASTIC_BLOCKS, "Transparent Plastic Block");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_STAIRS, "Plastic Stairs");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_SLABS, "Plastic Slab");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_FENCES, "Plastic Barrier");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_FENCE_GATES, "Plastic Gate");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_GLOW_STAIRS, "Glow Plastic Stairs");
+        addColoredBlocks(builder, AdditionsBlocks.PLASTIC_GLOW_SLABS, "Glow Plastic Slab");
+        addColoredBlocks(builder, AdditionsBlocks.TRANSPARENT_PLASTIC_STAIRS, "Transparent Plastic Stairs");
+        addColoredBlocks(builder, AdditionsBlocks.TRANSPARENT_PLASTIC_SLABS, "Transparent Plastic Slab");
     }
 
-    private void addEntities() {
-        add(AdditionsEntityTypes.BABY_CREEPER, "Baby Creeper");
-        add(AdditionsEntityTypes.BABY_ENDERMAN, "Baby Enderman");
-        add(AdditionsEntityTypes.BABY_SKELETON, "Baby Skeleton");
-        add(AdditionsEntityTypes.BABY_STRAY, "Baby Stray");
-        add(AdditionsEntityTypes.BABY_WITHER_SKELETON, "Baby Wither Skeleton");
-        add(AdditionsEntityTypes.BALLOON, "Balloon");
-        add(AdditionsEntityTypes.OBSIDIAN_TNT, "Obsidian TNT");
+    private void addEntities(TranslationBuilder builder) {
+        add(builder, AdditionsEntityTypes.BABY_CREEPER, "Baby Creeper");
+        add(builder, AdditionsEntityTypes.BABY_ENDERMAN, "Baby Enderman");
+        add(builder, AdditionsEntityTypes.BABY_SKELETON, "Baby Skeleton");
+        add(builder, AdditionsEntityTypes.BABY_STRAY, "Baby Stray");
+        add(builder, AdditionsEntityTypes.BABY_WITHER_SKELETON, "Baby Wither Skeleton");
+        add(builder, AdditionsEntityTypes.BALLOON, "Balloon");
+        add(builder, AdditionsEntityTypes.OBSIDIAN_TNT, "Obsidian TNT");
     }
 
-    private void addSubtitles() {
-        add(AdditionsSounds.POP, "Balloon pops");
+    private void addSubtitles(TranslationBuilder builder) {
+        add(builder, AdditionsSounds.POP, "Balloon pops");
     }
 
-    private void addAdvancements() {
-        add(AdditionsAdvancements.BALLOON, "Reach for the Skies", "Craft any color Balloon");
-        add(AdditionsAdvancements.POP_POP, "Pop Pop", "Pop a balloon");
-        add(AdditionsAdvancements.GLOW_IN_THE_DARK, "Glow in the Dark", "Craft any color Glow Panel");
-        add(AdditionsAdvancements.HURT_BY_BABIES, "Don't Try Taking Candy From Those Babies", "Get injured by all baby mobs from " + basicModName);
-        add(AdditionsAdvancements.NOT_THE_BABIES, "Not the Babies", "Kill any baby " + basicModName + " mob");
+    private void addAdvancements(TranslationBuilder builder) {
+        add(builder, AdditionsAdvancements.BALLOON, "Reach for the Skies", "Craft any color Balloon");
+        add(builder, AdditionsAdvancements.POP_POP, "Pop Pop", "Pop a balloon");
+        add(builder, AdditionsAdvancements.GLOW_IN_THE_DARK, "Glow in the Dark", "Craft any color Glow Panel");
+        add(builder, AdditionsAdvancements.HURT_BY_BABIES, "Don't Try Taking Candy From Those Babies", "Get injured by all baby mobs from " + basicModName);
+        add(builder, AdditionsAdvancements.NOT_THE_BABIES, "Not the Babies", "Kill any baby " + basicModName + " mob");
     }
 
-    private void addMisc() {
-        addPackData(AdditionsLang.MEKANISM_ADDITIONS, AdditionsLang.PACK_DESCRIPTION);
-        add(AdditionsLang.CHANNEL, "Channel: %1$s");
-        add(AdditionsLang.CHANNEL_CHANGE, "Channel changed to: %1$s");
-        add(AdditionsLang.WALKIE_DISABLED, "Voice server disabled.");
-        add(AdditionsLang.KEY_VOICE, "Voice");
+    private void addMisc(TranslationBuilder builder) {
+        addPackData(builder, AdditionsLang.MEKANISM_ADDITIONS, AdditionsLang.PACK_DESCRIPTION);
+        add(builder, AdditionsLang.CHANNEL, "Channel: %1$s");
+        add(builder, AdditionsLang.CHANNEL_CHANGE, "Channel changed to: %1$s");
+        add(builder, AdditionsLang.WALKIE_DISABLED, "Voice server disabled.");
+        add(builder, AdditionsLang.KEY_VOICE, "Voice");
 
-        add(AdditionsLang.DESCRIPTION_GLOW_PANEL, "A modern, ever-lasting light source. Now in many colors!");
-        add(AdditionsLang.DESCRIPTION_OBSIDIAN_TNT, "An extremely powerful, obsidian-infused block of TNT. Use at your own peril.");
+        add(builder, AdditionsLang.DESCRIPTION_GLOW_PANEL, "A modern, ever-lasting light source. Now in many colors!");
+        add(builder, AdditionsLang.DESCRIPTION_OBSIDIAN_TNT, "An extremely powerful, obsidian-infused block of TNT. Use at your own peril.");
     }
 
-    private void addColoredBlocks(Map<EnumColor, ? extends IBlockProvider> blocks, String suffix) {
+    private void addColoredBlocks(TranslationBuilder builder, Map<EnumColor, ? extends IBlockProvider> blocks, String suffix) {
         for (Map.Entry<EnumColor, ? extends IBlockProvider> entry : blocks.entrySet()) {
-            add(entry.getValue(), entry.getKey().getEnglishName() + " " + suffix);
+            add(builder, entry.getValue(), entry.getKey().getEnglishName() + " " + suffix);
         }
     }
 }

@@ -50,6 +50,10 @@ public abstract class BaseItemModelProvider extends FabricModelProvider {
         return "Item model provider: " + modid;
     }
 
+    public ResourceLocation modLoc(String path) {
+        return new ResourceLocation(modid, path);
+    }
+
     public boolean textureExists(ResourceLocation texture) {
         return output.getModContainer().findPath("assets/" + texture.getNamespace() + "/textures/" + texture.getPath() + ".png").isPresent();
         //return output.exists(texture, PackType.CLIENT_RESOURCES, ".png", "textures");
