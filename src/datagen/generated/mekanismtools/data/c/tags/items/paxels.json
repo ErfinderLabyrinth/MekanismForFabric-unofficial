@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "#c:wood_paxels",
+    "#c:stone_paxels",
+    "#c:gold_paxels",
+    "#c:iron_paxels",
+    "#c:diamond_paxels",
+    "#c:netherite_paxels",
+    "#c:bronze_paxels",
+    "#c:lapis_lazuli_paxels",
+    "#c:osmium_paxels",
+    "#c:refined_glowstone_paxels",
+    "#c:refined_obsidian_paxels",
+    "#c:steel_paxels"
+  ]
+}

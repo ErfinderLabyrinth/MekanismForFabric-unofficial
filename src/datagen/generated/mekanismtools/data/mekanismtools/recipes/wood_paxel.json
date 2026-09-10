@@ -9,7 +9,7 @@
       "item": "minecraft:wooden_pickaxe"
     },
     "R": {
-      "tag": "forge:rods/wooden"
+      "item": "minecraft:stick"
     },
     "S": {
       "item": "minecraft:wooden_shovel"

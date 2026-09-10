@@ -3,13 +3,13 @@
   "category": "equipment",
   "key": {
     "A": {
-      "tag": "forge:tools/axes/refined_glowstone"
+      "tag": "c:refined_glowstone_axes"
     },
     "P": {
       "tag": "forge:tools/pickaxes/refined_glowstone"
     },
     "R": {
-      "tag": "forge:rods/wooden"
+      "item": "minecraft:stick"
     },
     "S": {
       "tag": "forge:tools/shovels/refined_glowstone"

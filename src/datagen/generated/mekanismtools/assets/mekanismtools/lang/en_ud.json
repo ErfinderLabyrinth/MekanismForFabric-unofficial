@@ -40,9 +40,6 @@
   "item.mekanismtools.bronze_shield.yellow": "pꞁǝᴉɥS ǝzuoɹᗺ ʍoꞁꞁǝ⅄",
   "item.mekanismtools.bronze_shovel": "ꞁǝʌoɥS ǝzuoɹᗺ",
   "item.mekanismtools.bronze_sword": "pɹoʍS ǝzuoɹᗺ",
-  "item.mekanismtools.diamond_paxel": "ꞁǝxɐԀ puoɯɐᴉᗡ",
-  "item.mekanismtools.gold_paxel": "ꞁǝxɐԀ pꞁo⅁",
-  "item.mekanismtools.iron_paxel": "ꞁǝxɐԀ uoɹI",
   "item.mekanismtools.lapis_lazuli_axe": "ǝxⱯ ᴉꞁnzɐꞀ sᴉdɐꞀ",
   "item.mekanismtools.lapis_lazuli_boots": "sʇooᗺ ᴉꞁnzɐꞀ sᴉdɐꞀ",
   "item.mekanismtools.lapis_lazuli_chestplate": "ǝʇɐꞁdʇsǝɥƆ ᴉꞁnzɐꞀ sᴉdɐꞀ",
@@ -70,7 +67,6 @@
   "item.mekanismtools.lapis_lazuli_shield.yellow": "pꞁǝᴉɥS ᴉꞁnzɐꞀ sᴉdɐꞀ ʍoꞁꞁǝ⅄",
   "item.mekanismtools.lapis_lazuli_shovel": "ꞁǝʌoɥS ᴉꞁnzɐꞀ sᴉdɐꞀ",
   "item.mekanismtools.lapis_lazuli_sword": "pɹoʍS ᴉꞁnzɐꞀ sᴉdɐꞀ",
-  "item.mekanismtools.netherite_paxel": "ꞁǝxɐԀ ǝʇᴉɹǝɥʇǝN",
   "item.mekanismtools.osmium_axe": "ǝxⱯ ɯnᴉɯsO",
   "item.mekanismtools.osmium_boots": "sʇooᗺ ɯnᴉɯsO",
   "item.mekanismtools.osmium_chestplate": "ǝʇɐꞁdʇsǝɥƆ ɯnᴉɯsO",
@@ -179,7 +175,5 @@
   "item.mekanismtools.steel_shield.yellow": "pꞁǝᴉɥS ꞁǝǝʇS ʍoꞁꞁǝ⅄",
   "item.mekanismtools.steel_shovel": "ꞁǝʌoɥS ꞁǝǝʇS",
   "item.mekanismtools.steel_sword": "pɹoʍS ꞁǝǝʇS",
-  "item.mekanismtools.stone_paxel": "ꞁǝxɐԀ ǝuoʇS",
-  "item.mekanismtools.wood_paxel": "ꞁǝxɐԀ pooM",
   "tooltip.mekanismtools.hp": "%s :ԀH"
 }

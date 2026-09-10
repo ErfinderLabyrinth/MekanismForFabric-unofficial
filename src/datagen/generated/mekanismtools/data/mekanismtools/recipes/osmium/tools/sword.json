@@ -3,10 +3,10 @@
   "category": "equipment",
   "key": {
     "I": {
-      "tag": "forge:ingots/osmium"
+      "tag": "c:osmium_ingots"
     },
     "R": {
-      "tag": "forge:rods/wooden"
+      "item": "minecraft:stick"
     }
   },
   "pattern": [

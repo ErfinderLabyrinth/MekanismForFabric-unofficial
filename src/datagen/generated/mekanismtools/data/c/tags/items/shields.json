@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#c:bronze_shields",
+    "#c:lapis_lazuli_shields",
+    "#c:osmium_shields",
+    "#c:refined_glowstone_shields",
+    "#c:refined_obsidian_shields",
+    "#c:steel_shields"
+  ]
+}

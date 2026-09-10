@@ -3,7 +3,7 @@
   "category": "equipment",
   "key": {
     "I": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     },
     "P": {
       "item": "minecraft:shield"

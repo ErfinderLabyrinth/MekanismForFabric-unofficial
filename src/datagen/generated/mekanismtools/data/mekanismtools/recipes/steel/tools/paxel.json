@@ -3,13 +3,13 @@
   "category": "equipment",
   "key": {
     "A": {
-      "tag": "forge:tools/axes/steel"
+      "tag": "c:steel_axes"
     },
     "P": {
       "tag": "forge:tools/pickaxes/steel"
     },
     "R": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "S": {
       "tag": "forge:tools/shovels/steel"

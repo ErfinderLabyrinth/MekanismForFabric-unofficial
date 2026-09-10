@@ -3,10 +3,10 @@
   "category": "equipment",
   "key": {
     "I": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     },
     "R": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     }
   },
   "pattern": [

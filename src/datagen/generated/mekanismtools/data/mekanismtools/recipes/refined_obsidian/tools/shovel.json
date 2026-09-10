@@ -3,10 +3,10 @@
   "category": "equipment",
   "key": {
     "I": {
-      "tag": "forge:ingots/refined_obsidian"
+      "tag": "c:refined_obsidian_ingots"
     },
     "R": {
-      "tag": "forge:rods/wooden"
+      "item": "minecraft:stick"
     }
   },
   "pattern": [

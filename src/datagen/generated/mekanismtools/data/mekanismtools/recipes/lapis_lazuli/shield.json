@@ -3,7 +3,7 @@
   "category": "equipment",
   "key": {
     "I": {
-      "tag": "forge:gems/lapis"
+      "tag": "c:lapis"
     },
     "P": {
       "item": "minecraft:shield"
