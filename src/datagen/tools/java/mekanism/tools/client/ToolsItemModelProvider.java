@@ -81,7 +81,7 @@ public class ToolsItemModelProvider extends BaseItemModelProvider {
         JsonObject override = new JsonObject();
 
         JsonObject predicate = new JsonObject();
-        predicate.addProperty("blocking", 1);
+        predicate.addProperty(MekanismTools.rl("blocking").toString(), 1.0);
         override.add("predicate", predicate);
         override.addProperty("model", blockingModel.toString());
         overrides.add(override);
