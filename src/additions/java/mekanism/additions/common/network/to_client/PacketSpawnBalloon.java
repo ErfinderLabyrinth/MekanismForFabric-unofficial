@@ -2,6 +2,7 @@ package mekanism.additions.common.network.to_client;
 
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.entity.EntityBalloon;
+import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.api.text.EnumColor;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.NetworkUtil;
@@ -52,10 +53,11 @@ public class PacketSpawnBalloon implements IMekanismPacket {
 
     @Override
     public void handle(Player player, PacketSender responseSender) {
-        EntityBalloon balloon = EntityBalloon.create(player.level(), position.x, position.y, position.z, color);
+        EntityBalloon balloon = AdditionsEntityTypes.BALLOON.get().create(player.level());
         if(balloon == null) {
             return;
         }
+        balloon.setPos(position);
         balloon.syncPacketPositionCodec(position.x, position.y, position.z);
         balloon.setId(id);
         balloon.latched = latched;
