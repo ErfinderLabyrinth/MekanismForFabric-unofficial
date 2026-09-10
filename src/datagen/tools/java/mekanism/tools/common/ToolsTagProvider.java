@@ -39,7 +39,7 @@ public class ToolsTagProvider extends BaseTagProvider {
               ToolsItems.REFINED_GLOWSTONE_BOOTS,
               ToolsItems.REFINED_GLOWSTONE_SHIELD
         );
-        getBlockBuilder(ToolsTags.Blocks.MINEABLE_WITH_PAXEL).add(
+        getBlockBuilder(ToolsTags.Blocks.MINEABLE_WITH_PAXEL).addForced(
               BlockTags.MINEABLE_WITH_AXE,
               BlockTags.MINEABLE_WITH_PICKAXE,
               BlockTags.MINEABLE_WITH_SHOVEL

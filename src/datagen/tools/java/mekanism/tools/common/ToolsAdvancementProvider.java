@@ -1,6 +1,7 @@
 package mekanism.tools.common;
 
 import mekanism.common.advancements.BaseAdvancementProvider;
+import mekanism.common.advancements.MekanismAdvancements;
 import mekanism.tools.common.advancements.ToolsAdvancements;
 import mekanism.tools.common.item.ItemMekanismArmor;
 import mekanism.tools.common.item.ItemMekanismAxe;
@@ -29,32 +30,40 @@ public class ToolsAdvancementProvider extends BaseAdvancementProvider {
 
     @Override
     protected void registerAdvancements(@NotNull Consumer<Advancement> consumer) {
-        advancement(ToolsAdvancements.PAXEL)
+        Advancement root = createPlaceHolder(MekanismAdvancements.ROOT.name());
+        Advancement materials = createPlaceHolder(MekanismAdvancements.MATERIALS.name());
+        Advancement paxel = advancement(ToolsAdvancements.PAXEL)
+              .parent(root)
               .display(ToolsItems.DIAMOND_PAXEL, FrameType.TASK, true)
               .orCriteria("any_paxel", getItems(item -> item instanceof ItemMekanismPaxel))
               .save(consumer);
-        advancement(ToolsAdvancements.ALTERNATE_ARMOR)
+        Advancement alternateArmor = advancement(ToolsAdvancements.ALTERNATE_ARMOR)
+              .parent(materials)
               .display(ToolsItems.OSMIUM_CHESTPLATE, FrameType.TASK, false)
               .orCriteria("armor", getItems(item -> item instanceof ItemMekanismArmor))
               .save(consumer);
-        advancement(ToolsAdvancements.ALTERNATE_TOOLS)
+        Advancement alternateTools = advancement(ToolsAdvancements.ALTERNATE_TOOLS)
+              .parent(materials)
               .display(ToolsItems.OSMIUM_PICKAXE, FrameType.TASK, false)
               .orCriteria("tools", getItems(item -> item instanceof ItemMekanismAxe || item instanceof ItemMekanismHoe || item instanceof ItemMekanismPickaxe ||
                                                     item instanceof ItemMekanismShovel || item instanceof ItemMekanismSword))
               .save(consumer);
-        advancement(ToolsAdvancements.NOT_ENOUGH_SHIELDING)
+        Advancement notEnoughShielding = advancement(ToolsAdvancements.NOT_ENOUGH_SHIELDING)
+              .parent(materials)
               .display(ToolsItems.OSMIUM_SHIELD, FrameType.TASK, false)
               .orCriteria("shields", getItems(item -> item instanceof ItemMekanismShield))
               .save(consumer);
 
-        advancement(ToolsAdvancements.BETTER_THAN_NETHERITE)
+        Advancement betterThanNetherite = advancement(ToolsAdvancements.BETTER_THAN_NETHERITE)
+              .parent(alternateArmor)
               .display(ToolsItems.REFINED_OBSIDIAN_CHESTPLATE, FrameType.GOAL, false)
               .orCriteria("armor", ToolsItems.REFINED_OBSIDIAN_HELMET,
                     ToolsItems.REFINED_OBSIDIAN_CHESTPLATE,
                     ToolsItems.REFINED_OBSIDIAN_LEGGINGS,
                     ToolsItems.REFINED_OBSIDIAN_BOOTS
               ).save(consumer);
-        advancement(ToolsAdvancements.LOVED_BY_PIGLINS)
+        Advancement lovedByPiglins = advancement(ToolsAdvancements.LOVED_BY_PIGLINS)
+              .parent(alternateArmor)
               .display(ToolsItems.REFINED_GLOWSTONE_CHESTPLATE, FrameType.GOAL, false)
               .orCriteria("armor", ToolsItems.REFINED_GLOWSTONE_HELMET,
                     ToolsItems.REFINED_GLOWSTONE_CHESTPLATE,

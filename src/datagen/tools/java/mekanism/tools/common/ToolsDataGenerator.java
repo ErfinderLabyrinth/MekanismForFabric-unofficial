@@ -1,6 +1,5 @@
 package mekanism.tools.common;
 
-import mekanism.common.MekanismDataGenerator;
 import mekanism.tools.client.ToolsItemModelProvider;
 import mekanism.tools.client.ToolsLangProvider;
 import mekanism.tools.client.ToolsSpriteSourceProvider;
@@ -10,7 +9,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
 public class ToolsDataGenerator implements DataGeneratorEntrypoint {
     public void onInitializeDataGenerator(FabricDataGenerator gen) {
-        MekanismDataGenerator.bootstrapConfigs(MekanismTools.MODID);
+        //MekanismDataGenerator.bootstrapConfigs(MekanismTools.MODID);
         FabricDataGenerator.Pack pack = gen.createPack();
         //pack.addProvider(output -> new BasePackMetadataGenerator(output, ToolsLang.PACK_DESCRIPTION));
         //Client side data generators

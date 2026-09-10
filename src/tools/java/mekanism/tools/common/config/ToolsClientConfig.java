@@ -9,9 +9,4 @@ public class ToolsClientConfig extends BaseMekanismConfig {
 
     public ToolsClientConfig() {
     }
-
-    @Override
-    public String getFileName() {
-        return "tools-client";
-    }
 }

@@ -55,11 +55,6 @@ public class ToolsConfig extends BaseMekanismConfig {
         steel = new MaterialCreator(new SteelMaterialDefaults());
     }
 
-    @Override
-    public String getFileName() {
-        return "tools";
-    }
-
     public static class ArmorSpawnChanceConfig {
 
         public final boolean canSpawnWeapon = true;

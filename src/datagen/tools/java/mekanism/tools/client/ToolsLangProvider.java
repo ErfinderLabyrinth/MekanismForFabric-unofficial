@@ -4,6 +4,7 @@ import mekanism.api.providers.IItemProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.client.lang.BaseLanguageProvider;
 import mekanism.common.util.EnumUtils;
+import mekanism.tools.common.MekanismTools;
 import mekanism.tools.common.ToolsLang;
 import mekanism.tools.common.advancements.ToolsAdvancements;
 import mekanism.tools.common.registries.ToolsItems;
@@ -12,7 +13,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 public class ToolsLangProvider extends BaseLanguageProvider {
 
     public ToolsLangProvider(FabricDataOutput output) {
-        super(output);
+        super(output, MekanismTools.instance);
     }
 
     @Override
