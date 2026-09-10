@@ -1,1 +1,10 @@
-[]
+{
+  "entity.balloon.pop": {
+    "sounds": [
+      {
+        "name": "mekanismadditions:pop"
+      }
+    ],
+    "subtitle": "sound_event.mekanismadditions.entity.balloon.pop"
+  }
+}
