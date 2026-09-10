@@ -91,6 +91,16 @@ sourceSets {
         compileClasspath += api.output
         runtimeClasspath += api.output
     }
+    full {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+
+        compileClasspath += sourceSets.api.output
+        runtimeClasspath += sourceSets.api.output
+    }
 }
 
 configurations {
@@ -128,6 +138,11 @@ for (String name : secondaryModules) {
     sourceSet.runtimeClasspath += project.sourceSets.main.output
     sourceSet.runtimeClasspath += sourceSets.main.runtimeClasspath
     sourceSet.runtimeClasspath += sourceSets.main.output
+
+    //Add to 'full' sourceset
+    sourceSets.full.compileClasspath += sourceSet.output
+    sourceSets.full.runtimeClasspath += sourceSet.output
+
     //Create all secondary sourceSets for this module
     setupExtraSourceSets(sourceSet)
 }
@@ -380,6 +395,11 @@ loom {
 
                 property("fabric-api.datagen.modid", "mekanism${name}")
             }
+        }
+
+        fullClient {
+            inherit client
+            source(sourceSets.full)
         }
     }
 
