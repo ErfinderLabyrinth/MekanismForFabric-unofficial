@@ -8,7 +8,6 @@ import mekanism.additions.common.registries.AdditionsSounds;
 import mekanism.api.NBTConstants;
 import mekanism.api.text.EnumColor;
 import mekanism.common.util.NBTUtils;
-import mekanism.common.util.NetworkUtil;
 import mekanism.common.util.WorldUtils;
 import net.fabricmc.fabric.api.entity.EntityPickInteractionAware;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -52,7 +51,7 @@ public class EntityBalloon extends Entity implements EntityPickInteractionAware 
     private static final double OFFSET = -0.275;
 
     private EnumColor color = EnumColor.DARK_BLUE;
-    private BlockPos latched;
+    public BlockPos latched;
     public LivingEntity latchedEntity;
     /* server-only */
     private boolean hasCachedEntity;
@@ -310,36 +309,10 @@ public class EntityBalloon extends Entity implements EntityPickInteractionAware 
 
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        writeSpawnData(buf);
-        return ServerPlayNetworking.createS2CPacket(PacketSpawnBalloon.TYPE.getId(), buf);
-    }
-
-    public void writeSpawnData(FriendlyByteBuf data) {
-        NetworkUtil.writeVector3d(data, position());
-        data.writeEnum(color);
-        if (latched != null) {
-            data.writeByte((byte) 1);
-            data.writeBlockPos(latched);
-        } else if (latchedEntity != null) {
-            data.writeByte((byte) 2);
-            data.writeVarInt(latchedEntity.getId());
-        } else {
-            data.writeByte((byte) 0);
-        }
-    }
-
-    public void readSpawnData(FriendlyByteBuf data) {
-        setPos(NetworkUtil.readVector3d(data));
-        color = data.readEnum(EnumColor.class);
-        byte type = data.readByte();
-        if (type == 1) {
-            latched = data.readBlockPos();
-        } else if (type == 2) {
-            latchedEntity = (LivingEntity) level().getEntity(data.readVarInt());
-        } else {
-            latched = null;
-        }
+        PacketSpawnBalloon spawnBalloon = new PacketSpawnBalloon(this);
+        FriendlyByteBuf buffer = PacketByteBufs.create();
+        spawnBalloon.write(buffer);
+        return ServerPlayNetworking.createS2CPacket(PacketSpawnBalloon.TYPE.getId(), buffer);
     }
 
     @Override

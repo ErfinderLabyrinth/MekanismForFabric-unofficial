@@ -28,6 +28,6 @@ public class AdditionsEntityTypes {
     public static final EntityTypeRegistryObject<EntityObsidianTNT> OBSIDIAN_TNT = ENTITY_TYPES.register("obsidian_tnt", EntityType.Builder.of(EntityObsidianTNT::new, MobCategory.MISC).fireImmune().sized(0.98F, 0.98F));
 
     public static void register() {
-
+        ENTITY_TYPES.registerEntityAttributes();
     }
 }

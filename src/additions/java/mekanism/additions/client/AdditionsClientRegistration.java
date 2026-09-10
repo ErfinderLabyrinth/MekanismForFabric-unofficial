@@ -14,7 +14,6 @@ import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.additions.common.registries.AdditionsItems;
 import mekanism.api.text.EnumColor;
 import mekanism.client.ClientRegistrationUtil;
-import mekanism.client.model.MekanismModelCache;
 import mekanism.client.model.MekanismModelLoadingPlugin;
 import mekanism.client.model.ModelBakingCompletedEvent;
 import mekanism.client.render.MekanismRenderer;

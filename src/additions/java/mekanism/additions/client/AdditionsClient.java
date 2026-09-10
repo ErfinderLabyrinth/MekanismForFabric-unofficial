@@ -2,6 +2,7 @@ package mekanism.additions.client;
 
 import io.netty.channel.local.LocalAddress;
 import mekanism.additions.client.model.AdditionsModelLoadingPlugin;
+import mekanism.additions.client.network.AdditionsClientPacketHandler;
 import mekanism.additions.client.voice.VoiceClient;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
 import mekanism.common.Mekanism;
@@ -15,13 +16,14 @@ import java.net.SocketAddress;
 
 public class AdditionsClient implements ClientModInitializer {
     private static VoiceClient voiceClient;
+    private static final AdditionsClientPacketHandler clientPacketHandler = new AdditionsClientPacketHandler();
 
     @Override
     public void onInitializeClient() {
         ModelLoadingPlugin.register(new AdditionsModelLoadingPlugin());
         MekanismAdditionsConfig.registerClientConfigs();
         AdditionsClientRegistration.init();
-
+        clientPacketHandler.initialize();
     }
 
     public static void reset() {

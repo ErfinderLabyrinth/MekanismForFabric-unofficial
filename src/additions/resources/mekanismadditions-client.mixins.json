@@ -4,6 +4,7 @@
   "package": "mekanism.additions.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "ItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

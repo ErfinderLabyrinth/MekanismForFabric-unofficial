@@ -8,6 +8,8 @@ public class AdditionsModelCache extends BaseModelCache {
     public static final AdditionsModelCache INSTANCE = new AdditionsModelCache();
 
     public final JSONModelData BALLOON = registerJSON("item/balloon_latched");
+    public final JSONModelData BALLOON_GUI = registerJSON("item/balloon_gui");
+    public final JSONModelData BALLOON_FIXED = registerJSON("item/balloon_fixed");
     public final JSONModelData BALLOON_FREE = registerJSON("item/balloon_free");
 
     private AdditionsModelCache() {
