@@ -29,6 +29,7 @@ import mekanism.generators.common.registries.GeneratorsBlocks;
 import mekanism.generators.common.registries.GeneratorsFluids;
 import mekanism.generators.common.registries.GeneratorsGases;
 import mekanism.generators.common.registries.GeneratorsItems;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.tags.ItemTags;
@@ -50,8 +51,8 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
     private static final char COPPER_CHAR = 'C';
     private static final char FURNACE_CHAR = 'F';
 
-    public GeneratorsRecipeProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-        super(output, existingFileHelper, MekanismGenerators.MODID);
+    public GeneratorsRecipeProvider(FabricDataOutput output) {
+        super(output, MekanismGenerators.MODID);
     }
 
     @Override

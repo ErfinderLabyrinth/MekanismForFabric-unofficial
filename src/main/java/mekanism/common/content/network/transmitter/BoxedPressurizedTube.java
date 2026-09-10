@@ -139,13 +139,18 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
     private <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>>
     boolean pullFromAcceptor(Storage<CHEMICAL> connectedAcceptor, BoxedChemicalStack bufferWithFallback, ChemicalType chemicalType, boolean bufferIsEmpty) {
         long availablePull = getAvailablePull(chemicalType);
-        STACK received = (STACK) connectedAcceptor.iterator().next().getResource().getStack(0);
+        Iterator<StorageView<CHEMICAL>> iterator2 = connectedAcceptor.iterator();
+        if(!iterator2.hasNext()) {
+            return false;
+        }
+        STACK received = (STACK) iterator2.next().getResource().getStack(0);
         if (bufferIsEmpty) {
             Iterator<StorageView<CHEMICAL>> iterator = connectedAcceptor.nonEmptyIterator();
             if (iterator.hasNext()) {
+                StorageView<CHEMICAL> view = iterator.next();
                 try(Transaction t=Transaction.openOuter()) {
-                    CHEMICAL resource = iterator.next().getResource();
-                    received = (STACK) resource.getStack(connectedAcceptor.extract(iterator.next().getResource(), availablePull, t));
+                    CHEMICAL resource = view.getResource();
+                    received = (STACK) resource.getStack(connectedAcceptor.extract(view.getResource(), availablePull, t));
                 }
             }
             //If we don't have a chemical stored try pulling as much as we are able to
@@ -168,6 +173,7 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
             // and not accidentally dupe anything, and we know our simulation we just performed on taking it is valid
             try(Transaction t=Transaction.openOuter()) {
                 takeChemical(chemicalType, received.getType().getStack(connectedAcceptor.extract(received.getType(), received.getAmount(), t)), t);
+                t.commit();
             }
             return true;
         }
@@ -356,8 +362,8 @@ public class BoxedPressurizedTube extends BufferedTransmitter<BoxedChemicalHandl
         } else {
             tank = (IChemicalTank<CHEMICAL, STACK>) chemicalTank.getTankForType(type);
         }
-        try(Transaction t2=Transaction.openOuter()) {
-            STACK result = (STACK) stack.getType().getStack(tank.insert(stack.getType(), stack.getAmount(), t));
+        try(Transaction t2=Transaction.openNested(t)) {
+            STACK result = (STACK) stack.getType().getStack(stack.getAmount() - tank.insert(stack.getType(), stack.getAmount(), t));
             t2.commit();
             return result;
         }

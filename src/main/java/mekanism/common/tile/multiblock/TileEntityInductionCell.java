@@ -28,7 +28,7 @@ public class TileEntityInductionCell extends TileEntityInternalMultiblock {
 
     @Override
     public EnergyStorage getEnergyContainer(@Nullable Direction side) {
-        return null;
+        return EnergyStorage.EMPTY;
     }
 
     @NotNull

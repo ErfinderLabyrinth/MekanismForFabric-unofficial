@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "mekanismtools",
-  "version": "${version}",
+  "version": "${mod_version}",
   "name": "MekanismForFabric: Tools",
   "description": "Tools module for Mekanism",
   "authors": [

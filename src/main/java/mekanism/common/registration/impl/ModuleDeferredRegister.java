@@ -7,6 +7,7 @@ import mekanism.api.gear.ModuleData;
 import mekanism.api.gear.ModuleData.ModuleDataBuilder;
 import mekanism.api.providers.IItemProvider;
 import mekanism.common.registration.WrappedDeferredRegister;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,11 @@ public class ModuleDeferredRegister extends WrappedDeferredRegister<ModuleData<?
     String modid;
     public ModuleDeferredRegister(String modid) {
         super(MekanismAPI.MODULE_REGISTRY_NAME);
+        this.modid = modid;
+    }
+
+    public ModuleDeferredRegister(String modid, Registry<ModuleData<?>> registry) {
+        super(registry);
         this.modid = modid;
     }
 

@@ -318,6 +318,7 @@ public abstract class TileEntityBasicLaser extends TileEntityMekanism {
             }
             try(Transaction t = Transaction.openOuter()) {
                 energyContainer.extract(firing, t);
+                t.commit();
             }
         } else if (getActive()) {
             setActive(false);

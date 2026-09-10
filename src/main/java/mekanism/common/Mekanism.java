@@ -152,6 +152,7 @@ public class Mekanism implements ModInitializer {
     private final ReloadListener recipeCacheManager = new ReloadListener();
 
     public static final CommonPlayerTickHandler commonPlayerTickHandler = new CommonPlayerTickHandler();
+    private static boolean modulesLaunched = false;
 
     @Override
     public void onInitialize() {
@@ -240,6 +241,15 @@ public class Mekanism implements ModInitializer {
             }
             return false;
         });
+
+        launchCommon();
+    }
+
+    public static void launchCommon() {
+        modulesLaunched = true;
+        for (IModModule module : Mekanism.modulesLoaded) {
+            module.launchCommon();
+        }
     }
 
     private @Nullable Storage<FluidVariant> findFluidStorage(ContainerItemContext containerItemContext) {
@@ -255,8 +265,11 @@ public class Mekanism implements ModInitializer {
         return null;
     }
 
-    public static synchronized void addModule(IModModule modModule) {
+    public static void addModule(IModModule modModule) {
         modulesLoaded.add(modModule);
+        if (modulesLaunched) {
+            modModule.launchCommon();
+        }
     }
 
     public static PacketHandler packetHandler() {

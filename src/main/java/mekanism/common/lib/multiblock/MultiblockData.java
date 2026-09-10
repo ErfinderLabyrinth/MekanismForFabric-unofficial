@@ -373,7 +373,7 @@ public class MultiblockData implements IContentsListener, ITileHeatHandler, ICon
 
     @NotNull
     public List<IExtendedFluidTank> getFluidTanks() {
-        return isFormed() ? fluidTanks : null;
+        return isFormed() ? fluidTanks : Collections.emptyList();
     }
 
     @NotNull

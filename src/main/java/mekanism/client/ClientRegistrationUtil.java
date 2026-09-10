@@ -7,6 +7,7 @@ import mekanism.api.text.EnumColor;
 import mekanism.client.gui.machine.GuiAdvancedElectricMachine;
 import mekanism.client.gui.machine.GuiElectricMachine;
 import mekanism.client.render.MekanismRenderer;
+import mekanism.client.render.item.MekanismISTER;
 import mekanism.common.block.interfaces.IColoredBlock;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.item.interfaces.IColoredItem;
@@ -19,7 +20,9 @@ import mekanism.common.tile.prefab.TileEntityAdvancedElectricMachine;
 import mekanism.common.tile.prefab.TileEntityElectricMachine;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -35,12 +38,14 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
@@ -128,6 +133,12 @@ public class ClientRegistrationUtil {
             for (TileEntityTypeRegistryObject<? extends T> tileTypeRO : tileEntityTypeROs) {
                 BlockEntityRenderers.register(tileTypeRO.get(), provider);
             }
+        }
+    }
+
+    public static void registerISTER(MekanismISTER ister, ItemLike... items) {
+        for(ItemLike itemLike : items) {
+            BuiltinItemRendererRegistry.INSTANCE.register(itemLike, ister);
         }
     }
 

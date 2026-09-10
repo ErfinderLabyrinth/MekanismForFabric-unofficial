@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "mekanismgenerators",
-  "version": "${version}",
+  "version": "${mod_version}",
   "name": "MekanismForFabric: Generators",
   "description": "Generators module for Mekanism",
   "authors": [
@@ -35,7 +35,9 @@
       "mekanism.generators.common.GeneratorsDataGenerator"
     ]
   },
-  "mixins": [],
+  "mixins": [
+    "mekanismgenerators.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",

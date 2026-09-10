@@ -42,7 +42,7 @@ public class TileEntitySecurityDesk extends TileEntityMekanism implements IBound
 
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
-        return null;
+        return Storage.empty();
     }
 
     @NotNull

@@ -34,6 +34,10 @@ import mekanism.common.util.FluidUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -295,4 +299,38 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
         previousMode();
     }
     //End methods IComputerTile
+
+
+    @Override
+    public @Nullable Storage<FluidVariant> getFluidStorage(@Nullable Direction side) {
+        Storage<FluidVariant> storage = super.getFluidStorage(side);
+        if(side == Direction.UP) {
+            return new FluidTankWrapper(storage);
+        } else {
+            return storage;
+        }
+    }
+
+    public class FluidTankWrapper extends FilteringStorage<FluidVariant> {
+        public FluidTankWrapper(Storage<FluidVariant> backingStorage) {
+            super(backingStorage);
+        }
+
+        @Override
+        public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+            long inserted = super.insert(resource, maxAmount, transaction);
+            if (inserted != 0 && !isRemote()) {
+                transaction.addOuterCloseCallback(result -> {
+                    if(result.wasCommitted()) {
+                        if (valve == 0) {
+                            needsPacket = true;
+                        }
+                        valve = 20;
+                        valveFluid = new FluidStack(resource, 1);
+                    }
+                });
+            }
+            return inserted;
+        }
+    }
 }

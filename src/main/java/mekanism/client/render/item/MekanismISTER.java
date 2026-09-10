@@ -2,7 +2,9 @@ package mekanism.client.render.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -25,10 +27,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer implements IdentifiableResourceReloadListener {
+public abstract class MekanismISTER implements SimpleSynchronousResourceReloadListener, BuiltinItemRendererRegistry.DynamicItemRenderer {
 
     protected MekanismISTER() {
-        super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
     }
 
     protected EntityModelSet getEntityModels() {
@@ -50,9 +51,13 @@ public abstract class MekanismISTER extends BlockEntityWithoutLevelRenderer impl
     @Override
     public abstract void onResourceManagerReload(@NotNull ResourceManager resourceManager);
 
-    @Override
     public abstract void renderByItem(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
           int light, int overlayLight);
+
+    @Override
+    public void render(ItemStack stack, ItemDisplayContext mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
+        renderByItem(stack, mode, matrices, vertexConsumers, light, overlay);
+    }
 
     /**
      * @implNote Heavily based on/from vanilla's ItemRenderer#render code that calls the renderByItem method on the ISBER

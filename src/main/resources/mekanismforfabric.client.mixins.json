@@ -10,10 +10,8 @@
     "BlockElementFaceDeserializerMixin",
     "BlockElementFaceMixin",
     "BlockElementMixin",
-    "BlockEntityWithoutLevelRendererMixin",
     "BlockModelDeserializerMixin",
     "BlockModelMixin",
-    "BlockRenderDispatcherMixin",
     "ClientLevelMixin",
     "ClientPacketListenerMixin",
     "ElytraLayerMixin",
@@ -32,7 +30,6 @@
     "MouseHandlerMixin",
     "PlayerRendererMixin",
     "TextureAtlasMixin",
-    "VanillaModelEncoderMixin",
     "VertexConsumerMixin"
   ],
   "injectors": {

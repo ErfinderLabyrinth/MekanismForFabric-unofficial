@@ -2,6 +2,7 @@ package mekanism.common.service;
 
 import com.mojang.serialization.Codec;
 import mekanism.api.IMekanismAccess;
+import mekanism.api.IMekanismRegistries;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.infuse.InfuseType;
@@ -70,5 +71,10 @@ public class MekanismAccess implements IMekanismAccess {
     @Override
     public IChemicalStackIngredientCreator<Slurry, SlurryStack, SlurryStackIngredient> slurryStackIngredientCreator() {
         return SlurryStackIngredientCreator.INSTANCE;
+    }
+
+    @Override
+    public IMekanismRegistries getRegistries() {
+        return MekanismRegistries.INSTANCE;
     }
 }

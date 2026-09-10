@@ -7,7 +7,9 @@ import mekanism.client.model.TextureAtlasStitchEvent;
 import mekanism.client.model.baked.ExtensionBakedModel.TransformedBakedModel;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
+import mekanism.common.registration.impl.FluidDeferredRegister;
 import mekanism.common.registration.impl.FluidRegistryObject;
+import mekanism.common.registries.MekanismFluids;
 import mekanism.generators.client.gui.GuiBioGenerator;
 import mekanism.generators.client.gui.GuiFissionReactor;
 import mekanism.generators.client.gui.GuiFissionReactorLogicAdapter;
@@ -41,6 +43,7 @@ import mekanism.generators.common.registries.GeneratorsTileEntityTypes;
 import mekanism.generators.common.tile.TileEntityAdvancedSolarGenerator;
 import mekanism.generators.common.tile.TileEntitySolarGenerator;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.renderer.RenderType;
@@ -53,10 +56,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 
 public class GeneratorsClientRegistration implements ClientModInitializer {
-
-    private GeneratorsClientRegistration() {
-    }
-
+    @Override
     public void onInitializeClient() {
         //Set fluids to a translucent render layer
         for (FluidRegistryObject<?, ?, ?, ?> fluidRO : GeneratorsFluids.FLUIDS.getAllFluids()) {
@@ -74,6 +74,7 @@ public class GeneratorsClientRegistration implements ClientModInitializer {
         moduleHelper.addMekaSuitModuleModels(MekanismGenerators.rl("models/entity/mekasuit_modules.obj"));
         moduleHelper.addMekaSuitModuleModelSpec("solar_helmet", GeneratorsModules.SOLAR_RECHARGING_UNIT, EquipmentSlot.HEAD);
 
+        registerFluidRenderProperties();
         registerRenderers();
         registerLayer();
         registerClientReloadListeners();
@@ -81,6 +82,14 @@ public class GeneratorsClientRegistration implements ClientModInitializer {
         registerItemColorHandlers();
 
         TextureAtlasStitchEvent.EVENT.register(GeneratorsClientRegistration::onStitch);
+    }
+
+    public static void registerFluidRenderProperties() {
+        for(FluidRegistryObject<?,?,?,?> object : GeneratorsFluids.FLUIDS.getAllFluids()) {
+            FluidDeferredRegister.FluidTypeRenderProperties properties = object.getRenderProperties();
+            FluidRenderHandlerRegistry.INSTANCE.register(object.getStillFluid(), properties.createRenderHandler());
+            FluidRenderHandlerRegistry.INSTANCE.register(object.getFlowingFluid(), properties.createRenderHandler());
+        }
     }
 
     public static void registerRenderers() {

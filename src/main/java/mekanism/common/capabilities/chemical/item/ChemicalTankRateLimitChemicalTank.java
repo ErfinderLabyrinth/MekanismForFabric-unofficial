@@ -56,7 +56,7 @@ public abstract class ChemicalTankRateLimitChemicalTank<CHEMICAL extends Chemica
     @Override
     public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
         long inserted;
-        try(Transaction t2=Transaction.openOuter()) {
+        try(Transaction t2=Transaction.openNested(transaction)) {
             inserted = super.insert(resource, maxAmount, t2);
             if(!isCreative) {
                 t2.commit();
@@ -68,7 +68,7 @@ public abstract class ChemicalTankRateLimitChemicalTank<CHEMICAL extends Chemica
     @Override
     public long extract(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
         long extracted;
-        try(Transaction t2=Transaction.openOuter()) {
+        try(Transaction t2=Transaction.openNested(transaction)) {
             extracted = super.extract(resource, maxAmount, t2);
             if(!isCreative) {
                 t2.commit();

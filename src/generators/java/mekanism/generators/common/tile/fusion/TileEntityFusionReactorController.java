@@ -27,18 +27,18 @@ public class TileEntityFusionReactorController extends TileEntityFusionReactorBl
 
     @Override
     public Storage<Gas> getGasStorage(@Nullable Direction side) {
-        return null;
+        return Storage.empty();
     }
 
     @Override
     public EnergyStorage getEnergyContainer(@Nullable Direction side) {
-        return null;
+        return EnergyStorage.EMPTY;
     }
 
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
         if (!getMultiblock().isFormed()) {
-            return null;
+            return Storage.empty();
         }
         return super.getItemStorage(side);
     }

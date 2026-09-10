@@ -3,14 +3,14 @@ package mekanism.generators.client;
 import mekanism.client.texture.BaseSpriteSourceProvider;
 import mekanism.generators.common.MekanismGenerators;
 import mekanism.generators.common.registries.GeneratorsFluids;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
-import net.minecraft.data.PackOutput;
 
 import java.util.List;
 
 public class GeneratorsSpriteSourceProvider extends BaseSpriteSourceProvider {
 
-    public GeneratorsSpriteSourceProvider(PackOutput output) {
+    public GeneratorsSpriteSourceProvider(FabricDataOutput output) {
         super(output, MekanismGenerators.MODID);
     }
 

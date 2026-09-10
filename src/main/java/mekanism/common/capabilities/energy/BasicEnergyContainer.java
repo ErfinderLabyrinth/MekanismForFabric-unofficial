@@ -107,7 +107,11 @@ public class BasicEnergyContainer extends SnapshotParticipant<Long> implements I
 
     @Override
     public long insert(long amount, TransactionContext t) {
-        if (amount == 0 || !canInsert.test(null)) {
+        return insert(amount, t, AutomationType.EXTERNAL);
+    }
+
+    public long insert(long amount, TransactionContext t, AutomationType automationType) {
+        if (amount == 0 || !canInsert.test(automationType)) {
             return 0;
         }
         long needed = Long.min(getRate(null), getNeeded());

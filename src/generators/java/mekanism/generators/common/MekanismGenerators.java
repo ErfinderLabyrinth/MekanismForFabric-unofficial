@@ -64,14 +64,19 @@ public class MekanismGenerators implements ModInitializer, IModModule {
     public static final MultiblockManager<FusionReactorMultiblockData> fusionReactorManager = new MultiblockManager<>("fusionReactor", FusionReactorCache::new, FusionReactorValidator::new);
 
     public void onInitialize() {
+        packetHandler = new GeneratorsPacketHandler();
         Mekanism.addModule(instance = this);
         MekanismGeneratorsConfig.registerConfigs();
 
-        packetHandler = new GeneratorsPacketHandler();
 
+        versionNumber = new Version(FabricLoader.getInstance().getModContainer(MODID).get());
+    }
+
+    @Override
+    public void launchCommon() {
         commonSetup();
-        imcQueue();
 
+        GeneratorsModules.register();
         GeneratorsItems.register();
         GeneratorsBlocks.register();
         GeneratorsFluids.register();
@@ -80,9 +85,8 @@ public class MekanismGenerators implements ModInitializer, IModModule {
         GeneratorsContainerTypes.register();
         GeneratorsTileEntityTypes.register();
         GeneratorsGases.register();
-        GeneratorsModules.register();
         //Set our version number to match the mods.toml file, which matches the one in our build.gradle
-        versionNumber = new Version(FabricLoader.getInstance().getModContainer(MODID).get());
+        imcQueue();
     }
 
     public static GeneratorsPacketHandler packetHandler() {

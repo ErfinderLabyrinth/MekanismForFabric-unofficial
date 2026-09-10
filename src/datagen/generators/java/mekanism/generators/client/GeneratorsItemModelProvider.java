@@ -4,19 +4,21 @@ import mekanism.client.model.BaseItemModelProvider;
 import mekanism.generators.common.MekanismGenerators;
 import mekanism.generators.common.registries.GeneratorsFluids;
 import mekanism.generators.common.registries.GeneratorsItems;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class GeneratorsItemModelProvider extends BaseItemModelProvider {
 
-    public GeneratorsItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-        super(output, MekanismGenerators.MODID, existingFileHelper);
+    public GeneratorsItemModelProvider(FabricDataOutput output) {
+        super(output, MekanismGenerators.MODID);
     }
 
     @Override
-    protected void registerModels() {
-        registerBuckets(GeneratorsFluids.FLUIDS);
-        registerModules(GeneratorsItems.ITEMS);
-        registerGenerated(GeneratorsItems.HOHLRAUM, GeneratorsItems.SOLAR_PANEL, GeneratorsItems.TURBINE_BLADE);
+    public void generateItemModels(ItemModelGenerators gen) {
+        registerBuckets(gen, GeneratorsFluids.FLUIDS);
+        registerModules(gen, GeneratorsItems.ITEMS);
+        registerGenerated(gen, GeneratorsItems.HOHLRAUM, GeneratorsItems.SOLAR_PANEL, GeneratorsItems.TURBINE_BLADE);
     }
 }

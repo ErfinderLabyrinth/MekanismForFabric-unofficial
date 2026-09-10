@@ -87,4 +87,6 @@ public interface IMekanismAccess {
      * @apiNote Use {@link mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess#slurry()} instead.
      */
     IChemicalStackIngredientCreator<Slurry, SlurryStack, SlurryStackIngredient> slurryStackIngredientCreator();
+
+    IMekanismRegistries getRegistries();
 }

@@ -136,7 +136,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
 
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
-        return null;
+        return Storage.empty();
     }
 
     @NotNull

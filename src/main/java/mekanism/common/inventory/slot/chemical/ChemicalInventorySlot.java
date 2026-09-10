@@ -119,7 +119,7 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
                     //True if we can fill the tank with any of our contents
                     // Note: We need to recheck the fact the chemical is not empty in case the item has multiple tanks and only some of the chemicals are valid
                     long amountInsertable;
-                    try(Transaction t=Transaction.openOuter()) {
+                    try(Transaction t= Transaction.getCurrentUnsafe() != null ? Transaction.openNested(Transaction.getCurrentUnsafe()) : Transaction.openOuter()) {
                         amountInsertable = chemicalTank.insert(chemicalInTank.getType(), chemicalInTank.getAmount(), t);
                     }
 
@@ -260,7 +260,7 @@ public abstract class ChemicalInventorySlot<CHEMICAL extends Chemical<CHEMICAL>,
                         if (extractedAmount != 0) {
                             //If we were able to actually extract it from the item, then insert it into our chemical tank
                             try(Transaction t = Transaction.openOuter()) {
-                                MekanismUtils.logMismatchedStackSize(chemicalTank.insert(view.getResource(), extractedAmount, t), extractedAmount);
+                                MekanismUtils.logMismatchedStackSize(chemicalTank.insert(chemicalInItem.getType(), extractedAmount, t), extractedAmount);
                                 t.commit();
                             }
                             //and mark that we were able to transfer at least some of it

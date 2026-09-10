@@ -34,7 +34,7 @@ public class TileEntityDynamicTank extends TileEntityMultiblock<TankMultiblockDa
 
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction side) {
-        return null;
+        return Storage.empty();
     }
 
     @Override

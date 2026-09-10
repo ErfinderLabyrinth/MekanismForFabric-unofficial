@@ -59,4 +59,8 @@ public class WrappedDeferredRegister<T> {
         register();
         return registry;
     }
+
+    public Registry<T> getRegistry() {
+        return internal;
+    }
 }

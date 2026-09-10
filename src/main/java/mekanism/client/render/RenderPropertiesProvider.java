@@ -4,6 +4,7 @@ import mekanism.client.render.armor.*;
 import mekanism.client.render.item.block.RenderEnergyCubeItem;
 import mekanism.client.render.item.block.RenderFluidTankItem;
 import mekanism.client.render.item.gear.*;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.item.ArmorItem;
 import org.jetbrains.annotations.NotNull;
@@ -105,12 +106,12 @@ public class RenderPropertiesProvider {
 //    }
 
     public static class MekRenderProperties {
-        private BlockEntityWithoutLevelRenderer renderer;
-        public MekRenderProperties(BlockEntityWithoutLevelRenderer renderer) {
+        private BuiltinItemRendererRegistry.DynamicItemRenderer renderer;
+        public MekRenderProperties(BuiltinItemRendererRegistry.DynamicItemRenderer renderer) {
             this.renderer = renderer;
         }
 
-        public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+        public BuiltinItemRendererRegistry.DynamicItemRenderer getCustomRenderer() {
             return renderer;
         }
     }
@@ -122,7 +123,7 @@ public class RenderPropertiesProvider {
     public static class MekCustomArmorRenderProperties extends MekRenderProperties implements ISpecialGear {
         ICustomArmor gearModel;
 
-        public MekCustomArmorRenderProperties(BlockEntityWithoutLevelRenderer renderer, ICustomArmor gearModel) {
+        public MekCustomArmorRenderProperties(BuiltinItemRendererRegistry.DynamicItemRenderer renderer, ICustomArmor gearModel) {
             super(renderer);
             this.gearModel = gearModel;
         }

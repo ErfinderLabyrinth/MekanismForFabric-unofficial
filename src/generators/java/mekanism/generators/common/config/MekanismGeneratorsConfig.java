@@ -2,7 +2,6 @@ package mekanism.generators.common.config;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
-import mekanism.common.config.MekanismConfigHelper;
 
 public class MekanismGeneratorsConfig {
 

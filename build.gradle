@@ -401,6 +401,11 @@ loom {
             inherit client
             source(sourceSets.full)
         }
+
+        fullServer {
+            inherit server
+            source(sourceSets.full)
+        }
     }
 
     for(run in runs) {
@@ -559,6 +564,7 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junit_version}"
     //We use https://github.com/quicktheories/QuickTheories to allow for implementing property based testing
     testImplementation "org.quicktheories:quicktheories:${quicktheories_version}"
+    testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 
     modApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
     modApi("mezz.jei:jei-${minecraft_version}-fabric-api:${jei_version}")

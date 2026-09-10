@@ -24,7 +24,7 @@ public class MekanismRobitSkins {
     private MekanismRobitSkins() {
     }
 
-    private static final RobitSkinDeferredRegister ROBIT_SKINS = new RobitSkinDeferredRegister(Mekanism.MODID);
+    public static final RobitSkinDeferredRegister ROBIT_SKINS = new RobitSkinDeferredRegister(Mekanism.MODID);
 
     @SuppressWarnings("FieldCanBeLocal")//Cannot be local as we reflect and grab it from the API
     private static Codec<RobitSkin> DIRECT_CODEC;

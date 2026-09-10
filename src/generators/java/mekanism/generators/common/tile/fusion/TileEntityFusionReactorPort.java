@@ -59,7 +59,7 @@ public class TileEntityFusionReactorPort extends TileEntityFusionReactorBlock im
         return new IChemicalTankHolder<>() {
             @Override
             public @NotNull Storage<Gas> getTanks(@Nullable Direction side) {
-                return getMultiblock().getGasStorage(side);
+                 return getMultiblock().getGasStorage(side);
             }
 
             @Override

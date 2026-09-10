@@ -6,8 +6,10 @@ import mekanism.common.Mekanism;
 import mekanism.common.tags.LazyTagLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 
 public class GeneratorTags {
@@ -21,6 +23,14 @@ public class GeneratorTags {
     }
 
     private GeneratorTags() {
+    }
+
+    public static class Blocks {
+        public static final TagKey<Block> ENDERMAN_CANNOT_PLACE_ON = tag("enderman_cannot_place_on");
+
+        private static TagKey<Block> tag(String name) {
+            return TagKey.create(Registries.BLOCK, Mekanism.rl(name));
+        }
     }
 
     public static class Fluids {

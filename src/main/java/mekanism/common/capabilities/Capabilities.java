@@ -15,6 +15,10 @@ import mekanism.common.Mekanism;
 import mekanism.common.capabilities.merged.IMergedHandler;
 import mekanism.common.lib.radiation.capability.DefaultRadiationEntity;
 import mekanism.common.storage.item.ItemStorageHandler;
+import mekanism.common.tile.interfaces.chemical.IGasTile;
+import mekanism.common.tile.interfaces.chemical.IInfusionTile;
+import mekanism.common.tile.interfaces.chemical.IPigmentTile;
+import mekanism.common.tile.interfaces.chemical.ISlurryTile;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
@@ -83,6 +87,7 @@ public class Capabilities {
         GAS_HANDLER_BLOCK.registerFallback((level, blockPos, blockState, blockEntity, direction) -> {
             if (blockEntity instanceof IMergedHandler mergedHandler) return mergedHandler.getGasHandler();
             if (blockEntity instanceof IGasHandler gasHandler) return gasHandler;
+            if (blockEntity instanceof IGasTile gasTile) return gasTile.getGasStorage(direction);
             return null;
         });
 
@@ -96,6 +101,7 @@ public class Capabilities {
         INFUSION_HANDLER_BLOCK.registerFallback((level, blockPos, blockState, blockEntity, direction) -> {
             if (blockEntity instanceof IMergedHandler mergedHandler) return mergedHandler.getInfusionHandler();
             if (blockEntity instanceof IInfusionHandler infusionHandler) return infusionHandler;
+            if (blockEntity instanceof IInfusionTile infusionTile) return infusionTile.getInfusionStorage(direction);
             return null;
         });
 
@@ -109,6 +115,7 @@ public class Capabilities {
         PIGMENT_HANDLER_BLOCK.registerFallback((level, blockPos, blockState, blockEntity, direction) -> {
             if (blockEntity instanceof IMergedHandler mergedHandler) return mergedHandler.getPigmentHandler();
             if (blockEntity instanceof IPigmentHandler pigmentHandler) return pigmentHandler;
+            if (blockEntity instanceof IPigmentTile pigmentTile) return pigmentTile.getPigmentStorage(direction);
             return null;
         });
 
@@ -122,6 +129,7 @@ public class Capabilities {
         SLURRY_HANDLER_BLOCK.registerFallback((level, blockPos, blockState, blockEntity, direction) -> {
             if (blockEntity instanceof IMergedHandler mergedHandler) return mergedHandler.getSlurryHandler();
             if (blockEntity instanceof ISlurryHandler slurryHandler) return slurryHandler;
+            if (blockEntity instanceof ISlurryTile slurryTile) return slurryTile.getSlurryStorage(direction);
             return null;
         });
     }

@@ -156,7 +156,7 @@ public class BaseModelCache {
             model = new CustomGeometry() {
                 @Override
                 public BakedModel bake(BlockModel blockModel, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
-                    return finalUnbakedModel.bake(blockModel, spriteGetter).wrapper(parts, alreadyBaked);
+                    return finalUnbakedModel.bake(blockModel, spriteGetter).wrapper(parts != null ? parts : Set.of(), alreadyBaked);
                 }
 
                 @Override

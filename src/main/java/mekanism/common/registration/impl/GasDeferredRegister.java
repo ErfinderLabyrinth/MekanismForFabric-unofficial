@@ -6,6 +6,7 @@ import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasBuilder;
 import mekanism.common.base.IChemicalConstant;
 import mekanism.common.registration.WrappedDeferredRegister;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Supplier;
@@ -14,6 +15,11 @@ public class GasDeferredRegister extends WrappedDeferredRegister<Gas> {
     String modid;
     public GasDeferredRegister(String modid) {
         super(MekanismAPI.GAS_REGISTRY_NAME);
+        this.modid = modid;
+    }
+
+    public GasDeferredRegister(String modid, Registry<Gas> registry) {
+        super(registry);
         this.modid = modid;
     }
 

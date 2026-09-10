@@ -65,7 +65,7 @@ public abstract class ChemicalTankChemicalTank<CHEMICAL extends Chemical<CHEMICA
             //If a player manually inserts into a creative tank (or internally, via a GasInventorySlot), that is empty we need to allow setting the type,
             // Note: We check that it is not external insertion because an empty creative tanks acts as a "void" for automation
             long inserted;
-            try(Transaction t=Transaction.openOuter()) {
+            try(Transaction t=Transaction.openNested(transaction)) {
                 inserted = super.insert(resource, maxAmount, t);
             }
             if (inserted == maxAmount) {
@@ -75,7 +75,7 @@ public abstract class ChemicalTankChemicalTank<CHEMICAL extends Chemical<CHEMICA
             return inserted;
         }
 
-        try(Transaction t=Transaction.openOuter()) {
+        try(Transaction t=Transaction.openNested(transaction)) {
             long inserted = super.insert(resource, maxAmount, t);
             if (!isCreative)
                 t.commit();
@@ -85,7 +85,7 @@ public abstract class ChemicalTankChemicalTank<CHEMICAL extends Chemical<CHEMICA
 
     @Override
     public long extract(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
-        try(Transaction t=Transaction.openOuter()) {
+        try(Transaction t=Transaction.openNested(transaction)) {
             long extracted = super.extract(resource, maxAmount, t);
             if (!isCreative)
                 t.commit();

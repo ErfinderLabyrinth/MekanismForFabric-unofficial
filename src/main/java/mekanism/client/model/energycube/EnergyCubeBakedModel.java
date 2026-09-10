@@ -7,22 +7,34 @@ import mekanism.api.RelativeSide;
 import mekanism.client.model.baked.ExtensionBakedModel.QuadsKey;
 import mekanism.client.model.energycube.EnergyCubeGeometry.FaceData;
 import mekanism.client.render.lib.QuadTransformation;
+import mekanism.common.tile.TileEntityEnergyCube;
 import mekanism.common.tile.TileEntityEnergyCube.CubeSideState;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 public class EnergyCubeBakedModel implements BakedModel {
 
@@ -183,4 +195,40 @@ public class EnergyCubeBakedModel implements BakedModel {
 //        }
 //        return IDynamicBakedModel.super.getRenderTypes(stack, fabulous);
 //    }
+
+
+    @Override
+    public boolean isVanillaAdapter() {
+        return false;
+    }
+
+    @Override
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
+        BlockEntity blockEntity = blockView.getBlockEntity(pos);
+        if(!(blockEntity instanceof TileEntityEnergyCube tileEntityEnergyCube)) return;
+
+        TileEntityEnergyCube.CubeSideState[] sideStates = tileEntityEnergyCube.getSideStates();
+
+        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        QuadEmitter emitter = context.getEmitter();
+        final RenderMaterial defaultMaterial = useAmbientOcclusion() ? renderer.materialFinder().find() : renderer.materialFinder().ambientOcclusion(TriState.FALSE).find();
+
+		for (int i = 0; i <= ModelHelper.NULL_FACE_ID; i++) {
+			final Direction cullFace = ModelHelper.faceFromIndex(i);
+
+			if (!context.hasTransform() && context.isFaceCulled(cullFace)) {
+				// Skip entire quad list if possible.
+				continue;
+			}
+
+			final List<BakedQuad> quads = getQuads(state, cullFace, randomSupplier.get(), sideStates);
+			final int count = quads.size();
+
+			for (int j = 0; j < count; j++) {
+				final BakedQuad q = quads.get(j);
+				emitter.fromVanilla(q, defaultMaterial, cullFace);
+				emitter.emit();
+			}
+		}
+    }
 }

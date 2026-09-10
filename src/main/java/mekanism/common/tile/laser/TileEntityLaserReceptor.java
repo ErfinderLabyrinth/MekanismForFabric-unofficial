@@ -1,5 +1,6 @@
 package mekanism.common.tile.laser;
 
+import mekanism.api.AutomationType;
 import mekanism.api.lasers.ILaserReceptor;
 import mekanism.api.providers.IBlockProvider;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -16,7 +17,7 @@ public abstract class TileEntityLaserReceptor extends TileEntityBasicLaser imple
     @Override
     public void receiveLaserEnergy(long energy) {
         try(Transaction t = Transaction.openOuter()) {
-            energyContainer.insert(energy, t);
+            energyContainer.insert(energy, t, AutomationType.INTERNAL);
             t.commit();
         }
     }

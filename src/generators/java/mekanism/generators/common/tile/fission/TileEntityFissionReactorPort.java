@@ -21,6 +21,7 @@ import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
 import mekanism.common.capabilities.holder.heat.IHeatCapacitorHolder;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.lib.multiblock.IMultiblockEjector;
+import mekanism.common.tile.TileEntityFluidTank;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.WorldUtils;
@@ -30,6 +31,9 @@ import mekanism.generators.common.content.fission.FissionReactorMultiblockData;
 import mekanism.generators.common.registries.GeneratorsBlocks;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -208,4 +212,35 @@ public class TileEntityFissionReactorPort extends TileEntityFissionReactorCasing
         setMode(getMode().getPrevious());
     }
     //End methods IComputerTile
+
+    @Override
+    public @Nullable Storage<FluidVariant> getFluidStorage(@Nullable Direction side) {
+        Storage<FluidVariant> storage = super.getFluidStorage(side);
+        if(side == Direction.UP) {
+            return new FluidTankWrapper(storage);
+        } else {
+            return storage;
+        }
+    }
+
+    public class FluidTankWrapper extends FilteringStorage<FluidVariant> {
+        public FluidTankWrapper(Storage<FluidVariant> backingStorage) {
+            super(backingStorage);
+        }
+
+        @Override
+        public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+            long inserted = super.insert(resource, maxAmount, transaction);
+
+            if(inserted > 0) {
+                transaction.addOuterCloseCallback(result -> {
+                    if(result.wasCommitted()) {
+                        getMultiblock().triggerValveTransfer(TileEntityFissionReactorPort.this);
+                    }
+                });
+            }
+
+            return inserted;
+        }
+    }
 }

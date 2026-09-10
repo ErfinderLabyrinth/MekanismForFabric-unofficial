@@ -397,7 +397,7 @@ public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STA
 
     @Override
     protected STACK createSnapshot() {
-        return stored;
+        return (STACK) stored.copy();
     }
 
     @Override
