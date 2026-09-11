@@ -79,7 +79,7 @@ public class UniversalCable extends BufferedTransmitter<EnergyStorage, EnergyNet
                     received = connectedAcceptor.extract(getAvailablePull(), t);
                 }
                 try(Transaction t = Transaction.openOuter()) {
-                    if (received != 0 && takeEnergy(received, t) == 0) {
+                    if (received != 0 && takeEnergy(received, t) == received) {
                         //If we received some energy and are able to insert it all
                         connectedAcceptor.extract(received, t);
                         t.commit();

@@ -509,8 +509,11 @@ public class MekanismTagProvider extends BaseTagProvider {
         addToTag(MekanismTags.Items.SLIME_BALLS, Items.SLIME_BALL);
 
         addToTag(MekanismTags.Items.QUARTZ_BLOCKS, Items.QUARTZ_BLOCK);
+        addToTag(MekanismTags.Items.DIAMOND_BLOCKS, Items.DIAMOND_BLOCK);
         addToTag(MekanismTags.Items.REDSTONE_BLOCKS, Items.REDSTONE_BLOCK);
         addToTag(MekanismTags.Items.COAL_BLOCKS, Items.COAL_BLOCK);
+
+        addToTag(MekanismTags.Items.WOODEN_CHESTS, Items.CHEST);
     }
 
     private void addBiomes() {

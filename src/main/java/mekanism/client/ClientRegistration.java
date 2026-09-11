@@ -251,6 +251,16 @@ public class ClientRegistration {
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELITE_ENERGY_CUBE.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ULTIMATE_ENERGY_CUBE.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CREATIVE_ENERGY_CUBE.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.BASIC_BIN.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ADVANCED_BIN.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELITE_BIN.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ULTIMATE_BIN.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CREATIVE_BIN.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.BASIC_CHEMICAL_TANK.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ADVANCED_CHEMICAL_TANK.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELITE_CHEMICAL_TANK.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ULTIMATE_CHEMICAL_TANK.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CREATIVE_CHEMICAL_TANK.getBlock(), RenderType.cutout());
 
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CHARGEPAD.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.CHEMICAL_INFUSER.getBlock(), RenderType.cutout());
@@ -259,7 +269,7 @@ public class ClientRegistration {
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.DIGITAL_MINER.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELECTRIC_PUMP.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELECTROLYTIC_SEPARATOR.getBlock(), RenderType.cutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ISOTOPIC_CENTRIFUGE.getBlock(), RenderType.cutout());
+        //BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ISOTOPIC_CENTRIFUGE.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.LASER.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.LOGISTICAL_SORTER.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.MODIFICATION_STATION.getBlock(), RenderType.cutout());
@@ -280,6 +290,20 @@ public class ClientRegistration {
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ELITE_INDUCTION_PROVIDER.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.ULTIMATE_INDUCTION_PROVIDER.getBlock(), RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.INDUCTION_PORT.getBlock(), RenderType.cutout());
+
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.FLUIDIC_PLENISHER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.INDUSTRIAL_ALARM.getBlock(), RenderType.translucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.SOLAR_NEUTRON_ACTIVATOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.LASER_TRACTOR_BEAM.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.LASER_AMPLIFIER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.PIGMENT_EXTRACTOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.PAINTING_MACHINE.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.THERMAL_EVAPORATION_CONTROLLER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.SPS_PORT.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.TELEPORTER.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.TELEPORTER_FRAME.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.BOILER_VALVE.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(MekanismBlocks.SUPERHEATING_ELEMENT.getBlock(), RenderType.cutout());
 
         for(BlockRegistryObject<?,?> block : MekanismBlocks.getFactoryBlocks()) {
             BlockRenderLayerMap.INSTANCE.putBlock(block.getBlock(), RenderType.cutout());

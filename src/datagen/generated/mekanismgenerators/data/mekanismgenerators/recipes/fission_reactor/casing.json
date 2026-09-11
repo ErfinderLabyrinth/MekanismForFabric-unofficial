@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "I": {
-      "tag": "forge:ingots/lead"
+      "tag": "c:lead_ingots"
     },
     "X": {
       "item": "mekanism:steel_casing"

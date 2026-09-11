@@ -467,7 +467,7 @@ public class UnitDisplayUtils {
         }
 
         public boolean below(double d) {
-            return d > value;
+            return d < value;
         }
     }
 }

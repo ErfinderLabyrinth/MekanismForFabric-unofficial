@@ -147,7 +147,7 @@ public class BaseModelCache {
             super.reload(modelBakery, bakedRegistry);
             ObjModel unbakedModel = null; //new ModelSettings(rl, true, useDiffuseLighting(), true, true, null));
             try {
-                unbakedModel = ObjParser.load(Minecraft.getInstance().getResourceManager().open(rl), rl.withPath(rl.getPath().substring(0, rl.getPath().lastIndexOf('/'))));
+                unbakedModel = ObjParser.load(Minecraft.getInstance().getResourceManager().open(rl), rl.withPath(rl.getPath().substring(0, rl.getPath().lastIndexOf('/'))), false);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

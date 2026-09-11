@@ -3,14 +3,21 @@ package mekanism.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.RobitSpriteUploader;
 import mekanism.client.model.robit.RobitModelDataBakedModel;
+import mekanism.client.model.seperate_transforms.SeperateTransformsBakedModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemRenderer.class)
 public class ItemRendererMixin {
@@ -28,5 +35,12 @@ public class ItemRendererMixin {
             return RobitSpriteUploader.RENDER_TYPE;
         }
         return original.call(itemStack, bl);
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/BakedModel;getTransforms()Lnet/minecraft/client/renderer/block/model/ItemTransforms;"))
+    public void replaceModelForSeperateTransformModels(ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel, CallbackInfo ci, @Local LocalRef<BakedModel> bakedModelLocalRef) {
+        if (bakedModel instanceof SeperateTransformsBakedModel seperateTransformsBakedModel) {
+            bakedModelLocalRef.set(seperateTransformsBakedModel.getPerspectiveModel(itemDisplayContext));
+        }
     }
 }

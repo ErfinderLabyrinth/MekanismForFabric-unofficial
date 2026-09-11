@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "item": "minecraft:nether_star"
+      "tag": "c:nether_stars"
     },
     "A": {
       "tag": "c:ultimate_alloys"

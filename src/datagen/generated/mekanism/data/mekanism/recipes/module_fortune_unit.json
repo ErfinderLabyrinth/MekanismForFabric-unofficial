@@ -8,7 +8,7 @@
       "tag": "c:elite_alloys"
     },
     "D": {
-      "item": "minecraft:diamond_block"
+      "tag": "c:diamone_blocks"
     },
     "H": {
       "tag": "c:polonium_pellets"

@@ -25,7 +25,7 @@ public class TransmitterLoader {
         ObjModel model;
         try {
             ResourceLocation modelRl = new ResourceLocation(modelContents.get("model").getAsString());
-            model = ObjParser.load(Minecraft.getInstance().getResourceManager().open(modelRl), modelRl.withPath(modelRl.getPath().substring(0, modelRl.getPath().lastIndexOf('/'))));
+            model = ObjParser.load(Minecraft.getInstance().getResourceManager().open(modelRl), modelRl.withPath(modelRl.getPath().substring(0, modelRl.getPath().lastIndexOf('/'))), false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -33,7 +33,7 @@ public class TransmitterLoader {
         if (modelContents.has(JsonConstants.GLASS)) {
             try {
                 ResourceLocation glassRl = new ResourceLocation(modelContents.getAsJsonObject(JsonConstants.GLASS).get("model").getAsString());
-                glass = ObjParser.load(Minecraft.getInstance().getResourceManager().open(glassRl), glassRl.withPath(glassRl.getPath().substring(0, glassRl.getPath().lastIndexOf('/'))));
+                glass = ObjParser.load(Minecraft.getInstance().getResourceManager().open(glassRl), glassRl.withPath(glassRl.getPath().substring(0, glassRl.getPath().lastIndexOf('/'))), false);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

@@ -69,7 +69,6 @@
 			]
 		},
 		"translucent": {
-			"render_type": "minecraft:translucent",
 			"textures": {
 				"1": "mekanism:block/models/industrial_alarm"
 			},

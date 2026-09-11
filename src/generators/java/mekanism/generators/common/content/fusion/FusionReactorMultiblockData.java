@@ -23,6 +23,7 @@ import mekanism.api.math.FloatingLong;
 import mekanism.api.math.MathUtils;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.chemical.multiblock.MultiblockChemicalTankBuilder;
+import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.energy.VariableCapacityEnergyContainer;
 import mekanism.common.capabilities.fluid.VariableCapacityFluidTank;
 import mekanism.common.capabilities.heat.ITileHeatHandler;
@@ -85,7 +86,7 @@ public class FusionReactorMultiblockData extends MultiblockData {
 
     private boolean burning = false;
 
-    public IEnergyContainer energyContainer;
+    public BasicEnergyContainer energyContainer;
     public IHeatCapacitor heatCapacitor;
 
     @WrappingComputerMethod(wrapper = ComputerFluidTankWrapper.class, methodNames = {"getWater", "getWaterCapacity", "getWaterNeeded", "getWaterFilledPercentage"}, docPlaceholder = "water tank")
@@ -332,7 +333,7 @@ public class FusionReactorMultiblockData extends MultiblockData {
         if (Math.abs(caseAirHeat) > HeatAPI.EPSILON) {
             heatCapacitor.handleHeat(-caseAirHeat);
             try(Transaction t = Transaction.openOuter()) {
-                energyContainer.insert((long)(caseAirHeat * MekanismGeneratorsConfig.generators.fusionThermocoupleEfficiency), t);
+                energyContainer.insert((long)(caseAirHeat * MekanismGeneratorsConfig.generators.fusionThermocoupleEfficiency), t, AutomationType.INTERNAL);
                 t.commit();
             }
         }

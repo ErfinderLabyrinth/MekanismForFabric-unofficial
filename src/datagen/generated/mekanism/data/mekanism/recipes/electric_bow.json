@@ -3,7 +3,7 @@
   "category": "equipment",
   "key": {
     "#": {
-      "item": "minecraft:string"
+      "tag": "c:strings"
     },
     "A": {
       "tag": "mekanism:alloys/infused"

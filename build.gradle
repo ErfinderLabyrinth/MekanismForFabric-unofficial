@@ -332,7 +332,7 @@ def datagenExtraClasspath = {
 
 fabricApi {
     configureDataGeneration {
-        outputDirectory = file("src/datagen/generated/")
+        outputDirectory = file("src/datagen/generated/mekanism")
     }
 }
 
@@ -433,6 +433,17 @@ loom {
                 }*/
         }
     }
+}
+
+tasks.register('runFullDatagen') {
+    group = "fabric"
+
+    dependsOn = [
+            'runDatagen',
+            'runAdditionsDatagen',
+            'runGeneratorsDatagen',
+            'runToolsDatagen'
+    ]
 }
 
 //minecraft {

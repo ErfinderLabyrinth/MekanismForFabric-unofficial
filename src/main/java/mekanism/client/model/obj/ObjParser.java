@@ -14,7 +14,7 @@ public final class ObjParser {
 
     private ObjParser() {}
 
-    public static ObjModel load(InputStream in, ResourceLocation path) throws IOException {
+    public static ObjModel load(InputStream in, ResourceLocation path, boolean flipV) throws IOException {
 
         ObjModel model = new ObjModel();
 
@@ -47,7 +47,7 @@ public final class ObjParser {
                     case "vt":
                         model.uvs.add(new Vec2(
                                 Float.parseFloat(s[1]),
-                                Float.parseFloat(s[2])
+                                flipV ? 1 - Float.parseFloat(s[2]) : Float.parseFloat(s[2])
                         ));
                         break;
 

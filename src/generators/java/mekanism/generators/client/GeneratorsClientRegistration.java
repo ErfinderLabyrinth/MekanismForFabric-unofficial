@@ -9,6 +9,7 @@ import mekanism.client.render.lib.QuadTransformation;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.registration.impl.FluidDeferredRegister;
 import mekanism.common.registration.impl.FluidRegistryObject;
+import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.registries.MekanismFluids;
 import mekanism.generators.client.gui.GuiBioGenerator;
 import mekanism.generators.client.gui.GuiFissionReactor;
@@ -43,6 +44,7 @@ import mekanism.generators.common.registries.GeneratorsTileEntityTypes;
 import mekanism.generators.common.tile.TileEntityAdvancedSolarGenerator;
 import mekanism.generators.common.tile.TileEntitySolarGenerator;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -75,6 +77,7 @@ public class GeneratorsClientRegistration implements ClientModInitializer {
         moduleHelper.addMekaSuitModuleModelSpec("solar_helmet", GeneratorsModules.SOLAR_RECHARGING_UNIT, EquipmentSlot.HEAD);
 
         registerFluidRenderProperties();
+        registerRenderTypes();
         registerRenderers();
         registerLayer();
         registerClientReloadListeners();
@@ -90,6 +93,15 @@ public class GeneratorsClientRegistration implements ClientModInitializer {
             FluidRenderHandlerRegistry.INSTANCE.register(object.getStillFluid(), properties.createRenderHandler());
             FluidRenderHandlerRegistry.INSTANCE.register(object.getFlowingFluid(), properties.createRenderHandler());
         }
+    }
+
+    public static void registerRenderTypes() {
+        BlockRenderLayerMap.INSTANCE.putBlock(GeneratorsBlocks.HEAT_GENERATOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(GeneratorsBlocks.GAS_BURNING_GENERATOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(GeneratorsBlocks.SOLAR_GENERATOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(GeneratorsBlocks.ADVANCED_SOLAR_GENERATOR.getBlock(), RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(GeneratorsBlocks.REACTOR_GLASS.getBlock(), RenderType.translucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(GeneratorsBlocks.LASER_FOCUS_MATRIX.getBlock(), RenderType.translucent());
     }
 
     public static void registerRenderers() {

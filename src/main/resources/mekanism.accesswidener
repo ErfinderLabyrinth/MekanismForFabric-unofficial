@@ -110,3 +110,4 @@ accessible field net/minecraft/world/entity/monster/Creeper explosionRadius I
 accessible method net/minecraft/world/entity/monster/Creeper spawnLingeringCloud ()V
 accessible field net/minecraft/world/entity/item/PrimedTnt owner Lnet/minecraft/world/entity/LivingEntity;
 mutable field net/minecraft/world/level/levelgen/structure/Structure settings Lnet/minecraft/world/level/levelgen/structure/Structure$StructureSettings;
+accessible field net/minecraft/client/renderer/block/model/BlockModel GSON Lcom/google/gson/Gson;

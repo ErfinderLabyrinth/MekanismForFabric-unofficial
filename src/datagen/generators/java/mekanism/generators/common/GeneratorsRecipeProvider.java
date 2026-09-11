@@ -30,6 +30,7 @@ import mekanism.generators.common.registries.GeneratorsFluids;
 import mekanism.generators.common.registries.GeneratorsGases;
 import mekanism.generators.common.registries.GeneratorsItems;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.tags.ItemTags;
@@ -37,8 +38,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
 
 @NothingNullByDefault
 public class GeneratorsRecipeProvider extends BaseRecipeProvider {
@@ -121,9 +120,9 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(GLASS_CHAR, GLASS_CHAR, GLASS_CHAR),
                     TripleLine.of(Pattern.REDSTONE, Pattern.ALLOY, Pattern.REDSTONE),
                     TripleLine.of(Pattern.OSMIUM, Pattern.OSMIUM, Pattern.OSMIUM))
-              ).key(GLASS_CHAR, Tags.Items.GLASS_PANES)
+              ).key(GLASS_CHAR, ConventionalItemTags.GLASS_PANES)
               .key(Pattern.OSMIUM, MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.INGOT, PrimaryResource.OSMIUM))
-              .key(Pattern.REDSTONE, Tags.Items.DUSTS_REDSTONE)
+              .key(Pattern.REDSTONE, ConventionalItemTags.REDSTONE_DUSTS)
               .key(Pattern.ALLOY, MekanismTags.Items.ALLOYS_INFUSED)
               .build(consumer);
         //Solar Generator
@@ -134,7 +133,7 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.OSMIUM, Pattern.ENERGY, Pattern.OSMIUM))
               ).key(Pattern.CONSTANT, GeneratorsItems.SOLAR_PANEL)
               .key(Pattern.ALLOY, MekanismTags.Items.ALLOYS_INFUSED)
-              .key(Pattern.INGOT, Tags.Items.INGOTS_IRON)
+              .key(Pattern.INGOT, ConventionalItemTags.IRON_INGOTS)
               .key(Pattern.ENERGY, MekanismItems.ENERGY_TABLET)
               .key(Pattern.OSMIUM, MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.INGOT, PrimaryResource.OSMIUM))
               .build(consumer, MekanismGenerators.rl("generator/solar"));
@@ -146,7 +145,7 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.INGOT, Pattern.INGOT, Pattern.INGOT))
               ).key(Pattern.PREVIOUS, GeneratorsBlocks.SOLAR_GENERATOR)
               .key(Pattern.ALLOY, MekanismTags.Items.ALLOYS_INFUSED)
-              .key(Pattern.INGOT, Tags.Items.INGOTS_IRON)
+              .key(Pattern.INGOT, ConventionalItemTags.IRON_INGOTS)
               .build(consumer, MekanismGenerators.rl("generator/advanced_solar"));
         //Bio
         ExtendedShapedRecipeBuilder.shapedRecipe(GeneratorsBlocks.BIO_GENERATOR)
@@ -154,9 +153,9 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.REDSTONE, Pattern.ALLOY, Pattern.REDSTONE),
                     TripleLine.of(BIO_FUEL_CHAR, Pattern.CIRCUIT, BIO_FUEL_CHAR),
                     TripleLine.of(Pattern.INGOT, Pattern.ALLOY, Pattern.INGOT))
-              ).key(Pattern.REDSTONE, Tags.Items.DUSTS_REDSTONE)
+              ).key(Pattern.REDSTONE, ConventionalItemTags.REDSTONE_DUSTS)
               .key(Pattern.ALLOY, MekanismTags.Items.ALLOYS_INFUSED)
-              .key(Pattern.INGOT, Tags.Items.INGOTS_IRON)
+              .key(Pattern.INGOT, ConventionalItemTags.IRON_INGOTS)
               .key(Pattern.CIRCUIT, MekanismTags.Items.CIRCUITS_BASIC)
               .key(BIO_FUEL_CHAR, MekanismTags.Items.FUELS_BIO)
               .build(consumer, MekanismGenerators.rl("generator/bio"));
@@ -178,9 +177,9 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.WOOD, Pattern.OSMIUM, Pattern.WOOD),
                     TripleLine.of(COPPER_CHAR, FURNACE_CHAR, COPPER_CHAR))
               ).key(Pattern.WOOD, ItemTags.PLANKS)
-              .key(Pattern.INGOT, Tags.Items.INGOTS_IRON)
+              .key(Pattern.INGOT, ConventionalItemTags.IRON_INGOTS)
               .key(Pattern.OSMIUM, MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.INGOT, PrimaryResource.OSMIUM))
-              .key(COPPER_CHAR, Tags.Items.INGOTS_COPPER)
+              .key(COPPER_CHAR, ConventionalItemTags.COPPER_INGOTS)
               .key(FURNACE_CHAR, Blocks.FURNACE)
               .build(consumer, MekanismGenerators.rl("generator/heat"));
         //Wind
@@ -222,7 +221,7 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.REDSTONE, FRAME_CHAR, Pattern.REDSTONE),
                     TripleLine.of(Pattern.EMPTY, Pattern.REDSTONE, Pattern.EMPTY))
               ).key(FRAME_CHAR, GeneratorsBlocks.FISSION_REACTOR_CASING)
-              .key(Pattern.REDSTONE, Tags.Items.DUSTS_REDSTONE)
+              .key(Pattern.REDSTONE, ConventionalItemTags.REDSTONE_DUSTS)
               .build(consumer, MekanismGenerators.rl("fission_reactor/logic_adapter"));
         //Fission Fuel Assembly
         ExtendedShapedRecipeBuilder.shapedRecipe(GeneratorsBlocks.FISSION_FUEL_ASSEMBLY)
@@ -279,7 +278,7 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(GLASS_CHAR, Pattern.REDSTONE, GLASS_CHAR),
                     TripleLine.of(Pattern.EMPTY, GLASS_CHAR, Pattern.EMPTY))
               ).key(GLASS_CHAR, GeneratorsBlocks.REACTOR_GLASS)
-              .key(Pattern.REDSTONE, Tags.Items.STORAGE_BLOCKS_REDSTONE)
+              .key(Pattern.REDSTONE, MekanismTags.Items.REDSTONE_BLOCKS)
               .build(consumer);
         //Frame
         ExtendedShapedRecipeBuilder.shapedRecipe(GeneratorsBlocks.FUSION_REACTOR_FRAME, 4)
@@ -297,7 +296,7 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.STEEL, Pattern.INGOT, Pattern.STEEL),
                     TripleLine.of(Pattern.INGOT, GLASS_CHAR, Pattern.INGOT),
                     TripleLine.of(Pattern.STEEL, Pattern.INGOT, Pattern.STEEL))
-              ).key(GLASS_CHAR, Tags.Items.GLASS_SILICA)
+              ).key(GLASS_CHAR, ConventionalItemTags.GLASS_BLOCKS)
               .key(Pattern.INGOT, MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.INGOT, PrimaryResource.LEAD))
               .key(Pattern.STEEL, MekanismItems.ENRICHED_IRON)
               .build(consumer, MekanismGenerators.rl("reactor/glass"));
@@ -317,7 +316,7 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.REDSTONE, FRAME_CHAR, Pattern.REDSTONE),
                     TripleLine.of(Pattern.EMPTY, Pattern.REDSTONE, Pattern.EMPTY))
               ).key(FRAME_CHAR, GeneratorsBlocks.FUSION_REACTOR_FRAME)
-              .key(Pattern.REDSTONE, Tags.Items.DUSTS_REDSTONE)
+              .key(Pattern.REDSTONE, ConventionalItemTags.REDSTONE_DUSTS)
               .build(consumer, MekanismGenerators.rl("reactor/logic_adapter"));
         //Controller
         ExtendedShapedRecipeBuilder.shapedRecipe(GeneratorsBlocks.FUSION_REACTOR_CONTROLLER)
@@ -326,7 +325,7 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(FRAME_CHAR, Pattern.TANK, FRAME_CHAR),
                     TripleLine.of(FRAME_CHAR, FRAME_CHAR, FRAME_CHAR))
               ).key(Pattern.CIRCUIT, MekanismTags.Items.CIRCUITS_ULTIMATE)
-              .key(GLASS_CHAR, Tags.Items.GLASS_PANES)
+              .key(GLASS_CHAR, ConventionalItemTags.GLASS_PANES)
               .key(FRAME_CHAR, GeneratorsBlocks.FUSION_REACTOR_FRAME)
               .key(Pattern.TANK, MekanismBlocks.BASIC_CHEMICAL_TANK)
               .build(consumer, MekanismGenerators.rl("reactor/controller"));
@@ -340,7 +339,7 @@ public class GeneratorsRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.INGOT, Pattern.ENERGY, Pattern.INGOT),
                     TripleLine.of(Pattern.STEEL, Pattern.INGOT, Pattern.STEEL))
               ).key(Pattern.STEEL, MekanismTags.Items.INGOTS_STEEL)
-              .key(Pattern.INGOT, Tags.Items.INGOTS_GOLD)
+              .key(Pattern.INGOT, ConventionalItemTags.GOLD_INGOTS)
               .key(Pattern.ENERGY, MekanismItems.ENERGY_TABLET)
               .build(consumer);
         //Rotational Complex

@@ -5,9 +5,7 @@ import mekanism.generators.common.MekanismGenerators;
 import mekanism.generators.common.registries.GeneratorsFluids;
 import mekanism.generators.common.registries.GeneratorsItems;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class GeneratorsItemModelProvider extends BaseItemModelProvider {
 

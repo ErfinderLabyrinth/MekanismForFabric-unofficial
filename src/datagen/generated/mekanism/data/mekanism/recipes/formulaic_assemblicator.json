@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "c:chests"
+      "tag": "c:wooden_chests"
     },
     "C": {
       "tag": "c:basic_circuits"

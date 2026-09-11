@@ -11,7 +11,9 @@ import mekanism.client.model.CustomGeometry;
 import mekanism.client.model.composite.CompositeModelLoader;
 import mekanism.client.model.energycube.EnergyCubeModelLoader;
 import mekanism.client.model.item_layers.ItemLayersModelLoader;
+import mekanism.client.model.obj.model.ObjModelLoader;
 import mekanism.client.model.robit.RobitModel;
+import mekanism.client.model.seperate_transforms.SeperateTransformsModelLoader;
 import mekanism.client.render.obj.TransmitterLoader;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.ResourceLocation;
@@ -63,6 +65,12 @@ public class BlockModelDeserializerMixin {
         }
         if (name.equals(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "item_layers"))) {
             return ItemLayersModelLoader.INSTANCE.read(object);
+        }
+        if (name.equals(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "separate_transforms"))) {
+            return SeperateTransformsModelLoader.INSTANCE.read(object);
+        }
+        if (name.equals(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "obj"))) {
+            return ObjModelLoader.INSTANCE.read(object);
         }
         throw new JsonParseException(String.format(Locale.ENGLISH, "Model loader '%s' not found.", name));
 

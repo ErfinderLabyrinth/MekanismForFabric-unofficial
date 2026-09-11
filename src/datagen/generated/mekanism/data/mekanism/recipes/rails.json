@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "item": "minecraft:stick"
+      "tag": "c:wooden_rods"
     },
     "O": {
       "tag": "c:osmium_ingots"

@@ -214,8 +214,12 @@ public class MekanismTags {
         public static final TagKey<Item> SLIME_BALLS = cTag("slime_balls");
 
         public static final TagKey<Item> QUARTZ_BLOCKS = cTag("quartz_blocks");
+        public static final TagKey<Item> DIAMOND_BLOCKS = cTag("diamone_blocks");
         public static final TagKey<Item> REDSTONE_BLOCKS = cTag("redstone_blocks");
         public static final TagKey<Item> COAL_BLOCKS = cTag("coal_blocks");
+
+        public static final TagKey<Item> WOODEN_CHESTS = cTag("wooden_chests");
+
 
         private static TagKey<Item> cTag(String name) {
             return TagKey.create(Registries.ITEM, new ResourceLocation("c", name));

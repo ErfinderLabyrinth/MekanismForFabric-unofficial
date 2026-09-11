@@ -306,7 +306,8 @@ public class SoundHandler {
                 // what volume to use
                 volume = originalVolume;
                 //Minecraft.getInstance().getSoundManager().play(this);
-                SoundInstance s = onTilePlaySound(this, getLocation().getPath());
+                //SoundInstance s = onTilePlaySound(this, getLocation().getPath());
+                SoundInstance s = this;
                 IN_MUFFLED_CHECK = false;
 
                 if (s == this) {

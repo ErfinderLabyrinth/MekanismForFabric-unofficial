@@ -19,11 +19,14 @@ import mekanism.client.model.ModelBakingCompletedEvent;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.registration.impl.ItemRegistryObject;
+import mekanism.common.registries.MekanismBlocks;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.SkeletonRenderer;
 import net.minecraft.client.renderer.entity.StrayRenderer;
 import net.minecraft.client.renderer.entity.WitherSkeletonRenderer;
@@ -53,6 +56,18 @@ public class AdditionsClientRegistration {
         EntityRendererRegistry.register(AdditionsEntityTypes.BABY_SKELETON.get(), SkeletonRenderer::new);
         EntityRendererRegistry.register(AdditionsEntityTypes.BABY_STRAY.get(), StrayRenderer::new);
         EntityRendererRegistry.register(AdditionsEntityTypes.BABY_WITHER_SKELETON.get(), WitherSkeletonRenderer::new);
+    }
+
+    public static void registerRenderTypes() {
+        for(BlockRegistryObject<?,?> block : AdditionsBlocks.TRANSPARENT_PLASTIC_BLOCKS.values()) {
+            BlockRenderLayerMap.INSTANCE.putBlock(block.getBlock(), RenderType.translucent());
+        }
+        for(BlockRegistryObject<?,?> block : AdditionsBlocks.TRANSPARENT_PLASTIC_SLABS.values()) {
+            BlockRenderLayerMap.INSTANCE.putBlock(block.getBlock(), RenderType.translucent());
+        }
+        for(BlockRegistryObject<?,?> block : AdditionsBlocks.TRANSPARENT_PLASTIC_STAIRS.values()) {
+            BlockRenderLayerMap.INSTANCE.putBlock(block.getBlock(), RenderType.translucent());
+        }
     }
 
     public static void registerLayer() {

@@ -40,7 +40,7 @@ public final class InventoryUtils {
         ItemStack stack = entity.getItem();
         if (!entity.level().isClientSide && !stack.isEmpty() && stack.getItem() instanceof IDroppableContents inventory && inventory.canContentsDrop(stack)) {
             boolean shouldDrop;
-            if (source.getEntity() instanceof Player player) {
+            if (source != null && source.getEntity() instanceof Player player) {
                 //If the destroyer is a player use security utils to properly check for access
                 shouldDrop = ISecurityUtils.INSTANCE.canAccess(player, stack);
             } else {

@@ -310,7 +310,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
               ).key(Pattern.ENERGY, MekanismItems.ENERGY_TABLET)
               .key(Pattern.ALLOY, MekanismTags.Items.ALLOYS_INFUSED)
               .key(Pattern.INGOT, ConventionalItemTags.LAPIS)
-              .key(Pattern.CONSTANT, Items.STICK) //TODO Tags.Items.RODS_WOODEN
+              .key(Pattern.CONSTANT, MekanismTags.Items.WOODEN_RODS)
               .build(consumer);
         //Crafting formula
         ExtendedShapelessRecipeBuilder.shapelessRecipe(MekanismItems.CRAFTING_FORMULA)
@@ -388,7 +388,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.CONSTANT, Pattern.ALLOY, Pattern.EMPTY),
                     TripleLine.of(Pattern.CONSTANT, Pattern.EMPTY, Pattern.ENERGY),
                     TripleLine.of(Pattern.CONSTANT, Pattern.ALLOY, Pattern.EMPTY))
-              ).key(Pattern.CONSTANT, Items.STRING) //TODO Tags.Items.STRING
+              ).key(Pattern.CONSTANT, MekanismTags.Items.STRINGS)
               .key(Pattern.ENERGY, MekanismItems.ENERGY_TABLET)
               .key(Pattern.ALLOY, MekanismTags.Items.ALLOYS_INFUSED)
               .category(RecipeCategory.COMBAT)
@@ -487,7 +487,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.STEEL, Pattern.PREVIOUS, Pattern.STEEL),
                     TripleLine.of(Pattern.CIRCUIT, Pattern.STEEL_CASING, Pattern.CIRCUIT),
                     TripleLine.of(Pattern.STEEL, Pattern.CONSTANT, Pattern.STEEL))
-              ).key(Pattern.CONSTANT, ConventionalItemTags.CHESTS) //TODO Tags.Items.CHESTS_WOODEN
+              ).key(Pattern.CONSTANT, MekanismTags.Items.WOODEN_CHESTS)
               .key(Pattern.PREVIOUS, Blocks.CRAFTING_TABLE)
               .key(Pattern.CIRCUIT, MekanismTags.Items.CIRCUITS_BASIC)
               .key(Pattern.STEEL, MekanismTags.Items.INGOTS_STEEL)
@@ -736,7 +736,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
               .key(Pattern.CIRCUIT, MekanismTags.Items.CIRCUITS_BASIC)
               .key(Pattern.STEEL, MekanismTags.Items.INGOTS_STEEL)
               .key(Pattern.PREVIOUS, MekanismItems.DICTIONARY)
-              .key(Pattern.CONSTANT, ConventionalItemTags.CHESTS) //TODO Tags.Items.CHESTS_WOODEN
+              .key(Pattern.CONSTANT, MekanismTags.Items.WOODEN_CHESTS)
               .build(consumer);
         //Osmium compressor
         ExtendedShapedRecipeBuilder.shapedRecipe(MekanismBlocks.OSMIUM_COMPRESSOR)
@@ -773,7 +773,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.STEEL, GLASS_CHAR, Pattern.STEEL),
                     TripleLine.of(Pattern.PREVIOUS, Pattern.CIRCUIT, Pattern.PREVIOUS),
                     TripleLine.of(Pattern.STEEL, Pattern.STEEL, Pattern.STEEL))
-              ).key(Pattern.PREVIOUS, ConventionalItemTags.CHESTS) //TODO Tags.Items.CHESTS_WOODEN
+              ).key(Pattern.PREVIOUS, MekanismTags.Items.WOODEN_CHESTS)
               .key(Pattern.CIRCUIT, MekanismTags.Items.CIRCUITS_BASIC)
               .key(Pattern.STEEL, MekanismTags.Items.INGOTS_STEEL)
               .key(GLASS_CHAR, ConventionalItemTags.GLASS_BLOCKS)
@@ -851,7 +851,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.OSMIUM, Pattern.EMPTY, Pattern.OSMIUM),
                     TripleLine.of(Pattern.OSMIUM, Pattern.CONSTANT, Pattern.OSMIUM),
                     TripleLine.of(Pattern.OSMIUM, Pattern.EMPTY, Pattern.OSMIUM))
-              ).key(Pattern.CONSTANT, Items.STICK) //TODO Tags.Items.RODS_WOODEN
+              ).key(Pattern.CONSTANT, MekanismTags.Items.WOODEN_RODS)
               .key(Pattern.OSMIUM, MekanismTags.Items.PROCESSED_RESOURCES.get(ResourceType.INGOT, PrimaryResource.OSMIUM))
               .build(consumer, Mekanism.rl("rails"));
         //Resistive heater
@@ -1261,7 +1261,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.CIRCUIT, Pattern.STEEL_CASING, Pattern.CIRCUIT),
                     TripleLine.of(Pattern.PLASTIC, Pattern.ALLOY, Pattern.PLASTIC))
               ).key(Pattern.CIRCUIT, MekanismTags.Items.CIRCUITS_ULTIMATE)
-              .key(Pattern.WOOD, ConventionalItemTags.CHESTS) //TODO Tags.Items.CHESTS_WOODEN
+              .key(Pattern.WOOD, MekanismTags.Items.WOODEN_CHESTS)
               .key(Pattern.PLASTIC, MekanismItems.HDPE_SHEET)
               .key(Pattern.STEEL_CASING, MekanismBlocks.STEEL_CASING)
               .key(Pattern.ALLOY, MekanismTags.Items.PELLETS_POLONIUM)
@@ -1295,7 +1295,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
               ).key(Pattern.INGOT, MekanismTags.Items.INGOTS_REFINED_OBSIDIAN)
               .key(Pattern.CIRCUIT, MekanismTags.Items.CIRCUITS_ULTIMATE)
               .key(Pattern.ALLOY, MekanismTags.Items.ALLOYS_ATOMIC)
-              .key(DIAMOND_CHAR, Items.DIAMOND_BLOCK) //TODO Tags.Items.STORAGE_BLOCKS_DIAMOND
+              .key(DIAMOND_CHAR, MekanismTags.Items.DIAMOND_BLOCKS)
               .build(consumer);
     }
 
@@ -1424,7 +1424,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
               .key(Pattern.PREVIOUS, MekanismItems.MODULE_BASE)
               .key(Pattern.CONSTANT, MekanismTags.Items.STORAGE_BLOCKS_REFINED_GLOWSTONE)
               .key(Pattern.HDPE_CHAR, MekanismTags.Items.PELLETS_POLONIUM)
-              .key(Pattern.DIAMOND, Items.DIAMOND_BLOCK) //TODO Tags.Items.STORAGE_BLOCKS_DIAMOND
+              .key(Pattern.DIAMOND, MekanismTags.Items.DIAMOND_BLOCKS)
               .build(consumer);
         //Blasting Unit
         ExtendedShapedRecipeBuilder.shapedRecipe(MekanismItems.MODULE_BLASTING)
@@ -1589,7 +1589,7 @@ public class MekanismRecipeProvider extends BaseRecipeProvider {
                     TripleLine.of(Pattern.HDPE_CHAR, Pattern.HDPE_CHAR, Pattern.HDPE_CHAR))
               ).key(Pattern.ALLOY, MekanismTags.Items.ALLOYS_ULTIMATE)
               .key(Pattern.PREVIOUS, MekanismItems.MODULE_BASE)
-              .key(Pattern.CONSTANT, Items.NETHER_STAR) //TODO Tags.Items.NETHER_STARS
+              .key(Pattern.CONSTANT, MekanismTags.Items.NETHER_STARS)
               .key(Pattern.ENERGY, MekanismBlocks.ULTIMATE_INDUCTION_PROVIDER)
               .key(Pattern.HDPE_CHAR, MekanismItems.ANTIMATTER_PELLET)
               .build(consumer);

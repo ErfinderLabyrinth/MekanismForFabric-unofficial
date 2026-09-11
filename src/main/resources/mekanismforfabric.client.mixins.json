@@ -29,6 +29,7 @@
     "ModelManagerMixin",
     "MouseHandlerMixin",
     "PlayerRendererMixin",
+    "SoundEngineMixin",
     "TextureAtlasMixin",
     "VertexConsumerMixin"
   ],
