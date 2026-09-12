@@ -13,6 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,7 +27,7 @@ public class BlockGlowPanel extends BlockBaseModel<BlockType> implements IColore
     private static final VoxelShape[] MIN_SHAPES = new VoxelShape[EnumUtils.DIRECTIONS.length];
 
     static {
-        VoxelShapeUtils.setShape(box(4, 0, 4, 12, 16, 12), MIN_SHAPES, true);
+        VoxelShapeUtils.setShape(Block.box(4, 0, 4, 12, 16, 12), MIN_SHAPES, true);
     }
 
     private final EnumColor color;
