@@ -25,14 +25,19 @@ import java.util.function.Function;
 
 public class RobitModel extends CustomGeometry {
 
-    private RobitModel(List<BlockElement> elements) {
-        super(elements);
+    private RobitModel() {
+        super();
     }
 
     @Override
     public BakedModel bake(BlockModel blockModel, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
                            ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
         return new RobitBakedModel(super.bake(blockModel, parts, baker, spriteGetter, modelTransform, overrides, modelLocation, alreadyBaked));
+    }
+
+    @Override
+    public CustomGeometry clone() {
+        return new RobitModel();
     }
 
     /**
@@ -47,14 +52,14 @@ public class RobitModel extends CustomGeometry {
 
         @NotNull
         public RobitModel read(@NotNull JsonObject modelContents, @NotNull JsonDeserializationContext ctx) {
-            if (!modelContents.has("elements")) {
-                throw new JsonParseException("An element model must have an \"elements\" member.");
-            }
-            List<BlockElement> elements = new ArrayList<>();
-            for (JsonElement element : GsonHelper.getAsJsonArray(modelContents, "elements")) {
-                elements.add(ctx.deserialize(element, BlockElement.class));
-            }
-            return new RobitModel(elements);
+//            if (!modelContents.has("elements")) {
+//                throw new JsonParseException("An element model must have an \"elements\" member.");
+//            }
+//            List<BlockElement> elements = new ArrayList<>();
+//            for (JsonElement element : GsonHelper.getAsJsonArray(modelContents, "elements")) {
+//                elements.add(ctx.deserialize(element, BlockElement.class));
+//            }
+            return new RobitModel();
         }
     }
 }

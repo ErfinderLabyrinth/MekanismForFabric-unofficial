@@ -47,6 +47,50 @@ public final class BakedObjModel {
         return objectQuads.containsKey(objectName);
     }
 
+    public BakedModel allWrapper(BakedModel bakedOwner) {
+        return new BakedModel() {
+            @Override
+            public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, RandomSource randomSource) {
+                return BakedObjModel.this.getAllQuads();
+            }
+
+            @Override
+            public boolean useAmbientOcclusion() {
+                return bakedOwner.useAmbientOcclusion();
+            }
+
+            @Override
+            public boolean isGui3d() {
+                return bakedOwner.isGui3d();
+            }
+
+            @Override
+            public boolean usesBlockLight() {
+                return bakedOwner.usesBlockLight();
+            }
+
+            @Override
+            public boolean isCustomRenderer() {
+                return false;
+            }
+
+            @Override
+            public TextureAtlasSprite getParticleIcon() {
+                return bakedOwner.getParticleIcon();
+            }
+
+            @Override
+            public ItemTransforms getTransforms() {
+                return bakedOwner.getTransforms();
+            }
+
+            @Override
+            public ItemOverrides getOverrides() {
+                return bakedOwner.getOverrides();
+            }
+        };
+    }
+
     public BakedModel wrapper(Set<String> objects, BakedModel bakedOwner) {
         return new BakedModel() {
             @Override

@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.client.mixinhelper.CustomPerspectiveModels;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadUtils;
 import net.minecraft.client.renderer.RenderType;
@@ -15,6 +16,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +28,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 @NothingNullByDefault
-public class ExtensionBakedModel<T> implements BakedModel {
+public class ExtensionBakedModel<T> implements BakedModel, CustomPerspectiveModels {
     BakedModel original;
 
     private final LoadingCache<QuadsKey<T>, List<BakedQuad>> cache = CacheBuilder.newBuilder().build(new CacheLoader<>() {
@@ -123,6 +125,14 @@ public class ExtensionBakedModel<T> implements BakedModel {
     @Override
     public ItemOverrides getOverrides() {
         return original.getOverrides();
+    }
+
+    @Override
+    public BakedModel getPerspectiveModel(ItemDisplayContext context) {
+        if (original instanceof CustomPerspectiveModels customPerspectiveModels) {
+            return customPerspectiveModels.getPerspectiveModel(context);
+        }
+        return this;
     }
 
     public static class LightedBakedModel extends TransformedBakedModel<Void> {

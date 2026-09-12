@@ -4,10 +4,7 @@ import mekanism.client.model.CustomGeometry;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
@@ -35,5 +32,18 @@ public class SeperateTransformsGeometry extends CustomGeometry {
         }
 
         return new SeperateTransformsBakedModel(base.bake(baker, spriteGetter, modelTransform, modelLocation), bakedPerspectives);
+    }
+
+    @Override
+    public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
+        for (Map.Entry<ItemDisplayContext, BlockModel> itemDisplayContextBlockModelEntry : perspectives.entrySet()) {
+            itemDisplayContextBlockModelEntry.getValue().resolveParents(modelGetter);
+        }
+        base.resolveParents(modelGetter);
+    }
+
+    @Override
+    public CustomGeometry clone() {
+        return new SeperateTransformsGeometry(base, perspectives);
     }
 }

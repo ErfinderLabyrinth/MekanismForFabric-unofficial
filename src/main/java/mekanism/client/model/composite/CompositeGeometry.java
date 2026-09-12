@@ -3,6 +3,7 @@ package mekanism.client.model.composite;
 import com.mojang.datafixers.util.Either;
 import mekanism.client.mixinhelper.RenderTypeHolder;
 import mekanism.client.model.CustomGeometry;
+import mekanism.common.registration.impl.CreativeTabDeferredRegister;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
@@ -78,5 +79,10 @@ public class CompositeGeometry extends CustomGeometry {
             }
         }
         return textureMap;
+    }
+
+    @Override
+    public CustomGeometry clone() {
+        return new CompositeGeometry(this.children);
     }
 }

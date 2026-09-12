@@ -13,14 +13,9 @@ import java.util.Set;
 import java.util.function.Function;
 
 public abstract class CustomGeometry {
-    List<BlockElement> elements;
     protected boolean gui3d = true;
-    public CustomGeometry(List<BlockElement> elements) {
-        this.elements = elements;
-    }
 
     public CustomGeometry() {
-        this(List.of());
     }
 
     public BakedModel bake(BlockModel origin, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
@@ -33,4 +28,6 @@ public abstract class CustomGeometry {
     public void setGui3d(boolean gui3d) {
         this.gui3d = gui3d;
     }
+
+    public abstract CustomGeometry clone();
 }

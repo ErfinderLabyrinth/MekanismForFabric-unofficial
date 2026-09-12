@@ -13,4 +13,9 @@ public class ItemLayersGeometry extends CustomGeometry {
     public List<Integer> getFullLightLayers() {
         return fullLightLayers;
     }
+
+    @Override
+    public CustomGeometry clone() {
+        return new ItemLayersGeometry(fullLightLayers);
+    }
 }

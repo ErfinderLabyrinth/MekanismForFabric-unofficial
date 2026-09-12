@@ -77,6 +77,11 @@ public class EnergyCubeGeometry extends CustomGeometry {
         return data;
     }
 
+    @Override
+    public CustomGeometry clone() {
+        return new EnergyCubeGeometry(frame, leds, ports);
+    }
+
     static class FaceData {
 
         private List<BakedQuad> unculledFaces;

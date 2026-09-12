@@ -25,9 +25,13 @@ import java.util.function.Function;
 public class ItemModelGeneratorMixin {
     @Inject(method = "generateBlockModel", at = @At("TAIL"))
     public void disable3dGui(Function<Material, TextureAtlasSprite> function, BlockModel blockModel, CallbackInfoReturnable<BlockModel> cir) {
-        CustomGeometry customGeometry = ((CustomGeometryHolder)cir.getReturnValue()).getCustomGeometry();
+        CustomGeometry customGeometry = ((CustomGeometryHolder)blockModel).getCustomGeometry();
         if (customGeometry != null) {
-            ((CustomGeometryHolder)cir.getReturnValue()).getCustomGeometry().setGui3d(false);
+            CustomGeometry newCustomGeometry = customGeometry.clone();
+            ((CustomGeometryHolder)cir.getReturnValue()).setCustomGeometry(newCustomGeometry);
+            if (newCustomGeometry != null) {
+                ((CustomGeometryHolder)cir.getReturnValue()).getCustomGeometry().setGui3d(false);
+            }
         }
     }
 

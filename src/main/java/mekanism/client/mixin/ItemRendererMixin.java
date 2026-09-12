@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.RobitSpriteUploader;
+import mekanism.client.mixinhelper.CustomPerspectiveModels;
 import mekanism.client.model.robit.RobitModelDataBakedModel;
 import mekanism.client.model.seperate_transforms.SeperateTransformsBakedModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -37,10 +38,10 @@ public class ItemRendererMixin {
         return original.call(itemStack, bl);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/BakedModel;getTransforms()Lnet/minecraft/client/renderer/block/model/ItemTransforms;"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/BakedModel;getTransforms()Lnet/minecraft/client/renderer/block/model/ItemTransforms;", shift = At.Shift.BEFORE))
     public void replaceModelForSeperateTransformModels(ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel, CallbackInfo ci, @Local LocalRef<BakedModel> bakedModelLocalRef) {
-        if (bakedModel instanceof SeperateTransformsBakedModel seperateTransformsBakedModel) {
-            bakedModelLocalRef.set(seperateTransformsBakedModel.getPerspectiveModel(itemDisplayContext));
+        if (bakedModel instanceof CustomPerspectiveModels customPerspectiveModels) {
+            bakedModelLocalRef.set(customPerspectiveModels.getPerspectiveModel(itemDisplayContext));
         }
     }
 }

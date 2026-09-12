@@ -14,14 +14,14 @@ public class SeperateTransformsModelLoader {
     public SeperateTransformsGeometry read(@NotNull JsonObject jsonObject) {
         BlockModel base = BlockModel.GSON.fromJson(jsonObject.get("base"), BlockModel.class);
 
-        JsonObject perspectiveData = jsonObject.getAsJsonObject("perspective");
+        JsonObject perspectiveData = jsonObject.getAsJsonObject("perspectives");
 
         Map<ItemDisplayContext, BlockModel> perspectives = new HashMap<>();
         for (ItemDisplayContext transform : ItemDisplayContext.values())
         {
             if (perspectiveData.has(transform.getSerializedName()))
             {
-                BlockModel perspectiveModel = BlockModel.GSON.fromJson(jsonObject.get(transform.getSerializedName()), BlockModel.class);
+                BlockModel perspectiveModel = BlockModel.GSON.fromJson(perspectiveData.get(transform.getSerializedName()), BlockModel.class);
                 perspectives.put(transform, perspectiveModel);
             }
         }

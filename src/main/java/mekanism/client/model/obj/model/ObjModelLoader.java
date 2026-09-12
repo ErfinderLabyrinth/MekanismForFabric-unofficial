@@ -25,21 +25,30 @@ public class ObjModelLoader {
     public static final ObjModelLoader INSTANCE = new ObjModelLoader();
 
     public CustomGeometry read(@NotNull JsonObject jsonObject) {
-        boolean flipV;
-        if (jsonObject.has("flipV")) {
-            flipV = jsonObject.get("flipV").getAsBoolean();
+        boolean flipV = false;
+        if (jsonObject.has("flip_v") && jsonObject.get("flip_v").isJsonPrimitive() && jsonObject.getAsJsonPrimitive("flip_v").isBoolean()) {
+            flipV = jsonObject.get("flip_v").getAsBoolean();
         }
         ObjModel model;
         try {
             ResourceLocation modelRl = new ResourceLocation(jsonObject.get("model").getAsString());
-            model = ObjParser.load(Minecraft.getInstance().getResourceManager().open(modelRl), modelRl.withPath(modelRl.getPath().substring(0, modelRl.getPath().lastIndexOf('/'))), false);
+            model = ObjParser.load(Minecraft.getInstance().getResourceManager().open(modelRl), modelRl.withPath(modelRl.getPath().substring(0, modelRl.getPath().lastIndexOf('/'))), flipV);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return createCustomGeometry(model);
+    }
+
+    private CustomGeometry createCustomGeometry(ObjModel model) {
         return new CustomGeometry() {
             @Override
             public BakedModel bake(BlockModel origin, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
-                return model.bake(origin, spriteGetter).wrapper(Set.of("default"), alreadyBaked);
+                return model.bake(origin, spriteGetter).allWrapper(alreadyBaked);
+            }
+
+            @Override
+            public CustomGeometry clone() {
+                return createCustomGeometry(model);
             }
         };
     }

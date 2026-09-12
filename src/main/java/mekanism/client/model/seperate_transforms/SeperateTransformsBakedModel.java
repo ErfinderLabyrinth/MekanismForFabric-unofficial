@@ -1,6 +1,7 @@
 package mekanism.client.model.seperate_transforms;
 
 
+import mekanism.client.mixinhelper.CustomPerspectiveModels;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -14,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class SeperateTransformsBakedModel implements BakedModel {
+public class SeperateTransformsBakedModel implements BakedModel, CustomPerspectiveModels {
 
     BakedModel bake;
     Map<ItemDisplayContext, BakedModel> bakedPerspectives;

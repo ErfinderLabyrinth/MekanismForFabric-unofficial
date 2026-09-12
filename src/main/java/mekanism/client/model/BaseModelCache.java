@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class BaseModelCache {
 
@@ -153,7 +155,8 @@ public class BaseModelCache {
             }
             objModel = unbakedModel;
             ObjModel finalUnbakedModel = unbakedModel;
-            model = new CustomGeometry() {
+            AtomicReference<Supplier<CustomGeometry>> creator = new AtomicReference<>();
+            creator.set(() -> new CustomGeometry() {
                 @Override
                 public BakedModel bake(BlockModel blockModel, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
                     return finalUnbakedModel.bake(blockModel, spriteGetter).wrapper(parts != null ? parts : Set.of(), alreadyBaked);
@@ -162,7 +165,13 @@ public class BaseModelCache {
                 @Override
                 public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
                 }
-            };
+
+                @Override
+                public CustomGeometry clone() {
+                    return creator.get().get();
+                }
+            });
+            model = creator.get().get();
         }
 
         public ObjModel getObjModel() {

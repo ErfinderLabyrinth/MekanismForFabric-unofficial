@@ -36,4 +36,9 @@ public class TransmitterModel extends CustomGeometry {
 //            glass.resolveParents(modelGetter);
 //        }
     }
+
+    @Override
+    public CustomGeometry clone() {
+        return new TransmitterModel(this.internal, this.glass);
+    }
 }
