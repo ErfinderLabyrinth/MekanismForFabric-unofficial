@@ -5,6 +5,10 @@
 > This is a unstable fork for fabric. Many features of Mekanism dont work or are broken.
 > Usage on own risk. The usage in modpacks is not recommended
 
+# Known Bugs
+* Wrong Energy ratio (assumes 1J = 1E, but is not the case)
+* Crash when join a server (because of shader)
+
 # Mekanism for Minecraft 1.20 #
 
 Mekanism is an independent Minecraft add-on featuring high-tech machinery that can be used to create powerful tools, 
