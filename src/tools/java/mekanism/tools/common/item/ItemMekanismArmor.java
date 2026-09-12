@@ -20,7 +20,7 @@ public class ItemMekanismArmor extends ArmorItem implements IHasRepairType {
     private final MekanismTiers material;
 
     public ItemMekanismArmor(MekanismTiers material, ArmorItem.Type armorType, Item.Properties properties) {
-        super(material, armorType, properties.durability(material.getDurabilityForType(armorType)));
+        super(material.getArmorMaterialWrapper(), armorType, properties.durability(material.getDurabilityForType(armorType)));
         this.material = material;
         int armorConfig = switch (armorType) {
             case BOOTS -> material.getBootArmor();

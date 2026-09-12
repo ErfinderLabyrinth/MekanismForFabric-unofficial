@@ -1,6 +1,5 @@
 {
-  "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "mekanism:block/oxygen"
+    "particle": "mekanism:liquid/liquid"
   }
 }

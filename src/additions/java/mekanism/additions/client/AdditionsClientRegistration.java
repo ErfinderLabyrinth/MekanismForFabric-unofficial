@@ -45,6 +45,7 @@ public class AdditionsClientRegistration {
         ModelLoadingPlugin.register(new MekanismModelLoadingPlugin());
         registerLayer();
         registerColorHandlers();
+        registerRenderTypes();
     }
 
     public static void registerRenderers() {

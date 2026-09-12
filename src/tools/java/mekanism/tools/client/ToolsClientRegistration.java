@@ -21,9 +21,9 @@ public class ToolsClientRegistration implements ClientModInitializer {
               (stack, world, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F,
               ToolsItems.BRONZE_SHIELD, ToolsItems.LAPIS_LAZULI_SHIELD, ToolsItems.OSMIUM_SHIELD, ToolsItems.REFINED_GLOWSTONE_SHIELD,
               ToolsItems.REFINED_OBSIDIAN_SHIELD, ToolsItems.STEEL_SHIELD);
-        ToolsRenderPropertiesProvider.register();
 
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(RenderMekanismShieldItem.RENDERER);
+        registerItemRenderers();
         MekanismToolsConfig.registerClientConfigs();
     }
 
@@ -31,5 +31,11 @@ public class ToolsClientRegistration implements ClientModInitializer {
         for (IItemProvider shield : shields) {
             ClientRegistrationUtil.setPropertyOverride(shield, override, propertyGetter);
         }
+    }
+
+    public static void registerItemRenderers() {
+        ClientRegistrationUtil.registerISTER(RenderMekanismShieldItem.RENDERER,
+                ToolsItems.BRONZE_SHIELD, ToolsItems.LAPIS_LAZULI_SHIELD, ToolsItems.OSMIUM_SHIELD, ToolsItems.REFINED_GLOWSTONE_SHIELD,
+                ToolsItems.REFINED_OBSIDIAN_SHIELD, ToolsItems.STEEL_SHIELD);
     }
 }

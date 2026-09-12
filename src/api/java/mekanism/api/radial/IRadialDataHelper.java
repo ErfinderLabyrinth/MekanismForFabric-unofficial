@@ -21,7 +21,7 @@ public interface IRadialDataHelper {
      *
      * @since 10.4.0
      */
-    IRadialDataHelper INSTANCE = ServiceLoader.load(IRadialDataHelper.class).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for IRadialDataHelper found"));
+    IRadialDataHelper INSTANCE = ServiceLoader.load(IRadialDataHelper.class, IRadialDataHelper.class.getClassLoader()).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for IRadialDataHelper found"));
 
     /**
      * Creates an Enum based Radial Data implementation with the given default mode.

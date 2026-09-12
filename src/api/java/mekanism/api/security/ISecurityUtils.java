@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.UUID;
 import mekanism.api.annotations.NothingNullByDefault;
+import mekanism.api.radiation.IRadiationManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -26,7 +27,7 @@ public interface ISecurityUtils {
      *
      * @since 10.4.0
      */
-    ISecurityUtils INSTANCE = ServiceLoader.load(ISecurityUtils.class).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for ISecurityUtils found"));
+    ISecurityUtils INSTANCE = ServiceLoader.load(ISecurityUtils.class, ISecurityUtils.class.getClassLoader()).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for ISecurityUtils found"));
 
     /**
      * Checks if a player can access the given capability provider; validating that protection is enabled in the config. Additionally, this method also checks to see if

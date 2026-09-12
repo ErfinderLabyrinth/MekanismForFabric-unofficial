@@ -30,7 +30,7 @@ public interface IModuleHelper {
      *
      * @since 10.4.0
      */
-    IModuleHelper INSTANCE = ServiceLoader.load(IModuleHelper.class).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for IModuleHelper found"));
+    IModuleHelper INSTANCE = ServiceLoader.load(IModuleHelper.class, IModuleHelper.class.getClassLoader()).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for IModuleHelper found"));
 
     /**
      * Helper method used to create Module items that can then be registered. When Mekanism is not installed a dummy Item should be registered instead of calling this

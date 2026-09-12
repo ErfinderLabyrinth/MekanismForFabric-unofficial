@@ -15,14 +15,6 @@ public class RenderPropertiesProvider {
     private RenderPropertiesProvider() {
     }
 
-    public static MekRenderProperties energyCube() {
-        return new MekRenderProperties(RenderEnergyCubeItem.RENDERER);
-    }
-
-    public static MekRenderProperties fluidTank() {
-        return new MekRenderProperties(RenderFluidTankItem.RENDERER);
-    }
-
     public static MekCustomArmorRenderProperties armoredJetpack() {
         return new MekCustomArmorRenderProperties(RenderJetpack.ARMORED_RENDERER, JetpackArmor.ARMORED_JETPACK);
     }

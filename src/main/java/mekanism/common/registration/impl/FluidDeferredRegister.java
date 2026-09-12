@@ -114,13 +114,13 @@ public class FluidDeferredRegister {
         //Pass in suppliers that are wrapped instead of direct references to the registry objects, so that when we update the registry object to
         // point to a new object it gets updated properly.
         //Update the references to objects that are retrieved from the deferred registers
-        fluidRegistryObject.updateStill(Registry.register(BuiltInRegistries.FLUID, new ResourceLocation(Mekanism.MODID, name), new MekanismFluid.Source(fluidRegistryObject)));
-        fluidRegistryObject.updateFlowing(Registry.register(BuiltInRegistries.FLUID, new ResourceLocation(Mekanism.MODID, flowingName), new MekanismFluid.Flowing(fluidRegistryObject)));
-        fluidRegistryObject.updateBucket(Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(Mekanism.MODID, bucketName), bucketCreator.create(fluidRegistryObject.getStillFluid(),
+        fluidRegistryObject.updateStill(Registry.register(BuiltInRegistries.FLUID, new ResourceLocation(modid, name), new MekanismFluid.Source(fluidRegistryObject)));
+        fluidRegistryObject.updateFlowing(Registry.register(BuiltInRegistries.FLUID, new ResourceLocation(modid, flowingName), new MekanismFluid.Flowing(fluidRegistryObject)));
+        fluidRegistryObject.updateBucket(Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(modid, bucketName), bucketCreator.create(fluidRegistryObject.getStillFluid(),
               new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET))));
         MapColor color = getClosestColor(renderProperties.color);
         //Note: The block properties used here is a copy of the ones for water
-        fluidRegistryObject.updateBlock(Registry.register(BuiltInRegistries.BLOCK, new ResourceLocation(Mekanism.MODID, name), new LiquidBlock(fluidRegistryObject.getStillFluid(), BlockBehaviour.Properties.of()
+        fluidRegistryObject.updateBlock(Registry.register(BuiltInRegistries.BLOCK, new ResourceLocation(modid, name), new LiquidBlock(fluidRegistryObject.getStillFluid(), BlockBehaviour.Properties.of()
               .noCollission().strength(100.0F).noLootTable().replaceable().pushReaction(PushReaction.DESTROY).liquid().mapColor(color))));
         fluidRegistryObject.updateRenderProperties(renderProperties);
         FluidVariantAttributes.register(fluidRegistryObject.getStillFluid(), handler);

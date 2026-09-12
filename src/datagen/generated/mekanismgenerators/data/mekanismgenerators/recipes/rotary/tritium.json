@@ -6,7 +6,7 @@
   },
   "fluidOutput": {
     "amount": 1,
-    "fluid": "mekanism:tritium"
+    "fluid": "mekanismgenerators:tritium"
   },
   "gasInput": {
     "amount": 1,

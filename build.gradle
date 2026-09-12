@@ -6,6 +6,7 @@ import groovy.json.JsonSlurper
 import mekanism.MergeJars
 import net.darkhax.curseforgegradle.TaskPublishCurseForge
 import net.darkhax.curseforgegradle.UploadArtifact
+import net.fabricmc.loom.task.RemapJarTask
 
 import java.util.function.Consumer
 
@@ -435,6 +436,31 @@ loom {
     }
 }
 
+// ['additions', 'defense', 'generators', 'tools']
+
+for(secondaryModule in secondaryModules) {
+    if(!secondaryModule.equals('defense')) {
+        def taskName = "remap" + secondaryModule.capitalize() + "Jar"
+        tasks.register(taskName, RemapJarTask) {
+            final TaskProvider<AbstractArchiveTask> jarTask = tasks.named(secondaryModule + "Jar")
+            dependsOn(jarTask)
+            group = "fabric"
+            //from sourceSets.getByName(secondaryModule).output
+
+            //getArtifacts().add(JavaPlugin.API_ELEMENTS_CONFIGURATION_NAME, this);
+            //getArtifacts().add(JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME, this);
+
+            getInputFile().convention(jarTask.flatMap(AbstractArchiveTask::getArchiveFile));
+            getIncludesClientOnlyClasses().set(getProject().provider(loom::areEnvironmentSourceSetsSplit));
+            //archiveClassifier.set('example') // Optional: adds a classifier to the filename
+        }
+
+        tasks.named("build") {
+            dependsOn(taskName)
+        }
+    }
+}
+
 tasks.register('runFullDatagen') {
     group = "fabric"
 
@@ -693,7 +719,7 @@ def allJar = tasks.register('allJar', Jar, {
     List<String> baseExcludeData = MergeJars.getGeneralPathsToExclude(project, combineSets)
     Closure excludeFromMain = MergeJars.createExcludeClosure(baseExcludeData, 'crafttweaker_parameter_names.json')
     from(sourceSets.main.output, excludeFromMain)
-    Closure excludeFromAll = MergeJars.createExcludeClosure(baseExcludeData, 'logo.png', 'pack.mcmeta')
+    Closure excludeFromAll = MergeJars.createExcludeClosure(baseExcludeData, 'logo.png', 'logo_square.png', 'pack.mcmeta')
     for (String name : secondaryModules) {
         from(sourceSets.getByName(name).output, excludeFromAll)
     }

@@ -8,8 +8,8 @@ public class MekanismAdditionsConfig {
     private MekanismAdditionsConfig() {
     }
 
-    public static AdditionsConfig additions = new AdditionsConfig();
-    public static AdditionsClientConfig additionsClient = new AdditionsClientConfig();
+    public static AdditionsConfig additions;
+    public static AdditionsClientConfig additionsClient;
 
     public static void registerClientConfigs() {
         AutoConfig.register(AdditionsClientConfig.class, GsonConfigSerializer::new);
@@ -19,7 +19,6 @@ public class MekanismAdditionsConfig {
 
     public static void registerConfig() {
         AutoConfig.register(AdditionsConfig.class, GsonConfigSerializer::new);
-
         additions = AutoConfig.getConfigHolder(AdditionsConfig.class).getConfig();
     }
 }

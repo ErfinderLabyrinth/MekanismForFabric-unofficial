@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "mekanism:fusion_fuel",
-    "mekanism:flowing_fusion_fuel"
+    "mekanismgenerators:fusion_fuel",
+    "mekanismgenerators:flowing_fusion_fuel"
   ]
 }

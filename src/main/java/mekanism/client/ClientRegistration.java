@@ -30,6 +30,7 @@ import mekanism.client.render.armor.ScubaTankArmor;
 import mekanism.client.render.entity.RenderFlame;
 import mekanism.client.render.entity.RenderRobit;
 import mekanism.client.render.item.block.RenderEnergyCubeItem;
+import mekanism.client.render.item.block.RenderFluidTankItem;
 import mekanism.client.render.item.gear.*;
 import mekanism.client.render.layer.MekanismArmorLayer;
 import mekanism.client.render.layer.MekanismElytraLayer;
@@ -325,7 +326,8 @@ public class ClientRegistration {
     }
 
     public static void registerItemRenderers() {
-        ClientRegistrationUtil.registerISTER(RenderEnergyCubeItem.RENDERER, MekanismBlocks.BASIC_ENERGY_CUBE, MekanismBlocks.ADVANCED_ENERGY_CUBE, MekanismBlocks.ELITE_ENERGY_CUBE, MekanismBlocks.ULTIMATE_ENERGY_CUBE);
+        ClientRegistrationUtil.registerISTER(RenderEnergyCubeItem.RENDERER, MekanismBlocks.BASIC_ENERGY_CUBE, MekanismBlocks.ADVANCED_ENERGY_CUBE, MekanismBlocks.ELITE_ENERGY_CUBE, MekanismBlocks.ULTIMATE_ENERGY_CUBE, MekanismBlocks.CREATIVE_ENERGY_CUBE);
+        ClientRegistrationUtil.registerISTER(RenderFluidTankItem.RENDERER, MekanismBlocks.BASIC_FLUID_TANK, MekanismBlocks.ADVANCED_FLUID_TANK, MekanismBlocks.ELITE_FLUID_TANK, MekanismBlocks.ULTIMATE_FLUID_TANK, MekanismBlocks.CREATIVE_FLUID_TANK);
         ClientRegistrationUtil.registerISTER(RenderJetpack.ARMORED_RENDERER, MekanismItems.ARMORED_JETPACK);
         ClientRegistrationUtil.registerISTER(RenderAtomicDisassembler.RENDERER, MekanismItems.ATOMIC_DISASSEMBLER);
         ClientRegistrationUtil.registerISTER(RenderFlameThrower.RENDERER, MekanismItems.FLAMETHROWER);

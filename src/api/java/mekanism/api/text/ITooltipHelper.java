@@ -1,5 +1,6 @@
 package mekanism.api.text;
 
+import mekanism.api.security.ISecurityUtils;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
@@ -12,7 +13,7 @@ import java.util.ServiceLoader;
 @Internal
 public interface ITooltipHelper {
 
-    ITooltipHelper INSTANCE = ServiceLoader.load(ITooltipHelper.class).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for ITooltipHelper found"));
+    ITooltipHelper INSTANCE = ServiceLoader.load(ITooltipHelper.class, ITooltipHelper.class.getClassLoader()).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for ITooltipHelper found"));
 
     Component getEnergyPerMBDisplayShort(long energy);
 

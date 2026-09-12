@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "mekanism:tritium",
-    "mekanism:flowing_tritium"
+    "mekanismgenerators:tritium",
+    "mekanismgenerators:flowing_tritium"
   ]
 }

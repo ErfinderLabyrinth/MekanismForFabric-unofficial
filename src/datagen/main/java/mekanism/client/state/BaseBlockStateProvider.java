@@ -1,6 +1,7 @@
 package mekanism.client.state;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.client.model.BaseBlockModelProvider;
@@ -12,6 +13,7 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.data.models.model.ModelTemplates;
 import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
@@ -26,6 +28,8 @@ public abstract class BaseBlockStateProvider<PROVIDER extends BaseBlockModelProv
 
     private final String modid;
     private final PROVIDER modelProvider;
+    public final ModelTemplate ONLY_PARTICLE = new ModelTemplate(Optional.empty(), Optional.empty(), TextureSlot.PARTICLE);
+
 
     public BaseBlockStateProvider(FabricDataOutput output, String modid, Function<FabricDataOutput, PROVIDER> providerCreator) {
         super(output);
@@ -53,8 +57,8 @@ public abstract class BaseBlockStateProvider<PROVIDER extends BaseBlockModelProv
 //
     protected void registerFluidBlockStates(BlockModelGenerators generators, List<FluidRegistryObject<?, ?, ?, ?>> fluidROs) {
         for (FluidRegistryObject<?, ?, ?, ?> fluidRO : fluidROs) {
-            TextureMapping textures = TextureMapping.cube(fluidRO.getBlock()).put(TextureSlot.PARTICLE, fluidRO.getRenderProperties().stillTexture);
-            generators.createTrivialBlock(fluidRO.getBlock(), textures, ModelTemplates.CUBE_ALL);
+            TextureMapping textures = TextureMapping.particle(fluidRO.getRenderProperties().stillTexture);
+            generators.createTrivialBlock(fluidRO.getBlock(), textures, ONLY_PARTICLE);
         }
     }
 //

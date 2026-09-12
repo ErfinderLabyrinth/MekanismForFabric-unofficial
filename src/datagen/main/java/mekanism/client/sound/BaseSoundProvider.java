@@ -25,7 +25,7 @@ public abstract class BaseSoundProvider implements DataProvider {
     protected BaseSoundProvider(PackOutput output, String modid) {
         //super(output, modid, existingFileHelper);
         this.modid = modid;
-        soundPathProvider = output.createPathProvider(PackOutput.Target.DATA_PACK, "");
+        soundPathProvider = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "");
     }
 
     @NotNull

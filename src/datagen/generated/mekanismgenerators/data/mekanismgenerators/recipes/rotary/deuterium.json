@@ -6,7 +6,7 @@
   },
   "fluidOutput": {
     "amount": 1,
-    "fluid": "mekanism:deuterium"
+    "fluid": "mekanismgenerators:deuterium"
   },
   "gasInput": {
     "amount": 1,

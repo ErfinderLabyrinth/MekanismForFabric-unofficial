@@ -29,6 +29,7 @@ public class ItemWalkieTalkie extends Item implements IModeItem {
     public void appendHoverText(@NotNull ItemStack stack, Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
         tooltip.add(OnOff.of(getOn(stack), true).getTextComponent());
         tooltip.add(AdditionsLang.CHANNEL.translateColored(EnumColor.DARK_AQUA, EnumColor.GRAY, getChannel(stack)));
+        System.out.println(MekanismAdditionsConfig.additions.voiceServerEnabled);
         if (!MekanismAdditionsConfig.additions.voiceServerEnabled) {
             tooltip.add(AdditionsLang.WALKIE_DISABLED.translateColored(EnumColor.DARK_RED));
         }

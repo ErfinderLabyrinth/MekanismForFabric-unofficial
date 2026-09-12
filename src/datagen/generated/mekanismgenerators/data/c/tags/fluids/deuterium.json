@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "mekanism:deuterium",
-    "mekanism:flowing_deuterium"
+    "mekanismgenerators:deuterium",
+    "mekanismgenerators:flowing_deuterium"
   ]
 }

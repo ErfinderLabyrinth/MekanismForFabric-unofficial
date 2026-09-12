@@ -11,6 +11,7 @@ import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.api.chemical.gas.IGasTank;
+import mekanism.api.radial.IRadialDataHelper;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -54,7 +55,7 @@ public interface IRadiationManager {
      *
      * @since 10.4.0
      */
-    IRadiationManager INSTANCE = ServiceLoader.load(IRadiationManager.class).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for IRadiationManager found"));
+    IRadiationManager INSTANCE = ServiceLoader.load(IRadiationManager.class, IRadiationManager.class.getClassLoader()).findFirst().orElseThrow(() -> new IllegalStateException("No valid ServiceImpl for IRadiationManager found"));
 
     /**
      * Helper to expose the ability to check if Mekanism's radiation system is enabled in the config.

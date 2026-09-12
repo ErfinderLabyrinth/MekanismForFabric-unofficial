@@ -1,9 +1,9 @@
 {
   "replace": false,
   "values": [
-    "mekanism:bioethanol",
-    "mekanism:deuterium",
-    "mekanism:fusion_fuel",
-    "mekanism:tritium"
+    "mekanismgenerators:bioethanol",
+    "mekanismgenerators:deuterium",
+    "mekanismgenerators:fusion_fuel",
+    "mekanismgenerators:tritium"
   ]
 }

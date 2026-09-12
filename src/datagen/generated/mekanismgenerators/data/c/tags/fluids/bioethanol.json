@@ -1,7 +1,7 @@
 {
   "replace": false,
   "values": [
-    "mekanism:bioethanol",
-    "mekanism:flowing_bioethanol"
+    "mekanismgenerators:bioethanol",
+    "mekanismgenerators:flowing_bioethanol"
   ]
 }

@@ -11,11 +11,11 @@ import java.util.Map;
 
 @Config(name = "mekanism/additions")
 public class AdditionsConfig extends BaseMekanismConfig {
-    public final int obsidianTNTDelay = 100;
-    public final float obsidianTNTBlastRadius = 12;
-    public final boolean voiceServerEnabled = false;
-    public final int voicePort = 36_123;
-    private final Map<BabyType, SpawnConfig> spawnConfigs = new EnumMap<>(BabyType.class);
+    public int obsidianTNTDelay = 100;
+    public float obsidianTNTBlastRadius = 12;
+    public boolean voiceServerEnabled = false;
+    public int voicePort = 36_123;
+    private Map<BabyType, SpawnConfig> spawnConfigs = new EnumMap<>(BabyType.class);
 
     AdditionsConfig() {
         for (BabyType type : BabyType.values()) {

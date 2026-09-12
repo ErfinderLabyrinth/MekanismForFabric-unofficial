@@ -61,6 +61,7 @@ public class PacketSpawnBalloon implements IMekanismPacket {
         balloon.syncPacketPositionCodec(position.x, position.y, position.z);
         balloon.setId(id);
         balloon.latched = latched;
+        balloon.color = color;
         if(latchedEntity != null) {
             Entity entity = player.level().getEntity(latchedEntity);
             if(entity instanceof LivingEntity livingEntity) {

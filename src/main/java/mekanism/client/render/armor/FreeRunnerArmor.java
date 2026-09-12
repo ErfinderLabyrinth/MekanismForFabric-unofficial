@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
     public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "free_runner_armor");
+    public static final ResourceLocation ARMORED_ID = new ResourceLocation(Mekanism.MODID, "armored_free_runner_armor");
     public static final FreeRunnerArmor FREE_RUNNERS = new FreeRunnerArmor(false);
     public static final FreeRunnerArmor ARMORED_FREE_RUNNERS = new FreeRunnerArmor(true);
 
@@ -74,6 +75,6 @@ public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListe
 
     @Override
     public ResourceLocation getFabricId() {
-        return ID;
+        return armored ? ARMORED_ID : ID;
     }
 }

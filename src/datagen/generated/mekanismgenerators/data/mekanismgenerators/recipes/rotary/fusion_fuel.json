@@ -6,7 +6,7 @@
   },
   "fluidOutput": {
     "amount": 1,
-    "fluid": "mekanism:fusion_fuel"
+    "fluid": "mekanismgenerators:fusion_fuel"
   },
   "gasInput": {
     "amount": 1,

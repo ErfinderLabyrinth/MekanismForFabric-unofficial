@@ -32,15 +32,10 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.List;
 
-public class ItemBlockEnergyCube extends ItemBlockTooltip<BlockEnergyCube> implements IItemSustainedInventory, ICustomCreativeTabContents, RenderPropertiesProvider.MekRenderPropertiesGetter {
+public class ItemBlockEnergyCube extends ItemBlockTooltip<BlockEnergyCube> implements IItemSustainedInventory, ICustomCreativeTabContents {
 
     public ItemBlockEnergyCube(BlockEnergyCube block) {
         super(block);
-    }
-
-    @Override
-    public RenderPropertiesProvider.MekRenderProperties getRenderProperties() {
-        return RenderPropertiesProvider.energyCube();
     }
 
     @NotNull

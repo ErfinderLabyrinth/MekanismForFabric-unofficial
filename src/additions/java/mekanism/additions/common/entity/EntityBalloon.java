@@ -50,7 +50,7 @@ public class EntityBalloon extends Entity implements EntityPickInteractionAware 
     private static final EntityDataAccessor<Integer> LATCHED_ID = SynchedEntityData.defineId(EntityBalloon.class, EntityDataSerializers.INT);
     private static final double OFFSET = -0.275;
 
-    private EnumColor color = EnumColor.DARK_BLUE;
+    public EnumColor color = EnumColor.DARK_BLUE;
     public BlockPos latched;
     public LivingEntity latchedEntity;
     /* server-only */

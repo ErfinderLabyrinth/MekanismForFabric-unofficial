@@ -61,15 +61,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemBlockFluidTank extends ItemBlockMachine implements IModeItem, RenderPropertiesProvider.MekRenderPropertiesGetter {
+public class ItemBlockFluidTank extends ItemBlockMachine implements IModeItem {
 
     public ItemBlockFluidTank(BlockFluidTank block) {
         super(block);
-    }
-
-    @Override
-    public RenderPropertiesProvider.MekRenderProperties getRenderProperties() {
-        return RenderPropertiesProvider.fluidTank();
     }
 
     @NotNull

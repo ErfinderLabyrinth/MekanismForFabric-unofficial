@@ -16,12 +16,4 @@ public class ToolsRenderPropertiesProvider {
     public static MekRenderProperties shield() {
         return new MekRenderProperties(RenderMekanismShieldItem.RENDERER);
     }
-
-    public static void register() {
-        for(ItemRegistryObject<?> item : ToolsItems.ITEMS.getAllItems()) {
-            if(item.get() instanceof ItemMekanismShield) {
-                BuiltinItemRendererRegistry.INSTANCE.register(item.get(), RenderMekanismShieldItem.RENDERER::renderByItem);
-            }
-        }
-    }
 }

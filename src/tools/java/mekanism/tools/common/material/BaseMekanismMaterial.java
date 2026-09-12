@@ -2,13 +2,18 @@ package mekanism.tools.common.material;
 
 import mekanism.tools.common.MekanismTools;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @MethodsReturnNonnullByDefault
-public abstract class BaseMekanismMaterial extends IItemTierHelper implements IArmorMaterialHelper, IPaxelMaterial {
+public abstract class BaseMekanismMaterial extends IItemTierHelper implements IPaxelMaterial {
+    private final ArmorMaterialWrapper ARMOR_INSTANCE = new ArmorMaterialWrapper();
 
     public abstract String getConfigCommentName();
     @Nullable
@@ -87,25 +92,70 @@ public abstract class BaseMekanismMaterial extends IItemTierHelper implements IA
         return getCommonEnchantability();
     }
 
-    @Override
     public int getArmorEnchantability() {
         return getCommonEnchantability();
     }
 
     public abstract Ingredient getCommonRepairMaterial();
 
-    @Override
     public Ingredient getItemRepairMaterial() {
         return getCommonRepairMaterial();
     }
 
-    @Override
-    public Ingredient getArmorRepairMaterial() {
-        return getCommonRepairMaterial();
-    }
 
-    @Override
     public String getName() {
         return MekanismTools.MODID + ":" + getRegistryPrefix();
+    }
+
+    public IArmorMaterialHelper getArmorMaterialWrapper() {
+        return ARMOR_INSTANCE;
+    }
+
+    public abstract int getDurabilityForType(@NotNull ArmorItem.Type armorType);
+    public abstract int getDefenseForType(@NotNull ArmorItem.Type armorType);
+    public abstract SoundEvent getEquipSound();
+    public abstract float getKnockbackResistance();
+    public abstract float getToughness();
+
+    public class ArmorMaterialWrapper implements IArmorMaterialHelper {
+        @Override
+        public int getArmorEnchantability() {
+            return BaseMekanismMaterial.this.getArmorEnchantability();
+        }
+
+        @Override
+        public Ingredient getArmorRepairMaterial() {
+            return getCommonRepairMaterial();
+        }
+
+        @Override
+        public int getDurabilityForType(ArmorItem.Type type) {
+            return BaseMekanismMaterial.this.getDurabilityForType(type);
+        }
+
+        @Override
+        public int getDefenseForType(ArmorItem.Type type) {
+            return BaseMekanismMaterial.this.getDefenseForType(type);
+        }
+
+        @Override
+        public SoundEvent getEquipSound() {
+            return BaseMekanismMaterial.this.getEquipSound();
+        }
+
+        @Override
+        public String getName() {
+            return BaseMekanismMaterial.this.getName();
+        }
+
+        @Override
+        public float getToughness() {
+            return BaseMekanismMaterial.this.getToughness();
+        }
+
+        @Override
+        public float getKnockbackResistance() {
+            return BaseMekanismMaterial.this.getKnockbackResistance();
+        }
     }
 }

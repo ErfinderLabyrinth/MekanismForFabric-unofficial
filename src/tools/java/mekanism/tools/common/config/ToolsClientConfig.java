@@ -5,7 +5,7 @@ import mekanism.common.config.BaseMekanismConfig;
 
 @Config(name = "mekanism/tools-client")
 public class ToolsClientConfig extends BaseMekanismConfig {
-    public final boolean displayDurabilityTooltips = true;
+    public boolean displayDurabilityTooltips = true;
 
     public ToolsClientConfig() {
     }

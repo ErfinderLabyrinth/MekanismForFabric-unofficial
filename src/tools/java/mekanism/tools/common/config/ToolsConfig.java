@@ -10,27 +10,27 @@ import mekanism.tools.common.material.impl.vanilla.*;
 
 @Config(name = "mekanism/tools")
 public class ToolsConfig extends BaseMekanismConfig {
-    public final float armorSpawnChance = 0.1F;
-    public final float weaponSpawnChance = 0.01F;
-    public final float weaponSpawnChanceHard = 0.05F;
-    @CollapsibleObject public final ArmorSpawnChanceConfig bronzeSpawnRate;
-    @CollapsibleObject public final ArmorSpawnChanceConfig lapisLazuliSpawnRate;
-    @CollapsibleObject public final ArmorSpawnChanceConfig osmiumSpawnRate;
-    @CollapsibleObject public final ArmorSpawnChanceConfig refinedGlowstoneSpawnRate;
-    @CollapsibleObject public final ArmorSpawnChanceConfig refinedObsidianSpawnRate;
-    @CollapsibleObject public final ArmorSpawnChanceConfig steelSpawnRate;
-    @CollapsibleObject public final VanillaPaxelMaterialCreator wood;
-    @CollapsibleObject public final VanillaPaxelMaterialCreator stone;
-    @CollapsibleObject public final VanillaPaxelMaterialCreator iron;
-    @CollapsibleObject public final VanillaPaxelMaterialCreator diamond;
-    @CollapsibleObject public final VanillaPaxelMaterialCreator gold;
-    @CollapsibleObject public final VanillaPaxelMaterialCreator netherite;
-    @CollapsibleObject public final MaterialCreator bronze;
-    @CollapsibleObject public final MaterialCreator lapisLazuli;
-    @CollapsibleObject public final MaterialCreator osmium;
-    @CollapsibleObject public final MaterialCreator refinedGlowstone;
-    @CollapsibleObject public final MaterialCreator refinedObsidian;
-    @CollapsibleObject public final MaterialCreator steel;
+    public float armorSpawnChance = 0.1F;
+    public float weaponSpawnChance = 0.01F;
+    public float weaponSpawnChanceHard = 0.05F;
+    @CollapsibleObject public ArmorSpawnChanceConfig bronzeSpawnRate;
+    @CollapsibleObject public ArmorSpawnChanceConfig lapisLazuliSpawnRate;
+    @CollapsibleObject public ArmorSpawnChanceConfig osmiumSpawnRate;
+    @CollapsibleObject public ArmorSpawnChanceConfig refinedGlowstoneSpawnRate;
+    @CollapsibleObject public ArmorSpawnChanceConfig refinedObsidianSpawnRate;
+    @CollapsibleObject public ArmorSpawnChanceConfig steelSpawnRate;
+    @CollapsibleObject public VanillaPaxelMaterialCreator wood;
+    @CollapsibleObject public VanillaPaxelMaterialCreator stone;
+    @CollapsibleObject public VanillaPaxelMaterialCreator iron;
+    @CollapsibleObject public VanillaPaxelMaterialCreator diamond;
+    @CollapsibleObject public VanillaPaxelMaterialCreator gold;
+    @CollapsibleObject public VanillaPaxelMaterialCreator netherite;
+    @CollapsibleObject public MaterialCreator bronze;
+    @CollapsibleObject public MaterialCreator lapisLazuli;
+    @CollapsibleObject public MaterialCreator osmium;
+    @CollapsibleObject public MaterialCreator refinedGlowstone;
+    @CollapsibleObject public MaterialCreator refinedObsidian;
+    @CollapsibleObject public MaterialCreator steel;
 
     ToolsConfig() {
         bronzeSpawnRate = new ArmorSpawnChanceConfig();

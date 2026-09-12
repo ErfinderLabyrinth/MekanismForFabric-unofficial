@@ -36,11 +36,7 @@ import mekanism.generators.client.render.RenderTurbineRotor;
 import mekanism.generators.client.render.RenderWindGenerator;
 import mekanism.generators.client.render.item.RenderWindGeneratorItem;
 import mekanism.generators.common.MekanismGenerators;
-import mekanism.generators.common.registries.GeneratorsBlocks;
-import mekanism.generators.common.registries.GeneratorsContainerTypes;
-import mekanism.generators.common.registries.GeneratorsFluids;
-import mekanism.generators.common.registries.GeneratorsModules;
-import mekanism.generators.common.registries.GeneratorsTileEntityTypes;
+import mekanism.generators.common.registries.*;
 import mekanism.generators.common.tile.TileEntityAdvancedSolarGenerator;
 import mekanism.generators.common.tile.TileEntitySolarGenerator;
 import net.fabricmc.api.ClientModInitializer;
@@ -79,6 +75,7 @@ public class GeneratorsClientRegistration implements ClientModInitializer {
         registerFluidRenderProperties();
         registerRenderTypes();
         registerRenderers();
+        registerItemRenderers();
         registerLayer();
         registerClientReloadListeners();
         registerContainers();
@@ -115,6 +112,10 @@ public class GeneratorsClientRegistration implements ClientModInitializer {
         BlockEntityRenderers.register(GeneratorsTileEntityTypes.TURBINE_VALVE.get(), RenderIndustrialTurbine::new);
         BlockEntityRenderers.register(GeneratorsTileEntityTypes.TURBINE_VENT.get(), RenderIndustrialTurbine::new);
         BlockEntityRenderers.register(GeneratorsTileEntityTypes.WIND_GENERATOR.get(), RenderWindGenerator::new);
+    }
+
+    public static void registerItemRenderers() {
+        ClientRegistrationUtil.registerISTER(RenderWindGeneratorItem.RENDERER, GeneratorsBlocks.WIND_GENERATOR);
     }
 
     public static void registerLayer() {
