@@ -9,6 +9,7 @@
 * Wrong Energy ratio (assumes 1J = 1E, but is not the case)
 * Crash when join a server (because of shader)
 * Render problems when water is inside a tank
+* Integrations are missing (except mod menu)
 
 # Mekanism for Minecraft 1.20 #
 
