@@ -3,12 +3,9 @@ package mekanism.generators.common.tile;
 import java.util.Arrays;
 import java.util.Optional;
 
-import com.google.common.math.DoubleMath;
-import com.google.common.math.LongMath;
 import mekanism.api.*;
 import mekanism.api.heat.HeatAPI.HeatTransfer;
 import mekanism.api.heat.IHeatHandler;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.fluid.BasicFluidTank;
 import mekanism.common.capabilities.fluid.VariableCapacityFluidTank;
@@ -20,7 +17,6 @@ import mekanism.common.capabilities.holder.heat.HeatCapacitorHelper;
 import mekanism.common.capabilities.holder.heat.IHeatCapacitorHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.config.listener.ConfigBasedCachedFLSupplier;
 import mekanism.common.config.listener.ConfigBasedCachedSupplier;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerFluidTankWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerHeatCapacitorWrapper;
@@ -29,7 +25,6 @@ import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableDouble;
-import mekanism.common.inventory.container.sync.SyncableFloatingLong;
 import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.tags.MekanismTags;
@@ -46,7 +41,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -192,7 +186,8 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         heatCapacitor.handleHeat(-heatLost);
         long energyFromHeat = (long) (Math.abs(heatLost) * carnotEfficiency);
         try(Transaction t = Transaction.openOuter()) {
-            getEnergyContainer().insert(Math.min(energyFromHeat, MAX_PRODUCTION.get()), t);
+            getEnergyContainer().insert(Math.min(energyFromHeat, MAX_PRODUCTION.get()), t, AutomationType.INTERNAL);
+            t.commit();
         }
         return super.simulate();
     }
