@@ -719,6 +719,7 @@ secondaryModules.each { secondaryModule ->
         tasks.register(taskName, RemapJarTask) {
             final TaskProvider<AbstractArchiveTask> jarTask = tasks.named(secondaryModule + "Jar")
             dependsOn(jarTask)
+            dependsOn(jar)
             group = "fabric"
             //from sourceSets.getByName(secondaryModule).output
 
@@ -727,7 +728,7 @@ secondaryModules.each { secondaryModule ->
 
             getInputFile().convention(jarTask.flatMap(AbstractArchiveTask::getArchiveFile));
             getIncludesClientOnlyClasses().set(getProject().provider(loom::areEnvironmentSourceSetsSplit));
-            //archiveClassifier.set('example') // Optional: adds a classifier to the filename
+            classpath.from jar.getArchiveFile()
 
             archiveBaseName = "Mekanism" + secondaryModule.capitalize()
         }
