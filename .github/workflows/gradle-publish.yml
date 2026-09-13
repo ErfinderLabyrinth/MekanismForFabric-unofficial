@@ -52,6 +52,14 @@ jobs:
           build/downloadMCMeta
           build/downloadMcpConfig
           build/extractSrg
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
     - name: Set up JDK 21
       uses: actions/setup-java@v3
       with:
@@ -59,7 +67,7 @@ jobs:
         distribution: 'temurin'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
-
+        
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2
       with:
