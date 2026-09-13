@@ -6,10 +6,10 @@
   },
   "output": {
     "amount": 1,
-    "slurry": "minecraft:clean_copper"
+    "slurry": "mekanism:clean_copper"
   },
   "slurryInput": {
     "amount": 1,
-    "slurry": "minecraft:dirty_copper"
+    "slurry": "mekanism:dirty_copper"
   }
 }

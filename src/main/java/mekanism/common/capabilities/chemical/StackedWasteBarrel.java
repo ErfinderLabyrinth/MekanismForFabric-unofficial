@@ -1,5 +1,6 @@
 package mekanism.common.capabilities.chemical;
 
+import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTankBuilder;
@@ -52,14 +53,14 @@ public class StackedWasteBarrel extends VariableCapacityChemicalTank<Gas, GasSta
 //    }
 
     @Override
-    public long insert(Gas resource, long maxAmount, TransactionContext transaction) {
+    public long insert(Gas resource, long maxAmount, TransactionContext transaction, AutomationType automationType) {
         long amountInserted = super.insert(resource, maxAmount, transaction);
         if (amountInserted != maxAmount) {
             TileEntityRadioactiveWasteBarrel tileAbove = WorldUtils.getTileEntity(TileEntityRadioactiveWasteBarrel.class, tile.getLevel(), tile.getBlockPos().above());
             if (tileAbove != null) {
                 //Note: We do external so that it is not limited by the internal rate limits
                 try(Transaction t=Transaction.openOuter()) {
-                    amountInserted += tileAbove.getGasTank().insert(resource, maxAmount - amountInserted, t);
+                    amountInserted += tileAbove.getGasTank().insert(resource, maxAmount - amountInserted, t, automationType);
                 }
             }
         }

@@ -1,5 +1,6 @@
 package mekanism.generators.common.content.turbine;
 
+import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.gas.Gas;
@@ -20,8 +21,8 @@ public class TurbineGasTank extends MultiblockGasTank {
     }
 
     @Override
-    public long insert(Gas resource, long maxAmount, TransactionContext transaction) {
-        long inserted = super.insert(resource, maxAmount, transaction);
+    public long insert(Gas resource, long maxAmount, TransactionContext transaction, AutomationType automationType) {
+        long inserted = super.insert(resource, maxAmount, transaction, automationType);
 
         if(multiblock.isFormed()) {
             transaction.addOuterCloseCallback(result -> {

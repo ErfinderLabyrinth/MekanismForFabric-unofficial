@@ -57,6 +57,10 @@ public abstract class ChemicalTankWrapper<CHEMICAL extends Chemical<CHEMICAL>, S
         return insertCheck.getAsBoolean() ? internal.insert(resource, amount, transaction) : 0;
     }
 
+    public long insert(CHEMICAL resource, long amount, TransactionContext transaction, AutomationType automationType) {
+        return insertCheck.getAsBoolean() ? internal.insert(resource, amount, transaction, automationType) : 0;
+    }
+
     @Override
     public long extract(CHEMICAL resource, long amount, TransactionContext transaction) {
         return internal.extract(resource, amount, transaction);

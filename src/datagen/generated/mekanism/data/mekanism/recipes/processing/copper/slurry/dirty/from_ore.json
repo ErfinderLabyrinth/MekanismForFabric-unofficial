@@ -12,6 +12,6 @@
   "output": {
     "amount": 1000,
     "chemicalType": "slurry",
-    "slurry": "minecraft:dirty_copper"
+    "slurry": "mekanism:dirty_copper"
   }
 }

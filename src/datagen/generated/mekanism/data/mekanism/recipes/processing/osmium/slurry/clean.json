@@ -6,10 +6,10 @@
   },
   "output": {
     "amount": 1,
-    "slurry": "minecraft:clean_osmium"
+    "slurry": "mekanism:clean_osmium"
   },
   "slurryInput": {
     "amount": 1,
-    "slurry": "minecraft:dirty_osmium"
+    "slurry": "mekanism:dirty_osmium"
   }
 }

@@ -31,6 +31,7 @@ public class RegistryEntryPropertyData<V> extends PropertyData {
     @Override
     public void writeToPacket(FriendlyByteBuf buffer) {
         super.writeToPacket(buffer);
+        buffer.writeResourceLocation(registry.key().location());
         buffer.writeVarInt(registry.getId(value));
     }
 }

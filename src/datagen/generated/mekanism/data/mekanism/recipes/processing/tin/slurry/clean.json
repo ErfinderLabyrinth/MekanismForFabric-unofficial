@@ -6,10 +6,10 @@
   },
   "output": {
     "amount": 1,
-    "slurry": "minecraft:clean_tin"
+    "slurry": "mekanism:clean_tin"
   },
   "slurryInput": {
     "amount": 1,
-    "slurry": "minecraft:dirty_tin"
+    "slurry": "mekanism:dirty_tin"
   }
 }
