@@ -25,7 +25,9 @@ class MergeJars {
     static List<String> getGeneralPathsToExclude(Project project, List<SourceSet> sourceSets) {
         List<String> toExclude = new ArrayList<>()
         toExclude.add('META-INF/mods.toml')
+        toExclude.add('fabric.mod.json')
         toExclude.add('META-INF/accesstransformer.cfg')
+        toExclude.add('accesstransformer.cfg')
         //This file doesn't exist until compile time
         toExclude.add('META-INF/services/mekanism.common.integration.computer.IComputerMethodRegistry')
         addDuplicates(project, atlasFilter, sourceSets, toExclude)

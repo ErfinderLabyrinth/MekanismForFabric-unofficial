@@ -1,16 +1,22 @@
 package mekanism.api.inventory;
 
-import java.util.List;
+import com.google.common.collect.Iterators;
 import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 @NothingNullByDefault
-public interface IMekanismInventory extends ISidedItemHandler, IContentsListener {
+public interface IMekanismInventory extends IContentsListener {
 
     /**
      * Used to check if an instance of {@link IMekanismInventory} actually has an inventory.
@@ -36,7 +42,7 @@ public interface IMekanismInventory extends ISidedItemHandler, IContentsListener
      * @implNote When side is null (an internal request), this method <em>MUST</em> return all slots in the inventory. This will be used by the container generating code
      * to add all the proper slots that are needed. Additionally, if {@link #hasInventory()} is false, this <em>MUST</em> return an empty list.
      */
-    List<IInventorySlot> getInventorySlots(@Nullable Direction side);
+    Storage<ItemVariant> getItemStorage(@Nullable Direction side);
 
     /**
      * Returns the {@link IInventorySlot} that has the given index from the list of slots on the given side.
@@ -46,61 +52,74 @@ public interface IMekanismInventory extends ISidedItemHandler, IContentsListener
      *
      * @return The {@link IInventorySlot} that has the given index from the list of slots on the given side.
      */
+    /*
     @Nullable
-    default IInventorySlot getInventorySlot(int slot, @Nullable Direction side) {
-        List<IInventorySlot> slots = getInventorySlots(side);
-        return slot >= 0 && slot < slots.size() ? slots.get(slot) : null;
+    @Deprecated(forRemoval = true)
+    default StorageView<ItemVariant> getInventorySlot(int slot, @Nullable Direction side) {
+        Storage<ItemVariant> slots = getItemStorage(side);
+        return slot >= 0 && slot < Iterators.size(slots.iterator()) ? Iterators.get(slots.iterator(), slot) : null;
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     default void setStackInSlot(int slot, ItemStack stack, @Nullable Direction side) {
-        IInventorySlot inventorySlot = getInventorySlot(slot, side);
+        StorageView<ItemVariant> inventorySlot = getInventorySlot(slot, side);
         if (inventorySlot != null) {
-            inventorySlot.setStack(stack);
+            //inventorySlot.setStack(stack);
         }
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     default int getSlots(@Nullable Direction side) {
-        return getInventorySlots(side).size();
+        return Iterators.size(getItemStorage(side).iterator());
     }
 
     @Override
     default ItemStack getStackInSlot(int slot, @Nullable Direction side) {
-        IInventorySlot inventorySlot = getInventorySlot(slot, side);
-        return inventorySlot == null ? ItemStack.EMPTY : inventorySlot.getStack();
+        StorageView<ItemVariant> inventorySlot = getInventorySlot(slot, side);
+        return inventorySlot == null ? ItemStack.EMPTY : inventorySlot.getResource().toStack((int) inventorySlot.getAmount());
     }
 
-    @Override
-    default ItemStack insertItem(int slot, ItemStack stack, @Nullable Direction side, Action action) {
-        IInventorySlot inventorySlot = getInventorySlot(slot, side);
-        if (inventorySlot == null) {
-            return stack;
-        }
-        return inventorySlot.insertItem(stack, action, side == null ? AutomationType.INTERNAL : AutomationType.EXTERNAL);
-    }
+//    @Override
+//    default ItemStack insertItem(int slot, ItemStack stack, @Nullable Direction side, Action action) {
+//        StorageView<ItemVariant> inventorySlot = getInventorySlot(slot, side);
+//        if (inventorySlot == null) {
+//            return stack;
+//        }
+//        return inventorySlot.ina(stack, action, side == null ? AutomationType.INTERNAL : AutomationType.EXTERNAL);
+//    }
 
-    @Override
+    @Deprecated(forRemoval = true)
     default ItemStack extractItem(int slot, int amount, @Nullable Direction side, Action action) {
-        IInventorySlot inventorySlot = getInventorySlot(slot, side);
+        StorageView<ItemVariant> inventorySlot = getInventorySlot(slot, side);
         if (inventorySlot == null) {
             return ItemStack.EMPTY;
         }
-        return inventorySlot.extractItem(amount, action, side == null ? AutomationType.INTERNAL : AutomationType.EXTERNAL);
+        try(Transaction t=Transaction.openOuter()) {
+            ItemVariant resource = inventorySlot.getResource();
+            long extractAmount = inventorySlot.extract(resource, amount, t);
+            if (action == Action.EXECUTE) {
+                t.commit();
+            }
+            return resource.toStack((int) extractAmount);
+        }
     }
 
     @Override
-    default int getSlotLimit(int slot, @Nullable Direction side) {
-        IInventorySlot inventorySlot = getInventorySlot(slot, side);
-        return inventorySlot == null ? 0 : inventorySlot.getLimit(ItemStack.EMPTY);
+    @Deprecated(forRemoval = true)
+    default long getSlotLimit(int slot, @Nullable Direction side) {
+        StorageView<ItemVariant> inventorySlot = getInventorySlot(slot, side);
+        return inventorySlot == null ? 0 : inventorySlot.getCapacity();
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     default boolean isItemValid(int slot, ItemStack stack, @Nullable Direction side) {
-        IInventorySlot inventorySlot = getInventorySlot(slot, side);
-        return inventorySlot != null && inventorySlot.isItemValid(stack);
+        StorageView<ItemVariant> inventorySlot = getInventorySlot(slot, side);
+        return true;
     }
-
+*/
     /**
      * Are all the Slots empty?
      * @implNote named isInventoryEmpty to avoid clashing with any other isEmpty() method
@@ -110,8 +129,8 @@ public interface IMekanismInventory extends ISidedItemHandler, IContentsListener
      * @return true if completely empty on this side
      */
     default boolean isInventoryEmpty(@Nullable Direction side) {
-        for (IInventorySlot slot : getInventorySlots(side)) {
-            if (!slot.isEmpty()) {
+        for (StorageView<ItemVariant> view : getItemStorage(side)) {
+            if (!view.isResourceBlank() && view.getAmount() != 0) {
                 return false;
             }
         }
@@ -125,6 +144,6 @@ public interface IMekanismInventory extends ISidedItemHandler, IContentsListener
      * @return true if completely empty on the default side
      */
     default boolean isInventoryEmpty() {
-        return isInventoryEmpty(getInventorySideFor());
+        return isInventoryEmpty(null);
     }
 }

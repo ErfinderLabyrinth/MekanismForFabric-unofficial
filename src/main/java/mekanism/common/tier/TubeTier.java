@@ -2,20 +2,21 @@ package mekanism.common.tier;
 
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedLongValue;
 import mekanism.common.util.EnumUtils;
 
+import java.util.function.LongSupplier;
+
 public enum TubeTier implements ITier {
-    BASIC(BaseTier.BASIC, 4_000, 750),
-    ADVANCED(BaseTier.ADVANCED, 16_000, 2_000),
-    ELITE(BaseTier.ELITE, 256_000, 64_000),
-    ULTIMATE(BaseTier.ULTIMATE, 1_024_000, 256_000);
+    BASIC(BaseTier.BASIC, 4_000 * 81, 750 * 81),
+    ADVANCED(BaseTier.ADVANCED, 16_000 * 81, 2_000 * 81),
+    ELITE(BaseTier.ELITE, 256_000 * 81, 64_000 * 81),
+    ULTIMATE(BaseTier.ULTIMATE, 1_024_000 * 81, 256_000 * 81);
 
     private final long baseCapacity;
     private final long basePull;
     private final BaseTier baseTier;
-    private CachedLongValue capacityReference;
-    private CachedLongValue pullReference;
+    private LongSupplier capacityReference;
+    private LongSupplier pullReference;
 
     TubeTier(BaseTier tier, long capacity, long pullAmount) {
         baseCapacity = capacity;
@@ -38,11 +39,11 @@ public enum TubeTier implements ITier {
     }
 
     public long getTubeCapacity() {
-        return capacityReference == null ? getBaseCapacity() : capacityReference.getOrDefault();
+        return capacityReference == null ? getBaseCapacity() : capacityReference.getAsLong();
     }
 
     public long getTubePullAmount() {
-        return pullReference == null ? getBasePull() : pullReference.getOrDefault();
+        return pullReference == null ? getBasePull() : pullReference.getAsLong();
     }
 
     public long getBaseCapacity() {
@@ -56,7 +57,7 @@ public enum TubeTier implements ITier {
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the TubeTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedLongValue capacityReference, CachedLongValue pullReference) {
+    public void setConfigReference(LongSupplier capacityReference, LongSupplier pullReference) {
         this.capacityReference = capacityReference;
         this.pullReference = pullReference;
     }

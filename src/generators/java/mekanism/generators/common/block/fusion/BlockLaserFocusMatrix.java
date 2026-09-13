@@ -28,10 +28,10 @@ public class BlockLaserFocusMatrix extends BlockBasicMultiblock<TileEntityLaserF
               .instrument(NoteBlockInstrument.HAT));
     }
 
-    @Override
-    public boolean shouldDisplayFluidOverlay(BlockState state, BlockAndTintGetter world, BlockPos pos, FluidState fluidState) {
-        return true;
-    }
+//    @Override
+//    public boolean shouldDisplayFluidOverlay(BlockState state, BlockAndTintGetter world, BlockPos pos, FluidState fluidState) {
+//        return true;
+//    }
 
     @Override
     @Deprecated

@@ -1,12 +1,6 @@
 package mekanism.common.lib.frequency;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.common.lib.MekanismSavedData;
 import mekanism.common.lib.collection.HashList;
@@ -15,9 +9,12 @@ import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public class FrequencyManager<FREQ extends Frequency> {
 
@@ -52,7 +49,7 @@ public class FrequencyManager<FREQ extends Frequency> {
     /**
      * Note: This should only be called from the server side
      */
-    public static void load() {
+    public static void load(MinecraftServer server) {
         if (!loaded) {
             loaded = true;
             //Ensure that the frequency types have been initialized so can add their managers
@@ -60,13 +57,13 @@ public class FrequencyManager<FREQ extends Frequency> {
             // before we try to create or load each frequency, or they won't be properly loaded/saved on servers
             // as this happens on servers before the frequency types reliably have a chance to add their managers
             FrequencyType.init();
-            managers.forEach(FrequencyManager::createOrLoad);
+            managers.forEach(manager -> manager.createOrLoad(server));
         }
     }
 
-    public static void tick() {
+    public static void tick(MinecraftServer server) {
         if (!loaded) {
-            load();
+            load(server);
         }
         managers.forEach(FrequencyManager::tickSelf);
     }
@@ -111,11 +108,11 @@ public class FrequencyManager<FREQ extends Frequency> {
     /**
      * Note: This should only be called from the server side
      */
-    public void createOrLoad() {
+    public void createOrLoad(MinecraftServer server) {
         if (dataHandler == null) {
             String name = getName();
             //Always associate the world with the over world as the frequencies are global
-            dataHandler = MekanismSavedData.createSavedData(FrequencyDataHandler::new, name);
+            dataHandler = MekanismSavedData.createSavedData(FrequencyDataHandler::new, name, server);
             dataHandler.syncManager();
         }
     }

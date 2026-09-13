@@ -2,7 +2,7 @@ package mekanism.common.registries;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import java.util.Locale;
+import mekanism.api.MekanismAPI;
 import mekanism.api.Upgrade;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
@@ -11,39 +11,8 @@ import mekanism.api.tier.BaseTier;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.config.MekanismConfig;
-import mekanism.common.item.ItemAlloy;
-import mekanism.common.item.ItemConfigurationCard;
-import mekanism.common.item.ItemConfigurator;
-import mekanism.common.item.ItemCraftingFormula;
-import mekanism.common.item.ItemDictionary;
-import mekanism.common.item.ItemDosimeter;
-import mekanism.common.item.ItemEnergized;
-import mekanism.common.item.ItemGaugeDropper;
-import mekanism.common.item.ItemGeigerCounter;
-import mekanism.common.item.ItemModule;
-import mekanism.common.item.ItemNetworkReader;
-import mekanism.common.item.ItemPortableQIODashboard;
-import mekanism.common.item.ItemPortableTeleporter;
-import mekanism.common.item.ItemQIODrive;
-import mekanism.common.item.ItemRefinedGlowstoneIngot;
-import mekanism.common.item.ItemRobit;
-import mekanism.common.item.ItemSeismicReader;
-import mekanism.common.item.ItemTierInstaller;
-import mekanism.common.item.ItemUpgrade;
-import mekanism.common.item.gear.ItemArmoredFreeRunners;
-import mekanism.common.item.gear.ItemArmoredJetpack;
-import mekanism.common.item.gear.ItemAtomicDisassembler;
-import mekanism.common.item.gear.ItemCanteen;
-import mekanism.common.item.gear.ItemElectricBow;
-import mekanism.common.item.gear.ItemFlamethrower;
-import mekanism.common.item.gear.ItemFreeRunners;
-import mekanism.common.item.gear.ItemHDPEElytra;
-import mekanism.common.item.gear.ItemHazmatSuitArmor;
-import mekanism.common.item.gear.ItemJetpack;
-import mekanism.common.item.gear.ItemMekaSuitArmor;
-import mekanism.common.item.gear.ItemMekaTool;
-import mekanism.common.item.gear.ItemScubaMask;
-import mekanism.common.item.gear.ItemScubaTank;
+import mekanism.common.item.*;
+import mekanism.common.item.gear.*;
 import mekanism.common.registration.impl.ItemDeferredRegister;
 import mekanism.common.registration.impl.ItemRegistryObject;
 import mekanism.common.resource.IResource;
@@ -53,12 +22,15 @@ import mekanism.common.resource.ResourceType;
 import mekanism.common.tier.QIODriveTier;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
 
 public class MekanismItems {
 
@@ -68,50 +40,50 @@ public class MekanismItems {
     public static final ItemDeferredRegister ITEMS = new ItemDeferredRegister(Mekanism.MODID);
     public static final Table<ResourceType, PrimaryResource, ItemRegistryObject<Item>> PROCESSED_RESOURCES = HashBasedTable.create();
 
-    public static final ItemRegistryObject<ItemRobit> ROBIT = ITEMS.register("robit", ItemRobit::new);
-    public static final ItemRegistryObject<ItemEnergized> ENERGY_TABLET = ITEMS.register("energy_tablet", () -> new ItemEnergized(MekanismConfig.gear.tabletChargeRate, MekanismConfig.gear.tabletMaxEnergy, BasicEnergyContainer.alwaysTrue, BasicEnergyContainer.alwaysTrue, new Item.Properties().rarity(Rarity.UNCOMMON)));
-    public static final ItemRegistryObject<ItemConfigurator> CONFIGURATOR = ITEMS.register("configurator", ItemConfigurator::new);
-    public static final ItemRegistryObject<ItemNetworkReader> NETWORK_READER = ITEMS.register("network_reader", ItemNetworkReader::new);
-    public static final ItemRegistryObject<ItemDictionary> DICTIONARY = ITEMS.register("dictionary", ItemDictionary::new);
-    public static final ItemRegistryObject<ItemPortableTeleporter> PORTABLE_TELEPORTER = ITEMS.register("portable_teleporter", ItemPortableTeleporter::new);
-    public static final ItemRegistryObject<ItemConfigurationCard> CONFIGURATION_CARD = ITEMS.register("configuration_card", ItemConfigurationCard::new);
-    public static final ItemRegistryObject<ItemCraftingFormula> CRAFTING_FORMULA = ITEMS.register("crafting_formula", ItemCraftingFormula::new);
-    public static final ItemRegistryObject<ItemSeismicReader> SEISMIC_READER = ITEMS.register("seismic_reader", ItemSeismicReader::new);
-    public static final ItemRegistryObject<ItemGaugeDropper> GAUGE_DROPPER = ITEMS.register("gauge_dropper", ItemGaugeDropper::new);
-    public static final ItemRegistryObject<ItemGeigerCounter> GEIGER_COUNTER = ITEMS.register("geiger_counter", ItemGeigerCounter::new);
-    public static final ItemRegistryObject<ItemDosimeter> DOSIMETER = ITEMS.register("dosimeter", ItemDosimeter::new);
-    public static final ItemRegistryObject<ItemCanteen> CANTEEN = ITEMS.register("canteen", ItemCanteen::new);
-    public static final ItemRegistryObject<ItemPortableQIODashboard> PORTABLE_QIO_DASHBOARD = ITEMS.register("portable_qio_dashboard", ItemPortableQIODashboard::new);
+    public static final ItemRegistryObject<ItemRobit> ROBIT = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "robit"), ItemRobit::new);
+    public static final ItemRegistryObject<ItemEnergized> ENERGY_TABLET = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "energy_tablet"), () -> new ItemEnergized(() -> MekanismConfig.COMMON.gear.tabletChargeRate, () -> MekanismConfig.COMMON.gear.tabletMaxEnergy, BasicEnergyContainer.alwaysTrue, BasicEnergyContainer.alwaysTrue, new Item.Properties().rarity(Rarity.UNCOMMON)));
+    public static final ItemRegistryObject<ItemConfigurator> CONFIGURATOR = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "configurator"), ItemConfigurator::new);
+    public static final ItemRegistryObject<ItemNetworkReader> NETWORK_READER = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "network_reader"), ItemNetworkReader::new);
+    public static final ItemRegistryObject<ItemDictionary> DICTIONARY = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "dictionary"), ItemDictionary::new);
+    public static final ItemRegistryObject<ItemPortableTeleporter> PORTABLE_TELEPORTER = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "portable_teleporter"), ItemPortableTeleporter::new);
+    public static final ItemRegistryObject<ItemConfigurationCard> CONFIGURATION_CARD = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "configuration_card"), ItemConfigurationCard::new);
+    public static final ItemRegistryObject<ItemCraftingFormula> CRAFTING_FORMULA = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "crafting_formula"), ItemCraftingFormula::new);
+    public static final ItemRegistryObject<ItemSeismicReader> SEISMIC_READER = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "seismic_reader"), ItemSeismicReader::new);
+    public static final ItemRegistryObject<ItemGaugeDropper> GAUGE_DROPPER = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "gauge_dropper"), ItemGaugeDropper::new);
+    public static final ItemRegistryObject<ItemGeigerCounter> GEIGER_COUNTER = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "geiger_counter"), ItemGeigerCounter::new);
+    public static final ItemRegistryObject<ItemDosimeter> DOSIMETER = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "dosimeter"), ItemDosimeter::new);
+    public static final ItemRegistryObject<ItemCanteen> CANTEEN = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "canteen"), ItemCanteen::new);
+    public static final ItemRegistryObject<ItemPortableQIODashboard> PORTABLE_QIO_DASHBOARD = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "portable_qio_dashboard"), ItemPortableQIODashboard::new);
     // QIO Drives
     public static final ItemRegistryObject<ItemQIODrive> BASE_QIO_DRIVE = registerQIODrive(QIODriveTier.BASE);
     public static final ItemRegistryObject<ItemQIODrive> HYPER_DENSE_QIO_DRIVE = registerQIODrive(QIODriveTier.HYPER_DENSE);
     public static final ItemRegistryObject<ItemQIODrive> TIME_DILATING_QIO_DRIVE = registerQIODrive(QIODriveTier.TIME_DILATING);
     public static final ItemRegistryObject<ItemQIODrive> SUPERMASSIVE_QIO_DRIVE = registerQIODrive(QIODriveTier.SUPERMASSIVE);
     // Tools
-    public static final ItemRegistryObject<ItemAtomicDisassembler> ATOMIC_DISASSEMBLER = ITEMS.register("atomic_disassembler", ItemAtomicDisassembler::new);
-    public static final ItemRegistryObject<ItemElectricBow> ELECTRIC_BOW = ITEMS.register("electric_bow", ItemElectricBow::new);
-    public static final ItemRegistryObject<ItemFlamethrower> FLAMETHROWER = ITEMS.register("flamethrower", ItemFlamethrower::new);
-    public static final ItemRegistryObject<ItemMekaTool> MEKA_TOOL = ITEMS.registerUnburnable("meka_tool", ItemMekaTool::new);
+    public static final ItemRegistryObject<ItemAtomicDisassembler> ATOMIC_DISASSEMBLER = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "atomic_disassembler"), ItemAtomicDisassembler::new);
+    public static final ItemRegistryObject<ItemElectricBow> ELECTRIC_BOW = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "electric_bow"), ItemElectricBow::new);
+    public static final ItemRegistryObject<ItemFlamethrower> FLAMETHROWER = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "flamethrower"), ItemFlamethrower::new);
+    public static final ItemRegistryObject<ItemMekaTool> MEKA_TOOL = ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "meka_tool"), ItemMekaTool::new);
     // Armor
-    public static final ItemRegistryObject<ItemFreeRunners> FREE_RUNNERS = ITEMS.register("free_runners", ItemFreeRunners::new);
-    public static final ItemRegistryObject<ItemArmoredFreeRunners> ARMORED_FREE_RUNNERS = ITEMS.register("free_runners_armored", ItemArmoredFreeRunners::new);
-    public static final ItemRegistryObject<ItemScubaMask> SCUBA_MASK = ITEMS.register("scuba_mask", ItemScubaMask::new);
-    public static final ItemRegistryObject<ItemScubaTank> SCUBA_TANK = ITEMS.register("scuba_tank", ItemScubaTank::new);
-    public static final ItemRegistryObject<ItemJetpack> JETPACK = ITEMS.register("jetpack", ItemJetpack::new);
-    public static final ItemRegistryObject<ItemArmoredJetpack> ARMORED_JETPACK = ITEMS.register("jetpack_armored", ItemArmoredJetpack::new);
-    public static final ItemRegistryObject<ItemHDPEElytra> HDPE_REINFORCED_ELYTRA = ITEMS.register("hdpe_elytra", props -> new ItemHDPEElytra(props.durability(648).rarity(Rarity.RARE)));
+    public static final ItemRegistryObject<ItemFreeRunners> FREE_RUNNERS = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "free_runners"), ItemFreeRunners::new);
+    public static final ItemRegistryObject<ItemArmoredFreeRunners> ARMORED_FREE_RUNNERS = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "free_runners_armored"), ItemArmoredFreeRunners::new);
+    public static final ItemRegistryObject<ItemScubaMask> SCUBA_MASK = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "scuba_mask"), ItemScubaMask::new);
+    public static final ItemRegistryObject<ItemScubaTank> SCUBA_TANK = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "scuba_tank"), ItemScubaTank::new);
+    public static final ItemRegistryObject<ItemJetpack> JETPACK = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "jetpack"), ItemJetpack::new);
+    public static final ItemRegistryObject<ItemArmoredJetpack> ARMORED_JETPACK = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "jetpack_armored"), ItemArmoredJetpack::new);
+    public static final ItemRegistryObject<ItemHDPEElytra> HDPE_REINFORCED_ELYTRA = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hdpe_elytra"), props -> new ItemHDPEElytra(props.durability(648).rarity(Rarity.RARE)));
 
-    public static final ItemRegistryObject<ItemHazmatSuitArmor> HAZMAT_MASK = ITEMS.register("hazmat_mask", props -> new ItemHazmatSuitArmor(ArmorItem.Type.HELMET, props));
-    public static final ItemRegistryObject<ItemHazmatSuitArmor> HAZMAT_GOWN = ITEMS.register("hazmat_gown", props -> new ItemHazmatSuitArmor(ArmorItem.Type.CHESTPLATE, props));
-    public static final ItemRegistryObject<ItemHazmatSuitArmor> HAZMAT_PANTS = ITEMS.register("hazmat_pants", props -> new ItemHazmatSuitArmor(ArmorItem.Type.LEGGINGS, props));
-    public static final ItemRegistryObject<ItemHazmatSuitArmor> HAZMAT_BOOTS = ITEMS.register("hazmat_boots", props -> new ItemHazmatSuitArmor(ArmorItem.Type.BOOTS, props));
+    public static final ItemRegistryObject<ItemHazmatSuitArmor> HAZMAT_MASK = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hazmat_mask"), props -> new ItemHazmatSuitArmor(ArmorItem.Type.HELMET, props));
+    public static final ItemRegistryObject<ItemHazmatSuitArmor> HAZMAT_GOWN = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hazmat_gown"), props -> new ItemHazmatSuitArmor(ArmorItem.Type.CHESTPLATE, props));
+    public static final ItemRegistryObject<ItemHazmatSuitArmor> HAZMAT_PANTS = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hazmat_pants"), props -> new ItemHazmatSuitArmor(ArmorItem.Type.LEGGINGS, props));
+    public static final ItemRegistryObject<ItemHazmatSuitArmor> HAZMAT_BOOTS = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hazmat_boots"), props -> new ItemHazmatSuitArmor(ArmorItem.Type.BOOTS, props));
 
-    public static final ItemRegistryObject<ItemMekaSuitArmor> MEKASUIT_HELMET = ITEMS.registerUnburnable("mekasuit_helmet", props -> new ItemMekaSuitArmor(ArmorItem.Type.HELMET, props));
-    public static final ItemRegistryObject<ItemMekaSuitArmor> MEKASUIT_BODYARMOR = ITEMS.registerUnburnable("mekasuit_bodyarmor", props -> new ItemMekaSuitArmor(ArmorItem.Type.CHESTPLATE, props));
-    public static final ItemRegistryObject<ItemMekaSuitArmor> MEKASUIT_PANTS = ITEMS.registerUnburnable("mekasuit_pants", props -> new ItemMekaSuitArmor(ArmorItem.Type.LEGGINGS, props));
-    public static final ItemRegistryObject<ItemMekaSuitArmor> MEKASUIT_BOOTS = ITEMS.registerUnburnable("mekasuit_boots", props -> new ItemMekaSuitArmor(ArmorItem.Type.BOOTS, props));
+    public static final ItemRegistryObject<ItemMekaSuitArmor> MEKASUIT_HELMET = ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "mekasuit_helmet"), props -> new ItemMekaSuitArmor(ArmorItem.Type.HELMET, props));
+    public static final ItemRegistryObject<ItemMekaSuitArmor> MEKASUIT_BODYARMOR = ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "mekasuit_bodyarmor"), props -> new ItemMekaSuitArmor(ArmorItem.Type.CHESTPLATE, props));
+    public static final ItemRegistryObject<ItemMekaSuitArmor> MEKASUIT_PANTS = ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "mekasuit_pants"), props -> new ItemMekaSuitArmor(ArmorItem.Type.LEGGINGS, props));
+    public static final ItemRegistryObject<ItemMekaSuitArmor> MEKASUIT_BOOTS = ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "mekasuit_boots"), props -> new ItemMekaSuitArmor(ArmorItem.Type.BOOTS, props));
 
-    public static final ItemRegistryObject<Item> MODULE_BASE = ITEMS.register("module_base");
+    public static final ItemRegistryObject<Item> MODULE_BASE = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "module_base"));
 
     public static final ItemRegistryObject<ItemModule> MODULE_ENERGY = ITEMS.registerModule(MekanismModules.ENERGY_UNIT);
     public static final ItemRegistryObject<ItemModule> MODULE_COLOR_MODULATION = ITEMS.registerModule(MekanismModules.COLOR_MODULATION_UNIT);
@@ -174,27 +146,27 @@ public class MekanismItems {
     public static final ItemRegistryObject<Item> ENRICHED_GOLD = registerResource(ResourceType.ENRICHED, PrimaryResource.GOLD);
     public static final ItemRegistryObject<Item> ENRICHED_TIN = registerResource(ResourceType.ENRICHED, PrimaryResource.TIN);
 
-    public static final ItemRegistryObject<Item> HDPE_PELLET = ITEMS.register("hdpe_pellet", Rarity.UNCOMMON);
-    public static final ItemRegistryObject<Item> HDPE_ROD = ITEMS.register("hdpe_rod", Rarity.UNCOMMON);
-    public static final ItemRegistryObject<Item> HDPE_SHEET = ITEMS.register("hdpe_sheet", Rarity.UNCOMMON);
-    public static final ItemRegistryObject<Item> HDPE_STICK = ITEMS.register("hdpe_stick", Rarity.UNCOMMON);
+    public static final ItemRegistryObject<Item> HDPE_PELLET = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hdpe_pellet"), Rarity.UNCOMMON);
+    public static final ItemRegistryObject<Item> HDPE_ROD = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hdpe_rod"), Rarity.UNCOMMON);
+    public static final ItemRegistryObject<Item> HDPE_SHEET = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hdpe_sheet"), Rarity.UNCOMMON);
+    public static final ItemRegistryObject<Item> HDPE_STICK = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "hdpe_stick"), Rarity.UNCOMMON);
 
-    public static final ItemRegistryObject<Item> ELECTROLYTIC_CORE = ITEMS.register("electrolytic_core", Rarity.UNCOMMON);
-    public static final ItemRegistryObject<Item> TELEPORTATION_CORE = ITEMS.register("teleportation_core", Rarity.RARE);
-    public static final ItemRegistryObject<Item> ANTIMATTER_PELLET = ITEMS.register("pellet_antimatter", EnumColor.PURPLE);
-    public static final ItemRegistryObject<Item> PLUTONIUM_PELLET = ITEMS.register("pellet_plutonium", EnumColor.GRAY);
-    public static final ItemRegistryObject<Item> POLONIUM_PELLET = ITEMS.register("pellet_polonium", EnumColor.INDIGO);
-    public static final ItemRegistryObject<Item> REPROCESSED_FISSILE_FRAGMENT = ITEMS.register("reprocessed_fissile_fragment", Rarity.RARE);
+    public static final ItemRegistryObject<Item> ELECTROLYTIC_CORE = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "electrolytic_core"), Rarity.UNCOMMON);
+    public static final ItemRegistryObject<Item> TELEPORTATION_CORE = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "teleportation_core"), Rarity.RARE);
+    public static final ItemRegistryObject<Item> ANTIMATTER_PELLET = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "pellet_antimatter"), EnumColor.PURPLE);
+    public static final ItemRegistryObject<Item> PLUTONIUM_PELLET = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "pellet_plutonium"), EnumColor.GRAY);
+    public static final ItemRegistryObject<Item> POLONIUM_PELLET = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "pellet_polonium"), EnumColor.INDIGO);
+    public static final ItemRegistryObject<Item> REPROCESSED_FISSILE_FRAGMENT = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "reprocessed_fissile_fragment"), Rarity.RARE);
 
-    public static final ItemRegistryObject<Item> ENRICHED_IRON = ITEMS.register("enriched_iron");
-    public static final ItemRegistryObject<Item> SAWDUST = ITEMS.register("sawdust");
-    public static final ItemRegistryObject<Item> SALT = ITEMS.register("salt");
-    public static final ItemRegistryObject<Item> SUBSTRATE = ITEMS.register("substrate");
-    public static final ItemRegistryObject<Item> BIO_FUEL = ITEMS.register("bio_fuel");
-    public static final ItemRegistryObject<Item> DYE_BASE = ITEMS.register("dye_base");
-    public static final ItemRegistryObject<Item> FLUORITE_GEM = ITEMS.register("fluorite_gem");
-    public static final ItemRegistryObject<Item> YELLOW_CAKE_URANIUM = ITEMS.register("yellow_cake_uranium", Rarity.UNCOMMON);
-    public static final ItemRegistryObject<Item> DIRTY_NETHERITE_SCRAP = ITEMS.registerUnburnable("dirty_netherite_scrap");
+    public static final ItemRegistryObject<Item> ENRICHED_IRON = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "enriched_iron"));
+    public static final ItemRegistryObject<Item> SAWDUST = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "sawdust"));
+    public static final ItemRegistryObject<Item> SALT = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "salt"));
+    public static final ItemRegistryObject<Item> SUBSTRATE = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "substrate"));
+    public static final ItemRegistryObject<Item> BIO_FUEL = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "bio_fuel"));
+    public static final ItemRegistryObject<Item> DYE_BASE = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "dye_base"));
+    public static final ItemRegistryObject<Item> FLUORITE_GEM = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "fluorite_gem"));
+    public static final ItemRegistryObject<Item> YELLOW_CAKE_URANIUM = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "yellow_cake_uranium"), Rarity.UNCOMMON);
+    public static final ItemRegistryObject<Item> DIRTY_NETHERITE_SCRAP = ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "dirty_netherite_scrap"));
 
     public static final ItemRegistryObject<Item> BRONZE_DUST = registerResource(ResourceType.DUST, MiscResource.BRONZE);
     public static final ItemRegistryObject<Item> LAPIS_LAZULI_DUST = registerResource(ResourceType.DUST, MiscResource.LAPIS_LAZULI);
@@ -213,7 +185,7 @@ public class MekanismItems {
 
     public static final ItemRegistryObject<Item> BRONZE_INGOT = registerResource(ResourceType.INGOT, MiscResource.BRONZE);
     public static final ItemRegistryObject<Item> REFINED_OBSIDIAN_INGOT = registerUnburnableResource(ResourceType.INGOT, MiscResource.REFINED_OBSIDIAN);
-    public static final ItemRegistryObject<Item> REFINED_GLOWSTONE_INGOT = ITEMS.register(ResourceType.INGOT.getRegistryPrefix() + "_" + MiscResource.REFINED_GLOWSTONE.getRegistrySuffix(), ItemRefinedGlowstoneIngot::new);
+    public static final ItemRegistryObject<Item> REFINED_GLOWSTONE_INGOT = ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, ResourceType.INGOT.getRegistryName() + "_" + MiscResource.REFINED_GLOWSTONE.getRegistrySuffix()), ItemRefinedGlowstoneIngot::new);
     public static final ItemRegistryObject<Item> STEEL_INGOT = registerResource(ResourceType.INGOT, MiscResource.STEEL);
 
     public static final ItemRegistryObject<Item> REFINED_OBSIDIAN_NUGGET = registerUnburnableResource(ResourceType.NUGGET, MiscResource.REFINED_OBSIDIAN);
@@ -232,16 +204,16 @@ public class MekanismItems {
     }
 
     private static ItemRegistryObject<Item> registerResource(ResourceType type, IResource resource) {
-        return ITEMS.register(type.getRegistryPrefix() + "_" + resource.getRegistrySuffix());
+        return ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, type.getRegistryName() + "_" + resource.getRegistrySuffix()));
     }
 
     private static ItemRegistryObject<Item> registerUnburnableResource(ResourceType type, IResource resource) {
-        return ITEMS.registerUnburnable(type.getRegistryPrefix() + "_" + resource.getRegistrySuffix());
+        return ITEMS.registerUnburnable(new ResourceLocation(MekanismAPI.MEKANISM_MODID, type.getRegistryName() + "_" + resource.getRegistrySuffix()));
     }
 
     private static ItemRegistryObject<Item> registerCircuit(BaseTier tier) {
         //Ensure the name is lower case as with concatenating with values from enums it may not be
-        return ITEMS.register(tier.getLowerName() + "_control_circuit", properties -> new Item(properties) {
+        return ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, tier.getLowerName() + "_control_circuit"), properties -> new Item(properties) {
             @NotNull
             @Override
             public Component getName(@NotNull ItemStack stack) {
@@ -252,18 +224,22 @@ public class MekanismItems {
 
     private static ItemRegistryObject<ItemTierInstaller> registerInstaller(@Nullable BaseTier fromTier, @NotNull BaseTier toTier) {
         //Ensure the name is lower case as with concatenating with values from enums it may not be
-        return ITEMS.register(toTier.getLowerName() + "_tier_installer", properties -> new ItemTierInstaller(fromTier, toTier, properties));
+        return ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, toTier.getLowerName() + "_tier_installer"), properties -> new ItemTierInstaller(fromTier, toTier, properties));
     }
 
     private static ItemRegistryObject<ItemAlloy> registerAlloy(AlloyTier tier, Rarity rarity) {
-        return ITEMS.register("alloy_" + tier.getName(), properties -> new ItemAlloy(tier, properties.rarity(rarity)));
+        return ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "alloy_" + tier.getName()), properties -> new ItemAlloy(tier, properties.rarity(rarity)));
     }
 
     private static ItemRegistryObject<ItemUpgrade> registerUpgrade(Upgrade type) {
-        return ITEMS.register("upgrade_" + type.getRawName(), properties -> new ItemUpgrade(type, properties));
+        return ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "upgrade_" + type.getRawName()), properties -> new ItemUpgrade(type, properties));
     }
 
     private static ItemRegistryObject<ItemQIODrive> registerQIODrive(QIODriveTier tier) {
-        return ITEMS.register("qio_drive_" + tier.name().toLowerCase(Locale.ROOT), properties -> new ItemQIODrive(tier, properties));
+        return ITEMS.register(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "qio_drive_" + tier.name().toLowerCase(Locale.ROOT)), properties -> new ItemQIODrive(tier, properties));
+    }
+
+    public static void register() {
+
     }
 }

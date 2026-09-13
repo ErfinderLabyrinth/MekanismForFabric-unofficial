@@ -2,7 +2,7 @@
   "type": "mekanism:enriching",
   "input": {
     "ingredient": {
-      "tag": "forge:ores/lapis"
+      "tag": "minecraft:lapis_ores"
     }
   },
   "output": {

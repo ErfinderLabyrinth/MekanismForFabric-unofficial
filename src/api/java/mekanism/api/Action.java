@@ -1,15 +1,13 @@
 package mekanism.api;
 
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-
 public enum Action {
-    EXECUTE(FluidAction.EXECUTE),
-    SIMULATE(FluidAction.SIMULATE);
+    EXECUTE(/*FluidAction.EXECUTE*/),
+    SIMULATE(/*FluidAction.SIMULATE*/);
 
-    private final FluidAction fluidAction;
+    //private final FluidAction fluidAction;
 
-    Action(FluidAction fluidAction) {
-        this.fluidAction = fluidAction;
+    Action(/*FluidAction fluidAction*/) {
+        //this.fluidAction = fluidAction;
     }
 
     /**
@@ -29,9 +27,9 @@ public enum Action {
     /**
      * Converts this action to the corresponding FluidAction.
      */
-    public FluidAction toFluidAction() {
-        return fluidAction;
-    }
+//    public FluidAction toFluidAction() {
+//        return fluidAction;
+//    }
 
     /**
      * Helper to combines this action with a boolean based execution. This allows easily compounding actions.
@@ -62,10 +60,10 @@ public enum Action {
      *
      * @return Action.
      */
-    public static Action fromFluidAction(FluidAction action) {
-        if (action == FluidAction.EXECUTE) {
-            return EXECUTE;
-        } //else FluidAction.SIMULATE
-        return SIMULATE;
-    }
+//    public static Action fromFluidAction(FluidAction action) {
+//        if (action == FluidAction.EXECUTE) {
+//            return EXECUTE;
+//        } //else FluidAction.SIMULATE
+//        return SIMULATE;
+//    }
 }

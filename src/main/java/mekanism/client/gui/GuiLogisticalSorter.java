@@ -1,6 +1,6 @@
 package mekanism.client.gui;
 
-import java.util.List;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.element.button.ColorButton;
 import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.gui.element.button.TranslationButton;
@@ -10,7 +10,6 @@ import mekanism.client.gui.element.window.filter.transporter.GuiSorterFilerSelec
 import mekanism.client.gui.element.window.filter.transporter.GuiSorterItemStackFilter;
 import mekanism.client.gui.element.window.filter.transporter.GuiSorterModIDFilter;
 import mekanism.client.gui.element.window.filter.transporter.GuiSorterTagFilter;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.base.TagCache;
 import mekanism.common.content.filter.IFilter;
@@ -33,6 +32,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class GuiLogisticalSorter extends GuiFilterHolder<SorterFilter<?>, TileEntityLogisticalSorter, MekanismTileContainer<TileEntityLogisticalSorter>> {
 
     public GuiLogisticalSorter(MekanismTileContainer<TileEntityLogisticalSorter> container, Inventory inv, Component title) {
@@ -46,18 +47,18 @@ public class GuiLogisticalSorter extends GuiFilterHolder<SorterFilter<?>, TileEn
         addRenderableWidget(new TranslationButton(this, 56, 136, 96, 20, MekanismLang.BUTTON_NEW_FILTER,
               () -> addWindow(new GuiSorterFilerSelect(this, tile))));
         addRenderableWidget(new MekanismImageButton(this, 12, 58, 14, getButtonLocation("single"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.SINGLE_ITEM_BUTTON, tile)),
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.SINGLE_ITEM_BUTTON, tile)),
               getOnHover(MekanismLang.SORTER_SINGLE_ITEM_DESCRIPTION)));
         addRenderableWidget(new MekanismImageButton(this, 12, 84, 14, getButtonLocation("round_robin"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.ROUND_ROBIN_BUTTON, tile)),
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.ROUND_ROBIN_BUTTON, tile)),
               getOnHover(MekanismLang.SORTER_ROUND_ROBIN_DESCRIPTION)));
         addRenderableWidget(new MekanismImageButton(this, 12, 110, 14, getButtonLocation("auto_eject"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.AUTO_EJECT_BUTTON, tile)),
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.AUTO_EJECT_BUTTON, tile)),
               getOnHover(MekanismLang.SORTER_AUTO_EJECT_DESCRIPTION)));
         addRenderableWidget(new ColorButton(this, 13, 137, 16, 16, () -> tile.color,
-              () -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CHANGE_COLOR, tile,
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CHANGE_COLOR, tile,
                     hasShiftDown() ? -1 : TransporterUtils.getColorIndex(TransporterUtils.increment(tile.color)))),
-              () -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CHANGE_COLOR, tile,
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CHANGE_COLOR, tile,
                     TransporterUtils.getColorIndex(TransporterUtils.decrement(tile.color))))));
     }
 

@@ -1,7 +1,8 @@
 package mekanism.client.jei.interfaces;
 
-import java.util.Optional;
 import net.minecraft.client.renderer.Rect2i;
+
+import java.util.Optional;
 
 public interface IJEIIngredientHelper {
 

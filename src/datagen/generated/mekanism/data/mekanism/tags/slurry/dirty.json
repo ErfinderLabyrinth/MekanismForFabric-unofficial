@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:dirty_iron",
+    "minecraft:dirty_gold",
+    "minecraft:dirty_osmium",
+    "minecraft:dirty_copper",
+    "minecraft:dirty_tin",
+    "minecraft:dirty_lead",
+    "minecraft:dirty_uranium"
+  ]
+}

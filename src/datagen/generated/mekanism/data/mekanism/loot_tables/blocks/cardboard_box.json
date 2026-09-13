@@ -27,9 +27,7 @@
           "name": "mekanism:cardboard_box"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/cardboard_box"
+  ]
 }

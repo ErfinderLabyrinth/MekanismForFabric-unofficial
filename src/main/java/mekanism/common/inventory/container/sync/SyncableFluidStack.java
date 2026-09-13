@@ -1,13 +1,14 @@
 package mekanism.common.inventory.container.sync;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import mekanism.api.FluidStack;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.network.to_client.container.property.FluidStackPropertyData;
-import mekanism.common.network.to_client.container.property.IntPropertyData;
+import mekanism.common.network.to_client.container.property.LongPropertyData;
 import mekanism.common.network.to_client.container.property.PropertyData;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Version of {@link net.minecraft.world.inventory.DataSlot} for handling fluid stacks
@@ -54,15 +55,15 @@ public class SyncableFluidStack implements ISyncableData {
         FluidStack fluid = get();
         if (!fluid.isEmpty()) {
             //Double check it is not empty
-            set(new FluidStack(fluid.getFluid(), amount));
+            set(new FluidStack(fluid.variant(), amount));
         }
     }
 
     @Override
     public DirtyType isDirty() {
         FluidStack value = get();
-        boolean sameFluid = value.isFluidEqual(this.lastKnownValue);
-        if (!sameFluid || value.getAmount() != this.lastKnownValue.getAmount()) {
+        boolean sameFluid = value.equals(this.lastKnownValue);
+        if (!sameFluid || value.amount() != this.lastKnownValue.amount()) {
             //Make sure to copy it in case our fluid stack object is the same object so would be getting modified
             // only do so though if it is dirty, as we don't need to spam object creation
             this.lastKnownValue = value.copy();
@@ -75,7 +76,7 @@ public class SyncableFluidStack implements ISyncableData {
     public PropertyData getPropertyData(short property, DirtyType dirtyType) {
         if (dirtyType == DirtyType.SIZE) {
             //If only the size changed, don't bother re-syncing the type
-            return new IntPropertyData(property, get().getAmount());
+            return new LongPropertyData(property, get().amount());
         }
         return new FluidStackPropertyData(property, get());
     }

@@ -1,20 +1,20 @@
 package mekanism.generators.common.item.generator;
 
 import java.util.function.Consumer;
+
+import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.common.block.prefab.BlockTile;
 import mekanism.common.item.block.machine.ItemBlockMachine;
 import mekanism.generators.client.render.GeneratorsRenderPropertiesProvider;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import org.jetbrains.annotations.NotNull;
 
-public class ItemBlockWindGenerator extends ItemBlockMachine {
+public class ItemBlockWindGenerator extends ItemBlockMachine implements RenderPropertiesProvider.MekRenderPropertiesGetter {
 
     public ItemBlockWindGenerator(BlockTile<?, ?> block) {
         super(block);
     }
 
     @Override
-    public void initializeClient(@NotNull Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(GeneratorsRenderPropertiesProvider.wind());
+    public RenderPropertiesProvider.MekRenderProperties getRenderProperties() {
+        return GeneratorsRenderPropertiesProvider.wind();
     }
 }

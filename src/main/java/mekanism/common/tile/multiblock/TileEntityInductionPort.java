@@ -1,7 +1,5 @@
 package mekanism.common.tile.multiblock;
 
-import java.util.Collections;
-import java.util.Set;
 import mekanism.api.IContentsListener;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
@@ -21,6 +19,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.Set;
+
 public class TileEntityInductionPort extends TileEntityInductionCasing implements IMultiblockEjector {
 
     private Set<Direction> outputDirections = Collections.emptySet();
@@ -34,7 +35,7 @@ public class TileEntityInductionPort extends TileEntityInductionCasing implement
     @Override
     protected IEnergyContainerHolder getInitialEnergyContainers(IContentsListener listener) {
         //Don't allow inserting if we are on output mode, or extracting if we are on input mode
-        return ProxiedEnergyContainerHolder.create(side -> !getActive(), side -> getActive(), side -> getMultiblock().getEnergyContainers(side));
+        return ProxiedEnergyContainerHolder.create(side -> !getActive(), side -> getActive(), side -> getMultiblock().getEnergyStorage(side), () -> getMultiblock().getEnergyContainers());
     }
 
     @Override

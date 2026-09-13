@@ -8,7 +8,7 @@
       "item": "mekanism:energy_tablet"
     },
     "I": {
-      "tag": "forge:ingots/osmium"
+      "tag": "c:osmium_ingots"
     },
     "P": {
       "item": "mekanism:basic_energy_cube"

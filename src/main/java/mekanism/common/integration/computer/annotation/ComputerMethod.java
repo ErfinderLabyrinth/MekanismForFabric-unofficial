@@ -1,10 +1,11 @@
 package mekanism.common.integration.computer.annotation;
 
+import mekanism.common.integration.computer.MethodRestriction;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import mekanism.common.integration.computer.MethodRestriction;
 
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)

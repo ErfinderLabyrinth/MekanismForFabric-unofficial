@@ -9,9 +9,9 @@ import mekanism.common.recipe.pattern.RecipePattern;
 import mekanism.common.recipe.pattern.RecipePattern.TripleLine;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tags.MekanismTags;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.Tags;
 
 class ThermalEvaporationRecipeProvider implements ISubRecipeProvider {
 
@@ -25,7 +25,7 @@ class ThermalEvaporationRecipeProvider implements ISubRecipeProvider {
                     TripleLine.of(Pattern.STEEL, Pattern.INGOT, Pattern.STEEL),
                     TripleLine.of(Pattern.EMPTY, Pattern.STEEL, Pattern.EMPTY))
               ).key(Pattern.STEEL, MekanismTags.Items.INGOTS_STEEL)
-              .key(Pattern.INGOT, Tags.Items.INGOTS_COPPER)
+              .key(Pattern.INGOT, ConventionalItemTags.COPPER_INGOTS)
               .build(consumer, Mekanism.rl(basePath + "block"));
         //Controller
         ExtendedShapedRecipeBuilder.shapedRecipe(MekanismBlocks.THERMAL_EVAPORATION_CONTROLLER)
@@ -36,7 +36,7 @@ class ThermalEvaporationRecipeProvider implements ISubRecipeProvider {
               ).key(Pattern.CONSTANT, MekanismBlocks.THERMAL_EVAPORATION_BLOCK)
               .key(Pattern.CIRCUIT, MekanismTags.Items.CIRCUITS_ADVANCED)
               .key(Pattern.BUCKET, Items.BUCKET)
-              .key(MekanismRecipeProvider.GLASS_CHAR, Tags.Items.GLASS_PANES)
+              .key(MekanismRecipeProvider.GLASS_CHAR, ConventionalItemTags.GLASS_PANES)
               .build(consumer, Mekanism.rl(basePath + "controller"));
         //Valve
         ExtendedShapedRecipeBuilder.shapedRecipe(MekanismBlocks.THERMAL_EVAPORATION_VALVE)

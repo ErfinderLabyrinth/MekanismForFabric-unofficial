@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "A": {
-      "tag": "forge:pellets/polonium"
+      "tag": "c:polonium_pellets"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "P": {
       "item": "mekanism:hdpe_sheet"
     },
     "W": {
-      "tag": "forge:chests/wooden"
+      "tag": "c:wooden_chests"
     },
     "X": {
       "item": "mekanism:steel_casing"

@@ -2,7 +2,7 @@
   "type": "mekanism:enriching",
   "input": {
     "ingredient": {
-      "tag": "forge:ores/redstone"
+      "tag": "c:redstone_dusts"
     }
   },
   "output": {

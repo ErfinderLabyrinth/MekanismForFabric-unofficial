@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ores/copper"
+      "tag": "c:copper_ingots"
     }
   },
   "output": {
     "amount": 1000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_copper"
+    "slurry": "minecraft:dirty_copper"
   }
 }

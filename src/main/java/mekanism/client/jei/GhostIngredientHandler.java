@@ -6,10 +6,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap.FastSortedEntrySet;
 import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.window.GuiWindow;
@@ -21,6 +17,11 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.Rect2i;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GhostIngredientHandler<GUI extends GuiMekanism<?>> implements IGhostIngredientHandler<GUI> {
 

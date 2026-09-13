@@ -3,7 +3,7 @@
   "duration": 100,
   "fluidInput": {
     "amount": 100,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "gasInput": {
     "amount": 100,

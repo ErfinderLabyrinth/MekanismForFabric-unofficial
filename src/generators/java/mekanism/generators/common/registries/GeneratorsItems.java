@@ -21,4 +21,8 @@ public class GeneratorsItems {
 
     public static final ItemRegistryObject<ItemModule> MODULE_SOLAR_RECHARGING = ITEMS.registerModule(GeneratorsModules.SOLAR_RECHARGING_UNIT);
     public static final ItemRegistryObject<ItemModule> MODULE_GEOTHERMAL_GENERATOR = ITEMS.registerModule(GeneratorsModules.GEOTHERMAL_GENERATOR_UNIT);
+
+    public static void register() {
+
+    }
 }

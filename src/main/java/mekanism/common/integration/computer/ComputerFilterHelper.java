@@ -29,7 +29,7 @@ public class ComputerFilterHelper {
         return filter;
     }
 
-    @ComputerMethod(methodDescription = "Create a Logistical Sorter Tag Filter from a tag")
+    @ComputerMethod(methodDescription = "Create a Logistical Sorter Tag Filter from a tagSupplier")
     public static SorterTagFilter createSorterTagFilter(String tag) {
         SorterTagFilter filter = new SorterTagFilter();
         filter.setTagName(tag);
@@ -57,14 +57,14 @@ public class ComputerFilterHelper {
         return filter;
     }
 
-    @ComputerMethod(methodDescription = "Create an Oredictionificator filter from a tag, without specifying an output item")
+    @ComputerMethod(methodDescription = "Create an Oredictionificator filter from a tagSupplier, without specifying an output item")
     public static OredictionificatorItemFilter createOredictionificatorItemFilter(ResourceLocation filterTag) throws ComputerException {
         OredictionificatorItemFilter filter = new OredictionificatorItemFilter();
         filter.computerSetFilter(filterTag);
         return filter;
     }
 
-    @ComputerMethod(methodDescription = "Create an Oredictionificator filter from a tag and a selected output. The output is not validated.")
+    @ComputerMethod(methodDescription = "Create an Oredictionificator filter from a tagSupplier and a selected output. The output is not validated.")
     public static OredictionificatorItemFilter createOredictionificatorItemFilter(ResourceLocation filterTag, Item selectedOutput) throws ComputerException {
         OredictionificatorItemFilter filter = new OredictionificatorItemFilter();
         filter.computerSetFilter(filterTag);

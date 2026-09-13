@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "#mekanism:clumps/iron",
     "#mekanism:clumps/gold",

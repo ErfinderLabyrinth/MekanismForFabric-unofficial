@@ -1,7 +1,8 @@
 package mekanism.common.lib;
 
-import java.util.Locale;
 import net.minecraft.tags.TagKey;
+
+import java.util.Locale;
 
 public class WildcardMatcher {
 

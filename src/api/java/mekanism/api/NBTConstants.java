@@ -42,7 +42,7 @@ public final class NBTConstants {
     public static final String SCALE_ALT_2 = "scale2";
     public static final String SCALE_ALT_3 = "scale3";
     public static final String SOUND_SCALE = "soundScale";
-    public static final String TAG = "tag";
+    public static final String TAG = "tagSupplier";
     public static final String VALVE = "valve";
     public static final String VOLUME = "volume";
 
@@ -95,6 +95,7 @@ public final class NBTConstants {
      * @since 10.3.6
      */
     public static final String ENABLED = "enabled";
+    public static final String ENERGY_CONTAINER = "EnergyContainer";
     public static final String ENERGY_CONTAINERS = "EnergyContainers";
     public static final String ENERGY_STORED = "energy";
     public static final String ENERGY_USAGE = "energyUsage";

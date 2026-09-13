@@ -1,20 +1,10 @@
 package mekanism.common.tile.prefab;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
 import mekanism.api.IConfigurable;
 import mekanism.api.NBTConstants;
 import mekanism.api.providers.IBlockProvider;
-import mekanism.common.capabilities.Capabilities;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.lib.multiblock.FormationProtocol.FormationResult;
-import mekanism.common.lib.multiblock.IMultiblock;
-import mekanism.common.lib.multiblock.IStructuralMultiblock;
-import mekanism.common.lib.multiblock.MultiblockData;
-import mekanism.common.lib.multiblock.MultiblockManager;
-import mekanism.common.lib.multiblock.Structure;
+import mekanism.common.lib.multiblock.*;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -27,6 +17,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+
 public abstract class TileEntityStructuralMultiblock extends TileEntityMekanism implements IStructuralMultiblock, IConfigurable {
 
     private final Map<MultiblockManager<?>, Structure> structures = new HashMap<>();
@@ -37,7 +32,6 @@ public abstract class TileEntityStructuralMultiblock extends TileEntityMekanism 
 
     public TileEntityStructuralMultiblock(IBlockProvider provider, BlockPos pos, BlockState state) {
         super(provider, pos, state);
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIGURABLE, this));
     }
 
     @Override
@@ -200,8 +194,8 @@ public abstract class TileEntityStructuralMultiblock extends TileEntityMekanism 
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void load(@NotNull CompoundTag tag) {
+        super.load(tag);
         clientActiveMultiblock = tag.contains(NBTConstants.ACTIVE_STATE, Tag.TAG_STRING) ? tag.getString(NBTConstants.ACTIVE_STATE) : null;
     }
 

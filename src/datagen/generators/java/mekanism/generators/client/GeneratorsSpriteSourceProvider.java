@@ -3,18 +3,20 @@ package mekanism.generators.client;
 import mekanism.client.texture.BaseSpriteSourceProvider;
 import mekanism.generators.common.MekanismGenerators;
 import mekanism.generators.common.registries.GeneratorsFluids;
-import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.client.renderer.texture.atlas.SpriteSource;
+
+import java.util.List;
 
 public class GeneratorsSpriteSourceProvider extends BaseSpriteSourceProvider {
 
-    public GeneratorsSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-        super(output, MekanismGenerators.MODID, fileHelper);
+    public GeneratorsSpriteSourceProvider(FabricDataOutput output) {
+        super(output, MekanismGenerators.MODID);
     }
 
     @Override
     protected void addSources() {
-        SourceList atlas = atlas(BLOCKS_ATLAS);
+        List<SpriteSource> atlas = atlas(BLOCKS_ATLAS);
         addChemicalSprites(atlas);
         addFluids(atlas, GeneratorsFluids.FLUIDS);
     }

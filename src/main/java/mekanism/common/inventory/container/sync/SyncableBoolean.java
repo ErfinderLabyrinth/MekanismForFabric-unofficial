@@ -1,8 +1,9 @@
 package mekanism.common.inventory.container.sync;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import java.util.function.BooleanSupplier;
 import mekanism.common.network.to_client.container.property.BooleanPropertyData;
+
+import java.util.function.BooleanSupplier;
 
 /**
  * Version of {@link net.minecraft.world.inventory.DataSlot} for handling booleans

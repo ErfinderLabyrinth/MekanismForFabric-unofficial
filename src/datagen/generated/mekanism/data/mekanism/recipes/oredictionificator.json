@@ -2,19 +2,19 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:chests/wooden"
+      "tag": "c:wooden_chests"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "G": {
-      "tag": "forge:glass_panes"
+      "tag": "c:glass_panes"
     },
     "P": {
       "item": "mekanism:dictionary"
     },
     "S": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     }
   },
   "pattern": [

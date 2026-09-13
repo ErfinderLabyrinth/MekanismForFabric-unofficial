@@ -1,20 +1,17 @@
 package mekanism.common.lib.multiblock;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
 import mekanism.api.NBTConstants;
 import mekanism.common.lib.MekanismSavedData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.Supplier;
 
 public class MultiblockManager<T extends MultiblockData> {
 
@@ -136,19 +133,19 @@ public class MultiblockManager<T extends MultiblockData> {
     /**
      * Note: This should only be called from the server side
      */
-    public static void createOrLoadAll() {
+    public static void createOrLoadAll(MinecraftServer server) {
         for (MultiblockManager<?> manager : managers) {
-            manager.createOrLoad();
+            manager.createOrLoad(server);
         }
     }
 
     /**
      * Note: This should only be called from the server side
      */
-    private void createOrLoad() {
+    private void createOrLoad(MinecraftServer server) {
         if (dataHandler == null) {
             //Always associate the world with the overworld as we base it on a manager wide state
-            dataHandler = MekanismSavedData.createSavedData(MultiblockCacheDataHandler::new, getNameLower());
+            dataHandler = MekanismSavedData.createSavedData(MultiblockCacheDataHandler::new, getNameLower(), server);
         }
     }
 
@@ -176,8 +173,8 @@ public class MultiblockManager<T extends MultiblockData> {
             ListTag cachesNbt = new ListTag();
             for (Map.Entry<UUID, MultiblockCache<T>> entry : caches.entrySet()) {
                 CompoundTag cacheTags = new CompoundTag();
-                //Note: We can just store the inventory id in the same compound tag as the rest of the cache data
-                // as none of the caches save anything to this tag
+                //Note: We can just store the inventory id in the same compound tagSupplier as the rest of the cache data
+                // as none of the caches save anything to this tagSupplier
                 cacheTags.putUUID(NBTConstants.INVENTORY_ID, entry.getKey());
                 entry.getValue().save(cacheTags);
                 cachesNbt.add(cacheTags);

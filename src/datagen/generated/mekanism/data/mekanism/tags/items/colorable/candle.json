@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "minecraft:candle",
     "minecraft:white_candle",

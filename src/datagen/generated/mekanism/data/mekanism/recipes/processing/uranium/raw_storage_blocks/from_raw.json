@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:raw_materials/uranium"
+      "tag": "c:raw_uranium"
     },
     "P": {
       "item": "mekanism:raw_uranium"

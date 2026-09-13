@@ -1,6 +1,7 @@
 package mekanism.common.tile.multiblock;
 
 import mekanism.api.IContentsListener;
+import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.Mekanism;
 import mekanism.common.capabilities.heat.CachedAmbientTemperature;
@@ -11,8 +12,12 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class TileEntityBoilerCasing extends TileEntityMultiblock<BoilerMultiblockData> {
 
@@ -38,7 +43,17 @@ public class TileEntityBoilerCasing extends TileEntityMultiblock<BoilerMultibloc
     @NotNull
     @Override
     protected IHeatCapacitorHolder getInitialHeatCapacitors(IContentsListener listener, CachedAmbientTemperature ambientTemperature) {
-        return side -> getMultiblock().getHeatCapacitors(side);
+        return new IHeatCapacitorHolder() {
+            @Override
+            public @NotNull List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction side) {
+                return getMultiblock().getHeatCapacitors(side);
+            }
+
+            @Override
+            public List<IHeatCapacitor> getAll() {
+                return getHeatCapacitors(null);
+            }
+        };
     }
 
     @Override

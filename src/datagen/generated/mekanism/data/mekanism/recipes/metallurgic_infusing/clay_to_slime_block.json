@@ -2,7 +2,7 @@
   "type": "mekanism:metallurgic_infusing",
   "chemicalInput": {
     "amount": 40,
-    "tag": "mekanism:bio"
+    "tagSupplier": "mekanism:bio"
   },
   "itemInput": {
     "ingredient": {

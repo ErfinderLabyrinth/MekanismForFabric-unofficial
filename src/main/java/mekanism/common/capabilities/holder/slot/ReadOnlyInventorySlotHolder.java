@@ -1,12 +1,15 @@
 package mekanism.common.capabilities.holder.slot;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReadOnlyInventorySlotHolder implements IInventorySlotHolder {
 
@@ -19,11 +22,10 @@ public class ReadOnlyInventorySlotHolder implements IInventorySlotHolder {
         inventorySlots.add(slot);
     }
 
-    @NotNull
     @Override
-    public List<IInventorySlot> getInventorySlots(@Nullable Direction direction) {
+    public @NotNull Storage<ItemVariant> getInventorySlots(@Nullable Direction direction) {
         //Only expose the slots if it is internal
-        return direction == null ? inventorySlots : Collections.emptyList();
+        return direction == null ? new CombinedStorage<>(getAll()) : Storage.empty();
     }
 
     @Override
@@ -34,5 +36,10 @@ public class ReadOnlyInventorySlotHolder implements IInventorySlotHolder {
     @Override
     public boolean canExtract(@Nullable Direction direction) {
         return false;
+    }
+
+    @Override
+    public List<IInventorySlot> getAll() {
+        return inventorySlots;
     }
 }

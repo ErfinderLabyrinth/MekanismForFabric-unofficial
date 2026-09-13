@@ -1,24 +1,25 @@
 package mekanism.common.capabilities.chemical.item;
 
-import java.util.function.BiPredicate;
-import java.util.function.LongSupplier;
-import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.functions.ConstantPredicates;
+import mekanism.api.functions.TriPredicate;
 import mekanism.common.capabilities.GenericTankSpec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.TriPredicate;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.BiPredicate;
+import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 
 public class ChemicalTankSpec<CHEMICAL extends Chemical<CHEMICAL>> extends GenericTankSpec<CHEMICAL> {
 
-    final LongSupplier rate;
-    final LongSupplier capacity;
+    public final LongSupplier rate;
+    public final LongSupplier capacity;
 
     public ChemicalTankSpec(LongSupplier rate, LongSupplier capacity, BiPredicate<@NotNull CHEMICAL, @NotNull AutomationType> canExtract,
-          TriPredicate<@NotNull CHEMICAL, @NotNull AutomationType, @NotNull ItemStack> canInsert, Predicate<@NotNull CHEMICAL> isValid,
-          Predicate<@NotNull ItemStack> supportsStack) {
+                            TriPredicate<@NotNull CHEMICAL, @NotNull AutomationType, @NotNull ItemStack> canInsert, Predicate<@NotNull CHEMICAL> isValid,
+                            Predicate<@NotNull ItemStack> supportsStack) {
         super(canExtract, canInsert, isValid, supportsStack);
         this.rate = rate;
         this.capacity = capacity;

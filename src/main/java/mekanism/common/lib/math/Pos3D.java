@@ -58,11 +58,11 @@ public class Pos3D extends Vec3 {
     }
 
     /**
-     * Returns a new Pos3D from a tag compound.
+     * Returns a new Pos3D from a tagSupplier compound.
      *
-     * @param tag - tag compound to read from
+     * @param tag - tagSupplier compound to read from
      *
-     * @return the Pos3D from the tag compound
+     * @return the Pos3D from the tagSupplier compound
      */
     public static Pos3D read(CompoundTag tag) {
         return new Pos3D(tag.getDouble(NBTConstants.X), tag.getDouble(NBTConstants.Y), tag.getDouble(NBTConstants.Z));
@@ -90,9 +90,9 @@ public class Pos3D extends Vec3 {
     /**
      * Writes this Pos3D's data to an CompoundNBT.
      *
-     * @param nbtTags - tag compound to write to
+     * @param nbtTags - tagSupplier compound to write to
      *
-     * @return the tag compound with this Pos3D's data
+     * @return the tagSupplier compound with this Pos3D's data
      */
     public CompoundTag write(CompoundTag nbtTags) {
         nbtTags.putDouble(NBTConstants.X, x);

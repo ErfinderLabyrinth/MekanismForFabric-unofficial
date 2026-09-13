@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "mekanism:bounding_block",
     "mekanism:basic_energy_cube",

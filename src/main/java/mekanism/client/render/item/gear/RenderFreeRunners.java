@@ -5,14 +5,17 @@ import com.mojang.math.Axis;
 import mekanism.client.model.ModelArmoredFreeRunners;
 import mekanism.client.model.ModelFreeRunners;
 import mekanism.client.render.item.MekanismISTER;
+import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class RenderFreeRunners extends MekanismISTER {
-
+    public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "free_runners");
+    public static final ResourceLocation ID_ARMORED = new ResourceLocation(Mekanism.MODID, "armored_free_runners");
     public static final RenderFreeRunners RENDERER = new RenderFreeRunners(false);
     public static final RenderFreeRunners ARMORED_RENDERER = new RenderFreeRunners(true);
 
@@ -41,5 +44,10 @@ public class RenderFreeRunners extends MekanismISTER {
         matrix.translate(0, -1, 0);
         freeRunners.render(matrix, renderer, light, overlayLight, stack.hasFoil());
         matrix.popPose();
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return armored ? ID_ARMORED : ID;
     }
 }

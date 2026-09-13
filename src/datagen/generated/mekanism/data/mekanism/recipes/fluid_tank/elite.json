@@ -5,7 +5,7 @@
       "tag": "mekanism:alloys/reinforced"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "P": {
       "item": "mekanism:advanced_fluid_tank"

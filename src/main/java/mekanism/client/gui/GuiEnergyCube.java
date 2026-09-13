@@ -1,6 +1,6 @@
 package mekanism.client.gui;
 
-import java.util.List;
+import mekanism.api.math.FloatingLong;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.element.GuiSideHolder;
 import mekanism.client.gui.element.gauge.GaugeType;
@@ -15,6 +15,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class GuiEnergyCube extends GuiConfigurableTile<TileEntityEnergyCube, MekanismTileContainer<TileEntityEnergyCube>> {
 
@@ -35,7 +37,7 @@ public class GuiEnergyCube extends GuiConfigurableTile<TileEntityEnergyCube, Mek
         addRenderableWidget(GuiSideHolder.create(this, imageWidth, 36, 98, false, true, SpecialColors.TAB_ARMOR_SLOTS));
         super.addGuiElements();
         addRenderableWidget(new GuiEnergyGauge(tile.getEnergyContainer(), GaugeType.WIDE, this, 55, 18));
-        addRenderableWidget(new GuiEnergyTab(this, () -> List.of(MekanismLang.MATRIX_INPUT_RATE.translate(EnergyDisplay.of(tile.getInputRate())),
+        addRenderableWidget(new GuiEnergyTab(this, () -> List.of(MekanismLang.MATRIX_INPUT_RATE.translate(EnergyDisplay.of(FloatingLong.create(tile.getInputRate()))),
               MekanismLang.MAX_OUTPUT.translate(EnergyDisplay.of(tile.getTier().getOutput())))));
     }
 

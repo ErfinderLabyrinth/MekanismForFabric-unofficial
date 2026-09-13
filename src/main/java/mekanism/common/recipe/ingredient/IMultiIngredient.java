@@ -1,9 +1,10 @@
 package mekanism.common.recipe.ingredient;
 
-import java.util.List;
-import java.util.function.Predicate;
 import mekanism.api.recipes.ingredients.InputIngredient;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.function.Predicate;
 
 public interface IMultiIngredient<TYPE, INGREDIENT extends InputIngredient<@NotNull TYPE>> extends InputIngredient<@NotNull TYPE> {
 

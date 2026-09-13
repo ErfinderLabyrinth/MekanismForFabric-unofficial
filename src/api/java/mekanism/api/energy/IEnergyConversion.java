@@ -28,12 +28,12 @@ public interface IEnergyConversion extends IHasTranslationKey {
      *
      * @implNote This method will short circuit for zero or negative values as Joules are always positive.
      */
-    default FloatingLong convertFrom(long energy) {
+    default long convertFrom(long energy) {
         if (energy <= 0) {
             //Short circuit if energy is zero to avoid having to create any additional objects
-            return FloatingLong.ZERO;
+            return 0;
         }
-        return convertInPlaceFrom(FloatingLong.create(energy));
+        return convertInPlaceFrom(energy);
     }
 
     /**
@@ -57,7 +57,7 @@ public interface IEnergyConversion extends IHasTranslationKey {
      * @implNote This method will attempt to modify the passed in FloatingLong and return it.
      * @apiNote It is recommended to set this to itself to reduce the chance of accidental calls if calling this on a constant {@link FloatingLong}.
      */
-    FloatingLong convertInPlaceFrom(FloatingLong energy);
+    long convertInPlaceFrom(long energy);
 
     /**
      * Helper that converts Joules to the energy of the type represented by this conversion and returns it as an int.
@@ -66,19 +66,8 @@ public interface IEnergyConversion extends IHasTranslationKey {
      *
      * @return Amount of energy clamped to an int. (Units matching this conversion)
      */
-    default int convertToAsInt(FloatingLong joules) {
-        return convertTo(joules).intValue();
-    }
-
-    /**
-     * Helper that converts Joules to the energy of the type represented by this conversion and returns it as a long.
-     *
-     * @param joules Joules. (This object will not be modified)
-     *
-     * @return Amount of energy clamped to a long. (Units matching this conversion)
-     */
-    default long convertToAsLong(FloatingLong joules) {
-        return convertTo(joules).longValue();
+    default int convertToAsInt(long joules) {
+        return (int) convertTo(joules);
     }
 
     /**
@@ -90,7 +79,7 @@ public interface IEnergyConversion extends IHasTranslationKey {
      *
      * @implNote This method will return a new FloatingLong.
      */
-    FloatingLong convertTo(FloatingLong joules);
+    long convertTo(long joules);
 
     /**
      * Converts Joules to the energy of the type represented by this conversion.
@@ -102,5 +91,5 @@ public interface IEnergyConversion extends IHasTranslationKey {
      * @implNote This method will attempt to modify the passed in FloatingLong and return it.
      * @apiNote It is recommended to set this to itself to reduce the chance of accidental calls if calling this on a constant {@link FloatingLong}.
      */
-    FloatingLong convertInPlaceTo(FloatingLong joules);
+    long convertInPlaceTo(long joules);
 }

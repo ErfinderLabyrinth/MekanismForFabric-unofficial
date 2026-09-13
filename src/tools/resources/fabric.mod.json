@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "mekanismtools",
+  "version": "${mod_version}",
+  "name": "MekanismForFabric: Tools",
+  "description": "Tools module for Mekanism",
+  "authors": [
+    "Erfinderlabyrinth",
+    "skippyall",
+    "Aidancbrady",
+    "Thommy101",
+    "Thiakil",
+    "pupnewfster",
+    "dizzyd"
+  ],
+  "contributors": [
+    "unpairedbracket",
+    "CyanideX",
+    "Ridanisaurus"
+  ],
+  "contact": {
+    "repo": "https://github.com/Erfinderlabyrinth/MekanismForFabric"
+  },
+  "license": "MIT",
+  "icon": "logo_square.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "mekanism.tools.client.ToolsClientRegistration"
+    ],
+    "main": [
+      "mekanism.tools.common.MekanismTools"
+    ],
+    "fabric-datagen": [
+      "mekanism.tools.common.ToolsDataGenerator"
+    ],
+    "modmenu": [
+      "mekanism.tools.client.integration.modmenu.ToolsModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "mekanismtools.mixins.json",
+    "mekanismtools-client.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "mekanism": "${mod_version}"
+  }
+}

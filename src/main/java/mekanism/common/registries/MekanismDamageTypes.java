@@ -1,8 +1,5 @@
 package mekanism.common.registries;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import mekanism.api.text.IHasTranslationKey;
 import mekanism.common.Mekanism;
 import net.minecraft.core.RegistryAccess;
@@ -13,6 +10,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MekanismDamageTypes {
 

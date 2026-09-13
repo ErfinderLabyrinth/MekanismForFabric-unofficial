@@ -1,13 +1,5 @@
 package mekanism.common.tile.component;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
@@ -24,9 +16,13 @@ import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.UpgradeUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.*;
 
 //TODO: Clean this up as a lot of the code can probably be reduced due to the slot knowing some of that information
 public class TileComponentUpgrade implements ITileComponent, ISpecificContainerTracker {
@@ -71,7 +67,7 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
                 } else if (upgradeTicks == UPGRADE_TICKS_REQUIRED) {
                     int added = addUpgrades(type, upgradeSlot.getCount());
                     if (added > 0) {
-                        MekanismUtils.logMismatchedStackSize(upgradeSlot.shrinkStack(added, Action.EXECUTE), added);
+                        MekanismUtils.logMismatchedStackSize(upgradeSlot.shrinkStack(added), added);
                     }
                 }
             }
@@ -127,18 +123,19 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
         int installed = getUpgrades(upgrade);
         if (installed > 0) {
             int toRemove = removeAll ? installed : 1;
-            ItemStack simulatedRemainder = upgradeOutputSlot.insertItem(UpgradeUtils.getStack(upgrade, toRemove), Action.SIMULATE, AutomationType.INTERNAL);
-            if (simulatedRemainder.getCount() < toRemove) {
-                //We can fit at least one in the output slot
-                //Actually remove them and put them in the output slot
-                toRemove -= simulatedRemainder.getCount();
-                if (installed == toRemove) {
-                    upgrades.remove(upgrade);
-                } else {
-                    upgrades.put(upgrade, installed - toRemove);
+            try(Transaction t=Transaction.openOuter()) {
+                toRemove = (int)upgradeOutputSlot.insert(ItemVariant.of(UpgradeUtils.getItem(upgrade)), toRemove, t);
+                if (toRemove != 0) {
+                    //We can fit at least one in the output slot
+                    //Actually remove them and put them in the output slot
+                    if (installed == toRemove) {
+                        upgrades.remove(upgrade);
+                    } else {
+                        upgrades.put(upgrade, installed - toRemove);
+                    }
+                    tile.recalculateUpgrades(upgrade);
+                    t.commit();
                 }
-                tile.recalculateUpgrades(upgrade);
-                upgradeOutputSlot.insertItem(UpgradeUtils.getStack(upgrade, toRemove), Action.EXECUTE, AutomationType.INTERNAL);
             }
         }
     }

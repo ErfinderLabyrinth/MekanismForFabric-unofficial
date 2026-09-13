@@ -40,12 +40,12 @@ public interface IChemicalStackIngredientCreator<CHEMICAL extends Chemical<CHEMI
     }
 
     /**
-     * Creates a Chemical Stack Ingredient that matches a given chemical tag and amount.
+     * Creates a Chemical Stack Ingredient that matches a given chemical tagSupplier and amount.
      *
      * @param tag    Tag to match.
      * @param amount Amount needed.
      *
-     * @throws NullPointerException     if the given tag is null.
+     * @throws NullPointerException     if the given tagSupplier is null.
      * @throws IllegalArgumentException if the given amount smaller than one.
      */
     INGREDIENT from(TagKey<CHEMICAL> tag, long amount);

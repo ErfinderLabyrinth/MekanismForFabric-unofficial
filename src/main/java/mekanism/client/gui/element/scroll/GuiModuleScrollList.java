@@ -1,10 +1,5 @@
 package mekanism.client.gui.element.scroll;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.ObjIntConsumer;
-import java.util.function.Supplier;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.gear.ModuleData;
@@ -25,6 +20,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.ObjIntConsumer;
+import java.util.function.Supplier;
 
 public class GuiModuleScrollList extends GuiScrollList {
 

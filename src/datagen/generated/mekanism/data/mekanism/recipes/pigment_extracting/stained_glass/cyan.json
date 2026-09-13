@@ -2,7 +2,7 @@
   "type": "mekanism:pigment_extracting",
   "input": {
     "ingredient": {
-      "tag": "forge:glass/cyan"
+      "item": "minecraft:cyan_stained_glass"
     }
   },
   "output": {

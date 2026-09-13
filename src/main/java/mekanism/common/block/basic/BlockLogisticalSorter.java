@@ -1,5 +1,6 @@
 package mekanism.common.block.basic;
 
+import mekanism.api.radiation.IRadiationManager;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.prefab.BlockTile.BlockTileModel;
@@ -46,11 +47,11 @@ public class BlockLogisticalSorter extends BlockTileModel<TileEntityLogisticalSo
         BlockPos pos = context.getClickedPos();
         BlockEntity back = WorldUtils.getTileEntity(level, pos.relative(oppositeDirection));
         //Note: Check ItemHandler instead of acceptor as the back face cannot connect to transporters
-        if (!InventoryUtils.isItemHandler(back, oppositeDirection)) {
+        if (!InventoryUtils.isItemHandler(back.getLevel(), back.getBlockPos(), oppositeDirection)) {
             for (Direction dir : EnumUtils.DIRECTIONS) {
                 if (dir != oppositeDirection) {//Skip the side we already know is not a valid acceptor
                     BlockEntity neighbor = WorldUtils.getTileEntity(level, pos.relative(dir));
-                    if (InventoryUtils.isItemHandler(neighbor, dir)) {
+                    if (InventoryUtils.isItemHandler(neighbor.getLevel(), neighbor.getBlockPos(), dir)) {
                         state = Attribute.setFacing(state, dir.getOpposite());
                         break;
                     }
@@ -69,7 +70,7 @@ public class BlockLogisticalSorter extends BlockTileModel<TileEntityLogisticalSo
         if (tile == null) {
             return InteractionResult.PASS;
         } else if (world.isClientSide) {
-            return genericClientActivated(player, hand);
+            return genericClientActivated(player, hand, tile);
         }
         //TODO: Make this be moved into the logistical sorter tile
         ItemStack stack = player.getItemInHand(hand);
@@ -78,14 +79,18 @@ public class BlockLogisticalSorter extends BlockTileModel<TileEntityLogisticalSo
                 return InteractionResult.FAIL;
             }
             if (player.isShiftKeyDown()) {
-                WorldUtils.dismantleBlock(state, world, pos);
+                if (IRadiationManager.INSTANCE.isRadiationEnabled() && tile.getRadiationScale() > 0) {
+                    //Note: This should always be false for the logistical sorter, but we keep it here for good measure
+                    return InteractionResult.FAIL;
+                }
+                WorldUtils.dismantleBlock(state, world, pos, player);
                 return InteractionResult.SUCCESS;
             }
             Direction change = tile.getDirection().getClockWise();
             if (!tile.hasConnectedInventory()) {
                 for (Direction dir : EnumUtils.DIRECTIONS) {
                     BlockEntity tileEntity = WorldUtils.getTileEntity(world, pos.relative(dir));
-                    if (InventoryUtils.isItemHandler(tileEntity, dir)) {
+                    if (InventoryUtils.isItemHandler(tileEntity.getLevel(), tileEntity.getBlockPos(), dir)) {
                         change = dir.getOpposite();
                         break;
                     }
@@ -107,7 +112,7 @@ public class BlockLogisticalSorter extends BlockTileModel<TileEntityLogisticalSo
             TileEntityLogisticalSorter sorter = WorldUtils.getTileEntity(TileEntityLogisticalSorter.class, world, pos);
             if (sorter != null && !sorter.hasConnectedInventory()) {
                 BlockEntity tileEntity = WorldUtils.getTileEntity(world, neighborPos);
-                if (InventoryUtils.isItemHandler(tileEntity, dir)) {
+                if (InventoryUtils.isItemHandler(tileEntity.getLevel(), tileEntity.getBlockPos(), dir)) {
                     sorter.setFacing(dir.getOpposite());
                     state = sorter.getBlockState();
                 }

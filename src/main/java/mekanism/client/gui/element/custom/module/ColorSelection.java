@@ -1,7 +1,5 @@
 package mekanism.client.gui.element.custom.module;
 
-import java.util.Optional;
-import java.util.function.Consumer;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.config.ModuleColorData;
 import mekanism.client.gui.GuiModuleTweaker;
@@ -21,6 +19,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
+import java.util.function.Consumer;
 
 class ColorSelection extends MiniElement {
 

@@ -1,8 +1,10 @@
 package mekanism.common.item.interfaces;
 
-import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 public interface IDroppableContents {
 
@@ -15,5 +17,5 @@ public interface IDroppableContents {
      *
      * @apiNote Server side only.
      */
-    List<IInventorySlot> getDroppedSlots(ItemStack stack);
+    List<IInventorySlot> getDroppedSlots(ItemStack stack, MinecraftServer server);
 }

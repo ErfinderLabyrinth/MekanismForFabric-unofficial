@@ -1,11 +1,12 @@
 package mekanism.common.tile.multiblock;
 
-import java.util.UUID;
 import mekanism.common.content.boiler.BoilerMultiblockData;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.prefab.TileEntityInternalMultiblock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.UUID;
 
 public class TileEntitySuperheatingElement extends TileEntityInternalMultiblock {
 

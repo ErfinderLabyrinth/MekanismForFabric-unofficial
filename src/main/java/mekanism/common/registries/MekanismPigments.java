@@ -1,13 +1,14 @@
 package mekanism.common.registries;
 
-import java.util.EnumMap;
-import java.util.Map;
 import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.text.EnumColor;
 import mekanism.common.Mekanism;
 import mekanism.common.registration.impl.PigmentDeferredRegister;
 import mekanism.common.registration.impl.PigmentRegistryObject;
 import mekanism.common.util.EnumUtils;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class MekanismPigments {
 

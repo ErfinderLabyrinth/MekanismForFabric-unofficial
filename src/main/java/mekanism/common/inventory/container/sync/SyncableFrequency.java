@@ -1,11 +1,12 @@
 package mekanism.common.inventory.container.sync;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import mekanism.common.lib.frequency.Frequency;
 import mekanism.common.network.to_client.container.property.FrequencyPropertyData;
 import mekanism.common.network.to_client.container.property.PropertyData;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Version of {@link net.minecraft.world.inventory.DataSlot} for handling frequencies

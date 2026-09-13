@@ -1,7 +1,8 @@
 package mekanism.api.gear.config;
 
-import java.util.function.BooleanSupplier;
 import mekanism.api.text.ILangEntry;
+
+import java.util.function.BooleanSupplier;
 
 /**
  * Helper to create {@link IModuleConfigItem}s.

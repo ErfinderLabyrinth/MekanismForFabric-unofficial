@@ -2,10 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:nether_stars"
+      "tag": "c:nether_stars"
     },
     "A": {
-      "tag": "forge:alloys/ultimate"
+      "tag": "c:ultimate_alloys"
     },
     "E": {
       "item": "mekanism:ultimate_induction_provider"

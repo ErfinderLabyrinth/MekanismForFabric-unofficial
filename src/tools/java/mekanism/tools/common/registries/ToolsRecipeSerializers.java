@@ -17,4 +17,8 @@ public class ToolsRecipeSerializers {
 
     public static final RecipeSerializerRegistryObject<MekBannerShieldRecipe> BANNER_SHIELD = RECIPE_SERIALIZERS.register("banner_shield", () -> new SimpleCraftingRecipeSerializer<>(MekBannerShieldRecipe::new));
     public static final RecipeSerializerRegistryObject<PaxelRecipe> PAXEL = RECIPE_SERIALIZERS.register("paxel", () -> new WrappedShapedRecipeSerializer<>(PaxelRecipe::new));
+
+    public static void register() {
+
+    }
 }

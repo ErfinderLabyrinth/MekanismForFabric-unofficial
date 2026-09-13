@@ -2,18 +2,20 @@ package mekanism.additions.client;
 
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.client.texture.BaseSpriteSourceProvider;
-import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.client.renderer.texture.atlas.SpriteSource;
+
+import java.util.List;
 
 public class AdditionsSpriteSourceProvider extends BaseSpriteSourceProvider {
 
-    public AdditionsSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-        super(output, MekanismAdditions.MODID, fileHelper);
+    public AdditionsSpriteSourceProvider(FabricDataOutput output) {
+        super(output, MekanismAdditions.MODID);
     }
 
     @Override
     protected void addSources() {
-        SourceList atlas = atlas(BLOCKS_ATLAS);
+        List<SpriteSource> atlas = atlas(BLOCKS_ATLAS);
         addFiles(atlas, MekanismAdditions.rl("entity/balloon"), MekanismAdditions.rl("entity/balloon_string"));
     }
 }

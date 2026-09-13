@@ -26,8 +26,8 @@
                 },
                 {
                   "op": "replace",
-                  "source": "EnergyContainers",
-                  "target": "mekData.EnergyContainers"
+                  "source": "EnergyContainer",
+                  "target": "mekData.EnergyContainer"
                 },
                 {
                   "op": "replace",
@@ -41,9 +41,7 @@
           "name": "mekanism:laser_tractor_beam"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/laser_tractor_beam"
+  ]
 }

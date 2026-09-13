@@ -7,12 +7,12 @@
   "itemInput": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:raw_materials/iron"
+      "tag": "c:raw_iron_ores"
     }
   },
   "output": {
     "amount": 2000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_iron"
+    "slurry": "minecraft:dirty_iron"
   }
 }

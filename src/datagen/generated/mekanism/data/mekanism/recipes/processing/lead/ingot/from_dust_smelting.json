@@ -3,7 +3,7 @@
   "cookingtime": 200,
   "experience": 0.3,
   "ingredient": {
-    "tag": "forge:dusts/lead"
+    "tag": "c:lead_dusts"
   },
   "result": "mekanism:ingot_lead"
 }

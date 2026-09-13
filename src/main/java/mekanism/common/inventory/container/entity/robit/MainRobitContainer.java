@@ -1,8 +1,5 @@
 package mekanism.common.inventory.container.entity.robit;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
 import mekanism.api.MekanismAPI;
 import mekanism.api.robit.RobitSkin;
 import mekanism.common.entity.EntityRobit;
@@ -13,6 +10,10 @@ import mekanism.common.registries.MekanismContainerTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class MainRobitContainer extends RobitContainer implements ISpecificContainerTracker {
 

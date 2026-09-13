@@ -3,8 +3,6 @@ package mekanism.client.gui.item;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import java.util.ArrayList;
-import java.util.List;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.GuiArrowSelection;
@@ -17,6 +15,8 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.item.SeismicReaderContainer;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -24,14 +24,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BubbleColumnBlock;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.fluids.IFluidBlock;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiSeismicReader extends GuiMekanism<SeismicReaderContainer> {
 
@@ -101,21 +100,16 @@ public class GuiSeismicReader extends GuiMekanism<SeismicReaderContainer> {
                 ItemStack stack = new ItemStack(state.getBlock());
                 RenderTarget renderTarget;
                 if (stack.isEmpty()) {
-                    Fluid fluid = Fluids.EMPTY;
-                    if (state.getBlock() instanceof LiquidBlock liquidBlock) {
-                        fluid = liquidBlock.getFluid();
-                    } else if (state.getBlock() instanceof IFluidBlock fluidBlock) {
-                        fluid = fluidBlock.getFluid();
-                    } else if (state.getBlock() instanceof BubbleColumnBlock bubbleColumn) {
-                        fluid = bubbleColumn.getFluidState(state).getType();
-                    }
+                    Fluid fluid;
+                    fluid = state.getFluidState().getType();
+
                     if (fluid == Fluids.EMPTY) {
                         continue;
                     }
-                    IClientFluidTypeExtensions properties = IClientFluidTypeExtensions.of(fluid);
+
                     renderTarget = (graphics, x, y) -> {
-                        MekanismRenderer.color(guiGraphics, properties.getTintColor());
-                        TextureAtlasSprite texture = MekanismRenderer.getSprite(properties.getStillTexture());
+                        MekanismRenderer.color(guiGraphics, FluidVariantRendering.getColor(FluidVariant.of(fluid)));
+                        TextureAtlasSprite texture = FluidVariantRendering.getSprites(FluidVariant.of(fluid))[0];
                         guiGraphics.blit(x, y, 0, 16, 16, texture);
                         MekanismRenderer.resetColor(guiGraphics);
                     };

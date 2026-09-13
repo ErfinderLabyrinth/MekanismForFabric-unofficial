@@ -1,16 +1,8 @@
 package mekanism.common.content.network.transmitter;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.NBTConstants;
 import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.energy.IMekanismStrictEnergyHandler;
-import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.math.FloatingLong;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.block.attribute.Attribute;
@@ -24,27 +16,42 @@ import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.upgrade.transmitter.TransmitterUpgradeData;
 import mekanism.common.upgrade.transmitter.UniversalCableUpgradeData;
 import mekanism.common.util.NBTUtils;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
-public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, EnergyNetwork, FloatingLong, UniversalCable> implements IMekanismStrictEnergyHandler,
+import java.util.*;
+
+public class UniversalCable extends BufferedTransmitter<EnergyStorage, EnergyNetwork, Long, UniversalCable> implements IMekanismStrictEnergyHandler,
       IUpgradeableTransmitter<UniversalCableUpgradeData> {
 
     public final CableTier tier;
 
     private final List<IEnergyContainer> energyContainers;
     public final BasicEnergyContainer buffer;
-    public FloatingLong lastWrite = FloatingLong.ZERO;
+    public long lastWrite = 0;
 
     public UniversalCable(IBlockProvider blockProvider, TileEntityTransmitter tile) {
         super(tile, TransmissionType.ENERGY);
         this.tier = Attribute.getTier(blockProvider, CableTier.class);
-        buffer = BasicEnergyContainer.create(getCapacityAsFloatingLong(), BasicEnergyContainer.alwaysFalse, BasicEnergyContainer.alwaysTrue, this);
+        buffer = BasicEnergyContainer.create(getCapacity(), BasicEnergyContainer.alwaysFalse, BasicEnergyContainer.alwaysTrue, this);
         energyContainers = Collections.singletonList(buffer);
+    }
+
+    public List<IEnergyContainer> getEnergyContainers() {
+        return energyContainers;
+    }
+
+    @Override
+    protected BlockApiLookup<EnergyStorage, Direction> getAcceptorCacheLookup() {
+        return null;
     }
 
     @Override
@@ -66,31 +73,35 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
     public void pullFromAcceptors() {
         Set<Direction> connections = getConnections(ConnectionType.PULL);
         if (!connections.isEmpty()) {
-            for (IStrictEnergyHandler connectedAcceptor : getAcceptorCache().getConnectedAcceptors(connections)) {
-                FloatingLong received = connectedAcceptor.extractEnergy(getAvailablePull(), Action.SIMULATE);
-                if (!received.isZero() && takeEnergy(received, Action.SIMULATE).isZero()) {
-                    //If we received some energy and are able to insert it all
-                    FloatingLong remainder = takeEnergy(received, Action.EXECUTE);
-                    connectedAcceptor.extractEnergy(received.subtract(remainder), Action.EXECUTE);
+            for (EnergyStorage connectedAcceptor : getAcceptorCache().getConnectedAcceptors(connections)) {
+                long received;
+                try(Transaction t=Transaction.openOuter()) {
+                    received = connectedAcceptor.extract(getAvailablePull(), t);
+                }
+                try(Transaction t = Transaction.openOuter()) {
+                    if (received != 0 && takeEnergy(received, t) == received) {
+                        //If we received some energy and are able to insert it all
+                        connectedAcceptor.extract(received, t);
+                        t.commit();
+                    }
                 }
             }
         }
     }
 
-    private FloatingLong getAvailablePull() {
+    private long getAvailablePull() {
         if (hasTransmitterNetwork()) {
-            return getCapacityAsFloatingLong().min(getTransmitterNetwork().energyContainer.getNeeded());
+            return Long.min(getCapacity(), getTransmitterNetwork().energyContainer.getNeeded());
         }
-        return getCapacityAsFloatingLong().min(buffer.getNeeded());
+        return Long.min(getCapacity(), buffer.getNeeded());
     }
 
-    @NotNull
     @Override
-    public List<IEnergyContainer> getEnergyContainers(@Nullable Direction side) {
+    public EnergyStorage getEnergyContainer(@Nullable Direction side) {
         if (hasTransmitterNetwork()) {
-            return getTransmitterNetwork().getEnergyContainers(side);
+            return getTransmitterNetwork().getEnergyContainer(side);
         }
-        return energyContainers;
+        return energyContainers.get(0);
     }
 
     @Override
@@ -121,12 +132,12 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
         super.read(nbtTags);
         if (nbtTags.contains(NBTConstants.ENERGY_STORED, Tag.TAG_STRING)) {
             try {
-                lastWrite = FloatingLong.parseFloatingLong(nbtTags.getString(NBTConstants.ENERGY_STORED));
+                lastWrite = nbtTags.getLong(NBTConstants.ENERGY_STORED);
             } catch (NumberFormatException e) {
-                lastWrite = FloatingLong.ZERO;
+                lastWrite = 0;
             }
         } else {
-            lastWrite = FloatingLong.ZERO;
+            lastWrite = 0;
         }
         buffer.setEnergy(lastWrite);
     }
@@ -138,54 +149,54 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
         if (hasTransmitterNetwork()) {
             getTransmitterNetwork().validateSaveShares(this);
         }
-        if (lastWrite.isZero()) {
+        if (lastWrite == 0) {
             nbtTags.remove(NBTConstants.ENERGY_STORED);
         } else {
-            nbtTags.putString(NBTConstants.ENERGY_STORED, lastWrite.toString());
+            nbtTags.putLong(NBTConstants.ENERGY_STORED, lastWrite);
         }
         return nbtTags;
     }
 
     @Override
     public EnergyNetwork createNetworkByMerging(Collection<EnergyNetwork> networks) {
-        return new EnergyNetwork(networks);
+        return new EnergyNetwork(networks, getTileWorld());
     }
 
     @Override
-    public boolean isValidAcceptor(BlockEntity tile, Direction side) {
-        return super.isValidAcceptor(tile, side) && getAcceptorCache().hasStrictEnergyHandlerAndListen(tile, side);
+    public boolean isValidAcceptor(Level level, BlockPos pos, Direction side) {
+        return super.isValidAcceptor(level, pos, side) && getAcceptorCache().hasStrictEnergyHandlerAndListen(level, pos, side);
     }
 
     @Override
     public EnergyNetwork createEmptyNetworkWithID(UUID networkID) {
-        return new EnergyNetwork(networkID);
+        return new EnergyNetwork(networkID, getTileWorld());
     }
 
     @NotNull
     @Override
-    public FloatingLong releaseShare() {
-        FloatingLong energy = buffer.getEnergy();
+    public Long releaseShare() {
+        long energy = buffer.getEnergy();
         buffer.setEmpty();
         return energy;
     }
 
     @NotNull
     @Override
-    public FloatingLong getShare() {
+    public Long getShare() {
         return buffer.getEnergy();
     }
 
     @Override
     public boolean noBufferOrFallback() {
-        return getBufferWithFallback().isZero();
+        return getBufferWithFallback() == 0;
     }
 
     @NotNull
     @Override
-    public FloatingLong getBufferWithFallback() {
-        FloatingLong buffer = getShare();
+    public Long getBufferWithFallback() {
+        long buffer = getShare();
         //If we don't have a buffer try falling back to the network's buffer
-        if (buffer.isZero() && hasTransmitterNetwork()) {
+        if (buffer == 0 && hasTransmitterNetwork()) {
             return getTransmitterNetwork().getBuffer();
         }
         return buffer;
@@ -195,8 +206,8 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
     public void takeShare() {
         if (hasTransmitterNetwork()) {
             EnergyNetwork transmitterNetwork = getTransmitterNetwork();
-            if (!transmitterNetwork.energyContainer.isEmpty() && !lastWrite.isZero()) {
-                transmitterNetwork.energyContainer.setEnergy(transmitterNetwork.energyContainer.getEnergy().subtract(lastWrite));
+            if (!transmitterNetwork.energyContainer.isEmpty() && lastWrite != 0) {
+                transmitterNetwork.energyContainer.setEnergy(transmitterNetwork.energyContainer.getEnergy() - lastWrite);
                 buffer.setEnergy(lastWrite);
             }
         }
@@ -215,17 +226,17 @@ public class UniversalCable extends BufferedTransmitter<IStrictEnergyHandler, En
     /**
      * @return remainder
      */
-    private FloatingLong takeEnergy(FloatingLong amount, Action action) {
+    private long takeEnergy(long amount, Transaction t) {
         if (hasTransmitterNetwork()) {
-            return getTransmitterNetwork().energyContainer.insert(amount, action, AutomationType.INTERNAL);
+            return getTransmitterNetwork().energyContainer.insert(amount, t);
         }
-        return buffer.insert(amount, action, AutomationType.INTERNAL);
+        return buffer.insert(amount, t);
     }
 
     @Override
     protected void handleContentsUpdateTag(@NotNull EnergyNetwork network, @NotNull CompoundTag tag) {
         super.handleContentsUpdateTag(network, tag);
-        NBTUtils.setFloatingLongIfPresent(tag, NBTConstants.ENERGY_STORED, network.energyContainer::setEnergy);
+        NBTUtils.setLongIfPresent(tag, NBTConstants.ENERGY_STORED, network.energyContainer::setEnergy);
         NBTUtils.setFloatIfPresent(tag, NBTConstants.SCALE, scale -> network.currentScale = scale);
     }
 }

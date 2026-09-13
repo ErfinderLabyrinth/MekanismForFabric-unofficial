@@ -261,7 +261,7 @@ public class ChemicalTankBuilder<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
               Predicate<@NotNull CHEMICAL> validator, @Nullable ChemicalAttributeValidator attributeValidator, @Nullable IContentsListener listener);
     }
 
-    public static class BasicGasTank extends BasicChemicalTank<Gas, GasStack> implements IGasHandler, IGasTank {
+    public static class BasicGasTank extends BasicChemicalTank<Gas, GasStack, IGasTank> implements IGasHandler, IGasTank {
 
         protected BasicGasTank(long capacity, BiPredicate<@NotNull Gas, @NotNull AutomationType> canExtract, BiPredicate<@NotNull Gas, @NotNull AutomationType> canInsert,
               Predicate<@NotNull Gas> validator, @Nullable ChemicalAttributeValidator attributeValidator, @Nullable IContentsListener listener) {
@@ -269,7 +269,7 @@ public class ChemicalTankBuilder<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
         }
     }
 
-    public static class BasicInfusionTank extends BasicChemicalTank<InfuseType, InfusionStack> implements IInfusionHandler, IInfusionTank {
+    public static class BasicInfusionTank extends BasicChemicalTank<InfuseType, InfusionStack, IInfusionTank> implements IInfusionHandler, IInfusionTank {
 
         protected BasicInfusionTank(long capacity, BiPredicate<@NotNull InfuseType, @NotNull AutomationType> canExtract,
               BiPredicate<@NotNull InfuseType, @NotNull AutomationType> canInsert, Predicate<@NotNull InfuseType> validator,
@@ -278,7 +278,7 @@ public class ChemicalTankBuilder<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
         }
     }
 
-    public static class BasicPigmentTank extends BasicChemicalTank<Pigment, PigmentStack> implements IPigmentHandler, IPigmentTank {
+    public static class BasicPigmentTank extends BasicChemicalTank<Pigment, PigmentStack, IPigmentTank> implements IPigmentHandler, IPigmentTank {
 
         protected BasicPigmentTank(long capacity, BiPredicate<@NotNull Pigment, @NotNull AutomationType> canExtract,
               BiPredicate<@NotNull Pigment, @NotNull AutomationType> canInsert, Predicate<@NotNull Pigment> validator,
@@ -287,7 +287,7 @@ public class ChemicalTankBuilder<CHEMICAL extends Chemical<CHEMICAL>, STACK exte
         }
     }
 
-    public static class BasicSlurryTank extends BasicChemicalTank<Slurry, SlurryStack> implements ISlurryHandler, ISlurryTank {
+    public static class BasicSlurryTank extends BasicChemicalTank<Slurry, SlurryStack, ISlurryTank> implements ISlurryHandler, ISlurryTank {
 
         protected BasicSlurryTank(long capacity, BiPredicate<@NotNull Slurry, @NotNull AutomationType> canExtract,
               BiPredicate<@NotNull Slurry, @NotNull AutomationType> canInsert, Predicate<@NotNull Slurry> validator,

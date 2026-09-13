@@ -7,7 +7,7 @@
   },
   "mainInput": {
     "ingredient": {
-      "tag": "forge:crops/wheat"
+      "tag": "c:wheat"
     }
   },
   "output": {

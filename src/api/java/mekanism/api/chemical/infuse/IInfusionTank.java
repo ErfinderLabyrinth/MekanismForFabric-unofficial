@@ -18,6 +18,11 @@ public interface IInfusionTank extends IChemicalTank<InfuseType, InfusionStack>,
     }
 
     @Override
+    default InfusionStack createStack(InfuseType infuseType, long size) {
+        return new InfusionStack(infuseType, size);
+    }
+
+    @Override
     default void deserializeNBT(CompoundTag nbt) {
         if (nbt.contains(NBTConstants.STORED, Tag.TAG_COMPOUND)) {
             setStackUnchecked(InfusionStack.readFromNBT(nbt.getCompound(NBTConstants.STORED)));

@@ -1,13 +1,8 @@
 {
     "parent": "minecraft:item/generated",
-    "loader": "forge:item_layers",
-    "forge_data": {
-        "layers": {
-            "1": {
-                "block_light": 15,
-                "sky_light": 15
-            }
-        }
+    "loader": "mekanism:item_layers",
+    "mekanism_data": {
+        "full_light_layers": [1]
     },
     "textures": {
         "layer0": "mekanism:item/portable_qio_dashboard",

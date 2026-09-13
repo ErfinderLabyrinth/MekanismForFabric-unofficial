@@ -1,6 +1,5 @@
 package mekanism.common.block.attribute;
 
-import java.util.List;
 import mekanism.api.IIncrementalEnum;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.math.MathUtils;
@@ -15,6 +14,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class AttributeStateBoilerValveMode implements AttributeState {
 

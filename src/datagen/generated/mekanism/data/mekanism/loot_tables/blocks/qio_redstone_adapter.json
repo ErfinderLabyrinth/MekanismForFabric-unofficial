@@ -61,9 +61,7 @@
           "name": "mekanism:qio_redstone_adapter"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/qio_redstone_adapter"
+  ]
 }

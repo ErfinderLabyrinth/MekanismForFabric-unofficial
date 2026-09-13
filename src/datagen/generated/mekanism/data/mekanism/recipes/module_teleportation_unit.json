@@ -5,10 +5,10 @@
       "item": "mekanism:teleportation_core"
     },
     "A": {
-      "tag": "forge:alloys/ultimate"
+      "tag": "c:ultimate_alloys"
     },
     "H": {
-      "tag": "forge:pellets/antimatter"
+      "tag": "c:antimatter_pellets"
     },
     "P": {
       "item": "mekanism:module_base"

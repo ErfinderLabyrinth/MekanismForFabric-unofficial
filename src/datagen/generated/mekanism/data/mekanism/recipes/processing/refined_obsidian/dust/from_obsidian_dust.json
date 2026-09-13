@@ -2,11 +2,11 @@
   "type": "mekanism:metallurgic_infusing",
   "chemicalInput": {
     "amount": 10,
-    "tag": "mekanism:diamond"
+    "tagSupplier": "mekanism:diamond"
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:dusts/obsidian"
+      "tag": "c:obsidian_dusts"
     }
   },
   "output": {

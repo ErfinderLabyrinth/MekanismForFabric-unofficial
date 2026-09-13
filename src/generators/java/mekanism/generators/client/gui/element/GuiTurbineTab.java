@@ -1,6 +1,7 @@
 package mekanism.generators.client.gui.element;
 
 import mekanism.api.text.ILangEntry;
+import mekanism.client.MekanismClient;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.tab.GuiTabElementType;
@@ -47,7 +48,7 @@ public class GuiTurbineTab extends GuiTabElementType<TileEntityTurbineCasing, Tu
 
         @Override
         public void onClick(TileEntityTurbineCasing tile) {
-            MekanismGenerators.packetHandler().sendToServer(new PacketGeneratorsGuiButtonPress(button, tile.getBlockPos()));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketGeneratorsGuiButtonPress(button, tile.getBlockPos()));
         }
 
         @Override

@@ -53,7 +53,7 @@ public class GeneratorsBlockTypes {
     public static final Generator<TileEntityHeatGenerator> HEAT_GENERATOR = GeneratorBuilder
           .createGenerator(() -> GeneratorsTileEntityTypes.HEAT_GENERATOR, GeneratorsLang.DESCRIPTION_HEAT_GENERATOR)
           .withGui(() -> GeneratorsContainerTypes.HEAT_GENERATOR)
-          .withEnergyConfig(MekanismGeneratorsConfig.storageConfig.heatGenerator)
+          .withEnergyConfig(() -> MekanismGeneratorsConfig.storageConfig.heatGenerator)
           .withCustomShape(BlockShapes.HEAT_GENERATOR)
           .withSound(GeneratorsSounds.HEAT_GENERATOR)
           .withSupportedUpgrades(EnumSet.of(Upgrade.MUFFLING))
@@ -67,7 +67,7 @@ public class GeneratorsBlockTypes {
     public static final Generator<TileEntityBioGenerator> BIO_GENERATOR = GeneratorBuilder
           .createGenerator(() -> GeneratorsTileEntityTypes.BIO_GENERATOR, GeneratorsLang.DESCRIPTION_BIO_GENERATOR)
           .withGui(() -> GeneratorsContainerTypes.BIO_GENERATOR)
-          .withEnergyConfig(MekanismGeneratorsConfig.storageConfig.bioGenerator)
+          .withEnergyConfig(() -> MekanismGeneratorsConfig.storageConfig.bioGenerator)
           .withCustomShape(BlockShapes.BIO_GENERATOR)
           .withSound(GeneratorsSounds.BIO_GENERATOR)
           .withSupportedUpgrades(EnumSet.of(Upgrade.MUFFLING))
@@ -80,7 +80,7 @@ public class GeneratorsBlockTypes {
     public static final Generator<TileEntitySolarGenerator> SOLAR_GENERATOR = GeneratorBuilder
           .createGenerator(() -> GeneratorsTileEntityTypes.SOLAR_GENERATOR, GeneratorsLang.DESCRIPTION_SOLAR_GENERATOR)
           .withGui(() -> GeneratorsContainerTypes.SOLAR_GENERATOR)
-          .withEnergyConfig(MekanismGeneratorsConfig.storageConfig.solarGenerator)
+          .withEnergyConfig(() -> MekanismGeneratorsConfig.storageConfig.solarGenerator)
           .withCustomShape(BlockShapes.SOLAR_GENERATOR)
           .withSound(GeneratorsSounds.SOLAR_GENERATOR)
           .withSupportedUpgrades(EnumSet.of(Upgrade.MUFFLING))
@@ -91,7 +91,7 @@ public class GeneratorsBlockTypes {
     public static final Generator<TileEntityWindGenerator> WIND_GENERATOR = GeneratorBuilder
           .createGenerator(() -> GeneratorsTileEntityTypes.WIND_GENERATOR, GeneratorsLang.DESCRIPTION_WIND_GENERATOR)
           .withGui(() -> GeneratorsContainerTypes.WIND_GENERATOR)
-          .withEnergyConfig(MekanismGeneratorsConfig.storageConfig.windGenerator)
+          .withEnergyConfig(() -> MekanismGeneratorsConfig.storageConfig.windGenerator)
           .withCustomShape(BlockShapes.WIND_GENERATOR)
           .with(AttributeCustomSelectionBox.JAVA)
           .withSound(GeneratorsSounds.WIND_GENERATOR)
@@ -107,7 +107,7 @@ public class GeneratorsBlockTypes {
     public static final Generator<TileEntityGasGenerator> GAS_BURNING_GENERATOR = GeneratorBuilder
           .createGenerator(() -> GeneratorsTileEntityTypes.GAS_BURNING_GENERATOR, GeneratorsLang.DESCRIPTION_GAS_BURNING_GENERATOR)
           .withGui(() -> GeneratorsContainerTypes.GAS_BURNING_GENERATOR)
-          .withEnergyConfig(() -> MekanismConfig.general.FROM_H2.get().multiply(1_000))
+          .withEnergyConfig(() -> MekanismConfig.COMMON.general.FROM_H2 * 1_000)
           .withCustomShape(BlockShapes.GAS_BURNING_GENERATOR)
           .with(AttributeCustomSelectionBox.JSON)
           .withSound(GeneratorsSounds.GAS_BURNING_GENERATOR)
@@ -119,7 +119,7 @@ public class GeneratorsBlockTypes {
     public static final Generator<TileEntityAdvancedSolarGenerator> ADVANCED_SOLAR_GENERATOR = GeneratorBuilder
           .createGenerator(() -> GeneratorsTileEntityTypes.ADVANCED_SOLAR_GENERATOR, GeneratorsLang.DESCRIPTION_ADVANCED_SOLAR_GENERATOR)
           .withGui(() -> GeneratorsContainerTypes.ADVANCED_SOLAR_GENERATOR)
-          .withEnergyConfig(MekanismGeneratorsConfig.storageConfig.advancedSolarGenerator)
+          .withEnergyConfig(() -> MekanismGeneratorsConfig.storageConfig.advancedSolarGenerator)
           .withCustomShape(BlockShapes.ADVANCED_SOLAR_GENERATOR)
           .withSound(GeneratorsSounds.SOLAR_GENERATOR)
           .withSupportedUpgrades(EnumSet.of(Upgrade.MUFFLING))

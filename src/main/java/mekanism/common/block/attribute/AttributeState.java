@@ -1,6 +1,5 @@
 package mekanism.common.block.attribute;
 
-import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
@@ -11,6 +10,8 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public interface AttributeState extends Attribute {
 

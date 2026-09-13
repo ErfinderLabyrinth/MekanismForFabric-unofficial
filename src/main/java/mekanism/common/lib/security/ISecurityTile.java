@@ -1,11 +1,12 @@
 package mekanism.common.lib.security;
 
-import java.util.UUID;
 import mekanism.api.security.ISecurityObject;
 import mekanism.api.security.SecurityMode;
 import mekanism.common.tile.component.TileComponentSecurity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 public interface ISecurityTile extends ISecurityObject {
 

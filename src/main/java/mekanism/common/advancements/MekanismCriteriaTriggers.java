@@ -1,21 +1,15 @@
 package mekanism.common.advancements;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 import mekanism.common.Mekanism;
-import mekanism.common.advancements.triggers.AlloyUpgradeTrigger;
-import mekanism.common.advancements.triggers.BlockLaserTrigger;
-import mekanism.common.advancements.triggers.ChangeRobitSkinTrigger;
-import mekanism.common.advancements.triggers.ConfigurationCardTrigger;
-import mekanism.common.advancements.triggers.MekanismDamageTrigger;
-import mekanism.common.advancements.triggers.UnboxCardboardBoxTrigger;
-import mekanism.common.advancements.triggers.UseGaugeDropperTrigger;
-import mekanism.common.advancements.triggers.ViewVibrationsTrigger;
+import mekanism.common.advancements.triggers.*;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 public class MekanismCriteriaTriggers {
 

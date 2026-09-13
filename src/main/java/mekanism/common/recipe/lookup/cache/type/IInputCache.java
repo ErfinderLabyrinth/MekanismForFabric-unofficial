@@ -1,10 +1,11 @@
 package mekanism.common.recipe.lookup.cache.type;
 
-import java.util.function.Predicate;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.ingredients.InputIngredient;
 import mekanism.common.recipe.ingredient.IMultiIngredient;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 /**
  * Base interface describing how a specific input type is cached to allow for quick lookup of recipes by input both for finding the recipes and checking if any even exist

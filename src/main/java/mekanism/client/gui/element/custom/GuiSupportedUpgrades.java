@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.custom;
 
-import java.util.Set;
 import mekanism.api.Upgrade;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.IGuiWrapper;
@@ -14,6 +13,8 @@ import mekanism.common.util.UpgradeUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 public class GuiSupportedUpgrades extends GuiElement {
 

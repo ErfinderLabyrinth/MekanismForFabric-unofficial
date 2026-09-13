@@ -1,11 +1,12 @@
 package mekanism.common.inventory.container.slot;
 
-import java.util.function.IntSupplier;
 import mekanism.common.inventory.container.IGUIWindow;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.IntSupplier;
 
 public interface IVirtualSlot {
 

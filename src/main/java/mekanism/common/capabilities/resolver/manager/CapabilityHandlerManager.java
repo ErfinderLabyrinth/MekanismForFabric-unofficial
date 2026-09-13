@@ -1,28 +1,26 @@
 package mekanism.common.capabilities.resolver.manager;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.BiFunction;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.capabilities.holder.IHolder;
 import mekanism.common.capabilities.resolver.BasicSidedCapabilityResolver;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 
-@NothingNullByDefault
-public class CapabilityHandlerManager<HOLDER extends IHolder, CONTAINER, HANDLER, SIDED_HANDLER extends HANDLER> extends BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER>
-      implements ICapabilityHandlerManager<CONTAINER> {
+import java.util.function.BiFunction;
 
-    private final BiFunction<HOLDER, Direction, List<CONTAINER>> containerGetter;
+@NothingNullByDefault
+public class CapabilityHandlerManager<HOLDER extends IHolder<TYPE>, VARIANT, HANDLER, SIDED_HANDLER, TYPE> extends BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER>
+      implements ICapabilityHandlerManager<VARIANT> {
+
+    private final BiFunction<HOLDER, Direction, Storage<VARIANT>> containerGetter;
     private final boolean canHandle;
     @Nullable
     protected final HOLDER holder;
 
-    protected CapabilityHandlerManager(@Nullable HOLDER holder, SIDED_HANDLER baseHandler, Capability<HANDLER> supportedCapability,
-          ProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator, BiFunction<HOLDER, Direction, List<CONTAINER>> containerGetter) {
-        super(baseHandler, supportedCapability, proxyCreator, holder != null);
+    protected CapabilityHandlerManager(@Nullable HOLDER holder, /*SIDED_HANDLER baseHandler,*/
+          ProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator, BiFunction<HOLDER, Direction, Storage<VARIANT>> containerGetter) {
+        super(/*baseHandler, */proxyCreator, holder != null);
         this.holder = holder;
         this.canHandle = this.holder != null;
         this.containerGetter = containerGetter;
@@ -34,13 +32,13 @@ public class CapabilityHandlerManager<HOLDER extends IHolder, CONTAINER, HANDLER
     }
 
     @Override
-    public List<CONTAINER> getContainers(@Nullable Direction side) {
-        return canHandle() ? containerGetter.apply(holder, side) : Collections.emptyList();
+    public Storage<VARIANT> getContainers(@Nullable Direction side) {
+        return canHandle() ? containerGetter.apply(holder, side) : Storage.empty();
     }
 
     @Nullable
     @Override
-    protected IHolder getHolder() {
+    public IHolder<TYPE> getHolder() {
         return holder;
     }
 
@@ -49,13 +47,13 @@ public class CapabilityHandlerManager<HOLDER extends IHolder, CONTAINER, HANDLER
      *
      * @apiNote Assumes that {@link #canHandle} has been called before this and that it was {@code true}.
      */
-    @Override
-    public <T> LazyOptional<T> resolve(Capability<T> capability, @Nullable Direction side) {
-        if (getContainers(side).isEmpty()) {
-            //If we don't have any containers accessible from that side, don't return a handler
-            //TODO: Evaluate moving this somehow into being done via the is disabled check
-            return LazyOptional.empty();
-        }
-        return super.resolve(capability, side);
-    }
+//    @Override
+//    public @Nullable HANDLER resolve(@Nullable Direction side) {
+//        if (!getContainers(side).iterator().hasNext()) {
+//            //If we don't have any containers accessible from that side, don't return a handler
+//            //TODO: Evaluate moving this somehow into being done via the is disabled check
+//            return null;
+//        }
+//        return super.resolve(side);
+//    }
 }

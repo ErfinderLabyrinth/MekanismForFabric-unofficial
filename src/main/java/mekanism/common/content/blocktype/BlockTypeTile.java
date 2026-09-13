@@ -1,9 +1,6 @@
 package mekanism.common.content.blocktype;
 
-import java.util.Set;
-import java.util.function.Supplier;
 import mekanism.api.Upgrade;
-import mekanism.api.math.FloatingLongSupplier;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.block.attribute.Attribute.TileAttribute;
 import mekanism.common.block.attribute.AttributeEnergy;
@@ -17,6 +14,10 @@ import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
+import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 public class BlockTypeTile<TILE extends TileEntityMekanism> extends BlockType {
 
@@ -55,11 +56,11 @@ public class BlockTypeTile<TILE extends TileEntityMekanism> extends BlockType {
             return with(new AttributeGui(containerRegistrar, customName));
         }
 
-        public T withEnergyConfig(FloatingLongSupplier energyUsage, FloatingLongSupplier energyStorage) {
+        public T withEnergyConfig(LongSupplier energyUsage, LongSupplier energyStorage) {
             return with(new AttributeEnergy(energyUsage, energyStorage));
         }
 
-        public T withEnergyConfig(FloatingLongSupplier energyStorage) {
+        public T withEnergyConfig(LongSupplier energyStorage) {
             return with(new AttributeEnergy(null, energyStorage));
         }
 

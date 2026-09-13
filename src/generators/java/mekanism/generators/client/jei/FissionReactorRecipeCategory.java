@@ -3,6 +3,8 @@ package mekanism.generators.client.jei;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import mekanism.api.FluidStack;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.attribute.GasAttributes.CooledCoolant;
@@ -34,10 +36,10 @@ import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 public class FissionReactorRecipeCategory extends BaseRecipeCategory<FissionJEIRecipe> {
@@ -65,7 +67,7 @@ public class FissionReactorRecipeCategory extends BaseRecipeCategory<FissionJEIR
 
     private List<FluidStack> getWaterInput(FissionJEIRecipe recipe) {
         int amount = MathUtils.clampToInt(recipe.outputCoolant().getAmount());
-        return TagUtils.tag(ForgeRegistries.FLUIDS, FluidTags.WATER).stream().map(fluid -> new FluidStack(fluid, amount)).toList();
+        return TagUtils.tag(BuiltInRegistries.FLUID, FluidTags.WATER).map(tag -> tag.stream().map(fluid -> new FluidStack(FluidVariant.of(fluid.value()), amount)).toList()).orElseGet(List::of);
     }
 
     @Override
@@ -85,7 +87,7 @@ public class FissionReactorRecipeCategory extends BaseRecipeCategory<FissionJEIR
         //Note: The recipes below ignore thermal conductivity and just take enthalpy into account and it rounds the amount of coolant
         //TODO: Eventually we may want to try and improve on that but for now this should be fine
         List<FissionJEIRecipe> recipes = new ArrayList<>();
-        double energyPerFuel = MekanismGeneratorsConfig.generators.energyPerFissionFuel.get().doubleValue();
+        double energyPerFuel = MekanismGeneratorsConfig.generators.energyPerFissionFuel;
         //Special case water recipe
         long coolantAmount = Math.round(energyPerFuel * HeatUtils.getSteamEnergyEfficiency() / HeatUtils.getWaterThermalEnthalpy());
         recipes.add(new FissionJEIRecipe(null, IngredientCreatorAccess.gas().from(MekanismGases.FISSILE_FUEL, 1),

@@ -1,8 +1,5 @@
 package mekanism.common.inventory.slot;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.BiPredicate;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.Upgrade;
@@ -16,6 +13,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.BiPredicate;
 
 @NothingNullByDefault
 public class UpgradeInventorySlot extends BasicInventorySlot {

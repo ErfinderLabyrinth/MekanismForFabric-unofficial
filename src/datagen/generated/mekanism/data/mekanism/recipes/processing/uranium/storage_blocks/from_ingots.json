@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:ingots/uranium"
+      "tag": "c:uranium_ingots"
     },
     "P": {
       "item": "mekanism:ingot_uranium"

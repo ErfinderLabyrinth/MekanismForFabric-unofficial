@@ -1,10 +1,6 @@
 package mekanism.common.content.transporter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import mekanism.api.BigItemStack;
 import mekanism.api.Coord4D;
 import mekanism.api.NBTConstants;
 import mekanism.api.math.MathUtils;
@@ -18,21 +14,22 @@ import mekanism.common.tile.TileEntityLogisticalSorter;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.TransporterUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
+
 public class TransporterStack {
 
-    public ItemStack itemStack = ItemStack.EMPTY;
+    public BigItemStack itemStack = BigItemStack.EMPTY;
 
     public int progress;
 
@@ -81,7 +78,8 @@ public class TransporterStack {
             buf.writeBoolean(false);
         }
         buf.writeBlockPos(getPrev(transporter));
-        buf.writeItem(itemStack);
+        itemStack.getResource().toPacket(buf);
+        buf.writeLongLE(itemStack.amount());
     }
 
     public void read(FriendlyByteBuf dataStream) {
@@ -93,7 +91,9 @@ public class TransporterStack {
             clientNext = dataStream.readBlockPos();
         }
         clientPrev = dataStream.readBlockPos();
-        itemStack = dataStream.readItem();
+        ItemVariant variant = ItemVariant.fromPacket(dataStream);
+        long amount = dataStream.readLongLE();
+        itemStack = new BigItemStack(variant, amount);
     }
 
     public void writeToUpdateTag(LogisticalTransporterBase transporter, CompoundTag updateTag) {
@@ -115,7 +115,7 @@ public class TransporterStack {
         NBTUtils.setEnumIfPresent(updateTag, NBTConstants.PATH_TYPE, Path::byIndexStatic, type -> pathType = type);
         NBTUtils.setBlockPosIfPresent(updateTag, NBTConstants.CLIENT_NEXT, coord -> clientNext = coord);
         NBTUtils.setBlockPosIfPresent(updateTag, NBTConstants.CLIENT_PREVIOUS, coord -> clientPrev = coord);
-        itemStack = ItemStack.of(updateTag);
+        itemStack = BigItemStack.of(updateTag);
     }
 
     public void write(CompoundTag nbtTags) {
@@ -141,7 +141,7 @@ public class TransporterStack {
         NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.IDLE_DIR, Direction::from3DDataValue, dir -> idleDir = dir);
         NBTUtils.setBlockPosIfPresent(nbtTags, NBTConstants.HOME_LOCATION, coord -> homeLocation = coord);
         NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.PATH_TYPE, Path::byIndexStatic, type -> pathType = type);
-        itemStack = ItemStack.of(nbtTags);
+        itemStack = BigItemStack.of(nbtTags);
     }
 
     private void setPath(Level world, List<BlockPos> path, Path type, boolean updateFlowing) {
@@ -275,10 +275,10 @@ public class TransporterStack {
         return transmitter != null && canInsertToTransporterNN(transmitter, from, transporterFrom);
     }
 
-    public boolean canInsertToTransporterNN(@NotNull LogisticalTransporterBase transporter, Direction from, @Nullable BlockEntity tileFrom) {
+    public boolean canInsertToTransporterNN(@NotNull LogisticalTransporterBase transporter, Direction from, @Nullable Level level, BlockPos pos) {
         //If the color is valid, make sure that the connection is valid
         EnumColor color = transporter.getColor();
-        return (color == null || color == this.color) && transporter.canConnectMutual(from.getOpposite(), tileFrom);
+        return (color == null || color == this.color) && transporter.canConnectMutual(from.getOpposite(), level, pos);
     }
 
     public boolean canInsertToTransporterNN(@NotNull LogisticalTransporterBase transporter, Direction from, @Nullable LogisticalTransporterBase transporterFrom) {

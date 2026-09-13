@@ -1,11 +1,5 @@
 package mekanism.common.recipe.lookup.cache;
 
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.ChemicalType;
@@ -18,6 +12,9 @@ import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Similar in concept to {@link SingleInputRecipeCache} except specialized to handle Chemical Crystallizer recipes for the purposes of being able to better handle the

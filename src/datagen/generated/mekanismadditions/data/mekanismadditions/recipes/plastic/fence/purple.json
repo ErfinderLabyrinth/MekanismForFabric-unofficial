@@ -5,7 +5,7 @@
       "item": "mekanismadditions:purple_plastic"
     },
     "R": {
-      "tag": "forge:rods/plastic"
+      "tag": "c:plastic_rods"
     }
   },
   "pattern": [

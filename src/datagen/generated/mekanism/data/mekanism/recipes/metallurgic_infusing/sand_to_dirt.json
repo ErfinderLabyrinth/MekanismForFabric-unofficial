@@ -2,11 +2,11 @@
   "type": "mekanism:metallurgic_infusing",
   "chemicalInput": {
     "amount": 10,
-    "tag": "mekanism:bio"
+    "tagSupplier": "mekanism:bio"
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:sand"
+      "tag": "c:sands"
     }
   },
   "output": {

@@ -1,28 +1,32 @@
 package mekanism.common.registration.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.common.recipe.IMekanismRecipeTypeProvider;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.recipe.lookup.cache.IInputRecipeCache;
 import mekanism.common.registration.WrappedDeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class RecipeTypeDeferredRegister extends WrappedDeferredRegister<RecipeType<?>> {
 
     private final List<IMekanismRecipeTypeProvider<?, ?>> recipeTypes = new ArrayList<>();
 
+    String modid;
     public RecipeTypeDeferredRegister(String modid) {
-        super(modid, ForgeRegistries.RECIPE_TYPES);
+        super(BuiltInRegistries.RECIPE_TYPE);
+        this.modid = modid;
     }
 
     public <RECIPE extends MekanismRecipe, INPUT_CACHE extends IInputRecipeCache> RecipeTypeRegistryObject<RECIPE, INPUT_CACHE> register(String name,
-          Supplier<? extends MekanismRecipeType<RECIPE, INPUT_CACHE>> sup) {
-        RecipeTypeRegistryObject<RECIPE, INPUT_CACHE> registeredRecipeType = register(name, sup, RecipeTypeRegistryObject::new);
+                                                                                                                                         Supplier<MekanismRecipeType<RECIPE, INPUT_CACHE>> sup) {
+        RecipeTypeRegistryObject<RECIPE, INPUT_CACHE> registeredRecipeType = register(new ResourceLocation(modid, name), sup, RecipeTypeRegistryObject::new);
         recipeTypes.add(registeredRecipeType);
         return registeredRecipeType;
     }

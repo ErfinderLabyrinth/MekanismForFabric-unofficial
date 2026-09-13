@@ -8,8 +8,8 @@ import mekanism.common.recipe.ingredient.creator.ItemStackIngredientCreator.Sing
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.CompoundIngredient;
-import net.minecraftforge.common.crafting.StrictNBTIngredient;
+//import net.minecraftforge.common.crafting.CompoundIngredient;
+//import net.minecraftforge.common.crafting.StrictNBTIngredient;
 
 public class ItemInputCache<RECIPE extends MekanismRecipe> extends NBTSensitiveInputCache<Item, HashedItem, ItemStack, ItemStackIngredient, RECIPE> {
 
@@ -26,7 +26,7 @@ public class ItemInputCache<RECIPE extends MekanismRecipe> extends NBTSensitiveI
     }
 
     private boolean mapIngredient(RECIPE recipe, Ingredient input) {
-        if (input.isVanilla() || input.isSimple()) {
+        if (input.getClass() == Ingredient.class) {
             //Vanilla ingredients and simple ingredients don't actually check anything related to NBT,
             // so we can add the items to our base/raw input cache directly
             for (ItemStack item : input.getItems()) {
@@ -35,16 +35,16 @@ public class ItemInputCache<RECIPE extends MekanismRecipe> extends NBTSensitiveI
                     addInputCache(item.getItem(), recipe);
                 }
             }
-        } else if (input instanceof CompoundIngredient compoundIngredient) {
-            //Special handling for forge's compound ingredient to map all children
-            boolean result = false;
-            for (Ingredient child : compoundIngredient.getChildren()) {
-                result |= mapIngredient(recipe, child);
-            }
-            return result;
-        } else if (input instanceof StrictNBTIngredient) {
-            //Special handling for forge's NBT Ingredient as it requires an exact NBT match
-            addNbtInputCache(HashedItem.create(input.getItems()[0]), recipe);
+//        } else if (input instanceof CompoundIngredient compoundIngredient) {
+//            //Special handling for forge's compound ingredient to map all children
+//            boolean result = false;
+//            for (Ingredient child : compoundIngredient.getChildren()) {
+//                result |= mapIngredient(recipe, child);
+//            }
+//            return result;
+//        } else if (input.getCustomIngredient() instanceof NbtIngredient nbtIngredient && nbtIngredient.) {
+//            //Special handling for forge's NBT Ingredient as it requires an exact NBT match
+//            addNbtInputCache(HashedItem.create(input.getItems()[0]), recipe);
         } else {
             //Else it is a custom ingredient, so we don't have a great way of handling it using the normal extraction checks
             // and instead have to just mark it as complex and test as needed

@@ -2,8 +2,8 @@ package mekanism.common.recipe.upgrade;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.inventory.BinMekanismInventory;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -18,17 +18,17 @@ public class LockRecipeData implements RecipeUpgradeData<LockRecipeData> {
     @Nullable
     @Override
     public LockRecipeData merge(LockRecipeData other) {
-        return ItemHandlerHelper.canItemStacksStack(lock, other.lock) ? this : null;
+        return ItemEntity.areMergable(lock, other.lock) ? this : null;
     }
 
     @Override
-    public boolean applyToStack(ItemStack stack) {
+    public ItemStack applyToStack(ItemStack stack) {
         BinMekanismInventory inventory = BinMekanismInventory.create(stack);
         if (inventory == null) {
-            return false;
+            return null;
         }
         inventory.getBinSlot().setLockStack(this.lock);
         inventory.onContentsChanged();
-        return true;
+        return stack;
     }
 }

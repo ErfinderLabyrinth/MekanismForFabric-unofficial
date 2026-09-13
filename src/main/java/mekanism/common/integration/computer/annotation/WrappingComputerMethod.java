@@ -1,11 +1,12 @@
 package mekanism.common.integration.computer.annotation;
 
+import mekanism.common.integration.computer.MethodRestriction;
+import mekanism.common.integration.computer.SpecialComputerMethodWrapper;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import mekanism.common.integration.computer.MethodRestriction;
-import mekanism.common.integration.computer.SpecialComputerMethodWrapper;
 
 /**
  * Wraps fields as getters and methods with return types into one or more "synthetic" methods, based on the wrapper class.

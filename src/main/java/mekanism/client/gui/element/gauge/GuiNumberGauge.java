@@ -1,11 +1,12 @@
 package mekanism.client.gui.element.gauge;
 
-import java.util.Collections;
-import java.util.List;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.lib.transmitter.TransmissionType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
+
+import java.util.Collections;
+import java.util.List;
 
 public class GuiNumberGauge extends GuiGauge<Void> {
 

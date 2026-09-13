@@ -1,6 +1,5 @@
 {
 	"credit": "Made with love by CyanideX using Blockbench",
-	"render_type": "minecraft:cutout",
 	"textures": {
 		"ports_led": "mekanism:block/models/ports_large_led",
 		"tank_frame": "mekanism:block/models/fluid_tank",
@@ -62,7 +61,7 @@
 				"up": {"uv": [5, 5, 0, 0], "texture": "#ports_led", "cullface": "up"},
 				"down": {"uv": [5, 0, 0, 5], "texture": "#ports_led"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 					"block_light": 15,
 					"sky_light": 15
 			}
@@ -75,7 +74,7 @@
 				"up": {"uv": [5, 5, 0, 0], "texture": "#ports_led"},
 				"down": {"uv": [5, 0, 0, 5], "texture": "#ports_led", "cullface": "down"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 					"block_light": 15,
 					"sky_light": 15
 			}

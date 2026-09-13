@@ -14,9 +14,7 @@
           "name": "mekanism:block_raw_lead"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/block_raw_lead"
+  ]
 }

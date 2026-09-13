@@ -1,5 +1,6 @@
 package mekanism.common.network.to_server;
 
+import mekanism.api.MekanismAPI;
 import mekanism.api.RelativeSide;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.network.IMekanismPacket;
@@ -11,14 +12,17 @@ import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.TransporterUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class PacketConfigurationUpdate implements IMekanismPacket {
+    public static final PacketType<PacketConfigurationUpdate> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "configuration_update"), PacketConfigurationUpdate::decode);
 
     private final ConfigurationPacket packetType;
     private final BlockPos pos;
@@ -62,8 +66,7 @@ public class PacketConfigurationUpdate implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        Player player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player == null) {
             return;
         }
@@ -172,6 +175,11 @@ public class PacketConfigurationUpdate implements IMekanismPacket {
             }
         }
         return new PacketConfigurationUpdate(packetType, pos, clickType, inputSide, transmission);
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 
     public enum ConfigurationPacket {

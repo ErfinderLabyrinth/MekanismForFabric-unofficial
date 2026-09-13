@@ -1,13 +1,14 @@
 package mekanism.common.registries;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.common.Mekanism;
 import mekanism.common.registration.impl.SlurryDeferredRegister;
 import mekanism.common.registration.impl.SlurryRegistryObject;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.util.EnumUtils;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MekanismSlurries {
 

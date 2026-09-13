@@ -10,6 +10,8 @@ import mekanism.api.recipes.ingredients.creator.IngredientCreatorAccess;
 import mekanism.common.Mekanism;
 import mekanism.common.recipe.builder.ExtendedCookingRecipeBuilder;
 import mekanism.common.registries.MekanismItems;
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -20,7 +22,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.crafting.conditions.ICondition;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -53,7 +54,7 @@ public class RecipeProviderUtil {
 
     public static void addPrecisionSawmillWoodTypeRecipes(Consumer<FinishedRecipe> consumer, String basePath, ItemLike planks, @Nullable ItemLike boat,
           @Nullable ItemLike chestBoat, ItemLike door, ItemLike fenceGate, @Nullable TagKey<Item> log, ItemLike pressurePlate, ItemLike trapdoor,
-          @Nullable ItemLike hangingSign, String name, @Nullable ICondition condition) {
+          @Nullable ItemLike hangingSign, String name, @Nullable ConditionJsonProvider condition) {
         if (boat != null) {
             //Boat
             build(consumer, SawmillRecipeBuilder.sawing(
@@ -114,14 +115,14 @@ public class RecipeProviderUtil {
         ), basePath + "trapdoor/" + name, condition);
     }
 
-    public static void addSandStoneToSandRecipe(Consumer<FinishedRecipe> consumer, String path, @Nullable ICondition condition, ItemLike sand, ItemLike... sandstones) {
+    public static void addSandStoneToSandRecipe(Consumer<FinishedRecipe> consumer, String path, @Nullable ConditionJsonProvider condition, ItemLike sand, ItemLike... sandstones) {
         build(consumer, ItemStackToItemStackRecipeBuilder.crushing(
               IngredientCreatorAccess.item().from(Ingredient.of(sandstones)),
               new ItemStack(sand, 2)
         ), path, condition);
     }
 
-    private static void build(Consumer<FinishedRecipe> consumer, MekanismRecipeBuilder<?> builder, String path, @Nullable ICondition condition) {
+    private static void build(Consumer<FinishedRecipe> consumer, MekanismRecipeBuilder<?> builder, String path, @Nullable ConditionJsonProvider condition) {
         if (condition != null) {
             //If there is a condition, add it to the recipe builder
             builder.addCondition(condition);
@@ -134,7 +135,7 @@ public class RecipeProviderUtil {
     }
 
     public static void addPrecisionSawmillBedRecipe(Consumer<FinishedRecipe> consumer, String basePath, ItemLike bed, ItemLike planks, DyeColor color,
-          @Nullable ICondition condition) {
+          @Nullable ConditionJsonProvider condition) {
         SawmillRecipeBuilder bedRecipeBuilder = SawmillRecipeBuilder.sawing(
               IngredientCreatorAccess.item().from(bed),
               new ItemStack(planks, 3),

@@ -1,7 +1,8 @@
 {
+  "replace": false,
   "values": [
-    "#forge:slabs/plastic",
-    "#forge:slabs/plastic/glow",
-    "#forge:slabs/plastic/transparent"
+    "#c:plastic_slabs",
+    "#c:glowing_plastic_slabs",
+    "#c:transparent_plastic_slabs"
   ]
 }

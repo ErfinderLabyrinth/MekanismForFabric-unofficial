@@ -2,7 +2,7 @@
   "type": "mekanism:infusion_conversion",
   "input": {
     "ingredient": {
-      "tag": "forge:storage_blocks/coal"
+      "tag": "c:coal_blocks"
     }
   },
   "output": {

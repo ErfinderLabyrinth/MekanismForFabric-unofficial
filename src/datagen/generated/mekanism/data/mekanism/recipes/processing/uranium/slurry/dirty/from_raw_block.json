@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:storage_blocks/raw_uranium"
+      "tag": "c:raw_uranium_blocks"
     }
   },
   "output": {
     "amount": 6000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_uranium"
+    "slurry": "minecraft:dirty_uranium"
   }
 }

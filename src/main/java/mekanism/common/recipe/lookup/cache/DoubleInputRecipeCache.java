@@ -1,5 +1,12 @@
 package mekanism.common.recipe.lookup.cache;
 
+import mekanism.api.recipes.MekanismRecipe;
+import mekanism.api.recipes.ingredients.InputIngredient;
+import mekanism.common.recipe.MekanismRecipeType;
+import mekanism.common.recipe.lookup.cache.type.IInputCache;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -7,12 +14,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import mekanism.api.recipes.MekanismRecipe;
-import mekanism.api.recipes.ingredients.InputIngredient;
-import mekanism.common.recipe.MekanismRecipeType;
-import mekanism.common.recipe.lookup.cache.type.IInputCache;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Basic implementation for {@link IInputRecipeCache} for handling recipes with two inputs.

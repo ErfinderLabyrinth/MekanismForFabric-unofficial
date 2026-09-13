@@ -3,7 +3,6 @@ package mekanism.common.recipe.upgrade;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.content.qio.IQIODriveItem;
@@ -13,6 +12,8 @@ import mekanism.common.content.qio.QIODriveData.QIODriveKey;
 import mekanism.common.util.ItemDataUtils;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 /**
  * QIO Drive merging data helper. Duplicates a fair bit of code from {@link QIODriveData}, but without requiring a {@link QIODriveKey}, and not validating the total size
@@ -60,17 +61,17 @@ public class QIORecipeData implements RecipeUpgradeData<QIORecipeData> {
     }
 
     @Override
-    public boolean applyToStack(ItemStack stack) {
+    public ItemStack applyToStack(ItemStack stack) {
         if (itemMap.isEmpty()) {
             //If we have nothing present then it is a success, but if we have data that says we should
             // have items, but we don't then fail
-            return itemCount == 0;
+            return itemCount == 0 ? stack : null;
         }
         IQIODriveItem driveItem = (IQIODriveItem) stack.getItem();
         if (itemCount == 0 || itemCount > driveItem.getCountCapacity(stack) || itemMap.size() > driveItem.getTypeCapacity(stack)) {
             //If we have items stored but no types, have more items stored than the output item supports, or have more types stored
             // then return that we are not able to actually apply them to the stack
-            return false;
+            return null;
         }
         int i = 0;
         long[] serializedMap = new long[3 * itemMap.size()];
@@ -83,6 +84,6 @@ public class QIORecipeData implements RecipeUpgradeData<QIORecipeData> {
         ItemDataUtils.setLongArrayOrRemove(stack, NBTConstants.QIO_ITEM_MAP, serializedMap);
         DriveMetadata meta = new DriveMetadata(itemCount, itemMap.size());
         meta.write(stack);
-        return true;
+        return stack;
     }
 }

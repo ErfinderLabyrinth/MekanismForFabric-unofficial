@@ -8,7 +8,7 @@
       "item": "mekanism:energy_tablet"
     },
     "L": {
-      "tag": "forge:dusts/lithium"
+      "tag": "c:lithium_dusts"
     }
   },
   "pattern": [

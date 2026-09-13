@@ -5,10 +5,10 @@
       "item": "minecraft:iron_bars"
     },
     "A": {
-      "tag": "forge:alloys/elite"
+      "tag": "c:elite_alloys"
     },
     "C": {
-      "tag": "forge:circuits/elite"
+      "tag": "c:elite_circuits"
     },
     "H": {
       "item": "mekanism:pellet_polonium"

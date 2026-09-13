@@ -1,5 +1,5 @@
 {
-	"loader": "forge:composite",
+	"loader": "mekanism:composite",
 	"gui_light": "side",
 	"textures": {
 		"1": "mekanism:block/models/industrial_alarm",
@@ -69,7 +69,6 @@
 			]
 		},
 		"translucent": {
-			"render_type": "minecraft:translucent",
 			"textures": {
 				"1": "mekanism:block/models/industrial_alarm"
 			},

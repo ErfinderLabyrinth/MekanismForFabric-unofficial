@@ -3,15 +3,15 @@ package mekanism.common.integration.energy;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.common.capabilities.Capabilities;
-import mekanism.common.util.CapabilityUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
-public class StrictEnergyCompat implements IEnergyCompat {
+public class StrictEnergyCompat implements IEnergyCompat<IStrictEnergyHandler> {
 
     @Override
     public boolean isUsable() {
@@ -19,17 +19,17 @@ public class StrictEnergyCompat implements IEnergyCompat {
     }
 
     @Override
-    public Capability<IStrictEnergyHandler> getCapability() {
-        return Capabilities.STRICT_ENERGY;
+    public IStrictEnergyHandler getHandlerAs(IStrictEnergyHandler handler) {
+        return handler;
     }
 
     @Override
-    public LazyOptional<IStrictEnergyHandler> getHandlerAs(IStrictEnergyHandler handler) {
-        return LazyOptional.of(() -> handler);
+    public @Nullable IStrictEnergyHandler getStrictEnergyHandler(Level level, BlockPos pos, @Nullable Direction side) {
+        return Capabilities.STRICT_ENERGY_BLOCK.find(level, pos, side);
     }
 
     @Override
-    public LazyOptional<IStrictEnergyHandler> getLazyStrictEnergyHandler(ICapabilityProvider provider, @Nullable Direction side) {
-        return CapabilityUtils.getCapability(provider, getCapability(), side);
+    public @Nullable IStrictEnergyHandler getStrictEnergyHandler(ItemStack stack, ContainerItemContext context) {
+        return Capabilities.STRICT_ENERGY_ITEM.find(stack, context);
     }
 }

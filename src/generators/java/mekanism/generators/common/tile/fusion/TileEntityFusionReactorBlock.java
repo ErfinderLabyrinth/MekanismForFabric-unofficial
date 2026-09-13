@@ -2,7 +2,6 @@ package mekanism.generators.common.tile.fusion;
 
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.inventory.container.MekanismContainer;
-import mekanism.common.inventory.container.sync.dynamic.SyncMapper;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import mekanism.generators.common.MekanismGenerators;
@@ -59,6 +58,7 @@ public class TileEntityFusionReactorBlock extends TileEntityMultiblock<FusionRea
     }
 
     private void addTabContainerTracker(MekanismContainer container, String tab) {
-        SyncMapper.INSTANCE.setup(container, FusionReactorMultiblockData.class, this::getMultiblock, tab);
+        getMultiblock().addSyncables(container::track, tab);
+        //SyncMapper.INSTANCE.setup(container, FusionReactorMultiblockData.class, this::getMultiblock, tab);
     }
 }

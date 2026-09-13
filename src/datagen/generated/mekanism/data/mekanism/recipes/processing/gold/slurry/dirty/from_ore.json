@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ores/gold"
+      "tag": "c:gold_ingots"
     }
   },
   "output": {
     "amount": 1000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_gold"
+    "slurry": "minecraft:dirty_gold"
   }
 }

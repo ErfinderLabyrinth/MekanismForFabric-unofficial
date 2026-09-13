@@ -1,13 +1,14 @@
 package mekanism.client.gui.element;
 
-import java.util.Collections;
-import java.util.function.BooleanSupplier;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.MekanismLang;
 import mekanism.common.registries.MekanismSounds;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collections;
+import java.util.function.BooleanSupplier;
 
 public class GuiScreenSwitch extends GuiInnerScreen {
 

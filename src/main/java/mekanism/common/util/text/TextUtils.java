@@ -1,8 +1,9 @@
 package mekanism.common.util.text;
 
-import java.text.NumberFormat;
 import mekanism.common.MekanismLang;
 import net.minecraft.network.chat.Component;
+
+import java.text.NumberFormat;
 
 public final class TextUtils {
 

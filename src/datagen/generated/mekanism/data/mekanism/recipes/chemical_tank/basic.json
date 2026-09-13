@@ -5,7 +5,7 @@
       "tag": "mekanism:alloys/basic"
     },
     "O": {
-      "tag": "forge:ingots/osmium"
+      "tag": "c:osmium_ingots"
     }
   },
   "pattern": [

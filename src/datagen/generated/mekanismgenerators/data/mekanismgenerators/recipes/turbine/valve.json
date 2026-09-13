@@ -5,7 +5,7 @@
       "item": "mekanismgenerators:turbine_casing"
     },
     "C": {
-      "tag": "forge:circuits/advanced"
+      "tag": "c:advanced_circuits"
     }
   },
   "pattern": [

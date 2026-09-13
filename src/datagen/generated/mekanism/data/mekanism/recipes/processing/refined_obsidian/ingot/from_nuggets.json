@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:nuggets/refined_obsidian"
+      "tag": "c:refined_obsidian_nuggets"
     },
     "P": {
       "item": "mekanism:nugget_refined_obsidian"

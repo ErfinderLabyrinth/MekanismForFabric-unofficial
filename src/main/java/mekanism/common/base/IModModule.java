@@ -34,4 +34,8 @@ public interface IModModule {
      */
     default void launchClient() {
     }
+
+    default void launchCommon() {
+
+    }
 }

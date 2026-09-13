@@ -2,16 +2,24 @@ package mekanism.api.chemical;
 
 import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+
+import java.util.Iterator;
+import java.util.List;
 
 @NothingNullByDefault
-public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends IEmptyStackProvider<CHEMICAL, STACK> {
+public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>> extends IEmptyStackProvider<CHEMICAL, STACK>, Storage<CHEMICAL> {
 
     /**
      * Returns the number of chemical storage units ("tanks") available
      *
      * @return The number of tanks available
      */
-    int getTanks();
+
+    List<TANK> getTanks();
 
     /**
      * Returns the {@link STACK} in a given tank.
@@ -29,7 +37,8 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      *
      * @return {@link STACK} in a given tank. {@link #getEmptyStack()} if the tank is empty.
      */
-    STACK getChemicalInTank(int tank);
+//    @Deprecated(forRemoval = true)
+//    STACK getChemicalInTank(int tank);
 
     /**
      * Overrides the stack in the given tank. This method may throw an error if it is called unexpectedly.
@@ -39,7 +48,8 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      *
      * @throws RuntimeException if the handler is called in a way that the handler was not expecting.
      **/
-    void setChemicalInTank(int tank, STACK stack);
+//    @Deprecated(forRemoval = true)
+//    void setChemicalInTank(int tank, STACK stack);
 
     /**
      * Retrieves the maximum amount of chemical that can be stored in a given tank.
@@ -48,7 +58,8 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      *
      * @return The maximum chemical amount held by the tank.
      */
-    long getTankCapacity(int tank);
+//    @Deprecated(forRemoval = true)
+//    long getTankCapacity(int tank);
 
     /**
      * <p>
@@ -67,7 +78,8 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      * @return true if the tank can accept the {@link STACK}, not considering the current state of the tank. false if the tank can never support the given {@link STACK}
      * in any situation.
      */
-    boolean isValid(int tank, STACK stack);
+//    @Deprecated(forRemoval = true)
+//    boolean isValid(int tank, STACK stack);
 
     /**
      * <p>
@@ -84,7 +96,8 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      * @return The remaining {@link STACK} that was not inserted (if the entire stack is accepted, then return an empty {@link STACK}). May be the same as the input
      * {@link STACK} if unchanged, otherwise a new {@link STACK}. The returned {@link STACK} can be safely modified after
      */
-    STACK insertChemical(int tank, STACK stack, Action action);
+    //@Deprecated(forRemoval = true)
+    //STACK insertChemical(int tank, STACK stack, Action action);
 
     /**
      * Extracts a {@link STACK} from a specific tank in this handler.
@@ -99,7 +112,8 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      * @return {@link STACK} extracted from the tank, must be empty if nothing can be extracted. The returned {@link STACK} can be safely modified after, so the tank
      * should return a new or copied stack.
      */
-    STACK extractChemical(int tank, long amount, Action action);
+//    @Deprecated(forRemoval = true)
+//    STACK extractChemical(int tank, long amount, Action action);
 
     /**
      * <p>
@@ -120,9 +134,16 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      * all fit, falls back to inserting into any empty tanks.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IChemicalHandler} ends up distributing the insertion.
      */
-    default STACK insertChemical(STACK stack, Action action) {
-        return ChemicalUtils.insert(stack, action, getEmptyStack(), this::getTanks, this::getChemicalInTank, this::insertChemical);
+    default long insert(CHEMICAL resource, long amount, TransactionContext t) {
+        updateSnapshots(t);
+        long amountInserted = 0;
+        for (IChemicalTank<CHEMICAL, STACK> tank : getTanks()) {
+            amountInserted += tank.insert(resource, amount - amountInserted, t);
+        }
+        return amountInserted;
     }
+
+    void updateSnapshots(TransactionContext t);
 
     /**
      * Extracts a {@link STACK} from this handler, distribution is left <strong>entirely</strong> to this {@link IChemicalHandler}.
@@ -140,8 +161,13 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      * extracted is found, all future extractions will make sure to also make sure they are for the same type of chemical.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IChemicalHandler} ends up distributing the extraction.
      */
-    default STACK extractChemical(long amount, Action action) {
-        return ChemicalUtils.extract(amount, action, getEmptyStack(), this::getTanks, this::getChemicalInTank, this::extractChemical);
+    default long extract(CHEMICAL resource, long amount, TransactionContext t) {
+        updateSnapshots(t);
+        long amountExtracted = 0;
+        for (IChemicalTank<CHEMICAL, STACK> tank : getTanks()) {
+            amountExtracted += tank.insert(resource, amount - amountExtracted, t);
+        }
+        return amountExtracted;
     }
 
     /**
@@ -152,14 +178,18 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      *
      * @param stack  {@link STACK} representing the {@link CHEMICAL} and maximum amount to be drained.
      * @param action The action to perform, either {@link Action#EXECUTE} or {@link Action#SIMULATE}
-     *
      * @return {@link STACK} extracted from the tank, must be empty if nothing can be extracted. The returned {@link STACK} can be safely modified after, so the tank
      * should return a new or copied stack.
-     *
      * @implNote The default implementation of this method, extracts across all tanks that contents match the type of chemical passed into this method.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IChemicalHandler} ends up distributing the extraction.
      */
-    default STACK extractChemical(STACK stack, Action action) {
-        return ChemicalUtils.extract(stack, action, getEmptyStack(), this::getTanks, this::getChemicalInTank, this::extractChemical);
+//    default STACK extractChemical(STACK stack, Action action) {
+//        return ChemicalUtils.extract(stack, action, getEmptyStack(), this::getTanks, this::getChemicalInTank, this::extractChemical);
+//    }
+
+
+    @Override
+    default Iterator<StorageView<CHEMICAL>> iterator() {
+        return getTanks().stream().map(tank -> (StorageView<CHEMICAL>)tank).iterator();
     }
 }

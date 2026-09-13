@@ -1,6 +1,6 @@
 package mekanism.tools.common.integration.gender;
 
-import mekanism.common.Mekanism;
+/*import mekanism.common.Mekanism;
 import mekanism.common.capabilities.ItemCapabilityWrapper;
 import mekanism.common.integration.gender.MekanismGenderArmor;
 import mekanism.tools.common.item.ItemMekanismArmor;
@@ -41,4 +41,4 @@ public class ToolsGenderCapabilityHelper {
         private static final MekanismGenderArmor REFINED_OBSIDIAN = new MekanismGenderArmor(1);
         private static final MekanismGenderArmor STEEL = new MekanismGenderArmor(1);
     }
-}
+}*/

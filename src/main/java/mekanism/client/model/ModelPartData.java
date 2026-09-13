@@ -1,10 +1,11 @@
 package mekanism.client.model;
 
-import java.util.List;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+
+import java.util.List;
 
 public record ModelPartData(String name, CubeListBuilder cubes, PartPose pose, List<ModelPartData> children) {
 

@@ -2,27 +2,11 @@ package mekanism.common.registries;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import mekanism.api.tier.ITier;
 import mekanism.common.Mekanism;
-import mekanism.common.block.BlockBounding;
-import mekanism.common.block.BlockCardboardBox;
-import mekanism.common.block.BlockEnergyCube;
-import mekanism.common.block.BlockIndustrialAlarm;
-import mekanism.common.block.BlockOre;
-import mekanism.common.block.BlockPersonalBarrel;
-import mekanism.common.block.BlockPersonalChest;
-import mekanism.common.block.BlockRadioactiveWasteBarrel;
+import mekanism.common.block.*;
 import mekanism.common.block.attribute.AttributeTier;
-import mekanism.common.block.basic.BlockBin;
-import mekanism.common.block.basic.BlockChargepad;
-import mekanism.common.block.basic.BlockFluidTank;
-import mekanism.common.block.basic.BlockLogisticalSorter;
-import mekanism.common.block.basic.BlockResource;
-import mekanism.common.block.basic.BlockStructuralGlass;
+import mekanism.common.block.basic.*;
 import mekanism.common.block.interfaces.IHasDescription;
 import mekanism.common.block.prefab.BlockBase;
 import mekanism.common.block.prefab.BlockBasicMultiblock;
@@ -31,46 +15,13 @@ import mekanism.common.block.prefab.BlockFactoryMachine.BlockFactory;
 import mekanism.common.block.prefab.BlockFactoryMachine.BlockFactoryMachineModel;
 import mekanism.common.block.prefab.BlockTile;
 import mekanism.common.block.prefab.BlockTile.BlockTileModel;
-import mekanism.common.block.transmitter.BlockDiversionTransporter;
-import mekanism.common.block.transmitter.BlockLogisticalTransporter;
-import mekanism.common.block.transmitter.BlockMechanicalPipe;
-import mekanism.common.block.transmitter.BlockPressurizedTube;
-import mekanism.common.block.transmitter.BlockRestrictiveTransporter;
-import mekanism.common.block.transmitter.BlockThermodynamicConductor;
-import mekanism.common.block.transmitter.BlockUniversalCable;
-import mekanism.common.content.blocktype.BlockType;
-import mekanism.common.content.blocktype.BlockTypeTile;
-import mekanism.common.content.blocktype.Factory;
-import mekanism.common.content.blocktype.FactoryType;
-import mekanism.common.content.blocktype.Machine;
+import mekanism.common.block.transmitter.*;
+import mekanism.common.content.blocktype.*;
 import mekanism.common.content.blocktype.Machine.FactoryMachine;
-import mekanism.common.item.block.ItemBlockBin;
-import mekanism.common.item.block.ItemBlockCardboardBox;
-import mekanism.common.item.block.ItemBlockChemicalTank;
-import mekanism.common.item.block.ItemBlockEnergyCube;
-import mekanism.common.item.block.ItemBlockInductionCell;
-import mekanism.common.item.block.ItemBlockInductionProvider;
-import mekanism.common.item.block.ItemBlockLaserAmplifier;
-import mekanism.common.item.block.ItemBlockPersonalStorage;
-import mekanism.common.item.block.ItemBlockRadioactiveWasteBarrel;
-import mekanism.common.item.block.ItemBlockResource;
-import mekanism.common.item.block.ItemBlockSecurityDesk;
-import mekanism.common.item.block.ItemBlockTooltip;
-import mekanism.common.item.block.machine.ItemBlockFactory;
-import mekanism.common.item.block.machine.ItemBlockFluidTank;
-import mekanism.common.item.block.machine.ItemBlockLaserTractorBeam;
-import mekanism.common.item.block.machine.ItemBlockMachine;
-import mekanism.common.item.block.machine.ItemBlockQIOComponent;
+import mekanism.common.item.block.*;
+import mekanism.common.item.block.machine.*;
 import mekanism.common.item.block.machine.ItemBlockQIOComponent.ItemBlockQIOInventoryComponent;
-import mekanism.common.item.block.machine.ItemBlockQuantumEntangloporter;
-import mekanism.common.item.block.machine.ItemBlockTeleporter;
-import mekanism.common.item.block.transmitter.ItemBlockDiversionTransporter;
-import mekanism.common.item.block.transmitter.ItemBlockLogisticalTransporter;
-import mekanism.common.item.block.transmitter.ItemBlockMechanicalPipe;
-import mekanism.common.item.block.transmitter.ItemBlockPressurizedTube;
-import mekanism.common.item.block.transmitter.ItemBlockRestrictiveTransporter;
-import mekanism.common.item.block.transmitter.ItemBlockThermodynamicConductor;
-import mekanism.common.item.block.transmitter.ItemBlockUniversalCable;
+import mekanism.common.item.block.transmitter.*;
 import mekanism.common.registration.impl.BlockDeferredRegister;
 import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.resource.BlockResourceInfo;
@@ -78,80 +29,17 @@ import mekanism.common.resource.IResource;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.resource.ore.OreBlockType;
 import mekanism.common.resource.ore.OreType;
-import mekanism.common.tier.CableTier;
-import mekanism.common.tier.ConductorTier;
-import mekanism.common.tier.FactoryTier;
-import mekanism.common.tier.PipeTier;
-import mekanism.common.tier.TransporterTier;
-import mekanism.common.tier.TubeTier;
-import mekanism.common.tile.TileEntityBin;
-import mekanism.common.tile.TileEntityChemicalTank;
-import mekanism.common.tile.TileEntityEnergyCube;
-import mekanism.common.tile.TileEntityFluidTank;
-import mekanism.common.tile.TileEntityModificationStation;
-import mekanism.common.tile.TileEntityPressureDisperser;
-import mekanism.common.tile.TileEntityQuantumEntangloporter;
-import mekanism.common.tile.TileEntitySecurityDesk;
-import mekanism.common.tile.TileEntityTeleporter;
+import mekanism.common.tier.*;
+import mekanism.common.tile.*;
 import mekanism.common.tile.factory.TileEntityFactory;
 import mekanism.common.tile.laser.TileEntityLaser;
 import mekanism.common.tile.laser.TileEntityLaserAmplifier;
 import mekanism.common.tile.laser.TileEntityLaserTractorBeam;
-import mekanism.common.tile.machine.TileEntityAntiprotonicNucleosynthesizer;
-import mekanism.common.tile.machine.TileEntityChemicalCrystallizer;
-import mekanism.common.tile.machine.TileEntityChemicalDissolutionChamber;
-import mekanism.common.tile.machine.TileEntityChemicalInfuser;
-import mekanism.common.tile.machine.TileEntityChemicalInjectionChamber;
-import mekanism.common.tile.machine.TileEntityChemicalOxidizer;
-import mekanism.common.tile.machine.TileEntityChemicalWasher;
-import mekanism.common.tile.machine.TileEntityCombiner;
-import mekanism.common.tile.machine.TileEntityCrusher;
-import mekanism.common.tile.machine.TileEntityDigitalMiner;
-import mekanism.common.tile.machine.TileEntityDimensionalStabilizer;
-import mekanism.common.tile.machine.TileEntityElectricPump;
-import mekanism.common.tile.machine.TileEntityElectrolyticSeparator;
-import mekanism.common.tile.machine.TileEntityEnergizedSmelter;
-import mekanism.common.tile.machine.TileEntityEnrichmentChamber;
-import mekanism.common.tile.machine.TileEntityFluidicPlenisher;
-import mekanism.common.tile.machine.TileEntityFormulaicAssemblicator;
-import mekanism.common.tile.machine.TileEntityFuelwoodHeater;
-import mekanism.common.tile.machine.TileEntityIsotopicCentrifuge;
-import mekanism.common.tile.machine.TileEntityMetallurgicInfuser;
-import mekanism.common.tile.machine.TileEntityNutritionalLiquifier;
-import mekanism.common.tile.machine.TileEntityOredictionificator;
-import mekanism.common.tile.machine.TileEntityOsmiumCompressor;
-import mekanism.common.tile.machine.TileEntityPaintingMachine;
-import mekanism.common.tile.machine.TileEntityPigmentExtractor;
-import mekanism.common.tile.machine.TileEntityPigmentMixer;
-import mekanism.common.tile.machine.TileEntityPrecisionSawmill;
-import mekanism.common.tile.machine.TileEntityPressurizedReactionChamber;
-import mekanism.common.tile.machine.TileEntityPurificationChamber;
-import mekanism.common.tile.machine.TileEntityResistiveHeater;
-import mekanism.common.tile.machine.TileEntityRotaryCondensentrator;
-import mekanism.common.tile.machine.TileEntitySeismicVibrator;
-import mekanism.common.tile.machine.TileEntitySolarNeutronActivator;
-import mekanism.common.tile.multiblock.TileEntityBoilerCasing;
-import mekanism.common.tile.multiblock.TileEntityBoilerValve;
-import mekanism.common.tile.multiblock.TileEntityDynamicTank;
-import mekanism.common.tile.multiblock.TileEntityDynamicValve;
-import mekanism.common.tile.multiblock.TileEntityInductionCasing;
-import mekanism.common.tile.multiblock.TileEntityInductionCell;
-import mekanism.common.tile.multiblock.TileEntityInductionPort;
-import mekanism.common.tile.multiblock.TileEntityInductionProvider;
-import mekanism.common.tile.multiblock.TileEntitySPSCasing;
-import mekanism.common.tile.multiblock.TileEntitySPSPort;
-import mekanism.common.tile.multiblock.TileEntityStructuralGlass;
-import mekanism.common.tile.multiblock.TileEntitySuperchargedCoil;
-import mekanism.common.tile.multiblock.TileEntitySuperheatingElement;
-import mekanism.common.tile.multiblock.TileEntityThermalEvaporationBlock;
-import mekanism.common.tile.multiblock.TileEntityThermalEvaporationController;
-import mekanism.common.tile.multiblock.TileEntityThermalEvaporationValve;
-import mekanism.common.tile.qio.TileEntityQIODashboard;
-import mekanism.common.tile.qio.TileEntityQIODriveArray;
-import mekanism.common.tile.qio.TileEntityQIOExporter;
-import mekanism.common.tile.qio.TileEntityQIOImporter;
-import mekanism.common.tile.qio.TileEntityQIORedstoneAdapter;
+import mekanism.common.tile.machine.*;
+import mekanism.common.tile.multiblock.*;
+import mekanism.common.tile.qio.*;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Rarity;
@@ -161,6 +49,11 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class MekanismBlocks {
 
@@ -351,7 +244,11 @@ public class MekanismBlocks {
             if (!block.getResourceInfo().burnsInFire()) {
                 properties = properties.fireResistant();
             }
-            return new ItemBlockResource(block, properties);
+            ItemBlockResource item = new ItemBlockResource(block, properties);
+            if (block.getResourceInfo().getBurnTime() != -1) {
+                FuelRegistry.INSTANCE.add(item, block.getResourceInfo().getBurnTime());
+            }
+            return item;
         });
     }
 
@@ -454,5 +351,9 @@ public class MekanismBlocks {
     @SuppressWarnings("unchecked")
     public static BlockRegistryObject<BlockFactory<?>, ItemBlockFactory>[] getFactoryBlocks() {
         return FACTORIES.values().toArray(new BlockRegistryObject[0]);
+    }
+
+    public static void register() {
+
     }
 }

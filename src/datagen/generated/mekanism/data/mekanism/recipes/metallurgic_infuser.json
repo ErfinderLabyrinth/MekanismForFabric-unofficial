@@ -5,13 +5,13 @@
       "item": "minecraft:furnace"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "O": {
-      "tag": "forge:ingots/osmium"
+      "tag": "c:osmium_ingots"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:redstone_dusts"
     }
   },
   "pattern": [

@@ -1,7 +1,5 @@
 package mekanism.common.tile.prefab;
 
-import java.util.Objects;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.lib.multiblock.IInternalMultiblock;
@@ -14,6 +12,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.UUID;
 
 public class TileEntityInternalMultiblock extends TileEntityMekanism implements IInternalMultiblock {
 

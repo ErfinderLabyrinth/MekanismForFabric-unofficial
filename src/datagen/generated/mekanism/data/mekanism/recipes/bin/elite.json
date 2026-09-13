@@ -5,13 +5,13 @@
       "tag": "mekanism:alloys/reinforced"
     },
     "C": {
-      "tag": "forge:circuits/elite"
+      "tag": "c:elite_circuits"
     },
     "P": {
       "item": "mekanism:advanced_bin"
     },
     "_": {
-      "tag": "forge:cobblestone/normal"
+      "tag": "c:normal_cobblestones"
     }
   },
   "pattern": [

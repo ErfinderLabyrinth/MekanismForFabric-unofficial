@@ -1,18 +1,19 @@
 package mekanism.common.lib.frequency;
 
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
-import mekanism.common.network.BasePacketHandler;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+
+import java.util.UUID;
 
 public interface IdentitySerializer {
 
     IdentitySerializer NAME = new IdentitySerializer() {
         @Override
         public FrequencyIdentity read(FriendlyByteBuf buf) {
-            return new FrequencyIdentity(BasePacketHandler.readString(buf), buf.readBoolean());
+            return new FrequencyIdentity(NetworkUtil.readString(buf), buf.readBoolean());
         }
 
         @Override

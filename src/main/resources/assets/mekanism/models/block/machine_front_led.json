@@ -1,7 +1,6 @@
 {
 	"credit": "Made with love by CyanideX using Blockbench",
 	"parent": "block/cube_all",
-	"render_type": "minecraft:cutout",
 	"textures": {
 		"particle": "#sides",
 		"down": "#sides",
@@ -33,7 +32,7 @@
 			"faces": {
 				"north": {"uv": [0, 0, 16, 16], "texture": "#north_led", "cullface": "north"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

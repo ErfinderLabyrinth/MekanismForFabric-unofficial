@@ -5,10 +5,10 @@
       "item": "mekanism:basic_energy_cube"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "L": {
-      "tag": "forge:dusts/lithium"
+      "tag": "c:lithium_dusts"
     }
   },
   "pattern": [

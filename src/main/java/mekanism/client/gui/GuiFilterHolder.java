@@ -1,18 +1,12 @@
 package mekanism.client.gui;
 
-import java.util.ArrayList;
-import java.util.List;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.button.FilterButton;
 import mekanism.client.gui.element.button.MovableFilterButton;
 import mekanism.client.gui.element.scroll.GuiScrollBar;
-import mekanism.common.Mekanism;
-import mekanism.common.content.filter.FilterManager;
-import mekanism.common.content.filter.IFilter;
-import mekanism.common.content.filter.IItemStackFilter;
-import mekanism.common.content.filter.IModIDFilter;
-import mekanism.common.content.filter.ITagFilter;
+import mekanism.common.content.filter.*;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.network.to_server.PacketGuiInteract;
 import mekanism.common.network.to_server.PacketGuiInteract.GuiInteraction;
@@ -23,6 +17,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class GuiFilterHolder<FILTER extends IFilter<?>, TILE extends TileEntityMekanism & ITileFilterHolder<FILTER>, CONTAINER extends MekanismTileContainer<TILE>>
       extends GuiMekanismTile<TILE, CONTAINER> {
@@ -55,14 +52,14 @@ public abstract class GuiFilterHolder<FILTER extends IFilter<?>, TILE extends Ti
             addFilterButton(new MovableFilterButton(this, 56, 18 + i * 29, i, scrollBar::getCurrentSelection, filterManager, index -> {
                 if (index > 0) {
                     GuiInteraction interaction = hasShiftDown() ? GuiInteraction.MOVE_FILTER_TO_TOP : GuiInteraction.MOVE_FILTER_UP;
-                    Mekanism.packetHandler().sendToServer(new PacketGuiInteract(interaction, tile, index));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(interaction, tile, index));
                 }
             }, index -> {
                 if (index < filterManager.count() - 1) {
                     GuiInteraction interaction = hasShiftDown() ? GuiInteraction.MOVE_FILTER_TO_BOTTOM : GuiInteraction.MOVE_FILTER_DOWN;
-                    Mekanism.packetHandler().sendToServer(new PacketGuiInteract(interaction, tile, index));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(interaction, tile, index));
                 }
-            }, this::onClick, index -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.TOGGLE_FILTER_STATE, tile, index)), filter -> {
+            }, this::onClick, index -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.TOGGLE_FILTER_STATE, tile, index)), filter -> {
                 List<ItemStack> list = new ArrayList<>();
                 if (filter != null) {
                     if (filter instanceof IItemStackFilter<?> itemFilter) {

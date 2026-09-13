@@ -4,7 +4,6 @@ import mekanism.api.IEvaporationSolar;
 import mekanism.api.RelativeSide;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.capabilities.Capabilities;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.tile.interfaces.IBoundingBlock;
 import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.registries.GeneratorsBlocks;
@@ -18,8 +17,7 @@ public class TileEntityAdvancedSolarGenerator extends TileEntitySolarGenerator i
     private final SolarCheck[] solarChecks = new SolarCheck[8];
 
     public TileEntityAdvancedSolarGenerator(BlockPos pos, BlockState state) {
-        super(GeneratorsBlocks.ADVANCED_SOLAR_GENERATOR, pos, state, MekanismGeneratorsConfig.generators.advancedSolarGeneration);
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.EVAPORATION_SOLAR, this));
+        super(GeneratorsBlocks.ADVANCED_SOLAR_GENERATOR, pos, state, () -> MekanismGeneratorsConfig.generators.advancedSolarGeneration);
     }
 
     @Override
@@ -28,8 +26,8 @@ public class TileEntityAdvancedSolarGenerator extends TileEntitySolarGenerator i
     }
 
     @Override
-    protected FloatingLong getConfiguredMax() {
-        return MekanismGeneratorsConfig.generators.advancedSolarGeneration.get();
+    protected long getConfiguredMax() {
+        return MekanismGeneratorsConfig.generators.advancedSolarGeneration;
     }
 
     @Override
@@ -52,7 +50,7 @@ public class TileEntityAdvancedSolarGenerator extends TileEntitySolarGenerator i
             }
             totalPeak += solarChecks[i].getPeakMultiplier();
         }
-        updateMaxOutputRaw(getConfiguredMax().multiply(totalPeak / 9));
+        updateMaxOutputRaw((long) (getConfiguredMax() * (totalPeak / 9)));
     }
 
     @Override
@@ -77,11 +75,11 @@ public class TileEntityAdvancedSolarGenerator extends TileEntitySolarGenerator i
     }
 
     @Override
-    public FloatingLong getProduction() {
+    public long getProduction() {
         if (level == null || solarCheck == null) {
             //Note: We assume if solarCheck is null then solarChecks will be filled with null, and if it isn't
             // then it won't be as they get initialized at the same time
-            return FloatingLong.ZERO;
+            return 0;
         }
         float brightness = getBrightnessMultiplier(level);
         //Calculate the generation multiplier of all the solar panels together
@@ -93,7 +91,7 @@ public class TileEntityAdvancedSolarGenerator extends TileEntitySolarGenerator i
         }
         generationMultiplier /= solarChecks.length + 1;
         //Production is a function of the peak possible output in this biome and sun's current brightness
-        return getConfiguredMax().multiply(brightness * generationMultiplier);
+        return (long) (getConfiguredMax() * brightness * generationMultiplier);
     }
 
     private static class AdvancedSolarCheck extends SolarCheck {

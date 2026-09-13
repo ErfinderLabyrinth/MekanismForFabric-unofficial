@@ -1,7 +1,5 @@
 package mekanism.common.capabilities.holder.heat;
 
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.RelativeSide;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.common.capabilities.holder.BasicHolder;
@@ -9,7 +7,10 @@ import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class HeatCapacitorHolder extends BasicHolder<IHeatCapacitor> implements IHeatCapacitorHolder {
+import java.util.List;
+import java.util.function.Supplier;
+
+public class HeatCapacitorHolder extends BasicHolder<IHeatCapacitor, Object> implements IHeatCapacitorHolder {
 
     HeatCapacitorHolder(Supplier<Direction> facingSupplier) {
         super(facingSupplier);

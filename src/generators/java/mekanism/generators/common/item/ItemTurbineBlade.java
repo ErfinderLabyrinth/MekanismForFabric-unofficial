@@ -14,8 +14,8 @@ public class ItemTurbineBlade extends Item {
         super(properties);
     }
 
-    @Override
-    public boolean doesSneakBypassUse(ItemStack stack, LevelReader world, BlockPos pos, Player player) {
-        return WorldUtils.getTileEntity(TileEntityTurbineRotor.class, world, pos) != null;
-    }
+//    @Override //TODO
+//    public boolean doesSneakBypassUse(ItemStack stack, LevelReader world, BlockPos pos, Player player) {
+//        return WorldUtils.getTileEntity(TileEntityTurbineRotor.class, world, pos) != null;
+//    }
 }

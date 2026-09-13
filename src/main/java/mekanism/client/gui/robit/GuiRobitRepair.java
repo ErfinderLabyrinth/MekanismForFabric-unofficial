@@ -53,7 +53,7 @@ public class GuiRobitRepair extends GuiRobit<RepairRobitContainer> implements Co
                 newText = "";
             }
             menu.setItemName(newText);
-            getMinecraft().player.connection.send(new ServerboundRenameItemPacket(newText));
+            minecraft.player.connection.send(new ServerboundRenameItemPacket(newText));
         }
     }
 
@@ -71,7 +71,7 @@ public class GuiRobitRepair extends GuiRobit<RepairRobitContainer> implements Co
             int k = 0x80FF20;
             boolean flag = true;
             Component component = MekanismLang.REPAIR_COST.translate(maximumCost);
-            if (maximumCost >= 40 && !getMinecraft().player.isCreative()) {
+            if (maximumCost >= 40 && !minecraft.player.isCreative()) {
                 component = MekanismLang.REPAIR_EXPENSIVE.translate();
                 k = 0xFF6060;
             } else {

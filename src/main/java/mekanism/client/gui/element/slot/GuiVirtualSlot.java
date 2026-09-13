@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.slot;
 
-import java.util.Optional;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.VirtualSlotContainerScreen;
 import mekanism.client.gui.element.GuiElement;
@@ -15,6 +14,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class GuiVirtualSlot extends GuiSlot implements IJEIIngredientHelper {
 

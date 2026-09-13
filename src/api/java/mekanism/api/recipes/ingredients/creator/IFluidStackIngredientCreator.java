@@ -1,11 +1,13 @@
 package mekanism.api.recipes.ingredients.creator;
 
 import java.util.Objects;
+
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.providers.IFluidProvider;
 import mekanism.api.recipes.ingredients.FluidStackIngredient;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
 
 @NothingNullByDefault
 public interface IFluidStackIngredientCreator extends IIngredientCreator<Fluid, FluidStack, FluidStackIngredient> {
@@ -26,6 +28,6 @@ public interface IFluidStackIngredientCreator extends IIngredientCreator<Fluid, 
 
     @Override
     default FluidStackIngredient from(Fluid instance, int amount) {
-        return from(new FluidStack(instance, amount));
+        return from(new FluidStack(FluidVariant.of(instance), amount));
     }
 }

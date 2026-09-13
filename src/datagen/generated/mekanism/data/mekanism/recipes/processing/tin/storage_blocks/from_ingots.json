@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:ingots/tin"
+      "tag": "c:tin_ingots"
     },
     "P": {
       "item": "mekanism:ingot_tin"

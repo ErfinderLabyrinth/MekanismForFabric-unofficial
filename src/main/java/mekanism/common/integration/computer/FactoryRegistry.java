@@ -1,23 +1,14 @@
 package mekanism.common.integration.computer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import mekanism.common.Mekanism;
-import net.minecraftforge.common.util.Lazy;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Central place for Factories to be registered and bound.
@@ -27,9 +18,9 @@ import java.util.function.Supplier;
  */
 public class FactoryRegistry {
     /** subject to Factory registration map */
-    private static final Map<Class<?>, Lazy<? extends ComputerMethodFactory<?>>> factories = new HashMap<>();
+    private static final Map<Class<?>, ComputerMethodFactory<?>> factories = new HashMap<>();
     /** interface to factory registration map, must be iterated */
-    public static final Map<Class<?>, Lazy<? extends ComputerMethodFactory<?>>> interfaceFactories = new HashMap<>();
+    public static final Map<Class<?>, ComputerMethodFactory<?>> interfaceFactories = new HashMap<>();
     /** map of (relevant) superclasses for a subject's class. Added to at runtime to cache lookups for subclasses */
     private static final Map<Class<?>, List<Class<?>>> superClasses = new HashMap<>();
     /** cached list of factories for a subject class */
@@ -53,14 +44,14 @@ public class FactoryRegistry {
      * @param parents Classes of the supertypes which will be checked for handlers (calculated at compile time)
      */
     public static <T> void register(Class<T> subject, Supplier<ComputerMethodFactory<T>> factorySupplier, Class<?>... parents) {
-        factories.put(subject, Lazy.of(factorySupplier));
+        factories.put(subject, factorySupplier.get());
         if (parents != null && parents.length > 0) {
             superClasses.put(subject, Arrays.asList(parents));
         }
     }
 
     public static <T> void registerInterface(Class<T> subject, Supplier<ComputerMethodFactory<T>> factorySupplier) {
-        interfaceFactories.put(subject, Lazy.of(factorySupplier));
+        interfaceFactories.put(subject, factorySupplier.get());
     }
 
     /**
@@ -87,9 +78,9 @@ public class FactoryRegistry {
         for (ComputerMethodFactory computerMethodFactory : factoriesToBind) {
             computerMethodFactory.bindTo(subject, holder);
         }
-        for (Map.Entry<Class<?>, Lazy<? extends ComputerMethodFactory<?>>> interfaceEntry : interfaceFactories.entrySet()) {
+        for (Map.Entry<Class<?>, ComputerMethodFactory<?>> interfaceEntry : interfaceFactories.entrySet()) {
             if (interfaceEntry.getKey().isAssignableFrom(subjectClass)) {
-                ComputerMethodFactory computerMethodFactory = interfaceEntry.getValue().get();
+                ComputerMethodFactory computerMethodFactory = interfaceEntry.getValue();
                 computerMethodFactory.bindTo(subject, holder);
             }
         }
@@ -103,7 +94,7 @@ public class FactoryRegistry {
               .flatMap(s->
                     s.map(entry-> Pair.of(
                           entry.getKey(),
-                          entry.getValue().get().getHelpData())
+                          entry.getValue().getHelpData())
                     )
               )
               //nb, this MUST be a TreeMap for the Datagen to use
@@ -138,12 +129,12 @@ public class FactoryRegistry {
             //found one we handle, all supers will be present (if required)
             List<ComputerMethodFactory<?>> outList = new ArrayList<>();
             for (Class<?> aClass : superClasses.getOrDefault(target, Collections.emptyList())) {
-                Lazy<? extends ComputerMethodFactory<?>> computerMethodFactoryLazy = factories.get(aClass);
+                ComputerMethodFactory<?> computerMethodFactoryLazy = factories.get(aClass);
                 if (computerMethodFactoryLazy != null) {
-                    outList.add(computerMethodFactoryLazy.get());
+                    outList.add(computerMethodFactoryLazy);
                 }
             }
-            outList.add(factories.get(target).get());
+            outList.add(factories.get(target));
             return outList;
         }
         Class<?> parent = target.getSuperclass();

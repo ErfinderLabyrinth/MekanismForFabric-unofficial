@@ -1,13 +1,14 @@
 package mekanism.client.gui.element.scroll;
 
-import java.util.ArrayList;
-import java.util.List;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiInnerScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiTextScrollList extends GuiScrollList {
 
