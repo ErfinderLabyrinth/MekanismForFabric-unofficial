@@ -53,7 +53,15 @@ jobs:
           build/downloadMcpConfig
           build/extractSrg
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v5
+      with:
+        java-version: '17'
+        distribution: 'jetbrains'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -89,7 +97,7 @@ jobs:
     - name: Publish
       uses: gradle/gradle-build-action@v2
       with:
-        arguments: curseforge modrinth publish
+        disabled-arguments: curseforge modrinth publish
         gradle-version: wrapper
         cache-read-only: false
       env:
