@@ -5,7 +5,7 @@
       "item": "mekanismgenerators:fission_reactor_casing"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:redstone_dusts"
     }
   },
   "pattern": [

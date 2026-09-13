@@ -1,11 +1,12 @@
 package mekanism.common.integration;
 
-import java.util.function.Supplier;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.providers.IGasProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Supplier;
 
 public class LazyGasProvider implements IGasProvider {
 
@@ -17,7 +18,7 @@ public class LazyGasProvider implements IGasProvider {
      */
     public LazyGasProvider(ResourceLocation gasRegistryName) {
         this(() -> {
-            Gas gas = MekanismAPI.gasRegistry().getValue(gasRegistryName);
+            Gas gas = MekanismAPI.gasRegistry().get(gasRegistryName);
             return gas == null ? MekanismAPI.EMPTY_GAS : gas;
         });
     }

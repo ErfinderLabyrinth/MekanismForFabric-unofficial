@@ -1,9 +1,10 @@
 package mekanism.common.inventory.warning;
 
-import java.util.function.BooleanSupplier;
 import mekanism.common.inventory.warning.WarningTracker.WarningType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BooleanSupplier;
 
 public interface ISupportsWarning<TYPE extends ISupportsWarning<TYPE>> {
 

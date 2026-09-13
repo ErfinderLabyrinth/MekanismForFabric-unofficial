@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ores/uranium"
+      "tag": "c:uranium_ores"
     }
   },
   "output": {
     "amount": 1000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_uranium"
+    "slurry": "minecraft:dirty_uranium"
   }
 }

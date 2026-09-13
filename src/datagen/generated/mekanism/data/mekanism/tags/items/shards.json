@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "#mekanism:shards/iron",
     "#mekanism:shards/gold",

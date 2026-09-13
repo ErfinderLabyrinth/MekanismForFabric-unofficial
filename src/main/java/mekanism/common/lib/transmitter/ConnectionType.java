@@ -1,6 +1,5 @@
 package mekanism.common.lib.transmitter;
 
-import java.util.Locale;
 import mekanism.api.IIncrementalEnum;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.math.MathUtils;
@@ -11,6 +10,8 @@ import mekanism.api.text.ILangEntry;
 import mekanism.common.MekanismLang;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
+
+import java.util.Locale;
 
 @NothingNullByDefault
 public enum ConnectionType implements IIncrementalEnum<ConnectionType>, StringRepresentable, IHasTranslationKey, IHasTextComponent {

@@ -1,6 +1,5 @@
 package mekanism.common.tile.component;
 
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.security.SecurityMode;
@@ -15,6 +14,8 @@ import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+
+import java.util.UUID;
 
 public class TileComponentSecurity implements ITileComponent {
 
@@ -103,7 +104,7 @@ public class TileComponentSecurity implements ITileComponent {
     public void addToUpdateTag(CompoundTag updateTag) {
         if (ownerUUID != null) {
             updateTag.putUUID(NBTConstants.OWNER_UUID, ownerUUID);
-            updateTag.putString(NBTConstants.OWNER_NAME, MekanismUtils.getLastKnownUsername(ownerUUID));
+            updateTag.putString(NBTConstants.OWNER_NAME, MekanismUtils.getLastKnownUsername(ownerUUID, tile.getLevel().getServer()));
         }
     }
 

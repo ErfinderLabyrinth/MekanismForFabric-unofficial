@@ -1,11 +1,8 @@
 package mekanism.client.gui.element.window.filter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.ILangEntry;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.button.MekanismImageButton;
@@ -16,7 +13,6 @@ import mekanism.client.gui.element.slot.SlotType;
 import mekanism.client.gui.element.text.GuiTextField;
 import mekanism.client.gui.element.window.GuiWindow;
 import mekanism.client.jei.interfaces.IJEIGhostTarget.IGhostIngredientConsumer;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.filter.IFilter;
 import mekanism.common.content.transporter.SorterFilter;
@@ -32,6 +28,11 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends TileEntityMekanism & ITileFilterHolder<? super FILTER>> extends GuiWindow
       implements GuiFilterHelper<TILE> {
@@ -114,7 +115,7 @@ public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends Til
         addChild(new TranslationButton(gui(), getLeftButtonX(), screenBottom + 2, 60, 20,
               isNew ? MekanismLang.BUTTON_CANCEL : MekanismLang.BUTTON_DELETE, () -> {
             if (origFilter != null) {
-                Mekanism.packetHandler().sendToServer(new PacketEditFilter<>(tile.getBlockPos(), origFilter, null));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketEditFilter<>(tile.getBlockPos(), origFilter, null));
             }
             close();
         }));
@@ -194,9 +195,9 @@ public abstract class GuiFilter<FILTER extends IFilter<FILTER>, TILE extends Til
 
     protected void saveFilter() {
         if (isNew) {
-            Mekanism.packetHandler().sendToServer(new PacketNewFilter(tile.getBlockPos(), filter));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketNewFilter(tile.getBlockPos(), filter));
         } else {
-            Mekanism.packetHandler().sendToServer(new PacketEditFilter<>(tile.getBlockPos(), origFilter, filter));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketEditFilter<>(tile.getBlockPos(), origFilter, filter));
         }
         close();
     }

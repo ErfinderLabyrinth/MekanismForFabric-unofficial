@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "mekanism:ingot_osmium",
     "mekanism:ingot_tin",

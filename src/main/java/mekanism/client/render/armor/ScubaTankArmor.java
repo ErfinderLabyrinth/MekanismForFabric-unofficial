@@ -2,17 +2,20 @@ package mekanism.client.render.armor;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.model.ModelScubaTank;
+import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class ScubaTankArmor implements ICustomArmor, ResourceManagerReloadListener {
-
+public class ScubaTankArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
+    public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "scuba_tank_armor");
     public static final ScubaTankArmor SCUBA_TANK = new ScubaTankArmor();
 
     private ModelScubaTank model;
@@ -51,5 +54,10 @@ public class ScubaTankArmor implements ICustomArmor, ResourceManagerReloadListen
         matrix.translate(0, 0, 0.06);
         model.render(matrix, renderer, light, overlayLight, hasEffect);
         matrix.popPose();
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 }

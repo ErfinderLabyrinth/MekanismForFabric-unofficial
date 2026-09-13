@@ -1,7 +1,5 @@
 package mekanism.common.item;
 
-import java.util.ArrayList;
-import java.util.List;
 import mekanism.api.NBTConstants;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
@@ -22,6 +20,9 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ItemCraftingFormula extends Item {
 
@@ -69,10 +70,12 @@ public class ItemCraftingFormula extends Item {
         return InteractionResultHolder.pass(stack);
     }
 
-    @Override
-    public int getMaxStackSize(ItemStack stack) {
-        return hasInventory(stack) ? 1 : 64;
-    }
+//    @Override
+//    public int getMaxStackSize(ItemStack stack) {
+//        return hasInventory(stack) ? 1 : 64;
+//    }
+
+
 
     @NotNull
     @Override
@@ -124,7 +127,7 @@ public class ItemCraftingFormula extends Item {
         for (int slotCount = 0; slotCount < 9; slotCount++) {
             ItemStack slotStack = inv.get(slotCount);
             if (!slotStack.isEmpty()) {
-                CompoundTag tagCompound = slotStack.serializeNBT();
+                CompoundTag tagCompound = slotStack.save(new CompoundTag());
                 tagCompound.putByte(NBTConstants.SLOT, (byte) slotCount);
                 tagList.add(tagCompound);
             }

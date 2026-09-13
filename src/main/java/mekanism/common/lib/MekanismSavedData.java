@@ -1,14 +1,14 @@
 package mekanism.common.lib;
 
-import java.io.File;
-import java.util.function.Supplier;
 import mekanism.common.Mekanism;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.util.function.Supplier;
 
 public abstract class MekanismSavedData extends SavedData {
 
@@ -33,8 +33,7 @@ public abstract class MekanismSavedData extends SavedData {
     /**
      * Note: This should only be called from the server side
      */
-    public static <DATA extends MekanismSavedData> DATA createSavedData(Supplier<DATA> createFunction, String name) {
-        MinecraftServer currentServer = ServerLifecycleHooks.getCurrentServer();
+    public static <DATA extends MekanismSavedData> DATA createSavedData(Supplier<DATA> createFunction, String name, MinecraftServer currentServer) {
         if (currentServer == null) {
             throw new IllegalStateException("Current server is null");
         }

@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "mekanism:block_osmium",
     "mekanism:block_tin",

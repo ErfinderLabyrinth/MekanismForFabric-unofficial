@@ -2,7 +2,7 @@
   "type": "mekanism:mek_data",
   "key": {
     "#": {
-      "tag": "forge:gems/diamond"
+      "tag": "c:diamonds"
     },
     "A": {
       "tag": "mekanism:alloys/reinforced"

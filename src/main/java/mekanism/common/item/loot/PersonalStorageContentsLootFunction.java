@@ -3,14 +3,14 @@ package mekanism.common.item.loot;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import java.util.List;
-import java.util.Set;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
-import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.lib.inventory.personalstorage.AbstractPersonalStorageItemInventory;
 import mekanism.common.lib.inventory.personalstorage.ClientSidePersonalStorageInventory;
 import mekanism.common.lib.inventory.personalstorage.PersonalStorageManager;
 import mekanism.common.tile.TileEntityPersonalStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -20,7 +20,9 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraftforge.fml.util.thread.EffectiveSide;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
 
 /**
  * Loot function which copies the Personal Storage inventory to the saved data and adds an inv id to the stack
@@ -41,25 +43,26 @@ public class PersonalStorageContentsLootFunction implements LootItemFunction {
 
     @Override
     public LootItemFunctionType getType() {
-        return MekanismLootFunctions.PERSONAL_STORAGE_LOOT_FUNC.get();
+        return MekanismLootFunctions.PERSONAL_STORAGE_LOOT_FUNC;
     }
 
     @Override
     public ItemStack apply(ItemStack itemStack, LootContext lootContext) {
         BlockEntity blockEntity = lootContext.getParam(LootContextParams.BLOCK_ENTITY);
         if (blockEntity instanceof TileEntityPersonalStorage personalStorage && !personalStorage.isInventoryEmpty()) {
-            List<IInventorySlot> tileSlots = personalStorage.getInventorySlots(null);
+            @Nullable Storage<ItemVariant> tileSlots = personalStorage.getItemStorage(null);
             AbstractPersonalStorageItemInventory destInv;
-            if (EffectiveSide.get().isClient()) {
+            if (blockEntity.getLevel().isClientSide()) {
                 destInv = new ClientSidePersonalStorageInventory();
             } else {
-                destInv = PersonalStorageManager.getInventoryFor(itemStack).orElseThrow(()->new IllegalStateException("Inventory not available?!"));
+                destInv = PersonalStorageManager.getInventoryFor(itemStack, personalStorage.getLevel().getServer()).orElseThrow(()->new IllegalStateException("Inventory not available?!"));
             }
-            for (int i = 0; i < tileSlots.size(); i++) {
-                IInventorySlot tileSlot = tileSlots.get(i);
-                if (!tileSlot.isEmpty()) {
-                    destInv.setStackInSlot(i, tileSlot.getStack().copy());
+            int i = 0;
+            for (StorageView<ItemVariant> view:tileSlots) {
+                if (!view.isResourceBlank() && view.getAmount() != 0) {
+                    destInv.getSlot(i).setStack(view.getResource().toStack((int)view.getAmount()));
                 }
+                i++;
             }
         }
         return itemStack;

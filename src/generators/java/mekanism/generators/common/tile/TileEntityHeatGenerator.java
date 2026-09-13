@@ -2,10 +2,10 @@ package mekanism.generators.common.tile;
 
 import java.util.Arrays;
 import java.util.Optional;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
-import mekanism.api.IContentsListener;
-import mekanism.api.RelativeSide;
+
+import com.google.common.math.DoubleMath;
+import com.google.common.math.LongMath;
+import mekanism.api.*;
 import mekanism.api.heat.HeatAPI.HeatTransfer;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.api.math.FloatingLong;
@@ -21,6 +21,7 @@ import mekanism.common.capabilities.holder.heat.IHeatCapacitorHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
 import mekanism.common.config.listener.ConfigBasedCachedFLSupplier;
+import mekanism.common.config.listener.ConfigBasedCachedSupplier;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerFluidTankWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerHeatCapacitorWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
@@ -29,16 +30,19 @@ import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableDouble;
 import mekanism.common.inventory.container.sync.SyncableFloatingLong;
+import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.tile.base.SubstanceType;
-import mekanism.common.util.CapabilityUtils;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.WorldUtils;
 import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.registries.GeneratorsBlocks;
 import mekanism.generators.common.slot.FluidFuelInventorySlot;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -46,8 +50,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,18 +57,18 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
 
     private static final double THERMAL_EFFICIENCY = 0.5;
     //Default configs this is 510 compared to the previous 500
-    private static final ConfigBasedCachedFLSupplier MAX_PRODUCTION = new ConfigBasedCachedFLSupplier(() -> {
-        FloatingLong passiveMax = MekanismGeneratorsConfig.generators.heatGenerationLava.get().multiply(EnumUtils.DIRECTIONS.length + 1);
-        passiveMax = passiveMax.plusEqual(MekanismGeneratorsConfig.generators.heatGenerationNether.get());
-        return passiveMax.plusEqual(MekanismGeneratorsConfig.generators.heatGeneration.get());
-    }, MekanismGeneratorsConfig.generators.heatGeneration, MekanismGeneratorsConfig.generators.heatGenerationLava, MekanismGeneratorsConfig.generators.heatGenerationNether);
+    private static final ConfigBasedCachedSupplier<Long> MAX_PRODUCTION = new ConfigBasedCachedSupplier<>(() -> {
+        double passiveMax = MekanismGeneratorsConfig.generators.heatGenerationLava * (EnumUtils.DIRECTIONS.length + 1);
+        passiveMax += MekanismGeneratorsConfig.generators.heatGenerationNether;
+        return (long) (passiveMax + MekanismGeneratorsConfig.generators.heatGeneration);
+    });
 
     /**
      * The FluidTank for this generator.
      */
     @WrappingComputerMethod(wrapper = ComputerFluidTankWrapper.class, methodNames = {"getLava", "getLavaCapacity", "getLavaNeeded", "getLavaFilledPercentage"}, docPlaceholder = "lava tank")
     public BasicFluidTank lavaTank;
-    private FloatingLong producingEnergy = FloatingLong.ZERO;
+    private long producingEnergy = 0;
     private double lastTransferLoss;
     private double lastEnvironmentLoss;
 
@@ -78,14 +80,14 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
     EnergyInventorySlot energySlot;
 
     public TileEntityHeatGenerator(BlockPos pos, BlockState state) {
-        super(GeneratorsBlocks.HEAT_GENERATOR, pos, state, MAX_PRODUCTION);
+        super(GeneratorsBlocks.HEAT_GENERATOR, pos, state, MAX_PRODUCTION::get);
     }
 
     @NotNull
     @Override
     protected IFluidTankHolder getInitialFluidTanks(IContentsListener listener) {
         FluidTankHelper builder = FluidTankHelper.forSide(this::getDirection);
-        builder.addTank(lavaTank = VariableCapacityFluidTank.input(MekanismGeneratorsConfig.generators.heatTankCapacity,
+        builder.addTank(lavaTank = VariableCapacityFluidTank.input(() -> MekanismGeneratorsConfig.generators.heatTankCapacity,
                     fluidStack -> MekanismTags.Fluids.LAVA_LOOKUP.contains(fluidStack.getFluid()), listener), RelativeSide.LEFT, RelativeSide.RIGHT, RelativeSide.BACK,
               RelativeSide.TOP, RelativeSide.BOTTOM);
         return builder.build();
@@ -97,7 +99,7 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         InventorySlotHelper builder = InventorySlotHelper.forSide(this::getDirection);
         //Divide the burn time by 20 as that is the ratio of how much a bucket of lava would burn for
         // Eventually we may want to grab the 20 dynamically in case some mod is changing the burn time of a lava bucket
-        builder.addSlot(fuelSlot = FluidFuelInventorySlot.forFuel(lavaTank, stack -> ForgeHooks.getBurnTime(stack, null) / 20, size -> new FluidStack(Fluids.LAVA, size),
+        builder.addSlot(fuelSlot = FluidFuelInventorySlot.forFuel(lavaTank, stack -> FuelRegistry.INSTANCE.get(stack.getItem()) / 20, size -> new FluidStack(FluidVariant.of(Fluids.LAVA), size),
               listener, 17, 35), RelativeSide.FRONT, RelativeSide.LEFT, RelativeSide.BACK, RelativeSide.TOP, RelativeSide.BOTTOM);
         builder.addSlot(energySlot = EnergyInventorySlot.drain(getEnergyContainer(), listener, 143, 35), RelativeSide.RIGHT);
         return builder.build();
@@ -116,14 +118,21 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         super.onUpdateServer();
         energySlot.drainContainer();
         fuelSlot.fillOrBurn();
-        FloatingLong prev = getEnergyContainer().getEnergy().copyAsConst();
-        heatCapacitor.handleHeat(getBoost().doubleValue());
-        if (MekanismUtils.canFunction(this) && !getEnergyContainer().getNeeded().isZero()) {
-            int fluidRate = MekanismGeneratorsConfig.generators.heatGenerationFluidRate.get();
-            if (lavaTank.extract(fluidRate, Action.SIMULATE, AutomationType.INTERNAL).getAmount() == fluidRate) {
+        long prev = getEnergyContainer().getEnergy();
+        heatCapacitor.handleHeat(getBoost());
+        if (MekanismUtils.canFunction(this) && getEnergyContainer().getNeeded() != 0) {
+            int fluidRate = MekanismGeneratorsConfig.generators.heatGenerationFluidRate;
+            boolean extracted = false;
+            try(Transaction t = Transaction.openOuter()) {
+                long amountExtracted = lavaTank.extract(lavaTank.getResource(), fluidRate, t);
+                if (amountExtracted == fluidRate) {
+                    t.commit();
+                    extracted = true;
+                }
+            }
+            if (extracted) {
                 setActive(true);
-                lavaTank.extract(fluidRate, Action.EXECUTE, AutomationType.INTERNAL);
-                heatCapacitor.handleHeat(MekanismGeneratorsConfig.generators.heatGeneration.get().doubleValue());
+                heatCapacitor.handleHeat(MekanismGeneratorsConfig.generators.heatGeneration);
             } else {
                 setActive(false);
             }
@@ -133,18 +142,18 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         HeatTransfer loss = simulate();
         lastTransferLoss = loss.adjacentTransfer();
         lastEnvironmentLoss = loss.environmentTransfer();
-        producingEnergy = getEnergyContainer().getEnergy().subtract(prev);
+        producingEnergy = getEnergyContainer().getEnergy() - prev;
     }
 
-    private FloatingLong getBoost() {
+    private double getBoost() {
         if (level == null) {
-            return FloatingLong.ZERO;
+            return 0;
         }
-        FloatingLong boost;
-        FloatingLong passiveLavaAmount = MekanismGeneratorsConfig.generators.heatGenerationLava.get();
-        if (passiveLavaAmount.isZero()) {
+        double boost;
+        double passiveLavaAmount = MekanismGeneratorsConfig.generators.heatGenerationLava;
+        if (passiveLavaAmount == 0) {
             //If neighboring lava blocks produce no energy, don't bother checking the sides for them
-            boost = FloatingLong.ZERO;
+            boost = 0;
         } else {
             //Otherwise, calculate boost to apply from lava
             long lavaSides = Arrays.stream(EnumUtils.DIRECTIONS).filter(side -> {
@@ -156,10 +165,13 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
                 //If the heat generator is lava-logged then add it as another side that is adjacent to lava for the heat calculations
                 lavaSides++;
             }
-            boost = passiveLavaAmount.multiply(lavaSides);
+            boost = passiveLavaAmount * lavaSides;
         }
         if (level.dimensionType().ultraWarm()) {
-            boost = boost.plusEqual(MekanismGeneratorsConfig.generators.heatGenerationNether.get());
+            boost = boost + MekanismGeneratorsConfig.generators.heatGenerationNether;
+        }
+        if (boost == Double.POSITIVE_INFINITY) {
+            boost = Double.MAX_VALUE;
         }
         return boost;
     }
@@ -178,8 +190,10 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
         double carnotEfficiency = 1 - Math.min(ambientTemp, temp) / Math.max(ambientTemp, temp);
         double heatLost = THERMAL_EFFICIENCY * (temp - ambientTemp);
         heatCapacitor.handleHeat(-heatLost);
-        FloatingLong energyFromHeat = FloatingLong.create(Math.abs(heatLost) * carnotEfficiency);
-        getEnergyContainer().insert(energyFromHeat.min(MAX_PRODUCTION.get()), Action.EXECUTE, AutomationType.INTERNAL);
+        long energyFromHeat = (long) (Math.abs(heatLost) * carnotEfficiency);
+        try(Transaction t = Transaction.openOuter()) {
+            getEnergyContainer().insert(Math.min(energyFromHeat, MAX_PRODUCTION.get()), t);
+        }
         return super.simulate();
     }
 
@@ -187,14 +201,13 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
     @Override
     public IHeatHandler getAdjacent(@NotNull Direction side) {
         if (side == Direction.DOWN) {
-            BlockEntity adj = WorldUtils.getTileEntity(getLevel(), worldPosition.below());
-            return CapabilityUtils.getCapability(adj, Capabilities.HEAT_HANDLER, side.getOpposite()).resolve().orElse(null);
+            return Capabilities.HEAT_HANDLER_BLOCK.find(getLevel(), worldPosition.below(), side.getOpposite());
         }
         return null;
     }
 
     @Override
-    public FloatingLong getProductionRate() {
+    public long getProductionRate() {
         return producingEnergy;
     }
 
@@ -210,7 +223,7 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
 
     @Override
     public int getRedstoneLevel() {
-        return MekanismUtils.redstoneLevelFromContents(lavaTank.getFluidAmount(), lavaTank.getCapacity());
+        return MekanismUtils.redstoneLevelFromContents(lavaTank.getAmount(), lavaTank.getCapacity());
     }
 
     @Override
@@ -221,7 +234,7 @@ public class TileEntityHeatGenerator extends TileEntityGenerator {
     @Override
     public void addContainerTrackers(MekanismContainer container) {
         super.addContainerTrackers(container);
-        container.track(SyncableFloatingLong.create(this::getProductionRate, value -> producingEnergy = value));
+        container.track(SyncableLong.create(this::getProductionRate, value -> producingEnergy = value));
         container.track(SyncableDouble.create(this::getLastTransferLoss, value -> lastTransferLoss = value));
         container.track(SyncableDouble.create(this::getLastEnvironmentLoss, value -> lastEnvironmentLoss = value));
     }

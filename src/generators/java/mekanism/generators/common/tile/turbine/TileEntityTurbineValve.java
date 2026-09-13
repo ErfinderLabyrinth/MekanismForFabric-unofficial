@@ -1,11 +1,13 @@
 package mekanism.generators.common.tile.turbine;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
+import mekanism.api.energy.IEnergyContainer;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.capabilities.holder.energy.IEnergyContainerHolder;
 import mekanism.common.lib.multiblock.IMultiblockEjector;
@@ -13,10 +15,13 @@ import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.CableUtils;
 import mekanism.generators.common.content.turbine.TurbineMultiblockData;
 import mekanism.generators.common.registries.GeneratorsBlocks;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
 public class TileEntityTurbineValve extends TileEntityTurbineCasing implements IMultiblockEjector {
 
@@ -29,13 +34,33 @@ public class TileEntityTurbineValve extends TileEntityTurbineCasing implements I
     @NotNull
     @Override
     public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(IContentsListener listener) {
-        return side -> getMultiblock().getGasTanks(side);
+        return new IChemicalTankHolder<Gas, GasStack, IGasTank>() {
+            @Override
+            public @NotNull Storage<Gas> getTanks(@Nullable Direction side) {
+                return getMultiblock().getGasStorage(side);
+            }
+
+            @Override
+            public List<IGasTank> getAll() {
+                return getMultiblock().getGasTanks();
+            }
+        };
     }
 
     @NotNull
     @Override
     protected IEnergyContainerHolder getInitialEnergyContainers(IContentsListener listener) {
-        return side -> getMultiblock().getEnergyContainers(side);
+        return new IEnergyContainerHolder() {
+            @Override
+            public List<IEnergyContainer> getAll() {
+                return getMultiblock().getEnergyContainers();
+            }
+
+            @Override
+            public @NotNull EnergyStorage getEnergyContainers(@Nullable Direction side) {
+                return getMultiblock().getEnergyStorage(side);
+            }
+        };
     }
 
     @Override

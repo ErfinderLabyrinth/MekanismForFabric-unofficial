@@ -1,14 +1,7 @@
 package mekanism.common.content.gear;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
-import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.gear.ICustomModule;
 import mekanism.api.gear.IHUDElement;
 import mekanism.api.gear.IModule;
@@ -17,8 +10,6 @@ import mekanism.api.gear.config.IModuleConfigItem;
 import mekanism.api.gear.config.ModuleBooleanData;
 import mekanism.api.gear.config.ModuleConfigData;
 import mekanism.api.gear.config.ModuleConfigItemCreator;
-import mekanism.api.math.FloatingLong;
-import mekanism.api.math.FloatingLongSupplier;
 import mekanism.api.radial.RadialData;
 import mekanism.api.radial.mode.IRadialMode;
 import mekanism.api.radial.mode.NestedRadialMode;
@@ -27,10 +18,14 @@ import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.gear.ModuleConfigItem.DisableableModuleConfigItem;
+import mekanism.common.inventory.SimpleSingleStackStorage;
 import mekanism.common.item.interfaces.IModeItem.DisplayChange;
 import mekanism.common.util.ItemDataUtils;
 import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.StorageUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -40,6 +35,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.LongSupplier;
 
 @ParametersAreNotNullByDefault
 @MethodsReturnNonnullByDefault
@@ -50,7 +52,7 @@ public final class Module<MODULE extends ICustomModule<MODULE>> implements IModu
     private final List<ModuleConfigItem<?>> configItems = new ArrayList<>();
 
     private final ModuleData<MODULE> data;
-    private final ItemStack container;
+    private final SimpleSingleStackStorage container;
     private final MODULE customModule;
 
     private ModuleConfigItem<Boolean> enabled;
@@ -61,7 +63,7 @@ public final class Module<MODULE extends ICustomModule<MODULE>> implements IModu
 
     public Module(ModuleData<MODULE> data, ItemStack container) {
         this.data = data;
-        this.container = container;
+        this.container = new SimpleSingleStackStorage(container);
         this.customModule = data.get();
     }
 
@@ -155,67 +157,74 @@ public final class Module<MODULE extends ICustomModule<MODULE>> implements IModu
 
     @Nullable
     @Override
-    public IEnergyContainer getEnergyContainer() {
-        return StorageUtils.getEnergyContainer(getContainer(), 0);
+    public EnergyStorage getEnergyContainer() {
+        return ContainerItemContext.ofSingleSlot(getContainerStorage()).find(EnergyStorage.ITEM);
     }
 
     @Override
-    public FloatingLong getContainerEnergy() {
-        IEnergyContainer energyContainer = getEnergyContainer();
-        return energyContainer == null ? FloatingLong.ZERO : energyContainer.getEnergy();
+    public long getContainerEnergy() {
+        EnergyStorage energyContainer = getEnergyContainer();
+        return energyContainer == null ? 0 : energyContainer.getAmount();
     }
 
     @Override
-    public boolean hasEnoughEnergy(FloatingLongSupplier energySupplier) {
-        return hasEnoughEnergy(energySupplier.get());
+    public boolean hasEnoughEnergy(LongSupplier energySupplier) {
+        return hasEnoughEnergy(energySupplier.getAsLong());
     }
 
     @Override
-    public boolean hasEnoughEnergy(FloatingLong cost) {
-        return cost.isZero() || getContainerEnergy().greaterOrEqual(cost);
+    public boolean hasEnoughEnergy(long cost) {
+        return cost == 0 || getContainerEnergy() >= cost;
     }
 
     @Override
-    public boolean canUseEnergy(LivingEntity wearer, FloatingLong energy) {
+    public boolean canUseEnergy(LivingEntity wearer, long energy) {
         //Note: This is subtly different than how useEnergy does it so that we can get to useEnergy when in creative
         return canUseEnergy(wearer, energy, false);
     }
 
     @Override
-    public boolean canUseEnergy(LivingEntity wearer, FloatingLong energy, boolean ignoreCreative) {
+    public boolean canUseEnergy(LivingEntity wearer, long energy, boolean ignoreCreative) {
         return canUseEnergy(wearer, getEnergyContainer(), energy, ignoreCreative);
     }
 
     @Override
-    public boolean canUseEnergy(LivingEntity wearer, @Nullable IEnergyContainer energyContainer, FloatingLong energy, boolean ignoreCreative) {
+    public boolean canUseEnergy(LivingEntity wearer, @Nullable EnergyStorage energyContainer, long energy, boolean ignoreCreative) {
         if (energyContainer != null && !wearer.isSpectator()) {
             //Don't check spectators in general
             if (!ignoreCreative || !(wearer instanceof Player player) || !player.isCreative()) {
-                return energyContainer.extract(energy, Action.SIMULATE, AutomationType.MANUAL).equals(energy);
+                try(Transaction t=Transaction.openOuter()) {
+                    return energyContainer.extract(energy, t) == energy;
+                }
             }
         }
         return false;
     }
 
     @Override
-    public FloatingLong useEnergy(LivingEntity wearer, FloatingLong energy) {
+    public long useEnergy(LivingEntity wearer, long energy) {
         return useEnergy(wearer, energy, true);
     }
 
     @Override
-    public FloatingLong useEnergy(LivingEntity wearer, FloatingLong energy, boolean freeCreative) {
+    public long useEnergy(LivingEntity wearer, long energy, boolean freeCreative) {
         return useEnergy(wearer, getEnergyContainer(), energy, freeCreative);
     }
 
     @Override
-    public FloatingLong useEnergy(LivingEntity wearer, @Nullable IEnergyContainer energyContainer, FloatingLong energy, boolean freeCreative) {
+    public long useEnergy(LivingEntity wearer, @Nullable EnergyStorage energyContainer, long energy, boolean freeCreative) {
         if (energyContainer != null) {
             //Use from spectators if this is called due to the various edge cases that exist for when things are calculated manually
             if (!freeCreative || !(wearer instanceof Player player) || MekanismUtils.isPlayingMode(player)) {
-                return energyContainer.extract(energy, Action.EXECUTE, AutomationType.MANUAL);
+                long extracted;
+                try(Transaction t=Transaction.openOuter()) {
+                    extracted = energyContainer.extract(energy, t);
+                    t.commit();
+                }
+                return extracted;
             }
         }
-        return FloatingLong.ZERO;
+        return 0;
     }
 
     public void read(CompoundTag nbt) {
@@ -234,14 +243,14 @@ public final class Module<MODULE extends ICustomModule<MODULE>> implements IModu
      * @param callback - will run after the NBT data is saved
      */
     public void save(@Nullable Runnable callback) {
-        CompoundTag modulesTag = ItemDataUtils.getOrAddCompound(container, NBTConstants.MODULES);
+        CompoundTag modulesTag = ItemDataUtils.getOrAddCompound(container.getStack(), NBTConstants.MODULES);
         String registryName = data.getRegistryName().toString();
         CompoundTag nbt = modulesTag.getCompound(registryName);
         nbt.putInt(NBTConstants.AMOUNT, installed);
         for (ModuleConfigItem<?> item : configItems) {
             item.write(nbt);
         }
-        //If the modules tag doesn't contain a match then we are on a new entry and have to make sure to add it
+        //If the modules tagSupplier doesn't contain a match then we are on a new entry and have to make sure to add it
         modulesTag.put(registryName, nbt);
 
         if (callback != null) {
@@ -283,6 +292,11 @@ public final class Module<MODULE extends ICustomModule<MODULE>> implements IModu
 
     @Override
     public ItemStack getContainer() {
+        return container.getStack();
+    }
+
+    @Override
+    public SingleSlotStorage<ItemVariant> getContainerStorage() {
         return container;
     }
 

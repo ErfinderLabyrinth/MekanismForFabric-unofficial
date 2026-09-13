@@ -1,7 +1,5 @@
 package mekanism.client.gui;
 
-import java.util.ArrayList;
-import java.util.List;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
 import mekanism.client.gui.element.bar.GuiDynamicHorizontalRateBar;
@@ -9,6 +7,7 @@ import mekanism.client.gui.element.gauge.GaugeType;
 import mekanism.client.gui.element.gauge.GuiGasGauge;
 import mekanism.client.jei.MekanismJEIRecipeType;
 import mekanism.common.MekanismLang;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.content.sps.SPSMultiblockData;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.lib.Color;
@@ -20,6 +19,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiSPS extends GuiMekanismTile<TileEntitySPSCasing, MekanismTileContainer<TileEntitySPSCasing>> {
 
@@ -33,8 +35,8 @@ public class GuiSPS extends GuiMekanismTile<TileEntitySPSCasing, MekanismTileCon
     @Override
     protected void addGuiElements() {
         super.addGuiElements();
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().inputTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 7, 17));
-        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().outputTank, () -> tile.getMultiblock().getGasTanks(null), GaugeType.STANDARD, this, 151, 17));
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().inputTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 7, 17));
+        addRenderableWidget(new GuiGasGauge(() -> tile.getMultiblock().outputTank, () -> new ListHolder<>(tile.getMultiblock().getGasTanks()), GaugeType.STANDARD, this, 151, 17));
         addRenderableWidget(new GuiInnerScreen(this, 27, 17, 122, 60, () -> {
             List<Component> list = new ArrayList<>();
             SPSMultiblockData multiblock = tile.getMultiblock();

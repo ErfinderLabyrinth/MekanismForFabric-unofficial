@@ -5,7 +5,9 @@
       "conditions": {
         "items": [
           {
-            "type": "mekanism:full_canteen"
+            "mekanism": {
+              "fullCanteen": true
+            }
           }
         ]
       },

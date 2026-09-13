@@ -1,7 +1,5 @@
 package mekanism.common.block.attribute;
 
-import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
 import mekanism.api.functions.TriConsumer;
 import mekanism.common.Mekanism;
 import mekanism.common.block.BlockBounding;
@@ -15,6 +13,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.stream.Stream;
+import java.util.stream.Stream.Builder;
 
 //TODO: Currently requires the block to also have a tile and to implement IBoundingBlock for functionality of things
 // at some point that should be cleaned up some

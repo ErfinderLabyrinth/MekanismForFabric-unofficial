@@ -2,7 +2,7 @@
   "type": "mekanism:enriching",
   "input": {
     "ingredient": {
-      "tag": "forge:ores/iron"
+      "tag": "c:iron_ingots"
     }
   },
   "output": {

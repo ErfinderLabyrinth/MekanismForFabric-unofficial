@@ -1,16 +1,19 @@
 package mekanism.common.registration.impl;
 
-import java.util.function.Supplier;
 import mekanism.common.registration.WrappedDeferredRegister;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.function.Supplier;
 
 public class ParticleTypeDeferredRegister extends WrappedDeferredRegister<ParticleType<?>> {
-
+    String modid;
     public ParticleTypeDeferredRegister(String modid) {
-        super(modid, ForgeRegistries.PARTICLE_TYPES);
+        super(BuiltInRegistries.PARTICLE_TYPE);
+        this.modid = modid;
     }
 
     public ParticleTypeRegistryObject<SimpleParticleType, SimpleParticleType> registerBasicParticle(String name) {
@@ -18,6 +21,6 @@ public class ParticleTypeDeferredRegister extends WrappedDeferredRegister<Partic
     }
 
     public <PARTICLE extends ParticleOptions, TYPE extends ParticleType<PARTICLE>> ParticleTypeRegistryObject<PARTICLE, TYPE> register(String name, Supplier<TYPE> sup) {
-        return register(name, sup, ParticleTypeRegistryObject::new);
+        return register(new ResourceLocation(modid, name), sup, ParticleTypeRegistryObject::new);
     }
 }

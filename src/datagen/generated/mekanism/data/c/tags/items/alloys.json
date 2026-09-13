@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "#c:advanced_alloys",
+    "#c:elite_alloys",
+    "#c:ultimate_alloys"
+  ]
+}

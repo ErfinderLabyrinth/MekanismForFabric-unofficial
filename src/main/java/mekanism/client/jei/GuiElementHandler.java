@@ -1,10 +1,5 @@
 package mekanism.client.jei;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.window.GuiWindow;
@@ -18,6 +13,8 @@ import mezz.jei.api.runtime.IIngredientManager;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.Rect2i;
+
+import java.util.*;
 
 public class GuiElementHandler implements IGuiContainerHandler<GuiMekanism<?>> {
 
@@ -111,8 +108,8 @@ public class GuiElementHandler implements IGuiContainerHandler<GuiMekanism<?>> {
     @Override
     public Collection<IGuiClickableArea> getGuiClickableAreas(GuiMekanism<?> gui, double mouseX, double mouseY) {
         //Make mouseX and mouseY not be relative
-        mouseX += gui.getGuiLeft();
-        mouseY += gui.getGuiTop();
+        mouseX += gui.getLeft();
+        mouseY += gui.getTop();
         GuiWindow guiWindow = gui.getWindowHovering(mouseX, mouseY);
         if (guiWindow == null) {
             //If no window is being hovered, then check the elements in general

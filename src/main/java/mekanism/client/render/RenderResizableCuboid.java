@@ -2,7 +2,6 @@ package mekanism.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.Arrays;
 import mekanism.client.render.MekanismRenderer.Model3D;
 import mekanism.client.render.MekanismRenderer.Model3D.SpriteInfo;
 import mekanism.common.util.EnumUtils;
@@ -18,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+
+import java.util.Arrays;
 
 /**
  * Adapted from Mantle's FluidRenderer and Tinker's SmelteryTankRenderer

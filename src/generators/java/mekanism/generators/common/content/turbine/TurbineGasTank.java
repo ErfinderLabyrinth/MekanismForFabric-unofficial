@@ -1,13 +1,11 @@
 package mekanism.generators.common.content.turbine;
 
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.chemical.gas.GasStack;
+import mekanism.api.chemical.gas.Gas;
 import mekanism.common.capabilities.chemical.multiblock.MultiblockChemicalTankBuilder.MultiblockGasTank;
 import mekanism.common.registries.MekanismGases;
-import org.jetbrains.annotations.NotNull;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -22,11 +20,17 @@ public class TurbineGasTank extends MultiblockGasTank {
     }
 
     @Override
-    public GasStack insert(@NotNull GasStack stack, Action action, AutomationType automationType) {
-        GasStack returned = super.insert(stack, action, automationType);
-        if (action == Action.EXECUTE && multiblock.isFormed()) {
-            multiblock.newSteamInput += stack.getAmount() - returned.getAmount();
+    public long insert(Gas resource, long maxAmount, TransactionContext transaction) {
+        long inserted = super.insert(resource, maxAmount, transaction);
+
+        if(multiblock.isFormed()) {
+            transaction.addOuterCloseCallback(result -> {
+                if (result.wasCommitted()) {
+                    multiblock.newSteamInput += inserted;
+                }
+            });
         }
-        return returned;
+
+        return inserted;
     }
 }

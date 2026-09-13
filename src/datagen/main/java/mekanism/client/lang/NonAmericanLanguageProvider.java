@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import mekanism.client.lang.FormatSplitter.Component;
 import mekanism.client.lang.FormatSplitter.FormatComponent;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.Util;
 import net.minecraft.data.PackOutput;
 
@@ -39,8 +40,8 @@ public class NonAmericanLanguageProvider extends ConvertibleLanguageProvider {
         map.put(key.toLowerCase(Locale.ROOT), value.toLowerCase(Locale.ROOT));
     }
 
-    public NonAmericanLanguageProvider(PackOutput output, String modid, String locale) {
-        super(output, modid, locale);
+    public NonAmericanLanguageProvider(FabricDataOutput dataGenerator, String locale) {
+        super(dataGenerator, locale);
     }
 
     @Override

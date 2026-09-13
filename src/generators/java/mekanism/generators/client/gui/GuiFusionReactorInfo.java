@@ -1,6 +1,8 @@
 package mekanism.generators.client.gui;
 
 import java.util.List;
+
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
@@ -30,7 +32,7 @@ public abstract class GuiFusionReactorInfo extends GuiMekanismTile<TileEntityFus
     protected void addGuiElements() {
         super.addGuiElements();
         addRenderableWidget(new MekanismImageButton(this, 6, 6, 14, getButtonLocation("back"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketGuiButtonPress(ClickedTileButton.BACK_BUTTON, tile)), getOnHover(MekanismLang.BACK)));
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiButtonPress(ClickedTileButton.BACK_BUTTON, tile)), getOnHover(MekanismLang.BACK)));
         addRenderableWidget(new GuiEnergyTab(this, () -> {
             FusionReactorMultiblockData multiblock = tile.getMultiblock();
             return List.of(MekanismLang.STORING.translate(EnergyDisplay.of(multiblock.energyContainer)),

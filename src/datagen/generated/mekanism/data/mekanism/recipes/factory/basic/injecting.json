@@ -5,10 +5,10 @@
       "tag": "mekanism:alloys/basic"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "P": {
       "item": "mekanism:chemical_injection_chamber"

@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ores/osmium"
+      "tag": "c:osmium_ores"
     }
   },
   "output": {
     "amount": 1000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_osmium"
+    "slurry": "minecraft:dirty_osmium"
   }
 }

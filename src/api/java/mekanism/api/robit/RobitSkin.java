@@ -1,7 +1,6 @@
 package mekanism.api.robit;
 
 import com.mojang.serialization.Codec;
-import java.util.List;
 import mekanism.api.MekanismAPI;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.TextComponentUtil;
@@ -12,6 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Represents a skin for a robit. Register these during datagen using {@link net.minecraftforge.common.data.DatapackBuiltinEntriesProvider}.

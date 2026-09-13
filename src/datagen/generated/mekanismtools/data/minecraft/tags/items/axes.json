@@ -1,10 +1,11 @@
 {
+  "replace": false,
   "values": [
-    "#forge:tools/axes/bronze",
-    "#forge:tools/axes/lapis_lazuli",
-    "#forge:tools/axes/osmium",
-    "#forge:tools/axes/refined_glowstone",
-    "#forge:tools/axes/refined_obsidian",
-    "#forge:tools/axes/steel"
+    "#c:bronze_axes",
+    "#c:lapis_lazuli_axes",
+    "#c:osmium_axes",
+    "#c:refined_glowstone_axes",
+    "#c:refined_obsidian_axes",
+    "#c:steel_axes"
   ]
 }

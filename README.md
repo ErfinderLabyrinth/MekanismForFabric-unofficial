@@ -1,5 +1,16 @@
 ![Mekanism Logo](logo.png)
 
+> [!WARNING]
+> # alpha-status
+> This is a unstable fork for fabric. Many features of Mekanism dont work or are broken.
+> Usage on own risk. The usage in modpacks is not recommended
+
+# Known Bugs
+* Wrong Energy ratio (assumes 1J = 1E, but is not the case)
+* Render problems when water is inside a tank
+* Integrations are missing (except mod menu)
+* The "all" jar file doesn't work
+
 # Mekanism for Minecraft 1.20 #
 
 Mekanism is an independent Minecraft add-on featuring high-tech machinery that can be used to create powerful tools, 
@@ -28,6 +39,7 @@ If you would like to help translate Mekanism, you can do so through [Crowdin](ht
 Mekanism is licensed under the MIT license. You may use it in modpacks, reviews, or any other form as long as you abide by the terms below. 
 
 Copyright 2017-2023 Aidan C. Brady
+Copyright 2026 Erfinderlabyrinth
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -35,6 +47,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+<!---
 # Maven #
 Mekansim v10+ is also available via [ModMaven](https://modmaven.dev/) for developers wishing to make use of our API. Big thanks to K4Unl for hosting.
 
@@ -61,6 +74,7 @@ Add the following to your `gradle.properties` file (see [Maven](https://modmaven
 ```properties
 mekanism_version=1.20.1-10.4.0.14
 ```
+-->
 
 # Credits #
 

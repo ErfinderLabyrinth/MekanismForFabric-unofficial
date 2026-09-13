@@ -1,7 +1,6 @@
 package mekanism.api.recipes.cache;
 
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.PressurizedReactionRecipe;
@@ -9,9 +8,11 @@ import mekanism.api.recipes.PressurizedReactionRecipe.PressurizedReactionRecipeO
 import mekanism.api.recipes.inputs.IInputHandler;
 import mekanism.api.recipes.outputs.IOutputHandler;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 /**
  * Base class to help implement handling of reaction recipes.

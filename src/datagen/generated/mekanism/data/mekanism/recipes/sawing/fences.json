@@ -2,7 +2,7 @@
   "type": "mekanism:sawing",
   "input": {
     "ingredient": {
-      "tag": "forge:fences/wooden"
+      "tag": "minecraft:fences"
     }
   },
   "mainOutput": {

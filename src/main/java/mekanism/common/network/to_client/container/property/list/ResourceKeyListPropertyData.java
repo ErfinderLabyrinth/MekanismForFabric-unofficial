@@ -1,10 +1,11 @@
 package mekanism.common.network.to_client.container.property.list;
 
-import java.util.List;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ResourceKeyListPropertyData<V> extends ListPropertyData<ResourceKey<V>> {
 

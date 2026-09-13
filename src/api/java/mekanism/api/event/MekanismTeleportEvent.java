@@ -4,19 +4,20 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityTeleportEvent;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.fml.LogicalSide;
+//import net.minecraftforge.common.MinecraftForge;
+//import net.minecraftforge.event.entity.EntityTeleportEvent;
+//import net.minecraftforge.eventbus.api.Cancelable;
+//import net.minecraftforge.fml.LogicalSide;
 
 /**
  * Base Mekanism extension of the {@link EntityTeleportEvent}.
  *
  * @since 10.3.9
  */
-@Cancelable
-public class MekanismTeleportEvent extends EntityTeleportEvent {
 
+//TODO
+public class MekanismTeleportEvent {
+    Entity entity;
     /**
      * @param entity  Entity teleporting.
      * @param targetX Destination x position.
@@ -24,7 +25,12 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
      * @param targetZ Destination z position.
      */
     protected MekanismTeleportEvent(Entity entity, double targetX, double targetY, double targetZ) {
-        super(entity, targetX, targetY, targetZ);
+        //super(entity, targetX, targetY, targetZ);
+        this.entity = entity;
+    }
+
+    public Entity getEntity() {
+        return entity;
     }
 
     /**
@@ -40,7 +46,6 @@ public class MekanismTeleportEvent extends EntityTeleportEvent {
      * <br>
      * This event is only fired on the {@link LogicalSide#SERVER} side.
      */
-    @Cancelable
     public static class MekaTool extends MekanismTeleportEvent {
 
         private final BlockHitResult targetBlock;

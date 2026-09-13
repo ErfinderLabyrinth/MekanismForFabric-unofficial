@@ -1,6 +1,6 @@
 package mekanism.client.gui.machine;
 
-import java.util.Collections;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiConfigurableTile;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.button.FilterButton;
@@ -9,7 +9,6 @@ import mekanism.client.gui.element.progress.GuiProgress;
 import mekanism.client.gui.element.progress.ProgressType;
 import mekanism.client.gui.element.scroll.GuiScrollBar;
 import mekanism.client.gui.element.window.filter.GuiOredictionificatorFilter;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.filter.FilterManager;
 import mekanism.common.content.filter.IFilter;
@@ -23,6 +22,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collections;
 
 public class GuiOredictionificator extends GuiConfigurableTile<TileEntityOredictionificator, MekanismTileContainer<TileEntityOredictionificator>> {
 
@@ -55,7 +56,7 @@ public class GuiOredictionificator extends GuiConfigurableTile<TileEntityOredict
         //Add each of the buttons and then just change visibility state to match filter info
         for (int i = 0; i < FILTER_COUNT; i++) {
             addRenderableWidget(new FilterButton(this, 10, 18 + i * 22, 142, 22, i, scrollBar::getCurrentSelection, filterManager, this::onClick,
-                  index -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.TOGGLE_FILTER_STATE, tile, index)), filter -> {
+                  index -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.TOGGLE_FILTER_STATE, tile, index)), filter -> {
                 if (filter instanceof OredictionificatorItemFilter oredictionificatorFilter) {
                     return Collections.singletonList(oredictionificatorFilter.getResult());
                 }

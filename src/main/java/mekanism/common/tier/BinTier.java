@@ -2,7 +2,8 @@ package mekanism.common.tier;
 
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedIntValue;
+
+import java.util.function.IntSupplier;
 
 public enum BinTier implements ITier {
     BASIC(BaseTier.BASIC, 4_096),
@@ -13,7 +14,7 @@ public enum BinTier implements ITier {
 
     private final int baseStorage;
     private final BaseTier baseTier;
-    private CachedIntValue storageReference;
+    private IntSupplier storageReference;
 
     BinTier(BaseTier tier, int s) {
         baseTier = tier;
@@ -26,7 +27,7 @@ public enum BinTier implements ITier {
     }
 
     public int getStorage() {
-        return storageReference == null ? getBaseStorage() : storageReference.getOrDefault();
+        return storageReference == null ? getBaseStorage() : storageReference.getAsInt();
     }
 
     public int getBaseStorage() {
@@ -36,7 +37,7 @@ public enum BinTier implements ITier {
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the BinTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedIntValue storageReference) {
+    public void setConfigReference(IntSupplier storageReference) {
         this.storageReference = storageReference;
     }
 }

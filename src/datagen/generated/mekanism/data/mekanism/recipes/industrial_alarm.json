@@ -6,10 +6,10 @@
       "item": "minecraft:redstone_lamp"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "I": {
-      "tag": "forge:ingots/lead"
+      "tag": "c:lead_ingots"
     }
   },
   "pattern": [

@@ -1,9 +1,9 @@
 package mekanism.common.integration.lookingat;
 
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.math.FloatingLong;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fluids.FluidStack;
 
 public interface LookingAtHelper {
 

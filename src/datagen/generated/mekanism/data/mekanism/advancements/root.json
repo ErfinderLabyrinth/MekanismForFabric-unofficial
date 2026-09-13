@@ -13,7 +13,8 @@
     },
     "frame": "goal",
     "icon": {
-      "item": "mekanism:atomic_disassembler"
+      "item": "mekanism:atomic_disassembler",
+      "nbt": "{Damage:0}"
     },
     "show_toast": false,
     "title": {

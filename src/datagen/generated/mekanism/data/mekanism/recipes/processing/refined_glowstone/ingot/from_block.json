@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "tag": "forge:storage_blocks/refined_glowstone"
+      "tag": "c:refined_glowstone_blocks"
     }
   ],
   "result": {

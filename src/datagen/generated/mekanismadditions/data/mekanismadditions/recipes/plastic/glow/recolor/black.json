@@ -3,7 +3,7 @@
   "category": "building",
   "key": {
     "#": {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
         "tag": "mekanismadditions:plastic_blocks/glow"
       },
@@ -12,7 +12,7 @@
       }
     },
     "D": {
-      "tag": "forge:dyes/black"
+      "tag": "c:black_dyes"
     }
   },
   "pattern": [

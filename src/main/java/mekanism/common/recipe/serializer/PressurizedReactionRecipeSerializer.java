@@ -6,7 +6,6 @@ import com.google.gson.JsonSyntaxException;
 import mekanism.api.JsonConstants;
 import mekanism.api.SerializerHelper;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.math.FloatingLong;
 import mekanism.api.recipes.PressurizedReactionRecipe;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient.GasStackIngredient;
 import mekanism.api.recipes.ingredients.FluidStackIngredient;
@@ -40,9 +39,9 @@ public class PressurizedReactionRecipeSerializer<RECIPE extends PressurizedReact
         JsonElement gasInput = GsonHelper.isArrayNode(json, JsonConstants.GAS_INPUT) ? GsonHelper.getAsJsonArray(json, JsonConstants.GAS_INPUT) :
                                GsonHelper.getAsJsonObject(json, JsonConstants.GAS_INPUT);
         GasStackIngredient gasIngredient = IngredientCreatorAccess.gas().deserialize(gasInput);
-        FloatingLong energyRequired = FloatingLong.ZERO;
-        if (json.has(JsonConstants.ENERGY_REQUIRED)) {
-            energyRequired = SerializerHelper.getFloatingLong(json, JsonConstants.ENERGY_REQUIRED);
+        long energyRequired = 0;
+        if (json.has(JsonConstants.ENERGY_REQUIRED) && json.get(JsonConstants.ENERGY_REQUIRED).isJsonPrimitive()) {
+            energyRequired = json.getAsJsonPrimitive(JsonConstants.ENERGY_REQUIRED).getAsLong();
         }
 
         JsonElement ticks = json.get(JsonConstants.DURATION);
@@ -83,7 +82,7 @@ public class PressurizedReactionRecipeSerializer<RECIPE extends PressurizedReact
             ItemStackIngredient inputSolid = IngredientCreatorAccess.item().read(buffer);
             FluidStackIngredient inputFluid = IngredientCreatorAccess.fluid().read(buffer);
             GasStackIngredient inputGas = IngredientCreatorAccess.gas().read(buffer);
-            FloatingLong energyRequired = FloatingLong.readFromBuffer(buffer);
+            long energyRequired = buffer.readLong();
             int duration = buffer.readVarInt();
             ItemStack outputItem = buffer.readItem();
             GasStack outputGas = GasStack.readFromPacket(buffer);
@@ -107,7 +106,7 @@ public class PressurizedReactionRecipeSerializer<RECIPE extends PressurizedReact
     @FunctionalInterface
     public interface IFactory<RECIPE extends PressurizedReactionRecipe> {
 
-        RECIPE create(ResourceLocation id, ItemStackIngredient itemInput, FluidStackIngredient fluidInput, GasStackIngredient gasInput, FloatingLong energyRequired, int duration,
+        RECIPE create(ResourceLocation id, ItemStackIngredient itemInput, FluidStackIngredient fluidInput, GasStackIngredient gasInput, long energyRequired, int duration,
               ItemStack outputItem, GasStack outputGas);
     }
 }

@@ -1,10 +1,11 @@
 package mekanism.api.heat;
 
-import java.util.List;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 @NothingNullByDefault
 public interface IMekanismHeatHandler extends ISidedHeatHandler, IContentsListener {

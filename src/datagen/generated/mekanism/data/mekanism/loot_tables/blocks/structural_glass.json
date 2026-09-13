@@ -14,9 +14,7 @@
           "name": "mekanism:structural_glass"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/structural_glass"
+  ]
 }

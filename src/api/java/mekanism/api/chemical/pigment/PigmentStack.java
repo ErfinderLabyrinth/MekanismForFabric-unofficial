@@ -5,9 +5,9 @@ import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.providers.IPigmentProvider;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -33,7 +33,7 @@ public final class PigmentStack extends ChemicalStack<Pigment> {
     }
 
     @Override
-    protected IForgeRegistry<Pigment> getRegistry() {
+    protected Registry<Pigment> getRegistry() {
         return MekanismAPI.pigmentRegistry();
     }
 
@@ -43,11 +43,11 @@ public final class PigmentStack extends ChemicalStack<Pigment> {
     }
 
     /**
-     * Returns the PigmentStack stored in the defined tag compound, or null if it doesn't exist.
+     * Returns the PigmentStack stored in the defined tagSupplier compound, or null if it doesn't exist.
      *
-     * @param nbtTags - tag compound to read from
+     * @param nbtTags - tagSupplier compound to read from
      *
-     * @return PigmentStack stored in the tag compound
+     * @return PigmentStack stored in the tagSupplier compound
      */
     public static PigmentStack readFromNBT(@Nullable CompoundTag nbtTags) {
         if (nbtTags == null || nbtTags.isEmpty()) {
@@ -65,7 +65,7 @@ public final class PigmentStack extends ChemicalStack<Pigment> {
     }
 
     public static PigmentStack readFromPacket(FriendlyByteBuf buf) {
-        Pigment pigment = buf.readRegistryIdSafe(Pigment.class);
+        Pigment pigment = Pigment.getFromRegistry(buf.readResourceLocation());
         if (pigment.isEmptyType()) {
             return EMPTY;
         }

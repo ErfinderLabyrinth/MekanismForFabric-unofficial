@@ -14,7 +14,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.registries.tags.IReverseTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,11 +86,11 @@ public abstract class Chemical<CHEMICAL extends Chemical<CHEMICAL>> implements I
     }
 
     /**
-     * Writes this Chemical to a defined tag compound.
+     * Writes this Chemical to a defined tagSupplier compound.
      *
-     * @param nbtTags - tag compound to write this Chemical to
+     * @param nbtTags - tagSupplier compound to write this Chemical to
      *
-     * @return the tag compound this Chemical was written to
+     * @return the tagSupplier compound this Chemical was written to
      */
     public abstract CompoundTag write(CompoundTag nbtTags);
 
@@ -142,15 +141,14 @@ public abstract class Chemical<CHEMICAL extends Chemical<CHEMICAL>> implements I
     }
 
     /**
-     * Checks if this chemical is in a given tag.
+     * Checks if this chemical is in a given tagSupplier.
      *
-     * @param tag The tag to check.
+     * @param tag The tagSupplier to check.
      *
-     * @return {@code true} if the chemical is in the tag, {@code false} otherwise.
+     * @return {@code true} if the chemical is in the tagSupplier, {@code false} otherwise.
      */
     public boolean is(TagKey<CHEMICAL> tag) {
-        return getReverseTag().map(reverseTag -> reverseTag.containsTag(tag))
-              .orElse(false);
+        return getTags().anyMatch(reverseTag -> reverseTag.equals(tag));
     }
 
     /**
@@ -159,17 +157,17 @@ public abstract class Chemical<CHEMICAL extends Chemical<CHEMICAL>> implements I
      * @return All the tags this chemical is a part of.
      */
     public Stream<TagKey<CHEMICAL>> getTags() {
-        return getReverseTag().map(IReverseTag::getTagKeys).orElseGet(Stream::empty);
+        return chemicalTags.getTags(getChemical()).orElseGet(Stream::empty);
     }
 
-    /**
-     * Used to look-up the reverse tag that corresponds with this chemical.
-     *
-     * @return Corresponding reverse tag or empty.
-     */
-    protected Optional<IReverseTag<CHEMICAL>> getReverseTag() {
-        return chemicalTags.getManager().flatMap(manager -> manager.getReverseTag(getChemical()));
-    }
+//    /**
+//     * Used to look-up the reverse tagSupplier that corresponds with this chemical.
+//     *
+//     * @return Corresponding reverse tagSupplier or empty.
+//     */
+//    protected Optional<IReverseTag<CHEMICAL>> getReverseTag() {
+//        return chemicalTags.getTags().flatMap(lookup -> lookup.getReverseTag(getChemical()));
+//    }
 
     /**
      * Gets whether this chemical is the empty instance.

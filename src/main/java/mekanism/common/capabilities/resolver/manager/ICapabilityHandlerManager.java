@@ -1,13 +1,12 @@
 package mekanism.common.capabilities.resolver.manager;
 
-import java.util.List;
-import mekanism.common.capabilities.resolver.ICapabilityResolver;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
 @MethodsReturnNonnullByDefault
-public interface ICapabilityHandlerManager<CONTAINER> extends ICapabilityResolver {
+public interface ICapabilityHandlerManager<CHEMICAL> {
 
     /**
      * Checks if the capability handler manager can handle this substance type.
@@ -23,5 +22,5 @@ public interface ICapabilityHandlerManager<CONTAINER> extends ICapabilityResolve
      *
      * @return Containers on the given side
      */
-    List<CONTAINER> getContainers(@Nullable Direction side);
+    Storage<CHEMICAL> getContainers(@Nullable Direction side);
 }

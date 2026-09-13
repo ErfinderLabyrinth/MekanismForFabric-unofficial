@@ -4,17 +4,18 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
 import mekanism.common.config.listener.ConfigBasedCachedSupplier;
-import mekanism.common.config.value.CachedValue;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
+import java.util.function.Supplier;
+
 public class AttributeCache extends ConfigBasedCachedSupplier<Multimap<Attribute, AttributeModifier>> {
 
-    public AttributeCache(IAttributeRefresher attributeRefresher, CachedValue<?>... configValues) {
+    public AttributeCache(IAttributeRefresher attributeRefresher, Supplier<?>... configValues) {
         super(() -> {
             Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
             attributeRefresher.addToBuilder(builder);
             return builder.build();
-        }, configValues);
+        });
     }
 }

@@ -3,10 +3,10 @@
   "category": "equipment",
   "key": {
     "D": {
-      "tag": "forge:dyes/orange"
+      "tag": "c:orange_dyes"
     },
     "I": {
-      "tag": "forge:ingots/lead"
+      "tag": "c:lead_ingots"
     }
   },
   "pattern": [

@@ -1,8 +1,6 @@
 package mekanism.client.gui.element.window;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.IGuiWrapper;
@@ -22,6 +20,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class GuiWindow extends GuiTexturedElement implements IGUIWindow {
 

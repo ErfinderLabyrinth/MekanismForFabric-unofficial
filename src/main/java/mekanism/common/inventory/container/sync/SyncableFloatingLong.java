@@ -1,12 +1,13 @@
 package mekanism.common.inventory.container.sync;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import mekanism.api.math.FloatingLong;
 import mekanism.common.network.to_client.container.property.FloatingLongPropertyData;
 import mekanism.common.network.to_client.container.property.PropertyData;
 import mekanism.common.network.to_client.container.property.ShortPropertyData;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Version of {@link net.minecraft.world.inventory.DataSlot} for handling floating long
@@ -37,13 +38,13 @@ public class SyncableFloatingLong implements ISyncableData {
     }
 
     public void setDecimal(short decimal) {
-        set(FloatingLong.create(get().getValue(), decimal));
+        set(FloatingLong.create(get().longValue(), decimal));
     }
 
     @Override
     public DirtyType isDirty() {
         FloatingLong val = get();
-        long value = val.getValue();
+        long value = val.longValue();
         short decimal = val.getDecimal();
         if (value == lastKnownValue && decimal == lastKnownDecimal) {
             return DirtyType.CLEAN;

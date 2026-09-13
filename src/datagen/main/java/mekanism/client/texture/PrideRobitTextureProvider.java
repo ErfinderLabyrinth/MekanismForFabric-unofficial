@@ -5,33 +5,32 @@ import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import mekanism.common.Mekanism;
 import mekanism.common.entity.RobitPrideSkinData;
 import mekanism.common.lib.Color;
 import mekanism.common.registries.MekanismRobitSkins;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.PathProvider;
 import net.minecraft.data.PackOutput.Target;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.Resource;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public class PrideRobitTextureProvider implements DataProvider {
 
-    private final PackOutput output;
-    private final ExistingFileHelper helper;
+    private final FabricDataOutput output;
 
     private static final String ROBIT_SKIN_PATH = "textures/entity/robit";
 
-    public PrideRobitTextureProvider(PackOutput output, ExistingFileHelper helper) {
+    public PrideRobitTextureProvider(FabricDataOutput output) {
         this.output = output;
-        this.helper = helper;
     }
 
     @NotNull
@@ -41,8 +40,12 @@ public class PrideRobitTextureProvider implements DataProvider {
         return CompletableFuture.runAsync(() -> {
             PathProvider pathProvider = output.createPathProvider(Target.RESOURCE_PACK, ROBIT_SKIN_PATH);
             try {
-                Resource resource = helper.getResource(MekanismRobitSkins.BASE.location(), PackType.CLIENT_RESOURCES, ".png", ROBIT_SKIN_PATH);
-                try (InputStream inputStream = resource.open();
+                ResourceLocation skinId = MekanismRobitSkins.BASE.location(); // e.g., mekanism:robit_base
+                String pathString = "assets/" + skinId.getNamespace() + "/" + ROBIT_SKIN_PATH + "/" + skinId.getPath() + ".png";
+
+
+                Path resource = output.getModContainer().findPath(pathString).get();
+                try (InputStream inputStream = Files.newInputStream(resource);
                      NativeImage sourceImage = NativeImage.read(inputStream);
                      NativeImage writableImage = new NativeImage(sourceImage.format(), sourceImage.getWidth(), sourceImage.getHeight(), false)) {
                     //Set initial image data, we can just use one writable version as we always edit the same pixels,

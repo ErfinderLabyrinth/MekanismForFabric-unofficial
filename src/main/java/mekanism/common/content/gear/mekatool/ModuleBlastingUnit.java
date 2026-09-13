@@ -2,7 +2,6 @@ package mekanism.common.content.gear.mekatool;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import java.util.function.Consumer;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.gear.ICustomModule;
@@ -25,9 +24,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 @ParametersAreNotNullByDefault
 public class ModuleBlastingUnit implements ICustomModule<ModuleBlastingUnit> {
@@ -35,13 +35,13 @@ public class ModuleBlastingUnit implements ICustomModule<ModuleBlastingUnit> {
     private IModuleConfigItem<BlastRadius> blastRadius;
 
     private static final ResourceLocation RADIAL_ID = Mekanism.rl("blasting_mode");
-    private static final Int2ObjectMap<Lazy<NestedRadialMode>> RADIAL_DATAS = Util.make(() -> {
+    private static final Int2ObjectMap<NestedRadialMode> RADIAL_DATAS = Util.make(() -> {
         int types = BlastRadius.values().length - 1;
-        Int2ObjectMap<Lazy<NestedRadialMode>> map = new Int2ObjectArrayMap<>(types);
+        Int2ObjectMap<NestedRadialMode> map = new Int2ObjectArrayMap<>(types);
         for (int type = 1; type <= types; type++) {
             int accessibleValues = type + 1;
-            map.put(type, Lazy.of(() -> new NestedRadialMode(IRadialDataHelper.INSTANCE.dataForTruncated(RADIAL_ID, accessibleValues, BlastRadius.LOW),
-                    MekanismLang.RADIAL_BLASTING_POWER, BlastRadius.LOW.icon(), EnumColor.DARK_BLUE)));
+            map.put(type, new NestedRadialMode(IRadialDataHelper.INSTANCE.dataForTruncated(RADIAL_ID, accessibleValues, BlastRadius.LOW),
+                    MekanismLang.RADIAL_BLASTING_POWER, BlastRadius.LOW.icon(), EnumColor.DARK_BLUE));
         }
         return map;
     });
@@ -53,7 +53,7 @@ public class ModuleBlastingUnit implements ICustomModule<ModuleBlastingUnit> {
     }
 
     private NestedRadialMode getNestedData(IModule<ModuleBlastingUnit> module) {
-        return RADIAL_DATAS.get(module.getInstalledCount()).get();
+        return RADIAL_DATAS.get(module.getInstalledCount());
     }
 
     private RadialData<?> getRadialData(IModule<ModuleBlastingUnit> module) {

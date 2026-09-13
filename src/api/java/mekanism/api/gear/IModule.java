@@ -1,15 +1,18 @@
 package mekanism.api.gear;
 
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.math.FloatingLong;
-import mekanism.api.math.FloatingLongSupplier;
 import mekanism.api.text.IHasTextComponent;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.function.LongSupplier;
 
 /**
  * Interface that describes various methods that modules have.
@@ -89,20 +92,22 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      */
     ItemStack getContainer();
 
+    SingleSlotStorage<ItemVariant> getContainerStorage();
+
     /**
      * Helper to get the energy container of the item this module is installed on.
      *
      * @return Energy container or {@code null} if something failed.
      */
     @Nullable
-    IEnergyContainer getEnergyContainer();
+    EnergyStorage getEnergyContainer();
 
     /**
      * Helper to get the energy stored in {@link #getEnergyContainer()}.
      *
      * @return Energy stored, or {@link FloatingLong#ZERO} if the energy container is {@code null}.
      */
-    FloatingLong getContainerEnergy();
+    long getContainerEnergy();
 
     /**
      * Helper to check if there is at least a certain amount of energy stored in {@link #getEnergyContainer()}.
@@ -113,7 +118,7 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      *
      * @since 10.4.0
      */
-    boolean hasEnoughEnergy(FloatingLongSupplier energySupplier);
+    boolean hasEnoughEnergy(LongSupplier energySupplier);
 
     /**
      * Helper to check if there is at least a certain amount of energy stored in {@link #getEnergyContainer()}.
@@ -124,7 +129,7 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      *
      * @since 10.4.0
      */
-    boolean hasEnoughEnergy(FloatingLong energy);
+    boolean hasEnoughEnergy(long energy);
 
     /**
      * Helper to check if the item this module is installed on can provide the given amount of energy.
@@ -136,7 +141,7 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      *
      * @implNote By default, this method checks players in creative as well.
      */
-    boolean canUseEnergy(LivingEntity wearer, FloatingLong energy);
+    boolean canUseEnergy(LivingEntity wearer, long energy);
 
     /**
      * Helper to check if the item this module is installed on can provide the given amount of energy. If {@code checkCreative} is {@code false} this method will return
@@ -148,7 +153,7 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      *
      * @return {@code true} if the energy can be used/provided.
      */
-    boolean canUseEnergy(LivingEntity wearer, FloatingLong energy, boolean ignoreCreative);
+    boolean canUseEnergy(LivingEntity wearer, long energy, boolean ignoreCreative);
 
     /**
      * Helper to check if the item this module is installed on can provide the given amount of energy. If the {@code energyContainer} is null this will return
@@ -163,7 +168,7 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      *
      * @apiNote This method is mostly for use in not having to look up the energy container multiple times.
      */
-    boolean canUseEnergy(LivingEntity wearer, @Nullable IEnergyContainer energyContainer, FloatingLong energy, boolean ignoreCreative);
+    boolean canUseEnergy(LivingEntity wearer, @Nullable EnergyStorage energyContainer, long energy, boolean ignoreCreative);
 
     /**
      * Helper to use energy from the item this module is installed on.
@@ -175,7 +180,7 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      *
      * @implNote By default, this method does not use any energy from players that are in creative.
      */
-    FloatingLong useEnergy(LivingEntity wearer, FloatingLong energy);
+    long useEnergy(LivingEntity wearer, long energy);
 
     /**
      * Helper to use energy from the item this module is installed on. If {@code checkCreative} is {@code false} this method will return {@link FloatingLong#ZERO} for
@@ -187,7 +192,7 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      *
      * @return Actual amount of energy used.
      */
-    FloatingLong useEnergy(LivingEntity wearer, FloatingLong energy, boolean freeCreative);
+    long useEnergy(LivingEntity wearer, long energy, boolean freeCreative);
 
     /**
      * Helper to use energy from the given energy container. If the {@code energyContainer} is null this will return {@link FloatingLong#ZERO}. If {@code checkCreative}
@@ -202,5 +207,5 @@ public interface IModule<MODULE extends ICustomModule<MODULE>> {
      *
      * @apiNote This method is mostly for use in not having to look up the energy container multiple times.
      */
-    FloatingLong useEnergy(LivingEntity wearer, @Nullable IEnergyContainer energyContainer, FloatingLong energy, boolean freeCreative);
+    long useEnergy(LivingEntity wearer, @Nullable EnergyStorage energyContainer, long energy, boolean freeCreative);
 }

@@ -2,7 +2,7 @@
   "type": "mekanism:metallurgic_infusing",
   "chemicalInput": {
     "amount": 10,
-    "tag": "mekanism:carbon"
+    "tagSupplier": "mekanism:carbon"
   },
   "itemInput": {
     "ingredient": {

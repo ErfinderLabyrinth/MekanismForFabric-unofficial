@@ -5,10 +5,10 @@
       "tag": "mekanism:alloys/infused"
     },
     "C": {
-      "tag": "forge:circuits/advanced"
+      "tag": "c:advanced_circuits"
     },
     "I": {
-      "tag": "forge:ingots/osmium"
+      "tag": "c:osmium_ingots"
     },
     "P": {
       "tag": "minecraft:planks"

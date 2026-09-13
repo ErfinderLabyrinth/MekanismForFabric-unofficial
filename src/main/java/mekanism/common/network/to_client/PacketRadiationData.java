@@ -1,15 +1,20 @@
 package mekanism.common.network.to_client;
 
-import mekanism.common.capabilities.Capabilities;
+import mekanism.api.MekanismAPI;
 import mekanism.common.lib.radiation.RadiationManager;
 import mekanism.common.lib.radiation.RadiationManager.LevelAndMaxMagnitude;
+import mekanism.common.lib.radiation.capability.DefaultRadiationEntity;
 import mekanism.common.network.IMekanismPacket;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+
+import java.util.Optional;
 
 public class PacketRadiationData implements IMekanismPacket {
+    public static final PacketType<PacketRadiationData> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "radiation_data"), PacketRadiationData::decode);
 
     private final RadiationPacketType type;
     private final double radiation;
@@ -30,13 +35,12 @@ public class PacketRadiationData implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
+    public void handle(Player player, PacketSender responseSender) {
         if (type == RadiationPacketType.ENVIRONMENTAL) {
             RadiationManager.get().setClientEnvironmentalRadiation(radiation, maxMagnitude);
         } else if (type == RadiationPacketType.PLAYER) {
-            LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {
-                player.getCapability(Capabilities.RADIATION_ENTITY).ifPresent(c -> c.set(radiation));
+                Optional.ofNullable(player.getAttached(DefaultRadiationEntity.ATTACHMENT_TYPE)).ifPresent(c -> c.set(radiation));
             }
         }
     }
@@ -53,6 +57,11 @@ public class PacketRadiationData implements IMekanismPacket {
     public static PacketRadiationData decode(FriendlyByteBuf buffer) {
         RadiationPacketType type = buffer.readEnum(RadiationPacketType.class);
         return new PacketRadiationData(type, buffer.readDouble(), type.tracksMaxMagnitude ? buffer.readDouble() : 0);
+    }
+
+    @Override
+    public PacketType<PacketRadiationData> getType() {
+        return TYPE;
     }
 
     public enum RadiationPacketType {

@@ -1,15 +1,17 @@
 package mekanism.common.content.miner;
 
-import java.util.Objects;
 import mekanism.common.content.filter.FilterType;
 import mekanism.common.content.filter.IItemStackFilter;
 import mekanism.common.tags.MekanismTags;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class MinerItemStackFilter extends MinerFilter<MinerItemStackFilter> implements IItemStackFilter<MinerItemStackFilter> {
 
@@ -38,7 +40,7 @@ public class MinerItemStackFilter extends MinerFilter<MinerItemStackFilter> impl
 
     @Override
     public boolean hasBlacklistedElement() {
-        return !itemType.isEmpty() && itemType.getItem() instanceof BlockItem blockItem && MekanismTags.Blocks.MINER_BLACKLIST_LOOKUP.contains(blockItem.getBlock());
+        return !itemType.isEmpty() && itemType.getItem() instanceof BlockItem blockItem && BuiltInRegistries.BLOCK.getTag(MekanismTags.Blocks.MINER_BLACKLIST).get().contains(BuiltInRegistries.BLOCK.createIntrusiveHolder(blockItem.getBlock()));
     }
 
     @Override

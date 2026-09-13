@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ores/lead"
+      "tag": "c:lead_ores"
     }
   },
   "output": {
     "amount": 1000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_lead"
+    "slurry": "minecraft:dirty_lead"
   }
 }

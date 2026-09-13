@@ -5,13 +5,13 @@
       "item": "minecraft:sticky_piston"
     },
     "A": {
-      "tag": "forge:pellets/polonium"
+      "tag": "c:polonium_pellets"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "I": {
-      "tag": "forge:ingots/lead"
+      "tag": "c:lead_ingots"
     },
     "T": {
       "item": "mekanism:teleportation_core"

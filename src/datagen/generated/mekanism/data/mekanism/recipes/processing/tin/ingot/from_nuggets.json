@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:nuggets/tin"
+      "tag": "c:tin_nuggets"
     },
     "P": {
       "item": "mekanism:nugget_tin"

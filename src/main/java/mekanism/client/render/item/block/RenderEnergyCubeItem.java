@@ -2,16 +2,17 @@ package mekanism.client.render.item.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import mekanism.api.MekanismAPI;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
 import mekanism.client.model.ModelEnergyCore;
+import mekanism.client.model.energycube.EnergyCubeBakedModel;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.item.MekanismISTER;
 import mekanism.client.render.tileentity.RenderEnergyCube;
 import mekanism.common.item.block.ItemBlockEnergyCube;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tier.EnergyCubeTier;
-import mekanism.common.tile.TileEntityEnergyCube;
 import mekanism.common.tile.TileEntityEnergyCube.CubeSideState;
 import mekanism.common.tile.component.config.DataType;
 import mekanism.common.util.EnumUtils;
@@ -22,10 +23,10 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 
 public class RenderEnergyCubeItem extends MekanismISTER {
@@ -61,9 +62,14 @@ public class RenderEnergyCubeItem extends MekanismISTER {
                 sideStates[side.ordinal()] = tier == EnergyCubeTier.CREATIVE || side == RelativeSide.FRONT ? CubeSideState.ACTIVE_LIT : CubeSideState.ACTIVE_UNLIT;
             }
         }
-        ModelData modelData = ModelData.builder().with(TileEntityEnergyCube.SIDE_STATE_PROPERTY, sideStates).build();
-        renderBlockItem(stack, displayContext, matrix, renderer, light, overlayLight, modelData);
-        double energyPercentage = StorageUtils.getStoredEnergyFromNBT(stack).divideToLevel(tier.getMaxEnergy());
+        renderBlockItem(stack, displayContext, matrix, renderer, light, overlayLight, ((model, state, direction, random) -> {
+            if (model instanceof EnergyCubeBakedModel energyCubeBakedModel) {
+                return energyCubeBakedModel.getQuads(state, direction, random, sideStates);
+            }else {
+                return model.getQuads(state, direction, random);
+            }
+        }));
+        double energyPercentage = (double) StorageUtils.getStoredEnergyFromNBT(stack) / tier.getMaxEnergy();
         if (energyPercentage > 0) {
             float ticks = Minecraft.getInstance().levelRenderer.ticks + MekanismRenderer.getPartialTick();
             float scaledTicks = 4 * ticks;
@@ -76,5 +82,10 @@ public class RenderEnergyCubeItem extends MekanismISTER {
             core.render(matrix, renderer, LightTexture.FULL_BRIGHT, overlayLight, tier.getBaseTier(), (float) energyPercentage);
             matrix.popPose();
         }
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return new ResourceLocation(MekanismAPI.MEKANISM_MODID, "render_energy_cube_item");
     }
 }

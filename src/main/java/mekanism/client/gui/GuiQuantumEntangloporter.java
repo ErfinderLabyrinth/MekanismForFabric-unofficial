@@ -1,6 +1,6 @@
 package mekanism.client.gui;
 
-import java.util.List;
+import mekanism.api.math.FloatingLong;
 import mekanism.client.gui.element.custom.GuiFrequencySelector;
 import mekanism.client.gui.element.custom.GuiFrequencySelector.ITileGuiFrequencySelector;
 import mekanism.client.gui.element.tab.GuiEnergyTab;
@@ -17,6 +17,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class GuiQuantumEntangloporter extends GuiConfigurableTile<TileEntityQuantumEntangloporter, MekanismTileContainer<TileEntityQuantumEntangloporter>>
       implements ITileGuiFrequencySelector<InventoryFrequency, TileEntityQuantumEntangloporter> {
@@ -36,7 +38,7 @@ public class GuiQuantumEntangloporter extends GuiConfigurableTile<TileEntityQuan
         addRenderableWidget(new GuiEnergyTab(this, () -> {
             InventoryFrequency frequency = getFrequency();
             EnergyDisplay storing = frequency == null ? EnergyDisplay.ZERO : EnergyDisplay.of(frequency.storedEnergy);
-            EnergyDisplay rate = EnergyDisplay.of(tile.getInputRate());
+            EnergyDisplay rate = EnergyDisplay.of(FloatingLong.create(tile.getInputRate()));
             return List.of(MekanismLang.STORING.translate(storing), MekanismLang.MATRIX_INPUT_RATE.translate(rate));
         }));
         addRenderableWidget(new GuiHeatTab(this, () -> {

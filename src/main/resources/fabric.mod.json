@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "mekanism",
+  "version": "${mod_version}",
+  "name": "MekanismForFabric",
+  "description": "Mekanism is a Minecraft add-on featuring high-tech machinery that can be used to create powerful tools, armor, and weapons.",
+  "authors": [
+    "Erfinderlabyrinth",
+    "skippyall",
+    "Aidancbrady",
+    "Thommy101",
+    "Thiakil",
+    "pupnewfster",
+    "dizzyd"
+  ],
+  "contributors": [
+    "unpairedbracket",
+    "CyanideX",
+    "Ridanisaurus"
+  ],
+  "contact": {
+    "repo": "https://github.com/Erfinderlabyrinth/MekanismForFabric"
+  },
+  "license": "MIT",
+  "icon": "logo_square.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "mekanism.client.MekanismClient"
+    ],
+    "main": [
+      "mekanism.common.Mekanism"
+    ],
+    "fabric-datagen": [
+      "mekanism.common.MekanismDataGenerator"
+    ],
+    "modmenu": [
+      "mekanism.client.integration.modmenu.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "mekanismforfabric.client.mixins.json",
+    "mekanismforfabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "accessWidener": "mekanism.accesswidener"
+}

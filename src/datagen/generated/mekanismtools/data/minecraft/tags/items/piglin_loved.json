@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "mekanismtools:gold_paxel",
     "mekanismtools:refined_glowstone_pickaxe",

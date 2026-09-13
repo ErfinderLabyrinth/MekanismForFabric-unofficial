@@ -1,14 +1,15 @@
 package mekanism.client.gui.element;
 
-import java.util.Collections;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import mekanism.api.math.MathUtils;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.inventory.GuiComponents.IToggleEnum;
 import mekanism.common.registries.MekanismSounds;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collections;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class GuiDigitalIconToggle<TYPE extends Enum<TYPE> & IToggleEnum<TYPE>> extends GuiInnerScreen {
 

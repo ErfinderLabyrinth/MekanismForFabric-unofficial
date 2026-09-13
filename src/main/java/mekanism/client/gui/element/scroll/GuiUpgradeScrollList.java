@@ -1,7 +1,5 @@
 package mekanism.client.gui.element.scroll;
 
-import java.util.Set;
-import java.util.function.ObjIntConsumer;
 import mekanism.api.Upgrade;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.client.gui.IGuiWrapper;
@@ -16,6 +14,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
+import java.util.function.ObjIntConsumer;
 
 public class GuiUpgradeScrollList extends GuiScrollList {
 

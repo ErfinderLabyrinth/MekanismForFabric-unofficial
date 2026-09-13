@@ -1,6 +1,5 @@
 package mekanism.common.tile.qio;
 
-import java.util.Map;
 import mekanism.api.NBTConstants;
 import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.integration.computer.ComputerException;
@@ -14,14 +13,16 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 public class TileEntityQIORedstoneAdapter extends TileEntityQIOComponent {
 
@@ -151,7 +152,7 @@ public class TileEntityQIORedstoneAdapter extends TileEntityQIOComponent {
     @ComputerMethod(requiresPublicSecurity = true)
     void setTargetItem(ResourceLocation itemName) throws ComputerException {
         validateSecurityIsPublic();
-        Item item = ForgeRegistries.ITEMS.getValue(itemName);
+        Item item = BuiltInRegistries.ITEM.get(itemName);
         if (item == null || item == Items.AIR) {
             throw new ComputerException("Target item '%s' could not be found. If you are trying to clear it consider using clearTargetItem instead.", itemName);
         }

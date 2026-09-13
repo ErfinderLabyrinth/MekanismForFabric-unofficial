@@ -5,6 +5,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.EnumMap;
 import java.util.Map;
+
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.MekanismRenderer.FluidTextureType;
@@ -21,7 +23,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fluids.FluidStack;
 
 @NothingNullByDefault
 public class RenderBioGenerator extends MekanismTileEntityRenderer<TileEntityBioGenerator> {
@@ -41,7 +42,7 @@ public class RenderBioGenerator extends MekanismTileEntityRenderer<TileEntityBio
     protected void render(TileEntityBioGenerator tile, float partialTick, PoseStack matrix, MultiBufferSource renderer, int light, int overlayLight, ProfilerFiller profiler) {
         matrix.pushPose();
         FluidStack fluid = tile.bioFuelTank.getFluid();
-        float fluidScale = fluid.getAmount() / (float) tile.bioFuelTank.getCapacity();
+        float fluidScale = fluid.amount() / (float) tile.bioFuelTank.getCapacity();
         MekanismRenderer.renderObject(getModel(fluid, tile.getDirection(), fluidScale), matrix,
               renderer.getBuffer(Sheets.translucentCullBlockSheet()), MekanismRenderer.getColorARGB(fluid, fluidScale), LightTexture.FULL_BRIGHT, overlayLight,
               FaceDisplay.FRONT, getCamera(), tile.getBlockPos());

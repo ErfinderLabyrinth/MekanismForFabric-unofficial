@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:gems/lapis"
+      "tag": "c:lapis"
     },
     "A": {
       "tag": "mekanism:alloys/atomic"
     },
     "D": {
-      "tag": "forge:gems/diamond"
+      "tag": "c:diamonds"
     },
     "I": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:gold_ingots"
     }
   },
   "pattern": [

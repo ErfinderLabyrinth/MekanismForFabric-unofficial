@@ -46,9 +46,7 @@
           "name": "mekanism:qio_drive_array"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/qio_drive_array"
+  ]
 }

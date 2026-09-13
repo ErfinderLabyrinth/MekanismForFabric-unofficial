@@ -2,10 +2,10 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "tag": "forge:sawdust"
+      "tag": "c:saw_dusts"
     },
     {
-      "tag": "forge:sawdust"
+      "tag": "c:saw_dusts"
     },
     {
       "item": "minecraft:clay_ball"

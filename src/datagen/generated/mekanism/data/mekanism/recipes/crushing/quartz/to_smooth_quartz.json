@@ -2,7 +2,7 @@
   "type": "mekanism:crushing",
   "input": {
     "ingredient": {
-      "tag": "forge:storage_blocks/quartz"
+      "tag": "c:quartz_blocks"
     }
   },
   "output": {

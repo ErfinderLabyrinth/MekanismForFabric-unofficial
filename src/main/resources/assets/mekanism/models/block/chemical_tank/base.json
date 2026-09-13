@@ -1,7 +1,6 @@
 {
 	"credit": "Model by CyanideX",
 	"parent": "block/cube_all",
-	"render_type": "minecraft:cutout",
 	"textures": {
 		"particle": "mekanism:block/models/chemical_tank",
 		"body": "mekanism:block/models/chemical_tank",
@@ -131,7 +130,7 @@
 				"up": {"uv": [1, 12, 4, 15], "texture": "#body", "cullface": "up"},
 				"down": {"uv": [5, 0, 10, 5], "texture": "#body", "cullface": "up"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

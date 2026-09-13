@@ -5,13 +5,17 @@ import mekanism.common.registries.MekanismItems;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.resource.ResourceType;
 import mekanism.common.resource.ore.OreType;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 public class MekanismBlockLootTables extends BaseBlockLootTables {
+    public MekanismBlockLootTables(FabricDataOutput output) {
+        super(output);
+    }
 
     @Override
-    protected void generate() {
+    public void generate() {
         skip(MekanismBlocks.BOUNDING_BLOCK);
         add(block -> createSingleItemTableWithSilkTouch(block, MekanismItems.SALT, ConstantValue.exactly(4)), MekanismBlocks.SALT_BLOCK);
         add(block -> droppingWithFortuneOrRandomly(block, MekanismItems.FLUORITE_GEM, UniformGenerator.between(2, 4)), MekanismBlocks.ORES.get(OreType.FLUORITE));

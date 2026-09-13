@@ -1,9 +1,9 @@
 package mekanism.client.gui.element.window;
 
-import java.util.Collections;
 import mekanism.api.RelativeSide;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiInnerScreen;
@@ -12,7 +12,6 @@ import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.client.gui.element.button.SideDataButton;
 import mekanism.client.gui.element.slot.GuiSlot;
 import mekanism.client.gui.element.slot.SlotType;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.SelectedWindowData.WindowType;
@@ -29,6 +28,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.Collections;
+
 public class GuiTransporterConfig<TILE extends TileEntityMekanism & ISideConfiguration> extends GuiWindow {
 
     private final TILE tile;
@@ -41,11 +42,11 @@ public class GuiTransporterConfig<TILE extends TileEntityMekanism & ISideConfigu
               () -> Collections.singletonList(MekanismLang.STRICT_INPUT_ENABLED.translate(OnOff.of(tile.getEjector().hasStrictInput())))));
         addChild(new GuiSlot(SlotType.NORMAL, gui, relativeX + 111, relativeY + 48));
         addChild(new MekanismImageButton(gui, relativeX + 136, relativeY + 6, 14, 16, getButtonLocation("exclamation"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketConfigurationUpdate(this.tile.getBlockPos())), getOnHover(MekanismLang.STRICT_INPUT)));
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketConfigurationUpdate(this.tile.getBlockPos())), getOnHover(MekanismLang.STRICT_INPUT)));
         addChild(new ColorButton(gui, relativeX + 112, relativeY + 49, 16, 16,
               () -> this.tile.getEjector().getOutputColor(),
-              () -> Mekanism.packetHandler().sendToServer(new PacketConfigurationUpdate(this.tile.getBlockPos(), Screen.hasShiftDown() ? 2 : 0)),
-              () -> Mekanism.packetHandler().sendToServer(new PacketConfigurationUpdate(this.tile.getBlockPos(), 1))));
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketConfigurationUpdate(this.tile.getBlockPos(), Screen.hasShiftDown() ? 2 : 0)),
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketConfigurationUpdate(this.tile.getBlockPos(), 1))));
         addSideDataButton(RelativeSide.BOTTOM, 41, 64+16);
         addSideDataButton(RelativeSide.TOP, 41, 34);
         addSideDataButton(RelativeSide.FRONT, 41, 57);
@@ -53,7 +54,7 @@ public class GuiTransporterConfig<TILE extends TileEntityMekanism & ISideConfigu
         addSideDataButton(RelativeSide.LEFT, 18, 57);
         addSideDataButton(RelativeSide.RIGHT, 64, 57);
         ((MekanismContainer) ((GuiMekanism<?>) gui()).getMenu()).startTracking(MekanismContainer.TRANSPORTER_CONFIG_WINDOW, this.tile.getEjector());
-        Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_TRACK_EJECTOR, this.tile, MekanismContainer.TRANSPORTER_CONFIG_WINDOW));
+        MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_TRACK_EJECTOR, this.tile, MekanismContainer.TRANSPORTER_CONFIG_WINDOW));
     }
 
     private void addSideDataButton(RelativeSide side, int xPos, int yPos) {
@@ -68,7 +69,7 @@ public class GuiTransporterConfig<TILE extends TileEntityMekanism & ISideConfigu
     @Override
     public void close() {
         super.close();
-        Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_STOP_TRACKING, tile, MekanismContainer.TRANSPORTER_CONFIG_WINDOW));
+        MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.CONTAINER_STOP_TRACKING, tile, MekanismContainer.TRANSPORTER_CONFIG_WINDOW));
         ((MekanismContainer) ((GuiMekanism<?>) gui()).getMenu()).stopTracking(MekanismContainer.TRANSPORTER_CONFIG_WINDOW);
     }
 

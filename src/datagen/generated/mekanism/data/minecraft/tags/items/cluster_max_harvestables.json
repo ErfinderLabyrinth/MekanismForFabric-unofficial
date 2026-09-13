@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "mekanism:atomic_disassembler",
     "mekanism:meka_tool"

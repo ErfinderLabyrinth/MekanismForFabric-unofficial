@@ -31,7 +31,7 @@ public class GuiVerticalPowerBar extends GuiBar<IBarInfoHandler> {
 
             @Override
             public double getLevel() {
-                return container.getEnergy().divideToLevel(container.getMaxEnergy());
+                return (double)container.getEnergy() / container.getMaxEnergy();
             }
         }, x, y, desiredHeight);
     }

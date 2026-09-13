@@ -3,7 +3,7 @@
   "category": "equipment",
   "key": {
     "I": {
-      "tag": "forge:ingots/refined_glowstone"
+      "tag": "c:refined_glowstone_ingots"
     },
     "P": {
       "item": "minecraft:shield"

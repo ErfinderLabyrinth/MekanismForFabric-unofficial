@@ -46,9 +46,7 @@
           "name": "mekanism:elite_fluid_tank"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/elite_fluid_tank"
+  ]
 }

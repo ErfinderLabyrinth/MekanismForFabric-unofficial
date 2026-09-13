@@ -7,7 +7,7 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:nether_stars"
+      "tag": "c:nether_stars"
     }
   },
   "output": {

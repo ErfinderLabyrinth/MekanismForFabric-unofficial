@@ -1,9 +1,11 @@
 package mekanism.api.fluid;
 
 import mekanism.api.Action;
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -31,12 +33,15 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      *
      * @return The number of tanks available
      */
-    int getTanks(@Nullable Direction side);
 
-    @Override
-    default int getTanks() {
-        return getTanks(getFluidSideFor());
-    }
+    Storage<FluidVariant> getContainers(@Nullable Direction side);
+
+//    int getTanks(@Nullable Direction side);
+//
+//    @Override
+//    default int getTanks() {
+//        return getTanks(getFluidSideFor());
+//    }
 
     /**
      * A sided variant of {@link net.minecraftforge.fluids.capability.IFluidHandler#getFluidInTank(int)}, docs copied for convenience.
@@ -57,12 +62,12 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      *
      * @return {@link FluidStack} in a given tank. {@link FluidStack#EMPTY} if the tank is empty.
      */
-    FluidStack getFluidInTank(int tank, @Nullable Direction side);
-
-    @Override
-    default FluidStack getFluidInTank(int tank) {
-        return getFluidInTank(tank, getFluidSideFor());
-    }
+//    FluidStack getFluidInTank(int tank, @Nullable Direction side);
+//
+//    @Override
+//    default FluidStack getFluidInTank(int tank) {
+//        return getFluidInTank(tank, getFluidSideFor());
+//    }
 
     /**
      * A sided variant of {@link IExtendedFluidHandler#setFluidInTank(int, FluidStack)}, docs copied for convenience.
@@ -75,12 +80,12 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      *
      * @throws RuntimeException if the handler is called in a way that the handler was not expecting.
      **/
-    void setFluidInTank(int tank, FluidStack stack, @Nullable Direction side);
-
-    @Override
-    default void setFluidInTank(int tank, FluidStack stack) {
-        setFluidInTank(tank, stack, getFluidSideFor());
-    }
+//    void setFluidInTank(int tank, FluidStack stack, @Nullable Direction side);
+//
+//    @Override
+//    default void setFluidInTank(int tank, FluidStack stack) {
+//        setFluidInTank(tank, stack, getFluidSideFor());
+//    }
 
     /**
      * A sided variant of {@link IExtendedFluidHandler#getTankCapacity(int)}, docs copied for convenience.
@@ -92,12 +97,12 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      *
      * @return The maximum fluid amount held by the tank.
      */
-    int getTankCapacity(int tank, @Nullable Direction side);
-
-    @Override
-    default int getTankCapacity(int tank) {
-        return getTankCapacity(tank, getFluidSideFor());
-    }
+//    long getTankCapacity(int tank, @Nullable Direction side);
+//
+//    @Override
+//    default long getTankCapacity(int tank) {
+//        return getTankCapacity(tank, getFluidSideFor());
+//    }
 
     /**
      * A sided variant of {@link net.minecraftforge.fluids.capability.IFluidHandler#isFluidValid(int, FluidStack)}, docs copied for convenience.
@@ -118,12 +123,12 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      * @return true if the tank can accept the {@link FluidStack}, not considering the current state of the tank. false if the tank can never support the given
      * {@link FluidStack} in any situation.
      */
-    boolean isFluidValid(int tank, FluidStack stack, @Nullable Direction side);
-
-    @Override
-    default boolean isFluidValid(int tank, FluidStack stack) {
-        return isFluidValid(tank, stack, getFluidSideFor());
-    }
+//    boolean isFluidValid(int tank, FluidStack stack, @Nullable Direction side);
+//
+//    @Override
+//    default boolean isFluidValid(int tank, FluidStack stack) {
+//        return isFluidValid(tank, stack, getFluidSideFor());
+//    }
 
     /**
      * A sided variant of {@link IExtendedFluidHandler#insertFluid(int, FluidStack, Action)}, docs copied for convenience.
@@ -142,12 +147,12 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      * @return The remaining {@link FluidStack} that was not inserted (if the entire stack is accepted, then return an empty {@link FluidStack}). May be the same as the
      * input {@link FluidStack} if unchanged, otherwise a new {@link FluidStack}. The returned {@link FluidStack} can be safely modified after
      */
-    FluidStack insertFluid(int tank, FluidStack stack, @Nullable Direction side, Action action);
-
-    @Override
-    default FluidStack insertFluid(int tank, FluidStack stack, Action action) {
-        return insertFluid(tank, stack, getFluidSideFor(), action);
-    }
+//    FluidStack insertFluid(int tank, FluidStack stack, @Nullable Direction side, Action action);
+//
+//    @Override
+//    default FluidStack insertFluid(int tank, FluidStack stack, Action action) {
+//        return insertFluid(tank, stack, getFluidSideFor(), action);
+//    }
 
     /**
      * A sided variant of {@link IExtendedFluidHandler#extractFluid(int, int, Action)}, docs copied for convenience.
@@ -165,12 +170,12 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      * @return {@link FluidStack} extracted from the tank, must be empty if nothing can be extracted. The returned {@link FluidStack} can be safely modified after, so the
      * tank should return a new or copied stack.
      */
-    FluidStack extractFluid(int tank, int amount, @Nullable Direction side, Action action);
-
-    @Override
-    default FluidStack extractFluid(int tank, int amount, Action action) {
-        return extractFluid(tank, amount, getFluidSideFor(), action);
-    }
+//    FluidStack extractFluid(int tank, long amount, @Nullable Direction side, Action action);
+//
+//    @Override
+//    default FluidStack extractFluid(int tank, long amount, Action action) {
+//        return extractFluid(tank, amount, getFluidSideFor(), action);
+//    }
 
     /**
      * A sided variant of {@link IExtendedFluidHandler#insertFluid(FluidStack, Action)}, docs copied for convenience.
@@ -193,9 +198,9 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      * fit, falls back to inserting into any empty tanks.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IExtendedFluidHandler} ends up distributing the insertion.
      */
-    default FluidStack insertFluid(FluidStack stack, @Nullable Direction side, Action action) {
-        return ExtendedFluidHandlerUtils.insert(stack, action, () -> getTanks(side), tank -> getFluidInTank(tank, side), (tank, s, a) -> insertFluid(tank, s, side, a));
-    }
+//    default FluidStack insertFluid(FluidStack stack, @Nullable Direction side, Action action) {
+//        return ExtendedFluidHandlerUtils.insert(stack, action, () -> getTanks(side), tank -> getFluidInTank(tank, side), (tank, s, a) -> insertFluid(tank, s, side, a));
+//    }
 
     /**
      * A sided variant of {@link IExtendedFluidHandler#extractFluid(int, Action)}, docs copied for convenience.
@@ -216,9 +221,9 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      * extracted is found, all future extractions will make sure to also make sure they are for the same type of fluid.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IExtendedFluidHandler} ends up distributing the extraction.
      */
-    default FluidStack extractFluid(int amount, @Nullable Direction side, Action action) {
-        return ExtendedFluidHandlerUtils.extract(amount, action, () -> getTanks(side), tank -> getFluidInTank(tank, side), (tank, a, act) -> extractFluid(tank, a, side, act));
-    }
+//    default FluidStack extractFluid(int amount, @Nullable Direction side, Action action) {
+//        return ExtendedFluidHandlerUtils.extract(amount, action, () -> getTanks(side), tank -> getFluidInTank(tank, side), (tank, a, act) -> extractFluid(tank, a, side, act));
+//    }
 
     /**
      * A sided variant of {@link IExtendedFluidHandler#extractFluid(FluidStack, Action)}, docs copied for convenience.
@@ -238,7 +243,7 @@ public interface ISidedFluidHandler extends IExtendedFluidHandler {
      * @implNote The default implementation of this method, extracts across all tanks that contents match the type of gas passed into this method.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IExtendedFluidHandler} ends up distributing the extraction.
      */
-    default FluidStack extractFluid(FluidStack stack, @Nullable Direction side, Action action) {
-        return ExtendedFluidHandlerUtils.extract(stack, action, () -> getTanks(side), tank -> getFluidInTank(tank, side), (tank, a, act) -> extractFluid(tank, a, side, act));
-    }
+//    default FluidStack extractFluid(FluidStack stack, @Nullable Direction side, Action action) {
+//        return ExtendedFluidHandlerUtils.extract(stack, action, () -> getTanks(side), tank -> getFluidInTank(tank, side), (tank, a, act) -> extractFluid(tank, a, side, act));
+//    }
 }

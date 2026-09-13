@@ -2,30 +2,35 @@ package mekanism.common.tags;
 
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalTags;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.common.util.Lazy;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.tags.ITag;
 
-public record LazyTagLookup<TYPE>(TagKey<TYPE> key, Lazy<ITag<TYPE>> lazyTag) {
+import java.util.function.Supplier;
 
-    public static <TYPE> LazyTagLookup<TYPE> create(IForgeRegistry<TYPE> registry, TagKey<TYPE> key) {
-        return new LazyTagLookup<>(key, Lazy.of(() -> TagUtils.manager(registry).getTag(key)));
+public record LazyTagLookup<TYPE>(TagKey<TYPE> key, Supplier<HolderSet.Named<TYPE>> tagSupplier, Registry<TYPE> registry) {
+
+    public static <TYPE> LazyTagLookup<TYPE> create(Registry<TYPE> registry, HolderSet.Named<TYPE> key) {
+        return new LazyTagLookup<>(key.key(), () -> key, registry);
+    }
+
+    public static <TYPE> LazyTagLookup<TYPE> create(Registry<TYPE> registry, TagKey<TYPE> key) {
+        return new LazyTagLookup<>(key, () -> registry.getTag(key).get(), registry);
     }
 
     public static <CHEMICAL extends Chemical<CHEMICAL>> LazyTagLookup<CHEMICAL> create(ChemicalTags<CHEMICAL> registry, TagKey<CHEMICAL> key) {
-        return new LazyTagLookup<>(key, Lazy.of(() -> registry.getManager().orElseThrow().getTag(key)));
+        return new LazyTagLookup<>(key, () -> registry.getTag(key).get(), registry.getRegistry());
     }
 
-    public ITag<TYPE> tag() {
-        return lazyTag.get();
+    public Supplier<HolderSet.Named<TYPE>> tagSupplier() {
+        return tagSupplier;
     }
 
     public boolean contains(TYPE element) {
-        return tag().contains(element);
+        return tagSupplier().get().contains(registry.wrapAsHolder(element));
     }
 
     public boolean isEmpty() {
-        return tag().isEmpty();
+        return tagSupplier().get().stream().findAny().isEmpty();
     }
 }

@@ -4,8 +4,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.math.MathUtils;
 import mekanism.api.robit.RobitSkin;
 import mekanism.client.RobitSpriteUploader;
@@ -15,6 +13,7 @@ import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.model.MekanismModelCache;
+import mekanism.client.model.robit.RobitBakedModel;
 import mekanism.client.render.lib.QuadTransformation;
 import mekanism.client.render.lib.QuadUtils;
 import mekanism.common.Mekanism;
@@ -32,8 +31,10 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 public class GuiRobitSkinSelectScroll extends GuiElement {
 
@@ -187,8 +188,12 @@ public class GuiRobitSkinSelectScroll extends GuiElement {
         pose.scale(SLOT_DIMENSIONS, SLOT_DIMENSIONS, SLOT_DIMENSIONS);
         pose.mulPose(Axis.ZP.rotationDegrees(180));
         PoseStack.Pose matrixEntry = pose.last();
-        ModelData modelData = ModelData.builder().with(EntityRobit.SKIN_TEXTURE_PROPERTY, MathUtils.getByIndexMod(textures, index)).build();
-        List<BakedQuad> quads = model.getQuads(null, null, robit.level().random, modelData, null);
+        List<BakedQuad> quads;
+        if (model instanceof RobitBakedModel robitModel) {
+            quads = robitModel.getQuads(null, null, robit.level().random, MathUtils.getByIndexMod(textures, index));
+        }else {
+            quads = model.getQuads(null, null, robit.level().random);
+        }
         //TODO: Ideally at some point we will want to be able to have the rotations happen via the matrix stack
         // so that we aren't having to transform the quads directly
         quads = QuadUtils.transformBakedQuads(quads, rotation);

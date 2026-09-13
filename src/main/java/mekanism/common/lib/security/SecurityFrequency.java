@@ -1,21 +1,22 @@
 package mekanism.common.lib.security;
 
-import java.util.List;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.api.security.SecurityMode;
 import mekanism.common.lib.collection.HashList;
 import mekanism.common.lib.frequency.Frequency;
 import mekanism.common.lib.frequency.FrequencyType;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.UUID;
 
 public class SecurityFrequency extends Frequency {
 
@@ -68,7 +69,7 @@ public class SecurityFrequency extends Frequency {
             ListTag trustedList = nbtTags.getList(NBTConstants.TRUSTED, Tag.TAG_INT_ARRAY);
             for (Tag trusted : trustedList) {
                 UUID uuid = NbtUtils.loadUUID(trusted);
-                addTrustedRaw(uuid, MekanismUtils.getLastKnownUsername(uuid));
+                addTrustedRaw(uuid, MekanismUtils.getLastKnownUsername(uuid, null));
             }
         }
     }
@@ -86,7 +87,7 @@ public class SecurityFrequency extends Frequency {
         super.read(dataStream);
         override = dataStream.readBoolean();
         securityMode = dataStream.readEnum(SecurityMode.class);
-        trustedCache = dataStream.readList(BasePacketHandler::readString);
+        trustedCache = dataStream.readList(NetworkUtil::readString);
     }
 
     @Override

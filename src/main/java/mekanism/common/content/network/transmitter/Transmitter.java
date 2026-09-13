@@ -1,20 +1,11 @@
 package mekanism.common.content.network.transmitter;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.UUID;
 import mekanism.api.Chunk3D;
 import mekanism.api.Coord4D;
 import mekanism.api.NBTConstants;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
-import mekanism.common.lib.transmitter.CompatibleTransmitterValidator;
-import mekanism.common.lib.transmitter.ConnectionType;
-import mekanism.common.lib.transmitter.DynamicNetwork;
-import mekanism.common.lib.transmitter.TransmissionType;
-import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
+import mekanism.common.lib.transmitter.*;
 import mekanism.common.lib.transmitter.acceptor.AbstractAcceptorCache;
 import mekanism.common.lib.transmitter.acceptor.AcceptorCache;
 import mekanism.common.tile.interfaces.ITileWrapper;
@@ -23,16 +14,17 @@ import mekanism.common.util.EnumUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
 import mekanism.common.util.text.BooleanStateDisplay.OnOff;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEPTOR, NETWORK, TRANSMITTER>,
       TRANSMITTER extends Transmitter<ACCEPTOR, NETWORK, TRANSMITTER>> implements ITileWrapper {
@@ -81,8 +73,10 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         Collections.addAll(supportedTransmissionTypes, transmissionTypes);
     }
 
+    protected abstract BlockApiLookup<ACCEPTOR, Direction> getAcceptorCacheLookup();
+
     protected AbstractAcceptorCache<ACCEPTOR, ?> createAcceptorCache() {
-        return new AcceptorCache<>(this, getTransmitterTile());
+        return new AcceptorCache<>(this, getTransmitterTile(), getAcceptorCacheLookup());
     }
 
     public AbstractAcceptorCache<ACCEPTOR, ?> getAcceptorCache() {
@@ -241,7 +235,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
     }
 
     @NotNull
-    public LazyOptional<ACCEPTOR> getAcceptor(Direction side) {
+    public Optional<ACCEPTOR> getAcceptor(Direction side) {
         return acceptorCache.getCachedAcceptor(side);
     }
 
@@ -283,8 +277,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         if (isRedstoneActivated()) {
             return false;
         }
-        BlockEntity tile = WorldUtils.getTileEntity(getTileWorld(), getTilePos().relative(side));
-        if (canConnectMutual(side, tile) && isValidAcceptor(tile, side)) {
+        if (canConnectMutual(side, getTileWorld(), getTilePos()) && isValidAcceptor(getTileWorld(), getTilePos().relative(side), side)) {
             return true;
         }
         acceptorCache.invalidateCachedAcceptor(side);
@@ -312,13 +305,13 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
         }
         for (Direction side : EnumUtils.DIRECTIONS) {
             BlockPos offset = getTilePos().relative(side);
-            BlockEntity tile = WorldUtils.getTileEntity(getTileWorld(), offset);
-            if (canConnectMutual(side, tile)) {
+//            BlockEntity tile = WorldUtils.getTileEntity(getTileWorld(), offset);
+            if (canConnectMutual(side, getTileWorld(), offset)) {
                 if (!isRemote() && !WorldUtils.isBlockLoaded(getTileWorld(), offset)) {
                     getTransmitterTile().setForceUpdate();
                     continue;
                 }
-                if (isValidAcceptor(tile, side)) {
+                if (isValidAcceptor(getTileWorld(), offset, side)) {
                     connections |= 1 << side.ordinal();
                     continue;
                 }
@@ -337,7 +330,7 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
     }
 
     public boolean isValidTransmitterBasic(TileEntityTransmitter transmitter, Direction side) {
-        return supportsTransmissionType(transmitter) && canConnectMutual(side, transmitter);
+        return supportsTransmissionType(transmitter) && canConnectMutual(side, transmitter.getLevel(), transmitter.getTilePos());
     }
 
     public boolean canConnectToAcceptor(Direction side) {
@@ -348,21 +341,22 @@ public abstract class Transmitter<ACCEPTOR, NETWORK extends DynamicNetwork<ACCEP
     /**
      * @apiNote Only call this from the server side
      */
-    public boolean isValidAcceptor(BlockEntity tile, Direction side) {
+    public boolean isValidAcceptor(Level level, BlockPos pos, Direction side) {
         //TODO: Rename this method better to make it more apparent that it caches and also listens to the acceptor
         //If it isn't a transmitter or the transmission type is different than the one the transmitter has
-        return !(tile instanceof TileEntityTransmitter transmitter) || !supportsTransmissionType(transmitter);
+        return !(WorldUtils.getTileEntity(level, pos) instanceof TileEntityTransmitter transmitter) || !supportsTransmissionType(transmitter);
     }
 
-    public boolean canConnectMutual(Direction side, @Nullable BlockEntity cachedTile) {
+    public boolean canConnectMutual(Direction side, @Nullable Level level, BlockPos pos) {
         if (!canConnect(side)) {
             return false;
         }
-        if (cachedTile == null) {
+        if (level == null || pos == null) {
             //If we don't already have the tile that is on the side calculated, do so
-            cachedTile = WorldUtils.getTileEntity(getTileWorld(), getTilePos().relative(side));
+            level = getTileWorld();
+            pos = getTilePos().relative(side);
         }
-        return !(cachedTile instanceof TileEntityTransmitter transmitter) || transmitter.getTransmitter().canConnect(side.getOpposite());
+        return !(WorldUtils.getTileEntity(level, pos) instanceof TileEntityTransmitter transmitter) || transmitter.getTransmitter().canConnect(side.getOpposite());
     }
 
     public boolean canConnectMutual(Direction side, @Nullable TRANSMITTER cachedTransmitter) {

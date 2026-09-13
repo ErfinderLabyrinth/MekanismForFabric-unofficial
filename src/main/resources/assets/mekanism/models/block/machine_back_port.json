@@ -1,6 +1,5 @@
 {
   "parent": "block/cube_all",
-  "render_type": "minecraft:cutout",
   "textures": {
     "particle": "#sides",
     "down": "#sides",
@@ -73,7 +72,7 @@
 			"faces": {
 				"south": {"uv": [8, 8, 16, 16], "texture": "#ports_led"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

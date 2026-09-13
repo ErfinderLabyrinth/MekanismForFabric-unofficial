@@ -8,17 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import mekanism.api.BigItemStack;
 import mekanism.api.math.MathUtils;
 import mekanism.common.Mekanism;
 import mekanism.common.content.qio.QIOCraftingTransferHelper.BaseSimulatedInventory;
@@ -32,15 +22,19 @@ import mekanism.common.inventory.container.slot.MainInventorySlot;
 import mekanism.common.inventory.slot.CraftingWindowInventorySlot;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 /**
  * Used for the server side transfer handling by the {@link mekanism.common.network.to_server.PacketQIOFillCraftingWindow}
@@ -80,7 +74,11 @@ public class QIOServerCraftingTransferHandler {
         for (byte slot = 0; slot < 9; slot++) {
             CraftingWindowInventorySlot inputSlot = craftingWindow.getInputSlot(slot);
             if (!inputSlot.isEmpty()) {
-                ItemStack available = inputSlot.extractItem(inputSlot.getCount(), Action.SIMULATE, AutomationType.INTERNAL);
+                ItemVariant variant = inputSlot.getResource();
+                ItemStack available;
+                try(Transaction t=Transaction.openOuter()) {
+                    available = variant.toStack((int)inputSlot.extract(variant, inputSlot.getCount(), t));
+                }
                 if (available.getCount() < inputSlot.getCount()) {
                     //TODO: Eventually it would be nice if we added in some support so that if an item is staying put in its crafting slot
                     // we don't actually need to do any validation of if it can be extracted from when it will just end up in the same spot anyways
@@ -261,7 +259,7 @@ public class QIOServerCraftingTransferHandler {
             }
             //We copy the stack in case any mods do dumb things in their recipes and would end up mutating our stacks that shouldn't be mutated by accident
             recipeToTest.set(targetSlot, slotStack.copy());
-        } else if (!ItemHandlerHelper.canItemStacksStack(currentRecipeTarget, slotStack)) {
+        } else if (!ItemEntity.areMergable(currentRecipeTarget, slotStack)) {
             //If our stack can't stack with the item we already are going to put in the slot, fail "gracefully"
             //Note: debug level because this may happen due to not knowing all NBT
             Mekanism.logger.debug("Received transfer request from: {}, for: {}, but found items for target slot: {} cannot stack. "
@@ -410,7 +408,7 @@ public class QIOServerCraftingTransferHandler {
         for (Byte2ObjectMap.Entry<List<SingularHashedItemSource>> entry : sources.byte2ObjectEntrySet()) {
             for (SingularHashedItemSource source : entry.getValue()) {
                 byte slot = source.getSlot();
-                ItemStack stack;
+                BigItemStack stack;
                 if (slot == -1) {
                     UUID qioSource = source.getQioSource();
                     //Neither the source nor the frequency can be null here as we validated that during simulation
@@ -428,11 +426,11 @@ public class QIOServerCraftingTransferHandler {
                         bail(targetContents, "Received transfer request from: {}, for: {}, but could not extract item: {} with nbt: {} from the QIO.",
                               player, recipeID, storedItem.getItem(), storedItem.getInternalTag());
                         return;
-                    } else if (stack.getCount() < source.getUsed()) {
+                    } else if (stack.amount() < source.getUsed()) {
                         Mekanism.logger.warn("Received transfer request from: {}, for: {}, but was unable to extract the expected amount: {} of item: {} "
                                              + "with nbt: {} from the QIO. This should not be possible as it should have been caught during simulation. Attempting "
                                              + "to continue anyways with the actual extracted amount of {}.", player, recipeID, source.getUsed(), storedItem.getItem(),
-                              storedItem.getInternalTag(), stack.getCount());
+                              storedItem.getInternalTag(), stack.amount());
                     }
                 } else {
                     int actualSlot;
@@ -440,49 +438,53 @@ public class QIOServerCraftingTransferHandler {
                     if (slot < 9) {//Crafting Window
                         actualSlot = slot;
                         slotType = "crafting window";
-                        stack = craftingWindow.getInputSlot(slot).extractItem(source.getUsed(), Action.EXECUTE, AutomationType.MANUAL);
+                        ItemVariant resource = craftingWindow.getInputSlot(slot).getResource();
+                        try(Transaction t=Transaction.openOuter()) {
+                            stack = new BigItemStack(resource, craftingWindow.getInputSlot(slot).extract(resource, source.getUsed(), t));
+                            t.commit();
+                        }
                     } else if (slot < 9 + Inventory.getSelectionSize()) {//Hotbar
                         actualSlot = slot - 9;
                         slotType = "hotbar";
-                        stack = hotBarSlots.get(actualSlot).remove(source.getUsed());
+                        stack = BigItemStack.of(hotBarSlots.get(actualSlot).remove(source.getUsed()));
                     } else {//Main inventory
                         actualSlot = slot - 9 - Inventory.getSelectionSize();
                         slotType = "main inventory";
-                        stack = mainInventorySlots.get(actualSlot).remove(source.getUsed());
+                        stack = BigItemStack.of(mainInventorySlots.get(actualSlot).remove(source.getUsed()));
                     }
                     if (stack.isEmpty()) {
                         bail(targetContents, "Received transfer request from: {}, for: {}, could not extract item from {} slot: {}. "
                                              + "This likely means that more of it was requested than is stored.", player, recipeID, slotType, actualSlot);
                         return;
-                    } else if (stack.getCount() < source.getUsed()) {
+                    } else if (stack.amount() < source.getUsed()) {
                         Mekanism.logger.warn("Received transfer request from: {}, for: {}, but was unable to extract the expected amount: {} from {} slot: {}. "
                                              + "This should not be possible as it should have been caught during simulation. Attempting to continue anyways with the "
-                                             + "actual extracted amount of {}.", player, recipeID, source.getUsed(), slotType, actualSlot, stack.getCount());
+                                             + "actual extracted amount of {}.", player, recipeID, source.getUsed(), slotType, actualSlot, stack.amount());
                     }
                 }
                 byte targetSlot = entry.getByteKey();
                 if (targetContents.containsKey(targetSlot)) {
                     ItemStack existing = targetContents.get(targetSlot);
-                    if (ItemHandlerHelper.canItemStacksStack(existing, stack)) {
+                    if (ItemEntity.areMergable(existing, stack.createStack())) {
                         int needed = existing.getMaxStackSize() - existing.getCount();
-                        if (stack.getCount() <= needed) {
-                            existing.grow(stack.getCount());
+                        if (stack.amount() <= needed) {
+                            existing.grow((int)stack.amount());
                         } else {
                             existing.grow(needed);
                             //Note: We can safely modify the stack as all our ways of extracting return a new stack
-                            stack.shrink(needed);
+                            stack = stack.copyWithCount(stack.amount() - needed);
                             Mekanism.logger.warn("Received transfer request from: {}, for: {}, but contents could not fully fit into target slot: {}. "
                                                  + "This should not be able to happen, returning excess stack, and attempting to continue.", player, recipeID, targetSlot);
-                            returnItem(stack, windowData);
+                            returnItem(stack.createStack(), windowData);
                         }
                     } else {
                         Mekanism.logger.warn("Received transfer request from: {}, for: {}, but contents could not stack into target slot: {}. "
                                              + "This should not be able to happen, returning extra stack, and attempting to continue.", player, recipeID, targetSlot);
-                        returnItem(stack, windowData);
+                        returnItem(stack.createStack(), windowData);
                     }
                 } else {
                     //Note: We can safely modify the stack as all our ways of extracting return a new stack
-                    targetContents.put(targetSlot, stack);
+                    targetContents.put(targetSlot, stack.createStack());
                 }
             }
         }
@@ -491,7 +493,12 @@ public class QIOServerCraftingTransferHandler {
         for (byte slot = 0; slot < 9; slot++) {
             CraftingWindowInventorySlot inputSlot = craftingWindow.getInputSlot(slot);
             if (!inputSlot.isEmpty()) {
-                ItemStack stack = inputSlot.extractItem(inputSlot.getCount(), Action.EXECUTE, AutomationType.MANUAL);
+                ItemVariant resource = inputSlot.getResource();
+                ItemStack stack;
+                try(Transaction t=Transaction.openOuter()) {
+                    stack = resource.toStack((int) inputSlot.extract(resource, inputSlot.getCount(), t));
+                    t.commit();
+                }
                 if (!stack.isEmpty()) {
                     remainingCraftingGridContents.put(slot, stack);
                 } else {
@@ -507,7 +514,12 @@ public class QIOServerCraftingTransferHandler {
             Byte2ObjectMap.Entry<ItemStack> entry = iter.next();
             byte targetSlot = entry.getByteKey();
             CraftingWindowInventorySlot inputSlot = craftingWindow.getInputSlot(targetSlot);
-            ItemStack remainder = inputSlot.insertItem(entry.getValue(), Action.EXECUTE, AutomationType.MANUAL);
+            ItemVariant resource = ItemVariant.of(entry.getValue());
+            ItemStack remainder;
+            try(Transaction t=Transaction.openOuter()) {
+                remainder = resource.toStack(entry.getValue().getCount() - (int) inputSlot.insert(resource, entry.getValue().getCount(), t));
+                t.commit();
+            }
             if (remainder.isEmpty()) {
                 //If it was fully inserted, remove the entry from what we have left to deal with
                 iter.remove();
@@ -529,8 +541,12 @@ public class QIOServerCraftingTransferHandler {
                 //If we couldn't insert it all, try recombining with the slots they were in the crafting window
                 // (only if the type matches though)
                 CraftingWindowInventorySlot inputSlot = craftingWindow.getInputSlot(entry.getByteKey());
-                if (ItemHandlerHelper.canItemStacksStack(inputSlot.getStack(), stack)) {
-                    stack = inputSlot.insertItem(stack, Action.EXECUTE, AutomationType.MANUAL);
+                if (ItemEntity.areMergable(inputSlot.getStack(), stack)) {
+                    ItemVariant resource = ItemVariant.of(stack);
+                    try(Transaction t=Transaction.openOuter()) {
+                        stack = resource.toStack(stack.getCount() - (int)inputSlot.insert(resource, stack.getCount(), t));
+                        t.commit();
+                    }
                 }
                 if (!stack.isEmpty()) {
                     //If we couldn't insert it, then try to put the remaining items in the frequency
@@ -582,8 +598,12 @@ public class QIOServerCraftingTransferHandler {
         for (Byte2ObjectMap.Entry<ItemStack> entry : remainingCraftingGridContents.byte2ObjectEntrySet()) {
             ItemStack stack = entry.getValue();
             CraftingWindowInventorySlot inputSlot = craftingWindow.getInputSlot(entry.getByteKey());
-            if (ItemHandlerHelper.canItemStacksStack(inputSlot.getStack(), stack)) {
-                stack = inputSlot.insertItem(stack, Action.EXECUTE, AutomationType.MANUAL);
+            if (ItemEntity.areMergable(inputSlot.getStack(), stack)) {
+                ItemVariant resource = ItemVariant.of(stack);
+                try(Transaction t=Transaction.openOuter()) {
+                    stack = resource.toStack(stack.getCount() - (int)inputSlot.insert(resource, stack.getCount(), t));
+                    t.commit();
+                }
                 if (stack.isEmpty()) {
                     continue;
                 }

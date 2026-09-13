@@ -11,17 +11,17 @@ import net.minecraft.nbt.ListTag;
 public interface ISustainedInventory {
 
     /**
-     * Sets the inventory tag list to a new value.
+     * Sets the inventory tagSupplier list to a new value.
      *
      * @param nbtTags - NBTTagList value to set
      */
     void setSustainedInventory(ListTag nbtTags);
 
     /**
-     * Gets the inventory tag list from a block.
+     * Gets the inventory tagSupplier list from a block.
      * Do not implement for Items
      *
-     * @return inventory tag list
+     * @return inventory tagSupplier list
      */
     ListTag getSustainedInventory();
 

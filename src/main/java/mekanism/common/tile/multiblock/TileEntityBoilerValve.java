@@ -1,12 +1,10 @@
 package mekanism.common.tile.multiblock;
 
-import java.util.Collections;
-import java.util.Set;
-import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
+import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
 import mekanism.common.block.attribute.AttributeStateBoilerValveMode;
@@ -19,14 +17,22 @@ import mekanism.common.lib.multiblock.IMultiblockEjector;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.util.ChemicalUtil;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class TileEntityBoilerValve extends TileEntityBoilerCasing implements IMultiblockEjector {
 
@@ -39,13 +45,33 @@ public class TileEntityBoilerValve extends TileEntityBoilerCasing implements IMu
     @NotNull
     @Override
     public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(IContentsListener listener) {
-        return side -> getMultiblock().getGasTanks(side);
+        return new IChemicalTankHolder<>() {
+            @Override
+            public @NotNull Storage<Gas> getTanks(@Nullable Direction side) {
+                return getMultiblock().getGasStorage(side);
+            }
+
+            @Override
+            public List<IGasTank> getAll() {
+                return getMultiblock().getGasTanks();
+            }
+        };
     }
 
     @NotNull
     @Override
     protected IFluidTankHolder getInitialFluidTanks(IContentsListener listener) {
-        return side -> getMultiblock().getFluidTanks(side);
+        return new IFluidTankHolder() {
+            @Override
+            public @NotNull Storage<FluidVariant> getTanks(@Nullable Direction side) {
+                return getMultiblock().getFluidStorage(side);
+            }
+
+            @Override
+            public List<IExtendedFluidTank> getAll() {
+                return getMultiblock().fluidTanks;
+            }
+        };
     }
 
     @Override
@@ -54,9 +80,9 @@ public class TileEntityBoilerValve extends TileEntityBoilerCasing implements IMu
         if (multiblock.isFormed()) {
             BoilerValveMode mode = getMode();
             if (mode == BoilerValveMode.OUTPUT_STEAM) {
-                ChemicalUtil.emit(outputDirections, multiblock.steamTank, this);
+                ChemicalUtil.emit(outputDirections, multiblock.steamTank, this.level, this.getBlockPos());
             } else if (mode == BoilerValveMode.OUTPUT_COOLANT) {
-                ChemicalUtil.emit(outputDirections, multiblock.cooledCoolantTank, this);
+                ChemicalUtil.emit(outputDirections, multiblock.cooledCoolantTank, this.level, this.getBlockPos());
             }
         }
         return needsPacket;
@@ -103,14 +129,29 @@ public class TileEntityBoilerValve extends TileEntityBoilerCasing implements IMu
         return InteractionResult.SUCCESS;
     }
 
-    @NotNull
     @Override
-    public FluidStack insertFluid(@NotNull FluidStack stack, Direction side, @NotNull Action action) {
-        FluidStack ret = super.insertFluid(stack, side, action);
-        if (ret.getAmount() < stack.getAmount() && action.execute()) {
-            getMultiblock().triggerValveTransfer(this);
-        }
-        return ret;
+    public @Nullable Storage<FluidVariant> getFluidStorage(@Nullable Direction side) {
+        Storage<FluidVariant> original = super.getFluidStorage(side);
+        return new Storage<FluidVariant>() {
+            @Override
+            public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+                long amountInserted = original.insert(resource, maxAmount, transaction);
+                if (amountInserted != 0) {
+                    getMultiblock().triggerValveTransfer(TileEntityBoilerValve.this);
+                }
+                return amountInserted;
+            }
+
+            @Override
+            public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+                return original.extract(resource, maxAmount, transaction);
+            }
+
+            @Override
+            public Iterator<StorageView<FluidVariant>> iterator() {
+                return original.iterator();
+            }
+        };
     }
 
     @Override

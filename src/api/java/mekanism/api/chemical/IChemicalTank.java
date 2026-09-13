@@ -1,17 +1,15 @@
 package mekanism.api.chemical;
 
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
-import mekanism.api.IContentsListener;
-import mekanism.api.NBTConstants;
+import mekanism.api.*;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.util.INBTSerializable;
 
 @NothingNullByDefault
-public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends IEmptyStackProvider<CHEMICAL, STACK>,
-      INBTSerializable<CompoundTag>, IContentsListener {
+public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> extends IEmptyStackProvider<CHEMICAL, STACK>, IContentsListener, NBTSerializable<CompoundTag>, SingleSlotStorage<CHEMICAL> {
 
     /**
      * Helper for creating a stack of the type this {@link IChemicalTank} is storing.
@@ -22,6 +20,16 @@ public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extend
      * @return A new stack
      */
     STACK createStack(STACK stored, long size);
+
+    /**
+     * Helper for creating a stack of the type this {@link IChemicalTank} is storing.
+     *
+     * @param chemical The chemical of the new stack.
+     * @param size     The size of the new stack.
+     *
+     * @return A new stack
+     */
+    STACK createStack(CHEMICAL chemical, long size);
 
     /**
      * Returns the {@link ChemicalStack} in this tank.
@@ -81,35 +89,40 @@ public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extend
      * {@link #onContentsChanged()}. It is also recommended to override this if your internal {@link ChemicalStack} is mutable so that a copy does not have to be made
      * every run
      */
-    default STACK insert(STACK stack, Action action, AutomationType automationType) {
-        if (stack.isEmpty() || !isValid(stack)) {
+
+    void updateSnapshots(TransactionContext t);
+
+    @Override
+    default long insert(CHEMICAL resource, long amount, TransactionContext transaction) {
+        updateSnapshots(transaction);
+        STACK stack = (STACK) resource.getStack(amount);
+        if (resource.isEmptyType() || amount == 0 || !isValid(stack)) {
             //"Fail quick" if the given stack is empty, or we can never insert the item or currently are unable to insert it
-            return stack;
+            return 0;
         }
         long needed = getNeeded();
         if (needed <= 0) {
             //Fail if we are a full tank
-            return stack;
+            return 0;
         }
         boolean sameType = false;
         if (isEmpty() || (sameType = isTypeEqual(stack))) {
             long toAdd = Math.min(stack.getAmount(), needed);
-            if (action.execute()) {
-                //If we want to actually insert the chemical, then update the current chemical
-                if (sameType) {
-                    //We can just grow our stack by the amount we want to increase it
-                    // Note: this also will mark that the contents changed
-                    growStack(toAdd, action);
-                } else {
-                    //If we are not the same type then we have to copy the stack and set it
-                    // Note: this also will mark that the contents changed
-                    setStack(createStack(stack, toAdd));
-                }
+
+            //If we want to actually insert the chemical, then update the current chemical
+            if (sameType) {
+                //We can just grow our stack by the amount we want to increase it
+                // Note: this also will mark that the contents changed
+                growStack(toAdd);
+            } else {
+                //If we are not the same type then we have to copy the stack and set it
+                // Note: this also will mark that the contents changed
+                setStack(createStack(stack, toAdd));
             }
-            return createStack(stack, stack.getAmount() - toAdd);
+            return toAdd;
         }
         //If we didn't accept this chemical, then just return the given stack
-        return stack;
+        return 0;
     }
 
     /**
@@ -129,16 +142,17 @@ public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extend
      * sure to call {@link #onContentsChanged()}. It is also recommended to override this if your internal {@link ChemicalStack} is mutable so that a copy does not have
      * to be made every run
      */
-    default STACK extract(long amount, Action action, AutomationType automationType) {
+    default long extract(CHEMICAL resource, long amount, TransactionContext transaction) {
+        updateSnapshots(transaction);
         if (isEmpty() || amount < 1) {
-            return getEmptyStack();
+            return 0;
         }
-        STACK ret = createStack(getStack(), Math.min(getStored(), amount));
-        if (!ret.isEmpty() && action.execute()) {
+        long extractAmount = Math.min(getStored(), amount);
+        if (extractAmount != 0) {
             // Note: this also will mark that the contents changed
-            shrinkStack(ret.getAmount(), action);
+            shrinkStack(extractAmount);
         }
-        return ret;
+        return extractAmount;
     }
 
     /**
@@ -180,20 +194,18 @@ public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extend
      * @implNote It is recommended to override this if your internal {@link ChemicalStack} is mutable so that a copy does not have to be made every run. If the internal
      * stack does get updated make sure to call {@link #onContentsChanged()}
      */
-    default long setStackSize(long amount, Action action) {
+    default long setStackSize(long amount) {
         if (isEmpty()) {
             return 0;
         } else if (amount <= 0) {
-            if (action.execute()) {
-                setEmpty();
-            }
+            setEmpty();
             return 0;
         }
         long maxStackSize = getCapacity();
         if (amount > maxStackSize) {
             amount = maxStackSize;
         }
-        if (getStored() == amount || action.simulate()) {
+        if (getStored() == amount) {
             //If our size is not changing, or we are only simulating the change, don't do anything
             return amount;
         }
@@ -215,13 +227,13 @@ public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extend
      * @apiNote Negative values for amount are valid, and will instead cause the stack to shrink.
      * @implNote If the internal stack does get updated make sure to call {@link #onContentsChanged()}
      */
-    default long growStack(long amount, Action action) {
+    default long growStack(long amount) {
         long current = getStored();
         if (amount > 0) {
             //Cap adding amount at how much we need, so that we don't risk long overflow
             amount = Math.min(amount, getNeeded());
         }
-        long newSize = setStackSize(current + amount, action);
+        long newSize = setStackSize(current + amount);
         return newSize - current;
     }
 
@@ -239,8 +251,8 @@ public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extend
      * @apiNote Negative values for amount are valid, and will instead cause the stack to grow.
      * @implNote If the internal stack does get updated make sure to call {@link #onContentsChanged()}
      */
-    default long shrinkStack(long amount, Action action) {
-        return -growStack(-amount, action);
+    default long shrinkStack(long amount) {
+        return -growStack(-amount);
     }
 
     /**
@@ -325,7 +337,6 @@ public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extend
         return ChemicalAttributeValidator.DEFAULT;
     }
 
-    @Override
     default CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
         if (!isEmpty()) {

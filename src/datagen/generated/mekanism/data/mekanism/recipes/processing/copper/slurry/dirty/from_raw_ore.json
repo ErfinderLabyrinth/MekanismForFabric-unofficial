@@ -7,12 +7,12 @@
   "itemInput": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:raw_materials/copper"
+      "tag": "c:raw_copper_ores"
     }
   },
   "output": {
     "amount": 2000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_copper"
+    "slurry": "minecraft:dirty_copper"
   }
 }

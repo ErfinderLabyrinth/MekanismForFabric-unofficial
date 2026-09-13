@@ -2,10 +2,6 @@ package mekanism.common.recipe.ingredient.chemical;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.gas.Gas;
@@ -18,11 +14,16 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
 import mekanism.api.recipes.ingredients.InputIngredient;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.recipe.ingredient.IMultiIngredient;
 import mekanism.common.recipe.ingredient.chemical.ChemicalIngredientDeserializer.IngredientType;
+import mekanism.common.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 public abstract class MultiChemicalStackIngredient<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>,
       INGREDIENT extends ChemicalStackIngredient<CHEMICAL, STACK>> implements ChemicalStackIngredient<CHEMICAL, STACK>, IMultiIngredient<STACK, INGREDIENT> {
@@ -113,7 +114,7 @@ public abstract class MultiChemicalStackIngredient<CHEMICAL extends Chemical<CHE
     @Override
     public void write(FriendlyByteBuf buffer) {
         buffer.writeEnum(IngredientType.MULTI);
-        BasePacketHandler.writeArray(buffer, ingredients, InputIngredient::write);
+        NetworkUtil.writeArray(buffer, ingredients, InputIngredient::write);
     }
 
     @NotNull

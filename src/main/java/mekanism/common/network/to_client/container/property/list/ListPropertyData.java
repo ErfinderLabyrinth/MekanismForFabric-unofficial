@@ -1,12 +1,13 @@
 package mekanism.common.network.to_client.container.property.list;
 
-import java.util.List;
-import java.util.function.Function;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.network.to_client.container.property.PropertyData;
 import mekanism.common.network.to_client.container.property.PropertyType;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.function.Function;
 
 public abstract class ListPropertyData<TYPE> extends PropertyData {
 

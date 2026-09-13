@@ -2,7 +2,7 @@
   "type": "mekanism:pigment_extracting",
   "input": {
     "ingredient": {
-      "tag": "forge:glass/pink"
+      "item": "minecraft:pink_stained_glass"
     }
   },
   "output": {

@@ -1,9 +1,6 @@
 package mekanism.client.gui.element.custom.module;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.ObjIntConsumer;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.ModuleData.ExclusiveFlag;
 import mekanism.api.gear.config.ModuleBooleanData;
@@ -23,6 +20,10 @@ import mekanism.common.content.gear.ModuleConfigItem.DisableableModuleConfigItem
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.ObjIntConsumer;
 
 public class GuiModuleScreen extends GuiScrollableElement {
 

@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "C": {
-      "tag": "forge:ingots/copper"
+      "tag": "c:copper_ingots"
     },
     "F": {
       "item": "minecraft:furnace"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "O": {
-      "tag": "forge:ingots/osmium"
+      "tag": "c:osmium_ingots"
     },
     "W": {
       "tag": "minecraft:planks"

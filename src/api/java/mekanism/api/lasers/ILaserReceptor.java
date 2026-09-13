@@ -1,13 +1,9 @@
 package mekanism.api.lasers;
 
-import mekanism.api.math.FloatingLong;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
-import org.jetbrains.annotations.NotNull;
-
 /**
  * Expose this as a capability on your TileEntity to handle what happens when a laser hits it.
  */
-@AutoRegisterCapability
+//@AutoRegisterCapability //TODO
 public interface ILaserReceptor {
 
     /**
@@ -15,7 +11,7 @@ public interface ILaserReceptor {
      *
      * @param energy Energy received.
      */
-    void receiveLaserEnergy(@NotNull FloatingLong energy);
+    void receiveLaserEnergy(long energy);
 
     /**
      * Checks if a laser can break this receptor.

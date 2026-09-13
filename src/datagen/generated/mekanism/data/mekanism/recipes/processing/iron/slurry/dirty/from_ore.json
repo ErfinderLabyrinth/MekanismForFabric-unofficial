@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ores/iron"
+      "tag": "c:iron_ingots"
     }
   },
   "output": {
     "amount": 1000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_iron"
+    "slurry": "minecraft:dirty_iron"
   }
 }

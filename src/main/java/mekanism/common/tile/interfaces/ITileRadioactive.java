@@ -1,10 +1,11 @@
 package mekanism.common.tile.interfaces;
 
-import java.util.List;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.gas.attribute.GasAttributes.Radiation;
 import mekanism.api.math.MathUtils;
 import mekanism.api.radiation.IRadiationManager;
+
+import java.util.List;
 
 public interface ITileRadioactive {
 

@@ -6,10 +6,10 @@
       "tag": "mekanism:alloys/infused"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "S": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     },
     "T": {
       "item": "mekanism:basic_chemical_tank"

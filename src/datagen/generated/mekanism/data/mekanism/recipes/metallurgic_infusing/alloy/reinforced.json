@@ -2,7 +2,7 @@
   "type": "mekanism:metallurgic_infusing",
   "chemicalInput": {
     "amount": 20,
-    "tag": "mekanism:diamond"
+    "tagSupplier": "mekanism:diamond"
   },
   "itemInput": {
     "ingredient": {

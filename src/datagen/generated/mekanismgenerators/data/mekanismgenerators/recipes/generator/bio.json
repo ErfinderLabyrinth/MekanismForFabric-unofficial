@@ -5,16 +5,16 @@
       "tag": "mekanism:alloys/infused"
     },
     "B": {
-      "tag": "forge:fuels/bio"
+      "tag": "c:biofuels"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:redstone_dusts"
     }
   },
   "pattern": [

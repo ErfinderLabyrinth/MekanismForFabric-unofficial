@@ -1,7 +1,8 @@
 package mekanism.common.lib.multiblock;
 
-import java.util.Set;
 import net.minecraft.core.Direction;
+
+import java.util.Set;
 
 public interface IMultiblockEjector {
 

@@ -4,14 +4,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import mekanism.client.model.ModelAtomicDisassembler;
 import mekanism.client.render.item.MekanismISTER;
+import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class RenderAtomicDisassembler extends MekanismISTER {
-
+    public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "atomic_disassembler");
     public static final RenderAtomicDisassembler RENDERER = new RenderAtomicDisassembler();
     private ModelAtomicDisassembler atomicDisassembler;
 
@@ -28,5 +30,10 @@ public class RenderAtomicDisassembler extends MekanismISTER {
         matrix.mulPose(Axis.ZP.rotationDegrees(180));
         atomicDisassembler.render(matrix, renderer, light, overlayLight, stack.hasFoil());
         matrix.popPose();
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 }

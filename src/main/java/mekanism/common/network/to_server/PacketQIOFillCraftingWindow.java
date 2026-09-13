@@ -2,24 +2,28 @@ package mekanism.common.network.to_server;
 
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectArrayMap;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import mekanism.api.MekanismAPI;
 import mekanism.common.Mekanism;
 import mekanism.common.content.qio.QIOCraftingTransferHelper.SingularHashedItemSource;
 import mekanism.common.content.qio.QIOServerCraftingTransferHandler;
 import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.recipe.MekanismRecipeType;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraftforge.network.NetworkEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class PacketQIOFillCraftingWindow implements IMekanismPacket {
+    public static final PacketType<PacketQIOFillCraftingWindow> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "qiu_fill_crafting_window"), PacketQIOFillCraftingWindow::decode);
 
     private final Byte2ObjectMap<List<SingularHashedItemSource>> sources;
     private final ResourceLocation recipeID;
@@ -34,8 +38,7 @@ public class PacketQIOFillCraftingWindow implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        ServerPlayer player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null && player.containerMenu instanceof QIOItemViewerContainer container) {
             byte selectedCraftingGrid = container.getSelectedCraftingGrid(player.getUUID());
             if (selectedCraftingGrid == -1) {
@@ -118,5 +121,10 @@ public class PacketQIOFillCraftingWindow implements IMekanismPacket {
             }
         }
         return new PacketQIOFillCraftingWindow(recipeID, maxTransfer, sources);
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 }

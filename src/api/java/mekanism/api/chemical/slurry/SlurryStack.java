@@ -5,9 +5,9 @@ import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.providers.ISlurryProvider;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
@@ -33,7 +33,7 @@ public final class SlurryStack extends ChemicalStack<Slurry> {
     }
 
     @Override
-    protected IForgeRegistry<Slurry> getRegistry() {
+    protected Registry<Slurry> getRegistry() {
         return MekanismAPI.slurryRegistry();
     }
 
@@ -43,11 +43,11 @@ public final class SlurryStack extends ChemicalStack<Slurry> {
     }
 
     /**
-     * Returns the SlurryStack stored in the defined tag compound, or null if it doesn't exist.
+     * Returns the SlurryStack stored in the defined tagSupplier compound, or null if it doesn't exist.
      *
-     * @param nbtTags - tag compound to read from
+     * @param nbtTags - tagSupplier compound to read from
      *
-     * @return SlurryStack stored in the tag compound
+     * @return SlurryStack stored in the tagSupplier compound
      */
     public static SlurryStack readFromNBT(@Nullable CompoundTag nbtTags) {
         if (nbtTags == null || nbtTags.isEmpty()) {
@@ -65,7 +65,7 @@ public final class SlurryStack extends ChemicalStack<Slurry> {
     }
 
     public static SlurryStack readFromPacket(FriendlyByteBuf buf) {
-        Slurry slurry = buf.readRegistryIdSafe(Slurry.class);
+        Slurry slurry = Slurry.getFromRegistry(buf.readResourceLocation());
         if (slurry.isEmptyType()) {
             return EMPTY;
         }

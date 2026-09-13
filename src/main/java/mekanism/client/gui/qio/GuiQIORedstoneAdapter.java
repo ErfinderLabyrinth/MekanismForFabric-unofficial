@@ -1,7 +1,6 @@
 package mekanism.client.gui.qio;
 
-import java.util.ArrayList;
-import java.util.List;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.GuiInnerScreen;
 import mekanism.client.gui.element.button.MekanismImageButton;
@@ -10,7 +9,6 @@ import mekanism.client.gui.element.slot.SlotType;
 import mekanism.client.gui.element.tab.GuiQIOFrequencyTab;
 import mekanism.client.gui.element.text.GuiTextField;
 import mekanism.client.jei.interfaces.IJEIGhostTarget.IGhostItemConsumer;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.network.to_server.PacketGuiInteract;
@@ -26,6 +24,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuiQIORedstoneAdapter extends GuiMekanismTile<TileEntityQIORedstoneAdapter, MekanismTileContainer<TileEntityQIORedstoneAdapter>> {
 
@@ -56,7 +57,7 @@ public class GuiQIORedstoneAdapter extends GuiMekanismTile<TileEntityQIORedstone
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(MekanismSounds.BEEP.get(), 1.0F));
         });
         addRenderableWidget(new MekanismImageButton(this, 9, 80, 14, getButtonLocation("fuzzy"),
-              () -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.QIO_REDSTONE_ADAPTER_FUZZY, tile)), getOnHover(MekanismLang.FUZZY_MODE)));
+              () -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.QIO_REDSTONE_ADAPTER_FUZZY, tile)), getOnHover(MekanismLang.FUZZY_MODE)));
         addRenderableWidget(new GuiInnerScreen(this, 7, 16, imageWidth - 15, 12, GuiQIOFilterHandler.getFrequencyText(tile))
               .tooltip(GuiQIOFilterHandler.getFrequencyTooltip(tile)));
         addRenderableWidget(new GuiInnerScreen(this, 27, 30, imageWidth - 27 - 8, 64, () -> {
@@ -79,13 +80,13 @@ public class GuiQIORedstoneAdapter extends GuiMekanismTile<TileEntityQIORedstone
 
     private void updateStack(ItemStack stack) {
         //Note: Empty stack will be returned as empty by StackUtils#size, so we do not have to special case it
-        Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteractionItem.QIO_REDSTONE_ADAPTER_STACK, tile, stack.copyWithCount(1)));
+        MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteractionItem.QIO_REDSTONE_ADAPTER_STACK, tile, stack.copyWithCount(1)));
     }
 
     private void setCount() {
         if (!text.getText().isEmpty()) {
             long count = Long.parseLong(text.getText());
-            Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.QIO_REDSTONE_ADAPTER_COUNT, tile, (int) Math.min(count, Integer.MAX_VALUE)));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.QIO_REDSTONE_ADAPTER_COUNT, tile, (int) Math.min(count, Integer.MAX_VALUE)));
             text.setText("");
         }
     }

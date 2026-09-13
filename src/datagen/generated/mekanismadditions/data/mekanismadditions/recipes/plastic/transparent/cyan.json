@@ -6,7 +6,7 @@
       "item": "mekanism:hdpe_sheet"
     },
     "D": {
-      "tag": "forge:dyes/cyan"
+      "tag": "c:cyan_dyes"
     }
   },
   "pattern": [

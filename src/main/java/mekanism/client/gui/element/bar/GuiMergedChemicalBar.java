@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.bar;
 
-import java.util.Optional;
 import mekanism.api.chemical.IChemicalTank;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
@@ -20,6 +19,7 @@ import mekanism.common.capabilities.chemical.dynamic.IGasTracker;
 import mekanism.common.capabilities.chemical.dynamic.IInfusionTracker;
 import mekanism.common.capabilities.chemical.dynamic.IPigmentTracker;
 import mekanism.common.capabilities.chemical.dynamic.ISlurryTracker;
+import mekanism.common.capabilities.holder.ListHolder;
 import mekanism.common.util.text.TextUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
@@ -27,6 +27,8 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class GuiMergedChemicalBar<HANDLER extends IGasTracker & IInfusionTracker & IPigmentTracker & ISlurryTracker> extends GuiBar<IBarInfoHandler> implements
       IJEIIngredientHelper {
@@ -68,10 +70,10 @@ public class GuiMergedChemicalBar<HANDLER extends IGasTracker & IInfusionTracker
             }
         }, x, y, width, height, horizontal);
         this.chemicalTank = chemicalTank;
-        gasBar = addPositionOnlyChild(new GuiChemicalBar<>(gui, GuiChemicalBar.getProvider(this.chemicalTank.getGasTank(), handler.getGasTanks(null)), x, y, width, height, horizontal));
-        infusionBar = addPositionOnlyChild(new GuiChemicalBar<>(gui, GuiChemicalBar.getProvider(this.chemicalTank.getInfusionTank(), handler.getInfusionTanks(null)), x, y, width, height, horizontal));
-        pigmentBar = addPositionOnlyChild(new GuiChemicalBar<>(gui, GuiChemicalBar.getProvider(this.chemicalTank.getPigmentTank(), handler.getPigmentTanks(null)), x, y, width, height, horizontal));
-        slurryBar = addPositionOnlyChild(new GuiChemicalBar<>(gui, GuiChemicalBar.getProvider(this.chemicalTank.getSlurryTank(), handler.getSlurryTanks(null)), x, y, width, height, horizontal));
+        gasBar = addPositionOnlyChild(new GuiChemicalBar<>(gui, GuiChemicalBar.getProvider(this.chemicalTank.getGasTank(), new ListHolder<>(handler.getGasTanks())), x, y, width, height, horizontal));
+        infusionBar = addPositionOnlyChild(new GuiChemicalBar<>(gui, GuiChemicalBar.getProvider(this.chemicalTank.getInfusionTank(), new ListHolder<>(handler.getInfusionTanks())), x, y, width, height, horizontal));
+        pigmentBar = addPositionOnlyChild(new GuiChemicalBar<>(gui, GuiChemicalBar.getProvider(this.chemicalTank.getPigmentTank(), new ListHolder<>(handler.getPigmentTanks())), x, y, width, height, horizontal));
+        slurryBar = addPositionOnlyChild(new GuiChemicalBar<>(gui, GuiChemicalBar.getProvider(this.chemicalTank.getSlurryTank(), new ListHolder<>(handler.getSlurryTanks())), x, y, width, height, horizontal));
     }
 
     @Override

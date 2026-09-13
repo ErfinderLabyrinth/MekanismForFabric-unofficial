@@ -1,7 +1,9 @@
 package mekanism.generators.common.registries;
 
+import mekanism.api.MekanismAPI;
 import mekanism.common.registration.impl.ModuleDeferredRegister;
 import mekanism.common.registration.impl.ModuleRegistryObject;
+import mekanism.common.registries.MekanismModules;
 import mekanism.generators.common.MekanismGenerators;
 import mekanism.generators.common.content.gear.mekasuit.ModuleGeothermalGeneratorUnit;
 import mekanism.generators.common.content.gear.mekasuit.ModuleSolarRechargingUnit;
@@ -14,7 +16,7 @@ public class GeneratorsModules {
     private GeneratorsModules() {
     }
 
-    public static final ModuleDeferredRegister MODULES = new ModuleDeferredRegister(MekanismGenerators.MODID);
+    public static final ModuleDeferredRegister MODULES = new ModuleDeferredRegister(MekanismGenerators.MODID, MekanismAPI.moduleRegistry());
 
     //Helmet
     public static final ModuleRegistryObject<ModuleSolarRechargingUnit> SOLAR_RECHARGING_UNIT = MODULES.register("solar_recharging_unit",
@@ -23,4 +25,8 @@ public class GeneratorsModules {
     //Pants
     public static final ModuleRegistryObject<ModuleGeothermalGeneratorUnit> GEOTHERMAL_GENERATOR_UNIT = MODULES.register("geothermal_generator_unit",
           ModuleGeothermalGeneratorUnit::new, () -> GeneratorsItems.MODULE_GEOTHERMAL_GENERATOR.asItem(), builder -> builder.maxStackSize(8).rarity(Rarity.RARE));
+
+    public static void register() {
+
+    }
 }

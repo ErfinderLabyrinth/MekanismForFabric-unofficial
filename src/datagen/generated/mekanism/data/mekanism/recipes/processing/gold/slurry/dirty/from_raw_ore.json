@@ -7,12 +7,12 @@
   "itemInput": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:raw_materials/gold"
+      "tag": "c:raw_gold_ores"
     }
   },
   "output": {
     "amount": 2000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_gold"
+    "slurry": "minecraft:dirty_gold"
   }
 }

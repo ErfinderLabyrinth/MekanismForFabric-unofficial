@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ores/tin"
+      "tag": "c:tin_ores"
     }
   },
   "output": {
     "amount": 1000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_tin"
+    "slurry": "minecraft:dirty_tin"
   }
 }

@@ -26,6 +26,7 @@ import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.registries.GeneratorsBlocks;
 import mekanism.generators.common.registries.GeneratorsFluids;
 import mekanism.generators.common.slot.FluidFuelInventorySlot;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,14 +45,14 @@ public class TileEntityBioGenerator extends TileEntityGenerator {
     private float lastFluidScale;
 
     public TileEntityBioGenerator(BlockPos pos, BlockState state) {
-        super(GeneratorsBlocks.BIO_GENERATOR, pos, state, MekanismGeneratorsConfig.generators.bioGeneration);
+        super(GeneratorsBlocks.BIO_GENERATOR, pos, state, () -> MekanismGeneratorsConfig.generators.bioGeneration);
     }
 
     @NotNull
     @Override
     protected IFluidTankHolder getInitialFluidTanks(IContentsListener listener) {
         FluidTankHelper builder = FluidTankHelper.forSide(this::getDirection);
-        builder.addTank(bioFuelTank = VariableCapacityFluidTank.input(MekanismGeneratorsConfig.generators.bioTankCapacity,
+        builder.addTank(bioFuelTank = VariableCapacityFluidTank.input(() -> MekanismGeneratorsConfig.generators.bioTankCapacity,
                     fluidStack -> GeneratorTags.Fluids.BIOETHANOL_LOOKUP.contains(fluidStack.getFluid()), listener), RelativeSide.LEFT, RelativeSide.RIGHT,
               RelativeSide.BACK, RelativeSide.TOP, RelativeSide.BOTTOM);
         return builder.build();
@@ -73,15 +74,22 @@ public class TileEntityBioGenerator extends TileEntityGenerator {
         super.onUpdateServer();
         energySlot.drainContainer();
         fuelSlot.fillOrBurn();
-        if (MekanismUtils.canFunction(this) && !bioFuelTank.isEmpty() &&
-            getEnergyContainer().insert(MekanismGeneratorsConfig.generators.bioGeneration.get(), Action.SIMULATE, AutomationType.INTERNAL).isZero()) {
-            setActive(true);
-            MekanismUtils.logMismatchedStackSize(bioFuelTank.shrinkStack(1, Action.EXECUTE), 1);
-            getEnergyContainer().insert(MekanismGeneratorsConfig.generators.bioGeneration.get(), Action.EXECUTE, AutomationType.INTERNAL);
-            float fluidScale = MekanismUtils.getScale(lastFluidScale, bioFuelTank);
-            if (fluidScale != lastFluidScale) {
-                lastFluidScale = fluidScale;
-                sendUpdatePacket();
+        if (MekanismUtils.canFunction(this) && !bioFuelTank.isEmpty()) {
+            boolean isInserted = false;
+            try(Transaction t = Transaction.openOuter()) {
+                if(getEnergyContainer().insert(MekanismGeneratorsConfig.generators.bioGeneration, t) == MekanismGeneratorsConfig.generators.bioGeneration) {
+                    t.commit();
+                    isInserted = true;
+                }
+            }
+            if (isInserted) {
+                setActive(true);
+                MekanismUtils.logMismatchedStackSize(bioFuelTank.shrinkStack(1), 1);
+                float fluidScale = MekanismUtils.getScale(lastFluidScale, bioFuelTank);
+                if (fluidScale != lastFluidScale) {
+                    lastFluidScale = fluidScale;
+                    sendUpdatePacket();
+                }
             }
         } else {
             setActive(false);
@@ -104,7 +112,7 @@ public class TileEntityBioGenerator extends TileEntityGenerator {
 
     @Override
     public int getRedstoneLevel() {
-        return MekanismUtils.redstoneLevelFromContents(bioFuelTank.getFluidAmount(), bioFuelTank.getCapacity());
+        return MekanismUtils.redstoneLevelFromContents(bioFuelTank.getAmount(), bioFuelTank.getCapacity());
     }
 
     @Override
@@ -114,8 +122,8 @@ public class TileEntityBioGenerator extends TileEntityGenerator {
 
     //Methods relating to IComputerTile
     @Override
-    FloatingLong getProductionRate() {
-        return getActive() ? MekanismGeneratorsConfig.generators.bioGeneration.get() : FloatingLong.ZERO;
+    long getProductionRate() {
+        return getActive() ? MekanismGeneratorsConfig.generators.bioGeneration : 0;
     }
     //End methods IComputerTile
 }

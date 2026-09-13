@@ -21,8 +21,8 @@ public class SortingRecipeData implements RecipeUpgradeData<SortingRecipeData> {
     }
 
     @Override
-    public boolean applyToStack(ItemStack stack) {
+    public ItemStack applyToStack(ItemStack stack) {
         ItemDataUtils.setBoolean(stack, NBTConstants.SORTING, true);
-        return true;
+        return stack;
     }
 }

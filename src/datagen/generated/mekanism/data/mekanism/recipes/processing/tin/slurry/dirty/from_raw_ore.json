@@ -7,12 +7,12 @@
   "itemInput": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:raw_materials/tin"
+      "tag": "c:raw_tin"
     }
   },
   "output": {
     "amount": 2000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_tin"
+    "slurry": "minecraft:dirty_tin"
   }
 }

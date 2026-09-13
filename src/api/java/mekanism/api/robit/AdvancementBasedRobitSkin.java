@@ -1,8 +1,6 @@
 package mekanism.api.robit;
 
 import com.mojang.serialization.Codec;
-import java.util.List;
-import java.util.Objects;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +9,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Prefab of a robit skin that requires a given advancement to be unlocked to use it.

@@ -1,10 +1,5 @@
 package mekanism.common.tile;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
 import mekanism.api.IContentsListener;
 import mekanism.api.RelativeSide;
 import mekanism.api.chemical.gas.Gas;
@@ -55,20 +50,12 @@ import mekanism.common.tile.component.TileComponentConfig;
 import mekanism.common.tile.component.TileComponentEjector;
 import mekanism.common.tile.component.config.ConfigInfo;
 import mekanism.common.tile.component.config.DataType;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.EnergyProxy;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.FluidProxy;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.GasProxy;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.HeatProxy;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.InfusionProxy;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.InventoryProxy;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.PigmentProxy;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.ProxySlotInfoCreator;
-import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.SlurryProxy;
+import mekanism.common.tile.component.config.slot.IProxiedSlotInfo.*;
 import mekanism.common.tile.component.config.slot.ISlotInfo;
 import mekanism.common.tile.prefab.TileEntityConfigurableMachine;
-import mekanism.common.util.CapabilityUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
@@ -77,6 +64,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public class TileEntityQuantumEntangloporter extends TileEntityConfigurableMachine implements IChunkLoader {
 
@@ -133,25 +126,25 @@ public class TileEntityQuantumEntangloporter extends TileEntityConfigurableMachi
     @NotNull
     @Override
     public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(IContentsListener listener) {
-        return new QuantumEntangloporterChemicalTankHolder<>(this, TransmissionType.GAS, InventoryFrequency::getGasTanks);
+        return new QuantumEntangloporterChemicalTankHolder<>(this, TransmissionType.GAS, (inventoryFrequency, direction) -> new CombinedStorage<>(inventoryFrequency.getGasTanks(direction)));
     }
 
     @NotNull
     @Override
     public IChemicalTankHolder<InfuseType, InfusionStack, IInfusionTank> getInitialInfusionTanks(IContentsListener listener) {
-        return new QuantumEntangloporterChemicalTankHolder<>(this, TransmissionType.INFUSION, InventoryFrequency::getInfusionTanks);
+        return new QuantumEntangloporterChemicalTankHolder<>(this, TransmissionType.INFUSION, (inventoryFrequency, direction) -> new CombinedStorage<>(inventoryFrequency.getInfusionTanks(direction)));
     }
 
     @NotNull
     @Override
     public IChemicalTankHolder<Pigment, PigmentStack, IPigmentTank> getInitialPigmentTanks(IContentsListener listener) {
-        return new QuantumEntangloporterChemicalTankHolder<>(this, TransmissionType.PIGMENT, InventoryFrequency::getPigmentTanks);
+        return new QuantumEntangloporterChemicalTankHolder<>(this, TransmissionType.PIGMENT, (inventoryFrequency, direction) -> new CombinedStorage<>(inventoryFrequency.getPigmentTanks(direction)));
     }
 
     @NotNull
     @Override
     public IChemicalTankHolder<Slurry, SlurryStack, ISlurryTank> getInitialSlurryTanks(IContentsListener listener) {
-        return new QuantumEntangloporterChemicalTankHolder<>(this, TransmissionType.SLURRY, InventoryFrequency::getSlurryTanks);
+        return new QuantumEntangloporterChemicalTankHolder<>(this, TransmissionType.SLURRY, (inventoryFrequency, direction) -> new CombinedStorage<>(inventoryFrequency.getSlurryTanks(direction)));
     }
 
     @NotNull
@@ -224,7 +217,7 @@ public class TileEntityQuantumEntangloporter extends TileEntityConfigurableMachi
             ISlotInfo slotInfo = configComponent.getSlotInfo(TransmissionType.HEAT, side);
             if (slotInfo != null && slotInfo.canInput()) {
                 BlockEntity adj = WorldUtils.getTileEntity(getLevel(), getBlockPos().relative(side));
-                return CapabilityUtils.getCapability(adj, Capabilities.HEAT_HANDLER, side.getOpposite()).resolve().orElse(null);
+                return Capabilities.HEAT_HANDLER_BLOCK.find(adj.getLevel(), adj.getBlockPos(), side.getOpposite());
             }
         }
         return null;

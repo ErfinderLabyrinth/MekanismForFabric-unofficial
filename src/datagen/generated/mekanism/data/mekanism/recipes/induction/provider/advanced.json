@@ -5,7 +5,7 @@
       "item": "mekanism:advanced_energy_cube"
     },
     "C": {
-      "tag": "forge:circuits/advanced"
+      "tag": "c:advanced_circuits"
     },
     "P": {
       "item": "mekanism:basic_induction_provider"

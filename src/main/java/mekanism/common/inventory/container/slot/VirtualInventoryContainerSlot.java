@@ -1,7 +1,5 @@
 package mekanism.common.inventory.container.slot;
 
-import java.util.function.Consumer;
-import java.util.function.IntSupplier;
 import mekanism.common.inventory.container.IGUIWindow;
 import mekanism.common.inventory.container.SelectedWindowData;
 import mekanism.common.inventory.slot.BasicInventorySlot;
@@ -9,6 +7,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 
 public class VirtualInventoryContainerSlot extends InventoryContainerSlot implements IVirtualSlot {
 

@@ -6,9 +6,9 @@
   },
   "itemInput": {
     "ingredient": {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
-        "tag": "forge:stairs/plastic/transparent"
+        "tag": "c:transparent_plastic_stairs"
       },
       "subtracted": {
         "item": "mekanismadditions:gray_plastic_transparent_stairs"

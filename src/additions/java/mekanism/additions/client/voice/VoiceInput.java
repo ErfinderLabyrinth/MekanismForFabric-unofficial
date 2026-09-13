@@ -1,11 +1,12 @@
 package mekanism.additions.client.voice;
 
+import mekanism.additions.client.AdditionsKeyHandler;
+import mekanism.common.Mekanism;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
-import mekanism.additions.client.AdditionsKeyHandler;
-import mekanism.common.Mekanism;
 
 public class VoiceInput extends Thread {
 

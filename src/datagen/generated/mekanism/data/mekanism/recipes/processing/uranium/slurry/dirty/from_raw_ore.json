@@ -7,12 +7,12 @@
   "itemInput": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:raw_materials/uranium"
+      "tag": "c:raw_uranium"
     }
   },
   "output": {
     "amount": 2000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_uranium"
+    "slurry": "minecraft:dirty_uranium"
   }
 }

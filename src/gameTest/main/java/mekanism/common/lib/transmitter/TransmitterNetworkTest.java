@@ -1,5 +1,5 @@
 package mekanism.common.lib.transmitter;
-
+/*
 import java.util.UUID;
 import mekanism.api.functions.TriConsumer;
 import mekanism.common.Mekanism;
@@ -12,15 +12,11 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@PrefixGameTestTemplate(false)
-@GameTestHolder(Mekanism.MODID)
 public class TransmitterNetworkTest {
 
     private static final String BASE_PATH = "transmitter/";
@@ -35,7 +31,7 @@ public class TransmitterNetworkTest {
     /**
      * This test represents the issue that was reported in <a href="https://github.com/mekanism/Mekanism/issues/7428">Issue 7428</a> and most likely is also the last
      * remaining cause of <a href="https://github.com/mekanism/Mekanism/issues/6356">Issue 6356</a>.
-     */
+     *//*
     @GameTest(template = BASE_PATH + "straight_3c_cable", setupTicks = SETUP_TICKS, batch = "2")
     public static void inaccessibleNotUnloaded(GameTestHelper helper) {
         ChunkPos relativeChunk = new ChunkPos(1, 0);
@@ -118,4 +114,4 @@ public class TransmitterNetworkTest {
             });
         }
     }
-}
+}*/

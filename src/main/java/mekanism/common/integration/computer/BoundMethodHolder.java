@@ -4,17 +4,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectIntPair;
-import java.util.Objects;
 import mekanism.common.integration.computer.ComputerMethodFactory.ComputerFunctionCaller;
-import net.minecraftforge.common.util.Lazy;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public abstract class BoundMethodHolder {
 
@@ -36,7 +30,7 @@ public abstract class BoundMethodHolder {
      */
     private final Set<ObjectIntPair<String>> methodsKnown = new HashSet<>();
 
-    protected Lazy<String[]> methodNames = Lazy.of(() -> this.methods.keys().toArray(new String[0]));
+    protected String[] methodNames = this.methods.keys().toArray(new String[0]);
 
     protected BoundMethodHolder() {
         register(HELP_METHOD, new WeakReference<>(this.methods), true);

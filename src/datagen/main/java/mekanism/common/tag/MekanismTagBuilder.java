@@ -2,6 +2,9 @@ package mekanism.common.tag;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
+
+import net.fabricmc.fabric.impl.datagen.ForcedTagEntry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
@@ -34,6 +37,13 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
         return self();
     }
 
+    public BUILDER addForced(TagKey<TYPE>... tags) {
+        for (TagKey<TYPE> key : tags) {
+            builder.add(new ForcedTagEntry(TagEntry.tag(key.location())));
+        }
+        return self();
+    }
+
     @SafeVarargs
     public final BUILDER add(ResourceKey<TYPE>... keys) {
         return add(ResourceKey::location, keys);
@@ -44,12 +54,10 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
         return apply(builder::addElement, locationGetter, elements);
     }
 
-    public BUILDER replace() {
-        return replace(true);
-    }
-
-    public BUILDER replace(boolean value) {
-        builder.replace(value);
+    public final <T> BUILDER addForced(Function<T, ResourceLocation> locationGetter, T... elements) {
+        for (T element : elements) {
+            builder.add(new MekanismForcedTagEntry(TagEntry.element(locationGetter.apply(element))));
+        }
         return self();
     }
 
@@ -81,28 +89,29 @@ public class MekanismTagBuilder<TYPE, BUILDER extends MekanismTagBuilder<TYPE, B
         return apply(rl -> add(entryCreator.apply(rl)), locationGetter, elements);
     }
 
-    public BUILDER remove(ResourceLocation... locations) {
-        return remove(Function.identity(), locations);
-    }
-
-    @SafeVarargs
-    public final <T> BUILDER remove(Function<T, ResourceLocation> locationGetter, T... elements) {
-        return apply(rl -> builder.removeElement(rl, modID), locationGetter, elements);
-    }
-
-    @SafeVarargs
-    public final BUILDER remove(TagKey<TYPE>... tags) {
-        for (TagKey<TYPE> tag : tags) {
-            builder.removeTag(tag.location(), modID);
-        }
-        return self();
-    }
-
     @SafeVarargs
     protected final <T> BUILDER apply(Consumer<ResourceLocation> consumer, Function<T, ResourceLocation> locationGetter, T... elements) {
         for (T element : elements) {
             consumer.accept(locationGetter.apply(element));
         }
         return self();
+    }
+
+    public static class MekanismForcedTagEntry extends TagEntry {
+        TagEntry origin;
+        private MekanismForcedTagEntry(TagEntry origin) {
+            super(origin.id, origin.tag, origin.required);
+            this.origin = origin;
+        }
+
+        @Override
+        public <T> boolean build(TagEntry.Lookup<T> arg, Consumer<T> consumer) {
+            return origin.build(arg, consumer);
+        }
+
+        @Override
+        public boolean verifyIfPresent(Predicate<ResourceLocation> objectExistsTest, Predicate<ResourceLocation> tagExistsTest) {
+            return true;
+        }
     }
 }

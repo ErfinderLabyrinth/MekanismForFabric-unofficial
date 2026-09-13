@@ -4,19 +4,21 @@ import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.inventory.container.SelectedWindowData;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface IInsertableSlot {
+public interface IInsertableSlot extends SingleSlotStorage<ItemVariant> {
 
     //TODO: Improve these java docs at some point
 
     /**
      * Basically a container slot's equivalent of {@link IInventorySlot#insertItem(ItemStack, Action, AutomationType)} with {@link AutomationType#MANUAL}
      */
-    @NotNull
-    ItemStack insertItem(@NotNull ItemStack stack, Action action);
+//    @NotNull
+//    ItemStack insertItem(@NotNull ItemStack stack, Action action);
 
     /**
      * Used for determining if this slot can merge with the given stack when the stack is double-clicked.

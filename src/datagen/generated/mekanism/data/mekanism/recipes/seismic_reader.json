@@ -2,13 +2,13 @@
   "type": "mekanism:mek_data",
   "key": {
     "#": {
-      "tag": "forge:gems/lapis"
+      "tag": "c:lapis"
     },
     "E": {
       "item": "mekanism:energy_tablet"
     },
     "S": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     }
   },
   "pattern": [

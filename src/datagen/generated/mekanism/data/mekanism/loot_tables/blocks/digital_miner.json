@@ -91,8 +91,8 @@
                 },
                 {
                   "op": "replace",
-                  "source": "EnergyContainers",
-                  "target": "mekData.EnergyContainers"
+                  "source": "EnergyContainer",
+                  "target": "mekData.EnergyContainer"
                 },
                 {
                   "op": "replace",
@@ -106,9 +106,7 @@
           "name": "mekanism:digital_miner"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/digital_miner"
+  ]
 }

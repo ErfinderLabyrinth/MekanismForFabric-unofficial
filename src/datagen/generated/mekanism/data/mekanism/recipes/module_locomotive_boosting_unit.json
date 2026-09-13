@@ -5,7 +5,7 @@
       "item": "minecraft:diamond_leggings"
     },
     "A": {
-      "tag": "forge:alloys/elite"
+      "tag": "c:elite_alloys"
     },
     "E": {
       "item": "mekanism:energy_tablet"

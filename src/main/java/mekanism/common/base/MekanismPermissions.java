@@ -1,35 +1,24 @@
 package mekanism.common.base;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Predicate;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import mekanism.common.Mekanism;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.server.permission.PermissionAPI;
-import net.minecraftforge.server.permission.events.PermissionGatherEvent;
-import net.minecraftforge.server.permission.nodes.PermissionDynamicContext;
-import net.minecraftforge.server.permission.nodes.PermissionDynamicContextKey;
-import net.minecraftforge.server.permission.nodes.PermissionNode;
-import net.minecraftforge.server.permission.nodes.PermissionNode.PermissionResolver;
-import net.minecraftforge.server.permission.nodes.PermissionType;
-import net.minecraftforge.server.permission.nodes.PermissionTypes;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
+import java.util.function.Predicate;
 
 public class MekanismPermissions {
 
-    private static final List<PermissionNode<?>> NODES_TO_REGISTER = new ArrayList<>();
-    private static final PermissionResolver<Boolean> PLAYER_IS_OP = (player, uuid, context) -> player != null && player.hasPermissions(Commands.LEVEL_GAMEMASTERS);
-    private static final PermissionResolver<Boolean> ALWAYS_TRUE = (player, uuid, context) -> true;
+    private static final int OP_PERMISSION_LEVEL = Commands.LEVEL_GAMEMASTERS;
+    private static final int DEFAULT_PERMISSION_LEVEL = 0;
 
-    public static final PermissionNode<Boolean> BYPASS_SECURITY = node("bypass_security", PermissionTypes.BOOLEAN,
-          (player, uuid, context) -> player != null && player.server.getPlayerList().isOp(player.getGameProfile()));
+    public static final PermissionNode BYPASS_SECURITY = node("bypass_security", Commands.LEVEL_OWNERS);
 
     //Commands
-    public static final CommandPermissionNode COMMAND = new CommandPermissionNode(node("command", PermissionTypes.BOOLEAN,
-          (player, uuid, contexts) -> player != null && player.hasPermissions(Commands.LEVEL_ALL)), Commands.LEVEL_ALL);
+    public static final CommandPermissionNode COMMAND = new CommandPermissionNode(node("command", Commands.LEVEL_ALL), Commands.LEVEL_ALL);
 
     public static final CommandPermissionNode COMMAND_BUILD = nodeOpCommand("build");
     public static final CommandPermissionNode COMMAND_BUILD_REMOVE = nodeSubCommand(COMMAND_BUILD, "remove");
@@ -59,69 +48,57 @@ public class MekanismPermissions {
     public static final CommandPermissionNode COMMAND_TP_POP = nodeOpCommand("tp_pop");
 
     private static CommandPermissionNode nodeOpCommand(String nodeName) {
-        PermissionNode<Boolean> node = node("command." + nodeName, PermissionTypes.BOOLEAN, PLAYER_IS_OP);
+        PermissionNode node = node("command." + nodeName, OP_PERMISSION_LEVEL);
         return new CommandPermissionNode(node, Commands.LEVEL_GAMEMASTERS);
     }
 
     private static CommandPermissionNode nodeSubCommand(CommandPermissionNode parent, String nodeName) {
         //Because sub commands can assume that the parent was checked before getting to them, we can have a default resolver of always true
         // The main benefit for them to have their own node is just in case someone wants to do more restricting
-        PermissionNode<Boolean> node = subNode(parent.node, nodeName, ALWAYS_TRUE);
+        PermissionNode node = subNode(parent.node, nodeName, DEFAULT_PERMISSION_LEVEL);
         return new CommandPermissionNode(node, parent.fallbackLevel);
     }
 
     /**
      * @apiNote For use in sub nodes that don't know if there parent has been checked yet.
      */
-    private static <T> PermissionNode<T> subNode(PermissionNode<T> parent, String nodeName) {
-        return subNode(parent, nodeName, (player, uuid, context) -> getPermission(player, uuid, parent, context));
-    }
+//    private static PermissionNode subNode(PermissionNode parent, String nodeName) {
+//        return subNode(parent, nodeName, (player, uuid, context) -> getPermission(player, uuid, parent, context));
+//    }
+//
+//    private static PermissionNode subNode(PermissionNode parent, String nodeName, ResultTransformer<T> defaultRestrictionIncrease) {
+//        return subNode(parent, nodeName, (player, uuid, context) -> {
+//            T result = getPermission(player, uuid, parent, context);
+//            return defaultRestrictionIncrease.transform(player, uuid, result, context);
+//        });
+//    }
 
-    private static <T> PermissionNode<T> subNode(PermissionNode<T> parent, String nodeName, ResultTransformer<T> defaultRestrictionIncrease) {
-        return subNode(parent, nodeName, (player, uuid, context) -> {
-            T result = getPermission(player, uuid, parent, context);
-            return defaultRestrictionIncrease.transform(player, uuid, result, context);
-        });
-    }
-
-    private static <T> PermissionNode<T> subNode(PermissionNode<T> parent, String nodeName, PermissionResolver<T> defaultResolver) {
+    private static PermissionNode subNode(PermissionNode parent, String nodeName, int permissionLevel) {
         String fullParentName = parent.getNodeName();
         //Strip the modid from the parent's node name
         String parentName = fullParentName.substring(fullParentName.indexOf('.') + 1);
-        return node(parentName + "." + nodeName, parent.getType(), defaultResolver);
+        return node(parentName + "." + nodeName, permissionLevel);
     }
 
-    @SafeVarargs
-    private static <T> PermissionNode<T> node(String nodeName, PermissionType<T> type, PermissionResolver<T> defaultResolver, PermissionDynamicContextKey<T>... dynamics) {
-        PermissionNode<T> node = new PermissionNode<>(Mekanism.MODID, nodeName, type, defaultResolver, dynamics);
-        NODES_TO_REGISTER.add(node);
+    private static PermissionNode node(String nodeName, int permissionLevel) {
+        PermissionNode node = new PermissionNode(Mekanism.MODID, nodeName, permissionLevel);
         return node;
     }
 
-    public static void registerPermissionNodes(PermissionGatherEvent.Nodes event) {
-        event.addNodes(NODES_TO_REGISTER);
-    }
-
-    private static <T> T getPermission(@Nullable ServerPlayer player, UUID playerUUID, PermissionNode<T> node, PermissionDynamicContext<?>... context) {
+    private static boolean getPermission(@Nullable ServerPlayer player, UUID playerUUID, PermissionNode node) {
         if (player == null) {
-            return PermissionAPI.getOfflinePermission(playerUUID, node, context);
+            return node.test(playerUUID).join();
         }
-        return PermissionAPI.getPermission(player, node, context);
+        return node.test(player);
     }
 
-    public record CommandPermissionNode(PermissionNode<Boolean> node, int fallbackLevel) implements Predicate<CommandSourceStack> {
+    public record CommandPermissionNode(PermissionNode node, int fallbackLevel) implements Predicate<CommandSourceStack> {
 
         @Override
         public boolean test(CommandSourceStack source) {
             //See https://github.com/MinecraftForge/MinecraftForge/commit/f7eea35cb9b043aae0a3866a9578724aa7560585 for details on why
             // has permission is checked first and the implications
-            return source.hasPermission(fallbackLevel) || source.source instanceof ServerPlayer player && PermissionAPI.getPermission(player, node);
+            return Permissions.check(source, node.getPermission(), fallbackLevel);
         }
-    }
-
-    @FunctionalInterface
-    private interface ResultTransformer<T> {
-
-        T transform(@Nullable ServerPlayer player, UUID playerUUID, T resolved, PermissionDynamicContext<?>... context);
     }
 }

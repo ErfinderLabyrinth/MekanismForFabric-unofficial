@@ -1,6 +1,5 @@
 package mekanism.common.content.qio.filter;
 
-import java.util.Objects;
 import mekanism.api.NBTConstants;
 import mekanism.common.content.filter.FilterType;
 import mekanism.common.content.filter.IItemStackFilter;
@@ -8,9 +7,11 @@ import mekanism.common.lib.inventory.Finder;
 import mekanism.common.util.NBTUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class QIOItemStackFilter extends QIOFilter<QIOItemStackFilter> implements IItemStackFilter<QIOItemStackFilter> {
 
@@ -75,7 +76,7 @@ public class QIOItemStackFilter extends QIOFilter<QIOItemStackFilter> implements
             if (fuzzyMode) {
                 return itemType.getItem() == other.itemType.getItem();
             }
-            return ItemHandlerHelper.canItemStacksStack(itemType, other.itemType);
+            return ItemEntity.areMergable(itemType, other.itemType);
         }
         return false;
     }

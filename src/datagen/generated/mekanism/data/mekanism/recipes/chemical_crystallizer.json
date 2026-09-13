@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "A": {
-      "tag": "forge:gems/fluorite"
+      "tag": "c:fluorite"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "I": {
-      "tag": "forge:ingots/refined_obsidian"
+      "tag": "c:refined_obsidian_ingots"
     },
     "X": {
       "item": "mekanism:steel_casing"

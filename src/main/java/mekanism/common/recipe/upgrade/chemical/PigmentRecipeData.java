@@ -1,7 +1,5 @@
 package mekanism.common.recipe.upgrade.chemical;
 
-import java.util.List;
-import java.util.function.Predicate;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTankBuilder;
 import mekanism.api.chemical.pigment.IPigmentHandler;
@@ -12,14 +10,19 @@ import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.common.capabilities.Capabilities;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.ListTag;
-import net.minecraftforge.common.capabilities.Capability;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 @NothingNullByDefault
-public class PigmentRecipeData extends ChemicalRecipeData<Pigment, PigmentStack, IPigmentTank, IPigmentHandler> {
+public class PigmentRecipeData extends ChemicalRecipeData<Pigment, PigmentStack, IPigmentTank, Storage<Pigment>> {
 
     public PigmentRecipeData(ListTag tanks) {
         super(tanks);
@@ -47,6 +50,10 @@ public class PigmentRecipeData extends ChemicalRecipeData<Pigment, PigmentStack,
     @Override
     protected IPigmentHandler getOutputHandler(List<IPigmentTank> tanks) {
         return new IMekanismPigmentHandler() {
+            @Override
+            public void updateSnapshots(TransactionContext t) {
+            }
+
             @NotNull
             @Override
             public List<IPigmentTank> getChemicalTanks(@Nullable Direction side) {
@@ -60,17 +67,17 @@ public class PigmentRecipeData extends ChemicalRecipeData<Pigment, PigmentStack,
     }
 
     @Override
-    protected Capability<IPigmentHandler> getCapability() {
-        return Capabilities.PIGMENT_HANDLER;
+    protected ItemApiLookup<Storage<Pigment>, ContainerItemContext> getItemLookup() {
+        return Capabilities.PIGMENT_HANDLER_ITEM;
     }
 
-    @Override
-    protected Predicate<Pigment> cloneValidator(IPigmentHandler handler, int tank) {
-        return type -> handler.isValid(tank, new PigmentStack(type, 1));
-    }
+//    @Override
+//    protected Predicate<Pigment> cloneValidator(IPigmentHandler handler, int tank) {
+//        return type -> handler.isValid(tank, new PigmentStack(type, 1));
+//    }
 
     @Override
-    protected IPigmentHandler getHandlerFromTile(TileEntityMekanism tile) {
-        return tile.getPigmentManager().getInternal();
+    protected Storage<Pigment> getHandlerFromTile(TileEntityMekanism tile) {
+        return tile.getPigmentManager().getContainers(null);
     }
 }

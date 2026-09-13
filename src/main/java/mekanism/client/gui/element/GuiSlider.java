@@ -1,6 +1,5 @@
 package mekanism.client.gui.element;
 
-import java.util.function.DoubleConsumer;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.util.MekanismUtils;
@@ -8,6 +7,8 @@ import mekanism.common.util.MekanismUtils.ResourceType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+
+import java.util.function.DoubleConsumer;
 
 public class GuiSlider extends GuiElement {
 

@@ -1,11 +1,13 @@
 package mekanism.common.content.matrix;
 
-import mekanism.api.math.FloatingLong;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
 import mekanism.common.inventory.container.slot.SlotOverlay;
-import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
+import mekanism.common.inventory.container.sync.ISyncableData;
+import mekanism.common.inventory.container.sync.SyncableInt;
+import mekanism.common.inventory.container.sync.SyncableLong;
+import mekanism.common.inventory.container.sync.dynamic.IContainerSyncable;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.lib.multiblock.MultiblockCache.CacheSubstance;
 import mekanism.common.lib.multiblock.MultiblockData;
@@ -16,30 +18,27 @@ import mekanism.common.util.MekanismUtils;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class MatrixMultiblockData extends MultiblockData {
+import java.util.function.Consumer;
+
+public class MatrixMultiblockData extends MultiblockData implements IContainerSyncable {
 
     public static final String STATS_TAB = "stats";
 
     @NotNull
     private final MatrixEnergyContainer energyContainer;
 
-    @ContainerSync(getter = "getLastOutput")
-    private FloatingLong clientLastOutput = FloatingLong.ZERO;
-    @ContainerSync(getter = "getLastInput")
-    private FloatingLong clientLastInput = FloatingLong.ZERO;
+    private long clientLastOutput = 0;
 
-    @ContainerSync(getter = "getEnergy")
-    private FloatingLong clientEnergy = FloatingLong.ZERO;
+    private long clientLastInput = 0;
 
-    @ContainerSync(tags = STATS_TAB, getter = "getTransferCap")
-    private FloatingLong clientMaxTransfer = FloatingLong.ZERO;
+    private long clientEnergy = 0;
 
-    @ContainerSync(getter = "getStorageCap")
-    private FloatingLong clientMaxEnergy = FloatingLong.ZERO;
+    private long clientMaxTransfer = 0;
 
-    @ContainerSync(tags = STATS_TAB, getter = "getProviderCount")
+    private long clientMaxEnergy = 0;
+
     private int clientProviders;
-    @ContainerSync(tags = STATS_TAB, getter = "getCellCount")
+
     private int clientCells;
 
     @NotNull
@@ -64,7 +63,7 @@ public class MatrixMultiblockData extends MultiblockData {
     }
 
     @Override
-    protected boolean shouldCap(CacheSubstance<?, ?> type) {
+    protected boolean shouldCap(CacheSubstance<?> type) {
         return type != CacheSubstance.ENERGY;
     }
 
@@ -81,7 +80,7 @@ public class MatrixMultiblockData extends MultiblockData {
         return energyContainer;
     }
 
-    public FloatingLong getEnergy() {
+    public long getEnergy() {
         return isRemote() ? clientEnergy : energyContainer.getEnergy();
     }
 
@@ -94,7 +93,7 @@ public class MatrixMultiblockData extends MultiblockData {
         // rate limit of the structure being used up by the ports
         energyInputSlot.drainContainer();
         energyOutputSlot.fillContainerOrConvert();
-        if (!getLastInput().isZero() || !getLastOutput().isZero()) {
+        if (getLastInput() != 0 || getLastOutput() != 0) {
             // If the stored energy changed, update the comparator
             markDirtyComparator(world);
         }
@@ -107,22 +106,22 @@ public class MatrixMultiblockData extends MultiblockData {
         super.remove(world);
     }
 
-    public FloatingLong getStorageCap() {
+    public long getStorageCap() {
         return isRemote() ? clientMaxEnergy : energyContainer.getMaxEnergy();
     }
 
     @ComputerMethod
-    public FloatingLong getTransferCap() {
+    public long getTransferCap() {
         return isRemote() ? clientMaxTransfer : energyContainer.getMaxTransfer();
     }
 
     @ComputerMethod
-    public FloatingLong getLastInput() {
+    public long getLastInput() {
         return isRemote() ? clientLastInput : energyContainer.getLastInput();
     }
 
     @ComputerMethod
-    public FloatingLong getLastOutput() {
+    public long getLastOutput() {
         return isRemote() ? clientLastOutput : energyContainer.getLastOutput();
     }
 
@@ -134,5 +133,26 @@ public class MatrixMultiblockData extends MultiblockData {
     @ComputerMethod(nameOverride = "getInstalledProviders")
     public int getProviderCount() {
         return isRemote() ? clientProviders : energyContainer.getProviders();
+    }
+
+    @Override
+    public void addSyncables(Consumer<ISyncableData> acceptor, String tag) {
+        if ("default".equals(tag)) {
+            // clientLastOutput
+            acceptor.accept(SyncableLong.create(this::getLastOutput, newValue -> clientLastOutput = newValue));
+            // clientLastInput
+            acceptor.accept(SyncableLong.create(this::getLastInput, newValue -> clientLastInput = newValue));
+            // clientEnergy
+            acceptor.accept(SyncableLong.create(this::getEnergy, newValue -> clientEnergy = newValue));
+            // clientMaxTransfer
+            acceptor.accept(SyncableLong.create(this::getTransferCap, newValue -> clientMaxTransfer = newValue));
+            // clientMaxEnergy
+            acceptor.accept(SyncableLong.create(this::getStorageCap, newValue -> clientMaxEnergy = newValue));
+        }else if (MatrixMultiblockData.STATS_TAB.equals(tag)) {
+            // clientProviders
+            acceptor.accept(SyncableInt.create(this::getProviderCount, newValue -> clientProviders = newValue));
+            // clientCells
+            acceptor.accept(SyncableInt.create(this::getCellCount, newValue -> clientCells = newValue));
+        }
     }
 }

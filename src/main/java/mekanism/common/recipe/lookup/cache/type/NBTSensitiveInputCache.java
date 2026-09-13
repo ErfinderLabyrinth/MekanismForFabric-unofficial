@@ -1,13 +1,14 @@
 package mekanism.common.recipe.lookup.cache.type;
 
+import mekanism.api.recipes.MekanismRecipe;
+import mekanism.api.recipes.ingredients.InputIngredient;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
-import mekanism.api.recipes.MekanismRecipe;
-import mekanism.api.recipes.ingredients.InputIngredient;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Extended input cache that implements the backend handling to allow for both the basic key based input lookup that {@link BaseInputCache} provides, and also a more

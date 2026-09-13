@@ -5,11 +5,10 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.LongSupplier;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
-import mekanism.api.Coord4D;
-import mekanism.api.NBTConstants;
+
+import mekanism.api.*;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.attribute.ChemicalAttributeValidator;
 import mekanism.api.chemical.gas.GasStack;
@@ -29,7 +28,8 @@ import mekanism.common.integration.computer.SpecialComputerMethodWrapper.Compute
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.integration.computer.annotation.SyntheticComputerMethod;
 import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
-import mekanism.common.inventory.container.sync.dynamic.ContainerSync;
+import mekanism.common.inventory.container.sync.*;
+import mekanism.common.inventory.container.sync.chemical.SyncableGasStack;
 import mekanism.common.lib.multiblock.IValveHandler;
 import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockData;
@@ -44,6 +44,7 @@ import mekanism.generators.common.MekanismGenerators;
 import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.content.fission.FissionReactorValidator.FormedAssembly;
 import mekanism.generators.common.tile.fission.TileEntityFissionReactorCasing;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -51,7 +52,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.fluids.FluidStack;
 
 public class FissionReactorMultiblockData extends MultiblockData implements IValveHandler {
 
@@ -67,56 +67,41 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     private static final double EXPLOSION_CHANCE = 1D / 512_000;
 
     public final Set<FormedAssembly> assemblies = new LinkedHashSet<>();
-    @ContainerSync(setter = "setAssemblies")
     @SyntheticComputerMethod(getter = "getFuelAssemblies")
     private int fuelAssemblies = 0;
-    @ContainerSync
     @SyntheticComputerMethod(getter = "getFuelSurfaceArea")
     public int surfaceArea;
 
-    @ContainerSync
     public IGasTank gasCoolantTank;
-    @ContainerSync
     public VariableCapacityFluidTank fluidCoolantTank;
-    @ContainerSync
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getFuel", "getFuelCapacity", "getFuelNeeded", "getFuelFilledPercentage"}, docPlaceholder = "fuel tank")
     public IGasTank fuelTank;
 
-    @ContainerSync
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getHeatedCoolant", "getHeatedCoolantCapacity", "getHeatedCoolantNeeded",
                                                                                         "getHeatedCoolantFilledPercentage"}, docPlaceholder = "heated coolant")
     public IGasTank heatedCoolantTank;
-    @ContainerSync
     @WrappingComputerMethod(wrapper = ComputerChemicalTankWrapper.class, methodNames = {"getWaste", "getWasteCapacity", "getWasteNeeded", "getWasteFilledPercentage"}, docPlaceholder = "waste tank")
     public IGasTank wasteTank;
-    @ContainerSync
     @WrappingComputerMethod(wrapper = ComputerHeatCapacitorWrapper.class, methodNames = "getTemperature", docPlaceholder = "reactor")
     public VariableHeatCapacitor heatCapacitor;
 
     private double biomeAmbientTemp;
-    @ContainerSync
     @SyntheticComputerMethod(getter = "getEnvironmentalLoss")
     public double lastEnvironmentLoss = 0;
-    @ContainerSync
     @SyntheticComputerMethod(getter = "getHeatingRate")
     public long lastBoilRate = 0;
-    @ContainerSync
     @SyntheticComputerMethod(getter = "getActualBurnRate", getterDescription = "Actual burn rate as it may be lower if say there is not enough fuel")
     public double lastBurnRate = 0;
     private boolean clientBurning;
-    @ContainerSync
     public double reactorDamage = 0;
-    @ContainerSync
     @SyntheticComputerMethod(getter = "getBurnRate", getterDescription = "Configured burn rate")
-    public double rateLimit = MekanismGeneratorsConfig.generators.defaultBurnRate.get();
+    public double rateLimit = MekanismGeneratorsConfig.generators.defaultBurnRate;
     public double burnRemaining = 0, partialWaste = 0;
-    @ContainerSync
     private boolean active;
     //For use when meltdowns are disabled to make the reactor stop and require going under the threshold
-    @ContainerSync
     private boolean forceDisable;
 
-    private int cooledCoolantCapacity;
+    private long cooledCoolantCapacity;
     private long heatedCoolantCapacity;
     private long fuelCapacity;
 
@@ -144,7 +129,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         wasteTank = MultiblockChemicalTankBuilder.GAS.output(this, fuelCapacitySupplier,
               gas -> gas == MekanismGases.NUCLEAR_WASTE.getChemical(), ChemicalAttributeValidator.ALWAYS_ALLOW, this);
         Collections.addAll(gasTanks, fuelTank, heatedCoolantTank, wasteTank, gasCoolantTank);
-        heatCapacitor = VariableHeatCapacitor.create(MekanismGeneratorsConfig.generators.fissionCasingHeatCapacity.get(),
+        heatCapacitor = VariableHeatCapacitor.create(MekanismGeneratorsConfig.generators.fissionCasingHeatCapacity,
               () -> INVERSE_CONDUCTION_COEFFICIENT, () -> INVERSE_INSULATION_COEFFICIENT, () -> biomeAmbientTemp, this);
         heatCapacitors.add(heatCapacitor);
     }
@@ -154,7 +139,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         super.onCreated(world);
         biomeAmbientTemp = calculateAverageAmbientTemperature(world);
         // update the heat capacity now that we've read
-        heatCapacitor.setHeatCapacity(MekanismGeneratorsConfig.generators.fissionCasingHeatCapacity.get() * locations.size(), true);
+        heatCapacitor.setHeatCapacity(MekanismGeneratorsConfig.generators.fissionCasingHeatCapacity * locations.size(), true);
         hotZone = new AABB(getMinPos().offset(1, 1, 1), getMaxPos());
     }
 
@@ -254,14 +239,14 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         }
         // consider a meltdown only if we're passed the damage threshold and the temperature is still dangerous
         if (reactorDamage >= MAX_DAMAGE && temp >= MIN_DAMAGE_TEMPERATURE) {
-            if (isForceDisabled() && MekanismGeneratorsConfig.generators.fissionMeltdownsEnabled.get()) {
+            if (isForceDisabled() && MekanismGeneratorsConfig.generators.fissionMeltdownsEnabled) {
                 //If we have meltdowns enabled, and we would have had one before, but they were disabled, just meltdown immediately
                 // if we still meet the requirements for a meltdown
                 setForceDisable(false);
                 createMeltdown(world);
-            } else if (world.random.nextDouble() < (reactorDamage / MAX_DAMAGE) * MekanismGeneratorsConfig.generators.fissionMeltdownChance.get()) {
+            } else if (world.random.nextDouble() < (reactorDamage / MAX_DAMAGE) * MekanismGeneratorsConfig.generators.fissionMeltdownChance) {
                 // Otherwise, if our chance is hit either create a meltdown if it is enabled in the config, or force disable the reactor
-                if (MekanismGeneratorsConfig.generators.fissionMeltdownsEnabled.get()) {
+                if (MekanismGeneratorsConfig.generators.fissionMeltdownsEnabled) {
                     createMeltdown(world);
                 } else {
                     setForceDisable(true);
@@ -278,7 +263,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
 
     private void createMeltdown(Level world) {
         RadiationManager.get().createMeltdown(world, getMinPos(), getMaxPos(), heatCapacitor.getHeat(), EXPLOSION_CHANCE,
-              MekanismGeneratorsConfig.generators.fissionMeltdownRadius.get(), inventoryID);
+              MekanismGeneratorsConfig.generators.fissionMeltdownRadius, inventoryID);
     }
 
     @Override
@@ -290,16 +275,16 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
                 // amount of radiation released
                 double radiation = getTankRadioactivityAndDump(fuelTank) + getWasteTankRadioactivity(true) +
                                    getTankRadioactivityAndDump(gasCoolantTank) + getTankRadioactivityAndDump(heatedCoolantTank);
-                radiation *= MekanismGeneratorsConfig.generators.fissionMeltdownRadiationMultiplier.get();
+                radiation *= MekanismGeneratorsConfig.generators.fissionMeltdownRadiationMultiplier;
                 //When the meltdown actually happens, release radiation into the atmosphere
-                radiationManager.radiate(new Coord4D(getBounds().getCenter(), world), radiation);
+                radiationManager.radiate(new Coord4D(getBounds().getCenter(), world), radiation, world.getServer());
             }
             //Dump the heated coolant as "loss" that didn't survive the meltdown
             heatedCoolantTank.setEmpty();
             //Disable the reactor so that if the person rebuilds it, it isn't on by default (QoL)
             active = false;
             //Update reactor damage to the specified level for post meltdown
-            reactorDamage = MekanismGeneratorsConfig.generators.fissionPostMeltdownDamage.get();
+            reactorDamage = MekanismGeneratorsConfig.generators.fissionPostMeltdownDamage;
             //Reset burnRemaining to zero as it is reasonable to have the burnRemaining get wasted when the reactor explodes
             burnRemaining = 0;
             //Reset the partial waste as we just irradiated it and there is not much sense having it exist in limbo
@@ -351,11 +336,14 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         if (!fluidCoolantTank.isEmpty()) {
             double caseCoolantHeat = heat * waterConductivity;
             lastBoilRate = clampCoolantHeated(HeatUtils.getSteamEnergyEfficiency() * caseCoolantHeat / HeatUtils.getWaterThermalEnthalpy(),
-                  fluidCoolantTank.getFluidAmount());
+                  fluidCoolantTank.getAmount());
             if (lastBoilRate > 0) {
-                MekanismUtils.logMismatchedStackSize(fluidCoolantTank.shrinkStack((int) lastBoilRate, Action.EXECUTE), lastBoilRate);
+                MekanismUtils.logMismatchedStackSize(fluidCoolantTank.shrinkStack((int) lastBoilRate), lastBoilRate);
                 // extra steam is dumped
-                heatedCoolantTank.insert(MekanismGases.STEAM.getStack(lastBoilRate), Action.EXECUTE, AutomationType.INTERNAL);
+                try(Transaction t = Transaction.openOuter()) {
+                    heatedCoolantTank.insert(MekanismGases.STEAM.get(), lastBoilRate, t);
+                    t.commit();
+                }
                 caseCoolantHeat = lastBoilRate * HeatUtils.getWaterThermalEnthalpy() / HeatUtils.getSteamEnergyEfficiency();
                 heatCapacitor.handleHeat(-caseCoolantHeat);
             }
@@ -364,8 +352,11 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
                 double caseCoolantHeat = heat * coolantType.getConductivity();
                 lastBoilRate = clampCoolantHeated(caseCoolantHeat / coolantType.getThermalEnthalpy(), gasCoolantTank.getStored());
                 if (lastBoilRate > 0) {
-                    MekanismUtils.logMismatchedStackSize(gasCoolantTank.shrinkStack(lastBoilRate, Action.EXECUTE), lastBoilRate);
-                    heatedCoolantTank.insert(coolantType.getHeatedGas().getStack(lastBoilRate), Action.EXECUTE, AutomationType.INTERNAL);
+                    MekanismUtils.logMismatchedStackSize(gasCoolantTank.shrinkStack(lastBoilRate), lastBoilRate);
+                    try(Transaction t = Transaction.openOuter()) {
+                        heatedCoolantTank.insert(coolantType.getHeatedGas(), lastBoilRate, t);
+                        t.commit();
+                    }
                     caseCoolantHeat = lastBoilRate * coolantType.getThermalEnthalpy();
                     heatCapacitor.handleHeat(-caseCoolantHeat);
                 }
@@ -387,11 +378,11 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         double lastPartialWaste = partialWaste;
         double lastBurnRemaining = burnRemaining;
         double storedFuel = fuelTank.getStored() + burnRemaining;
-        double toBurn = Math.min(Math.min(rateLimit, storedFuel), fuelAssemblies * MekanismGeneratorsConfig.generators.burnPerAssembly.get());
+        double toBurn = Math.min(Math.min(rateLimit, storedFuel), fuelAssemblies * MekanismGeneratorsConfig.generators.burnPerAssembly);
         storedFuel -= toBurn;
-        fuelTank.setStackSize((long) storedFuel, Action.EXECUTE);
+        fuelTank.setStackSize((long) storedFuel);
         burnRemaining = storedFuel % 1;
-        heatCapacitor.handleHeat(toBurn * MekanismGeneratorsConfig.generators.energyPerFissionFuel.get().doubleValue());
+        heatCapacitor.handleHeat(toBurn * MekanismGeneratorsConfig.generators.energyPerFissionFuel);
         // handle waste
         partialWaste += toBurn;
         long newWaste = (long) Math.floor(partialWaste);
@@ -399,11 +390,14 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
             partialWaste %= 1;
             long leftoverWaste = Math.max(0, newWaste - wasteTank.getNeeded());
             GasStack wasteToAdd = MekanismGases.NUCLEAR_WASTE.getStack(newWaste);
-            wasteTank.insert(wasteToAdd, Action.EXECUTE, AutomationType.INTERNAL);
+            try(Transaction t = Transaction.openOuter()) {
+                wasteTank.insert(wasteToAdd.getType(), wasteToAdd.getAmount(), t);
+                t.commit();
+            }
             if (leftoverWaste > 0 && IRadiationManager.INSTANCE.isRadiationEnabled()) {
                 //Check if radiation is enabled in order to allow for short-circuiting when it will NO-OP further down the line anyway
                 wasteToAdd.ifAttributePresent(GasAttributes.Radiation.class, attribute ->
-                      IRadiationManager.INSTANCE.radiate(new Coord4D(getBounds().getCenter(), world), leftoverWaste * attribute.getRadioactivity()));
+                      IRadiationManager.INSTANCE.radiate(new Coord4D(getBounds().getCenter(), world), leftoverWaste * attribute.getRadioactivity(), world.getServer()));
             }
         }
         // update previous burn
@@ -472,12 +466,12 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
             return 0;
         }
         double avgSurfaceArea = (double) surfaceArea / (double) fuelAssemblies;
-        return Math.min(1, avgSurfaceArea / MekanismGeneratorsConfig.generators.fissionSurfaceAreaTarget.get());
+        return Math.min(1, avgSurfaceArea / MekanismGeneratorsConfig.generators.fissionSurfaceAreaTarget);
     }
 
     @ComputerMethod
     public long getMaxBurnRate() {
-        return fuelAssemblies * MekanismGeneratorsConfig.generators.burnPerAssembly.get();
+        return fuelAssemblies * MekanismGeneratorsConfig.generators.burnPerAssembly;
     }
 
     @ComputerMethod
@@ -488,7 +482,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     public void setAssemblies(int assemblies) {
         if (this.fuelAssemblies != assemblies) {
             this.fuelAssemblies = assemblies;
-            this.fuelCapacity = assemblies * MekanismGeneratorsConfig.generators.maxFuelPerAssembly.get();
+            this.fuelCapacity = assemblies * MekanismGeneratorsConfig.generators.maxFuelPerAssembly;
         }
     }
 
@@ -496,8 +490,8 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
     public void setVolume(int volume) {
         if (getVolume() != volume) {
             super.setVolume(volume);
-            cooledCoolantCapacity = volume * MekanismGeneratorsConfig.generators.fissionCooledCoolantPerTank.get();
-            heatedCoolantCapacity = volume * MekanismGeneratorsConfig.generators.fissionHeatedCoolantPerTank.get();
+            cooledCoolantCapacity = volume * MekanismGeneratorsConfig.generators.fissionCooledCoolantPerTank;
+            heatedCoolantCapacity = volume * MekanismGeneratorsConfig.generators.fissionHeatedCoolantPerTank;
         }
     }
 
@@ -574,7 +568,7 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         if (fluidCoolantTank.isEmpty() && !gasCoolantTank.isEmpty()) {
             return gasCoolantTank.getStored() / (double) gasCoolantTank.getCapacity();
         }
-        return fluidCoolantTank.getFluidAmount() / (double) fluidCoolantTank.getCapacity();
+        return fluidCoolantTank.getAmount() / (double) fluidCoolantTank.getCapacity();
     }
 
     @ComputerMethod
@@ -582,4 +576,25 @@ public class FissionReactorMultiblockData extends MultiblockData implements IVal
         return heatCapacitor.getHeatCapacity();
     }
     //End computer related methods
+
+
+    @Override
+    public void addSyncables(Consumer<ISyncableData> acceptor, String tag) {
+        acceptor.accept(SyncableInt.create(() -> fuelAssemblies, this::setAssemblies));
+        acceptor.accept(SyncableInt.create(() -> surfaceArea, newValue -> surfaceArea = newValue));
+        acceptor.accept(SyncableGasStack.create(gasCoolantTank));
+        acceptor.accept(SyncableFluidStack.create(fluidCoolantTank));
+        acceptor.accept(SyncableGasStack.create(fuelTank));
+        acceptor.accept(SyncableGasStack.create(heatedCoolantTank));
+        acceptor.accept(SyncableGasStack.create(wasteTank));
+        acceptor.accept(SyncableDouble.create(heatCapacitor::getHeatCapacity, heatCapacitor::setHeatCapacityFromPacket));
+        acceptor.accept(SyncableDouble.create(heatCapacitor::getHeat, heatCapacitor::setHeat));
+        acceptor.accept(SyncableDouble.create(() -> lastEnvironmentLoss, newValue -> lastEnvironmentLoss = newValue));
+        acceptor.accept(SyncableLong.create(() -> lastBoilRate, newValue -> lastBoilRate = newValue));
+        acceptor.accept(SyncableDouble.create(() -> lastBurnRate, newValue -> lastBurnRate = newValue));
+        acceptor.accept(SyncableDouble.create(() -> reactorDamage, newValue -> reactorDamage = newValue));
+        acceptor.accept(SyncableDouble.create(() -> rateLimit, newValue -> rateLimit = newValue));
+        acceptor.accept(SyncableBoolean.create(() -> active, newValue -> active = newValue));
+        acceptor.accept(SyncableBoolean.create(() -> forceDisable, newValue -> forceDisable = newValue));
+    }
 }

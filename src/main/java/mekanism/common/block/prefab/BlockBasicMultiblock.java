@@ -1,9 +1,7 @@
 package mekanism.common.block.prefab;
 
-import java.util.function.UnaryOperator;
 import mekanism.common.content.blocktype.BlockTypeTile;
 import mekanism.common.tile.base.TileEntityMekanism;
-import mekanism.common.tile.base.WrenchResult;
 import mekanism.common.tile.prefab.TileEntityMultiblock;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.WorldUtils;
@@ -16,6 +14,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.UnaryOperator;
 
 public class BlockBasicMultiblock<TILE extends TileEntityMekanism> extends BlockTile<TILE, BlockTypeTile<TILE>> {
 
@@ -43,8 +43,10 @@ public class BlockBasicMultiblock<TILE extends TileEntityMekanism> extends Block
                 }
             }
             return InteractionResult.SUCCESS;
-        } else if (tile.tryWrench(state, player, hand, hit) != WrenchResult.PASS) {
-            return InteractionResult.SUCCESS;
+        }
+        InteractionResult wrenchResult = tile.tryWrench(state, player, hand, hit).getInteractionResult();
+        if (wrenchResult != InteractionResult.PASS) {
+            return wrenchResult;
         }
         return tile.onActivate(player, hand, player.getItemInHand(hand));
     }

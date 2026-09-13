@@ -1,11 +1,12 @@
 package mekanism.common.capabilities;
 
+import mekanism.api.AutomationType;
+import mekanism.api.functions.TriPredicate;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-import mekanism.api.AutomationType;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.TriPredicate;
-import org.jetbrains.annotations.NotNull;
 
 public abstract class GenericTankSpec<TYPE> {
 

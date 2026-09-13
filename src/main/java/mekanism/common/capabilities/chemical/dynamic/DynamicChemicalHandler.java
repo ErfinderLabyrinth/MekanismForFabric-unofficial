@@ -1,8 +1,5 @@
 package mekanism.common.capabilities.chemical.dynamic;
 
-import java.util.List;
-import java.util.function.Function;
-import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
@@ -26,8 +23,14 @@ import mekanism.api.chemical.slurry.ISlurryTank;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.common.capabilities.DynamicHandler;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Function;
 
 @NothingNullByDefault
 public abstract class DynamicChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>>
@@ -43,22 +46,42 @@ public abstract class DynamicChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>
         return containerSupplier.apply(side);
     }
 
+//    @Override
+//    public STACK insertChemical(int tank, STACK stack, @Nullable Direction side, Action action) {
+//        //If we can insert into the specific tank from that side, try to. Otherwise exit
+//        return canInsert.test(tank, side) ? IMekanismChemicalHandler.super.insert(tank, stack, side, action) : stack;
+//    }
+
+//    @Override
+//    public STACK extractChemical(int tank, long amount, @Nullable Direction side, Action action) {
+//        //If we can extract from a specific tank from a given side, try to. Otherwise exit
+//        return canExtract.test(tank, side) ? IMekanismChemicalHandler.super.extractChemical(tank, amount, side, action) : getEmptyStack();
+//    }
+
     @Override
-    public STACK insertChemical(int tank, STACK stack, @Nullable Direction side, Action action) {
-        //If we can insert into the specific tank from that side, try to. Otherwise exit
-        return canInsert.test(tank, side) ? IMekanismChemicalHandler.super.insertChemical(tank, stack, side, action) : stack;
+    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
+        return canInsert.test(null) ? IMekanismChemicalHandler.super.insert(resource, maxAmount, transaction) : 0;
     }
 
     @Override
-    public STACK extractChemical(int tank, long amount, @Nullable Direction side, Action action) {
-        //If we can extract from a specific tank from a given side, try to. Otherwise exit
-        return canExtract.test(tank, side) ? IMekanismChemicalHandler.super.extractChemical(tank, amount, side, action) : getEmptyStack();
+    public long extract(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
+        return canExtract.test(null) ? IMekanismChemicalHandler.super.extract(resource, maxAmount, transaction) : 0;
+    }
+
+    @Override
+    public void updateSnapshots(TransactionContext t) {
+
+    }
+
+    @Override
+    public Iterator<StorageView<CHEMICAL>> iterator() {
+        throw new RuntimeException("Currently not implemented");
     }
 
     public static class DynamicGasHandler extends DynamicChemicalHandler<Gas, GasStack, IGasTank> implements IMekanismGasHandler {
 
         public DynamicGasHandler(Function<Direction, List<IGasTank>> tankSupplier, InteractPredicate canExtract, InteractPredicate canInsert,
-              @Nullable IContentsListener listener) {
+                                 @Nullable IContentsListener listener) {
             super(tankSupplier, canExtract, canInsert, listener);
         }
     }

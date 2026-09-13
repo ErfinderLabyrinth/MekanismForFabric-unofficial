@@ -1,10 +1,10 @@
 package mekanism.common.item;
 
-import java.util.List;
+import mekanism.api.security.IItemOwnerObjectGetter;
+import mekanism.api.security.IOwnerObject;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
-import mekanism.common.capabilities.ItemCapabilityWrapper.ItemCapability;
 import mekanism.common.capabilities.security.item.ItemStackOwnerObject;
 import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.inventory.container.item.PortableQIODashboardContainer;
@@ -20,29 +20,31 @@ import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.SecurityUtils;
 import mekanism.common.util.text.BooleanStateDisplay.YesNo;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ItemPortableQIODashboard extends CapabilityItem implements IFrequencyItem, IGuiItem, IItemSustainedInventory, IColoredItem {
+import java.util.List;
+
+public class ItemPortableQIODashboard extends Item implements IFrequencyItem, IGuiItem, IItemSustainedInventory, IColoredItem, IItemOwnerObjectGetter {
 
     public ItemPortableQIODashboard(Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.RARE));
     }
 
     @Override
-    public void onDestroyed(@NotNull ItemEntity item, @NotNull DamageSource damageSource) {
-        InventoryUtils.dropItemContents(item, damageSource);
+    public void onDestroyed(ItemEntity itemEntity) {
+        InventoryUtils.dropItemContents(itemEntity, null);
     }
 
     @Override
@@ -79,7 +81,7 @@ public class ItemPortableQIODashboard extends CapabilityItem implements IFrequen
     public void inventoryTick(@NotNull ItemStack stack, @NotNull Level level, @NotNull Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         if (!level.isClientSide && level.getGameTime() % 100 == 0) {
-            EnumColor frequencyColor = getFrequency(stack) instanceof QIOFrequency frequency ? frequency.getColor() : null;
+            EnumColor frequencyColor = getFrequency(stack, level.getServer()) instanceof QIOFrequency frequency ? frequency.getColor() : null;
             EnumColor color = getColor(stack);
             if (color != frequencyColor) {
                 setColor(stack, frequencyColor);
@@ -88,8 +90,7 @@ public class ItemPortableQIODashboard extends CapabilityItem implements IFrequen
     }
 
     @Override
-    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {
-        capabilities.add(new ItemStackOwnerObject());
-        super.gatherCapabilities(capabilities, stack, nbt);
+    public @Nullable IOwnerObject getOwnerObject(ItemStack stack) {
+        return new ItemStackOwnerObject(stack);
     }
 }

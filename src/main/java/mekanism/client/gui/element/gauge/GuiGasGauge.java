@@ -1,13 +1,14 @@
 package mekanism.client.gui.element.gauge;
 
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.client.gui.IGuiWrapper;
+import mekanism.common.capabilities.holder.IHolder;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.network.to_server.PacketDropperUse.TankType;
+
+import java.util.function.Supplier;
 
 public class GuiGasGauge extends GuiChemicalGauge<Gas, GasStack, IGasTank> {
 
@@ -15,12 +16,12 @@ public class GuiGasGauge extends GuiChemicalGauge<Gas, GasStack, IGasTank> {
         super(handler, type, gui, x, y, sizeX, sizeY, TankType.GAS_TANK);
     }
 
-    public GuiGasGauge(Supplier<IGasTank> tankSupplier, Supplier<List<IGasTank>> tanksSupplier, GaugeType type, IGuiWrapper gui, int x, int y) {
-        super(tankSupplier, tanksSupplier, type, gui, x, y, TankType.GAS_TANK);
+    public GuiGasGauge(Supplier<IGasTank> tankSupplier, Supplier<IHolder<IGasTank>> tankHolder, GaugeType type, IGuiWrapper gui, int x, int y) {
+        super(tankSupplier, tankHolder, type, gui, x, y, TankType.GAS_TANK);
     }
 
-    public GuiGasGauge(Supplier<IGasTank> tankSupplier, Supplier<List<IGasTank>> tanksSupplier, GaugeType type, IGuiWrapper gui, int x, int y, int sizeX, int sizeY) {
-        super(tankSupplier, tanksSupplier, type, gui, x, y, sizeX, sizeY, TankType.GAS_TANK);
+    public GuiGasGauge(Supplier<IGasTank> tankSupplier, Supplier<IHolder<IGasTank>> tankHolder, GaugeType type, IGuiWrapper gui, int x, int y, int sizeX, int sizeY) {
+        super(tankSupplier, tankHolder, type, gui, x, y, sizeX, sizeY, TankType.GAS_TANK);
     }
 
     public static GuiGasGauge getDummy(GaugeType type, IGuiWrapper gui, int x, int y) {

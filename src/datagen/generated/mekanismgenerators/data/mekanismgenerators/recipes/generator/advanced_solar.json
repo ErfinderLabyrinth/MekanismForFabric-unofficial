@@ -5,7 +5,7 @@
       "tag": "mekanism:alloys/infused"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "P": {
       "item": "mekanismgenerators:solar_generator"

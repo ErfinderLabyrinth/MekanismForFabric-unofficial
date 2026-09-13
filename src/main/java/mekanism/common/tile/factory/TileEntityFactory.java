@@ -3,22 +3,11 @@ package mekanism.common.tile.factory;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.IntSupplier;
-import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
 import mekanism.api.Upgrade;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.api.math.FloatingLong;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.cache.CachedRecipe;
@@ -39,8 +28,8 @@ import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
 import mekanism.common.integration.computer.computercraft.ComputerConstants;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableBoolean;
-import mekanism.common.inventory.container.sync.SyncableFloatingLong;
 import mekanism.common.inventory.container.sync.SyncableInt;
+import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.inventory.slot.FactoryInputInventorySlot;
 import mekanism.common.lib.inventory.HashedItem;
@@ -75,6 +64,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
+
 public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends TileEntityConfigurableMachine implements IRecipeLookupHandler<RECIPE>, ISustainedData {
 
     /**
@@ -101,7 +95,7 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends T
     private int ticksRequired = 200;
     private boolean sorting;
     private boolean sortingNeeded = true;
-    private FloatingLong lastUsage = FloatingLong.ZERO;
+    private long lastUsage = 0;
 
     /**
      * This machine's factory type.
@@ -240,7 +234,7 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends T
 
         //Copy this so that if it changes we still have the original amount. Don't bother making it a constant though as this way
         // we can then use minusEqual instead of subtract to remove an extra copy call
-        FloatingLong prev = energyContainer.getEnergy().copy();
+        long prev = energyContainer.getEnergy();
         for (int i = 0; i < recipeCacheLookupMonitors.length; i++) {
             if (!recipeCacheLookupMonitors[i].updateAndProcess()) {
                 //If we don't have a recipe in that slot make sure that our active state for that position is false
@@ -258,7 +252,7 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends T
         }
         setActive(isActive);
         //If none of the recipes are actively processing don't bother with any subtraction
-        lastUsage = isActive ? prev.minusEqual(energyContainer.getEnergy()) : FloatingLong.ZERO;
+        lastUsage = isActive ? Math.max(prev - energyContainer.getEnergy(), 0) : 0;
     }
 
     /**
@@ -364,7 +358,7 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends T
 
     @NotNull
     @ComputerMethod(nameOverride = "getEnergyUsage", methodDescription = ComputerConstants.DESCRIPTION_GET_ENERGY_USAGE)
-    public FloatingLong getLastUsage() {
+    public long getLastUsage() {
         return lastUsage;
     }
 
@@ -453,7 +447,7 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends T
         super.addContainerTrackers(container);
         container.trackArray(progress);
         errorTracker.track(container);
-        container.track(SyncableFloatingLong.create(this::getLastUsage, value -> lastUsage = value));
+        container.track(SyncableLong.create(this::getLastUsage, value -> lastUsage = value));
         container.track(SyncableBoolean.create(this::isSorting, value -> sorting = value));
         container.track(SyncableInt.create(this::getTicksRequired, value -> ticksRequired = value));
     }
@@ -713,7 +707,7 @@ public abstract class TileEntityFactory<RECIPE extends MekanismRecipe> extends T
                         // by a different amount then we expected
                         //Note: We use setStackSize here rather than setStack to avoid an unnecessary stack copy call
                         // as copying item stacks can sometimes be rather expensive in a heavily modded environment
-                        MekanismUtils.logMismatchedStackSize(sizeForSlot, inputSlot.setStackSize(sizeForSlot, Action.EXECUTE));
+                        MekanismUtils.logMismatchedStackSize(sizeForSlot, inputSlot.setStackSize(sizeForSlot));
                     }
                 }
             }

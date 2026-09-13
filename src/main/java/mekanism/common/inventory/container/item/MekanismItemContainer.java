@@ -6,7 +6,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +33,7 @@ public abstract class MekanismItemContainer extends MekanismContainer {
 
     @Nullable
     @Override
-    public ICapabilityProvider getSecurityObject() {
+    public Object getSecurityObject() {
         return stack;
     }
 

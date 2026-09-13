@@ -2,12 +2,12 @@
   "type": "mekanism:metallurgic_infusing",
   "chemicalInput": {
     "amount": 10,
-    "tag": "mekanism:carbon"
+    "tagSupplier": "mekanism:carbon"
   },
   "itemInput": {
     "amount": 4,
     "ingredient": {
-      "tag": "forge:dusts/gold"
+      "tag": "c:gold_dusts"
     }
   },
   "output": {

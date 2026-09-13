@@ -1,20 +1,18 @@
 package mekanism.common.inventory.container.item;
 
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.Coord4D;
-import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.content.teleporter.TeleporterFrequency;
 import mekanism.common.inventory.container.IEmptyContainer;
 import mekanism.common.inventory.container.sync.SyncableByte;
 import mekanism.common.lib.frequency.FrequencyType;
 import mekanism.common.registries.MekanismContainerTypes;
 import mekanism.common.tile.TileEntityTeleporter;
-import mekanism.common.util.StorageUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import team.reborn.energy.api.EnergyStorage;
 
 public class PortableTeleporterContainer extends FrequencyItemContainer<TeleporterFrequency> implements IEmptyContainer {
 
@@ -53,15 +51,17 @@ public class PortableTeleporterContainer extends FrequencyItemContainer<Teleport
                 if (freq != null && !freq.getActiveCoords().isEmpty()) {
                     status = 1;
                     if (!inv.player.isCreative()) {
-                        IEnergyContainer energyContainer = StorageUtils.getEnergyContainer(stack, 0);
-                        if (energyContainer == null) {
+                        EnergyStorage energyStorage = ContainerItemContext.withConstant(stack).find(EnergyStorage.ITEM);
+                        if (energyStorage == null) {
                             status = 4;
                         } else {
                             Coord4D coords = freq.getClosestCoords(new Coord4D(inv.player));
                             if (coords != null) {
-                                FloatingLong energyNeeded = TileEntityTeleporter.calculateEnergyCost(inv.player, coords);
-                                if (energyNeeded != null && energyContainer.extract(energyNeeded, Action.SIMULATE, AutomationType.MANUAL).smallerThan(energyNeeded)) {
-                                    status = 4;
+                                long energyNeeded = TileEntityTeleporter.calculateEnergyCost(inv.player, coords);
+                                try(Transaction t=Transaction.openOuter()) {
+                                    if (energyNeeded != -1 && energyStorage.extract(energyNeeded, t) < energyNeeded) {
+                                        status = 4;
+                                    }
                                 }
                             }
                         }

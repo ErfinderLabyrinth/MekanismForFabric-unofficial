@@ -2,20 +2,7 @@ package mekanism.common.content.qio;
 
 import it.unimi.dsi.fastutil.bytes.Byte2IntArrayMap;
 import it.unimi.dsi.fastutil.bytes.Byte2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMaps;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import it.unimi.dsi.fastutil.objects.*;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.math.MathUtils;
 import mekanism.common.inventory.container.slot.HotBarSlot;
@@ -23,12 +10,15 @@ import mekanism.common.inventory.container.slot.InsertableSlot;
 import mekanism.common.inventory.container.slot.MainInventorySlot;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.lib.inventory.HashedItem.UUIDAwareHashedItem;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public class QIOCraftingTransferHelper {
 
@@ -56,7 +46,11 @@ public class QIOCraftingTransferHelper {
             if (!slot.isEmpty()) {
                 //Note: This isn't a super accurate validation of if we can take the stack or not, given in theory we
                 // always should be able to, but we have this check that mimics our implementation here just in case
-                if (!slot.extractItem(1, Action.SIMULATE, AutomationType.MANUAL).isEmpty()) {
+                boolean canExtact;
+                try(Transaction t=Transaction.openOuter()) {
+                    canExtact = slot.extract(slot.getResource(), 1, t) != 0;
+                }
+                if (canExtact) {
                     reverseLookup.computeIfAbsent(HashedItem.raw(slot.getStack()), item -> new HashedItemSource()).addSlot(inventorySlotIndex, slot.getCount());
                 } else {
                     isValid = false;
@@ -324,7 +318,7 @@ public class QIOCraftingTransferHelper {
                 int currentAmount = stackSizes[slot];
                 int max = slotLimits[slot];
                 //If the slot has any room left, and our stack is able to stack with it
-                if (currentAmount < max && ItemHandlerHelper.canItemStacksStack(inventory[slot], stack)) {
+                if (currentAmount < max && ItemEntity.areMergable(inventory[slot], stack)) {
                     int toPlace = Math.min(max - currentAmount, amount);
                     stackSizes[slot] = currentAmount + toPlace;
                     amount -= toPlace;

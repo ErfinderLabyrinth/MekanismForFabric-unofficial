@@ -15,11 +15,13 @@ import mekanism.common.integration.computer.annotation.WrappingComputerMethod;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableBoolean;
 import mekanism.common.inventory.container.sync.SyncableFloatingLong;
+import mekanism.common.inventory.container.sync.SyncableLong;
 import mekanism.common.inventory.slot.EnergyInventorySlot;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.WorldUtils;
 import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import mekanism.generators.common.registries.GeneratorsBlocks;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -28,20 +30,22 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.LongSupplier;
+
 public class TileEntitySolarGenerator extends TileEntityGenerator {
 
     private boolean seesSun;
-    private FloatingLong lastProductionAmount = FloatingLong.ZERO;
+    private long lastProductionAmount = 0;
     @WrappingComputerMethod(wrapper = ComputerIInventorySlotWrapper.class, methodNames = "getEnergyItem", docPlaceholder = "energy item slot")
     EnergyInventorySlot energySlot;
     @Nullable
     protected SolarCheck solarCheck;
 
     public TileEntitySolarGenerator(BlockPos pos, BlockState state) {
-        this(GeneratorsBlocks.SOLAR_GENERATOR, pos, state, MekanismGeneratorsConfig.generators.solarGeneration);
+        this(GeneratorsBlocks.SOLAR_GENERATOR, pos, state, () -> MekanismGeneratorsConfig.generators.solarGeneration);
     }
 
-    protected TileEntitySolarGenerator(IBlockProvider blockProvider, BlockPos pos, BlockState state, @NotNull FloatingLongSupplier maxOutput) {
+    protected TileEntitySolarGenerator(IBlockProvider blockProvider, BlockPos pos, BlockState state, @NotNull LongSupplier maxOutput) {
         super(blockProvider, pos, state, maxOutput);
     }
 
@@ -69,13 +73,15 @@ public class TileEntitySolarGenerator extends TileEntityGenerator {
         // since under the new rules, we can still generate power when it's raining, albeit at a
         // significant penalty.
         seesSun = checkCanSeeSun();
-        if (seesSun && MekanismUtils.canFunction(this) && !getEnergyContainer().getNeeded().isZero()) {
+        if (seesSun && MekanismUtils.canFunction(this) && getEnergyContainer().getNeeded() != 0) {
             setActive(true);
-            FloatingLong production = getProduction();
-            lastProductionAmount = production.subtract(getEnergyContainer().insert(production, Action.EXECUTE, AutomationType.INTERNAL));
+            long production = getProduction();
+            try(Transaction t = Transaction.openOuter()) {
+                lastProductionAmount = getEnergyContainer().insert(production, t);
+            }
         } else {
             setActive(false);
-            lastProductionAmount = FloatingLong.ZERO;
+            lastProductionAmount = 0;
         }
     }
 
@@ -84,7 +90,7 @@ public class TileEntitySolarGenerator extends TileEntityGenerator {
             return;
         }
         solarCheck = new SolarCheck(level, worldPosition);
-        updateMaxOutputRaw(getConfiguredMax().multiply(solarCheck.getPeakMultiplier()));
+        updateMaxOutputRaw((long) (getConfiguredMax() * solarCheck.getPeakMultiplier()));
     }
 
     protected boolean checkCanSeeSun() {
@@ -95,13 +101,13 @@ public class TileEntitySolarGenerator extends TileEntityGenerator {
         return solarCheck.canSeeSun();
     }
 
-    public FloatingLong getProduction() {
+    public long getProduction() {
         if (level == null || solarCheck == null) {
-            return FloatingLong.ZERO;
+            return 0;
         }
         float brightness = getBrightnessMultiplier(level);
         //Production is a function of the peak possible output in this biome and sun's current brightness
-        return getConfiguredMax().multiply(brightness * solarCheck.getGenerationMultiplier());
+        return (long) (getConfiguredMax() * brightness * solarCheck.getGenerationMultiplier());
     }
 
     protected float getBrightnessMultiplier(@NotNull Level world) {
@@ -117,12 +123,12 @@ public class TileEntitySolarGenerator extends TileEntityGenerator {
         return new RelativeSide[]{RelativeSide.BOTTOM};
     }
 
-    protected FloatingLong getConfiguredMax() {
-        return MekanismGeneratorsConfig.generators.solarGeneration.get();
+    protected long getConfiguredMax() {
+        return MekanismGeneratorsConfig.generators.solarGeneration;
     }
 
     @Override
-    public FloatingLong getProductionRate() {
+    public long getProductionRate() {
         return lastProductionAmount;
     }
 
@@ -131,7 +137,7 @@ public class TileEntitySolarGenerator extends TileEntityGenerator {
         super.addContainerTrackers(container);
         container.track(SyncableBoolean.create(this::canSeeSun, value -> seesSun = value));
         container.track(syncableMaxOutput());
-        container.track(SyncableFloatingLong.create(this::getProductionRate, value -> lastProductionAmount = value));
+        container.track(SyncableLong.create(this::getProductionRate, value -> lastProductionAmount = value));
     }
 
     protected static class SolarCheck {
@@ -156,7 +162,7 @@ public class TileEntitySolarGenerator extends TileEntityGenerator {
             // As with temperature, we scale it so that it doesn't overwhelm production. Note the signedness
             // on the scaling factor. Also note that we only use rainfall as a proxy if it CAN rain; some dimensions
             // (like the End) have rainfall set, but can't actually support rain.
-            float humidityEff = needsRainCheck ? -0.3F * b.getModifiedClimateSettings().downfall() : 0;
+            float humidityEff = needsRainCheck ? -0.3F * b.climateSettings.downfall() : 0;
             peakMultiplier = 1.0F + tempEff + humidityEff;
         }
 

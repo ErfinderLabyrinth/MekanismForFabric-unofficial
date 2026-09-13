@@ -5,13 +5,13 @@
       "tag": "mekanism:alloys/infused"
     },
     "C": {
-      "tag": "forge:circuits/advanced"
+      "tag": "c:advanced_circuits"
     },
     "P": {
       "item": "mekanism:basic_bin"
     },
     "_": {
-      "tag": "forge:cobblestone/normal"
+      "tag": "c:normal_cobblestones"
     }
   },
   "pattern": [

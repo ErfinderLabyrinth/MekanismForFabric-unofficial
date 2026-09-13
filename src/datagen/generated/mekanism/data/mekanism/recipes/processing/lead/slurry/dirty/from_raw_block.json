@@ -6,12 +6,12 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:storage_blocks/raw_lead"
+      "tag": "c:raw_lead_blocks"
     }
   },
   "output": {
     "amount": 6000,
     "chemicalType": "slurry",
-    "slurry": "mekanism:dirty_lead"
+    "slurry": "minecraft:dirty_lead"
   }
 }

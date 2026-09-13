@@ -2,14 +2,14 @@
   "type": "mekanism:washing",
   "fluidInput": {
     "amount": 5,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "output": {
     "amount": 1,
-    "slurry": "mekanism:clean_osmium"
+    "slurry": "minecraft:clean_osmium"
   },
   "slurryInput": {
     "amount": 1,
-    "slurry": "mekanism:dirty_osmium"
+    "slurry": "minecraft:dirty_osmium"
   }
 }
