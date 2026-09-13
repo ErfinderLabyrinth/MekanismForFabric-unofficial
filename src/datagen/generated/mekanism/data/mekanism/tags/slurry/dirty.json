@@ -1,12 +1,12 @@
 {
   "replace": false,
   "values": [
-    "minecraft:dirty_iron",
-    "minecraft:dirty_gold",
-    "minecraft:dirty_osmium",
-    "minecraft:dirty_copper",
-    "minecraft:dirty_tin",
-    "minecraft:dirty_lead",
-    "minecraft:dirty_uranium"
+    "mekanism:dirty_iron",
+    "mekanism:dirty_gold",
+    "mekanism:dirty_osmium",
+    "mekanism:dirty_copper",
+    "mekanism:dirty_tin",
+    "mekanism:dirty_lead",
+    "mekanism:dirty_uranium"
   ]
 }

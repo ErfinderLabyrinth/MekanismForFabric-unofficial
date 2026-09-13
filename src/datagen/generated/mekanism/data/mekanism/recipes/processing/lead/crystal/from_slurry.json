@@ -3,7 +3,7 @@
   "chemicalType": "slurry",
   "input": {
     "amount": 200,
-    "slurry": "minecraft:clean_lead"
+    "slurry": "mekanism:clean_lead"
   },
   "output": {
     "item": "mekanism:crystal_lead"

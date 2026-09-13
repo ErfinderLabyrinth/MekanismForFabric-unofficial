@@ -60,13 +60,13 @@ public abstract class ChemicalTankChemicalTank<CHEMICAL extends Chemical<CHEMICA
     }
 
     @Override
-    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
+    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction, AutomationType automationType) {
         if (isCreative && isEmpty()) {
             //If a player manually inserts into a creative tank (or internally, via a GasInventorySlot), that is empty we need to allow setting the type,
             // Note: We check that it is not external insertion because an empty creative tanks acts as a "void" for automation
             long inserted;
             try(Transaction t=Transaction.openNested(transaction)) {
-                inserted = super.insert(resource, maxAmount, t);
+                inserted = super.insert(resource, maxAmount, t, automationType);
             }
             if (inserted == maxAmount) {
                 //If we are able to insert it then set perform the action of setting it to full
@@ -76,7 +76,7 @@ public abstract class ChemicalTankChemicalTank<CHEMICAL extends Chemical<CHEMICA
         }
 
         try(Transaction t=Transaction.openNested(transaction)) {
-            long inserted = super.insert(resource, maxAmount, t);
+            long inserted = super.insert(resource, maxAmount, t, automationType);
             if (!isCreative)
                 t.commit();
             return inserted;

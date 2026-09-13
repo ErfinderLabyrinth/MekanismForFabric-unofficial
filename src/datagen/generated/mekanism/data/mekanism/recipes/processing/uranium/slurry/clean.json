@@ -6,10 +6,10 @@
   },
   "output": {
     "amount": 1,
-    "slurry": "minecraft:clean_uranium"
+    "slurry": "mekanism:clean_uranium"
   },
   "slurryInput": {
     "amount": 1,
-    "slurry": "minecraft:dirty_uranium"
+    "slurry": "mekanism:dirty_uranium"
   }
 }

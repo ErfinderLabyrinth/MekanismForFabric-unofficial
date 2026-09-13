@@ -94,6 +94,10 @@ public interface IChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STACK extend
 
     @Override
     default long insert(CHEMICAL resource, long amount, TransactionContext transaction) {
+        return insert(resource, amount, transaction, AutomationType.EXTERNAL);
+    }
+
+    default long insert(CHEMICAL resource, long amount, TransactionContext transaction, AutomationType automationType) {
         updateSnapshots(transaction);
         STACK stack = (STACK) resource.getStack(amount);
         if (resource.isEmptyType() || amount == 0 || !isValid(stack)) {

@@ -1,5 +1,6 @@
 package mekanism.common.capabilities.proxy;
 
+import mekanism.api.AutomationType;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.*;
 import mekanism.api.chemical.gas.Gas;
@@ -114,8 +115,8 @@ public abstract class ProxyChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, 
     }
 
     @Override
-    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
-        return readOnly || readOnlyInsert.getAsBoolean() ? 0 : sidedHandler.insert(resource, maxAmount, transaction);
+    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction, AutomationType automationType) {
+        return readOnly || readOnlyInsert.getAsBoolean() ? 0 : sidedHandler.insert(resource, maxAmount, transaction, automationType);
     }
 
     @Override

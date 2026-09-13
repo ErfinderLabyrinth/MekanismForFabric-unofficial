@@ -1,5 +1,6 @@
 package mekanism.common.capabilities.chemical.item;
 
+import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
@@ -54,10 +55,10 @@ public abstract class ChemicalTankRateLimitChemicalTank<CHEMICAL extends Chemica
 //    }
 
     @Override
-    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
+    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction, AutomationType automationType) {
         long inserted;
         try(Transaction t2=Transaction.openNested(transaction)) {
-            inserted = super.insert(resource, maxAmount, t2);
+            inserted = super.insert(resource, maxAmount, t2, automationType);
             if(!isCreative) {
                 t2.commit();
             }

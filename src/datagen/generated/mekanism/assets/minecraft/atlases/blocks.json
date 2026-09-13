@@ -74,6 +74,10 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "mekanism:slurry/dirty"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "mekanism:slurry/clean"
     },
     {

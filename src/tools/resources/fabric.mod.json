@@ -36,6 +36,9 @@
     ],
     "modmenu": [
       "mekanism.tools.client.integration.modmenu.ToolsModMenuIntegration"
+    ],
+    "jei_mod_plugin": [
+      "mekanism.tools.client.jei.ToolsJEI"
     ]
   },
   "mixins": [

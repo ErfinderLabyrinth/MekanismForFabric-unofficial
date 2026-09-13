@@ -1,6 +1,7 @@
 package mekanism.api.chemical;
 
 import mekanism.api.Action;
+import mekanism.api.AutomationType;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -135,6 +136,10 @@ public interface IChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>, STACK ext
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IChemicalHandler} ends up distributing the insertion.
      */
     default long insert(CHEMICAL resource, long amount, TransactionContext t) {
+        return insert(resource, amount, t, AutomationType.EXTERNAL);
+    }
+
+    default long insert(CHEMICAL resource, long amount, TransactionContext t, AutomationType automationType) {
         updateSnapshots(t);
         long amountInserted = 0;
         for (IChemicalTank<CHEMICAL, STACK> tank : getTanks()) {

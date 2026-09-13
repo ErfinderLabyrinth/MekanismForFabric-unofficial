@@ -40,7 +40,7 @@ public class MinerItemStackFilter extends MinerFilter<MinerItemStackFilter> impl
 
     @Override
     public boolean hasBlacklistedElement() {
-        return !itemType.isEmpty() && itemType.getItem() instanceof BlockItem blockItem && BuiltInRegistries.BLOCK.getTag(MekanismTags.Blocks.MINER_BLACKLIST).get().contains(BuiltInRegistries.BLOCK.createIntrusiveHolder(blockItem.getBlock()));
+        return !itemType.isEmpty() && itemType.getItem() instanceof BlockItem blockItem && BuiltInRegistries.BLOCK.getTag(MekanismTags.Blocks.MINER_BLACKLIST).get().contains(BuiltInRegistries.BLOCK.wrapAsHolder(blockItem.getBlock()));
     }
 
     @Override

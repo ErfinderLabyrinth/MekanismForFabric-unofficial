@@ -13,6 +13,6 @@
   "output": {
     "amount": 2000,
     "chemicalType": "slurry",
-    "slurry": "minecraft:dirty_uranium"
+    "slurry": "mekanism:dirty_uranium"
   }
 }

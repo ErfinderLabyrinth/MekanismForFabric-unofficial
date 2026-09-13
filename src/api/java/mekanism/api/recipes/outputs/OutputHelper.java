@@ -213,7 +213,7 @@ public class OutputHelper {
             return;
         }
         try(Transaction t=Transaction.openOuter()) {
-            tank.insert(toOutput.getType(), toOutput.getAmount() * operations, t);
+            tank.insert(toOutput.getType(), toOutput.getAmount() * operations, t, AutomationType.INTERNAL);
             t.commit();
         }
     }
@@ -262,7 +262,7 @@ public class OutputHelper {
             //Divide the amount we can actually use by the amount one output operation is equal to, capping it at the max we were told about
             long amountUsed;
             try(Transaction t=Transaction.openOuter()) {
-                amountUsed = tank.insert(toOutput.getType(), Long.MAX_VALUE, t);
+                amountUsed = tank.insert(toOutput.getType(), Long.MAX_VALUE, t, AutomationType.INTERNAL);
             }
             //Divide the amount we can actually use by the amount one output operation is equal to, capping it at the max we were told about
             int operations = MathUtils.clampToInt(amountUsed / toOutput.getAmount());

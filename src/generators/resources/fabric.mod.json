@@ -33,6 +33,9 @@
     ],
     "fabric-datagen": [
       "mekanism.generators.common.GeneratorsDataGenerator"
+    ],
+    "jei_mod_plugin": [
+      "mekanism.generators.client.jei.GeneratorsJEI"
     ]
   },
   "mixins": [

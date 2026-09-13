@@ -318,13 +318,15 @@ public abstract class BasicChemicalTank<CHEMICAL extends Chemical<CHEMICAL>, STA
 //        return tank == 0 ? extract(amount, action, AutomationType.EXTERNAL) : getEmptyStack();
 //    }
 
-
-
     @Override
     public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
+        return insert(resource, maxAmount, transaction, AutomationType.EXTERNAL);
+    }
+
+    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction, AutomationType automationType) {
         STACK stack = createStack(resource, maxAmount);
         updateSnapshots(transaction);
-        if (maxAmount == 0 || !isValid(stack) || !canInsert.test(stack.getType(), null)) {
+        if (maxAmount == 0 || !isValid(stack) || !canInsert.test(stack.getType(), automationType)) {
             //"Fail quick" if the given stack is empty, or we can never insert the chemical or currently are unable to insert it
             return 0;
         }

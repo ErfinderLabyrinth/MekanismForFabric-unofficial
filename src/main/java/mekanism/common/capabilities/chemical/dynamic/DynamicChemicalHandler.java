@@ -1,5 +1,6 @@
 package mekanism.common.capabilities.chemical.dynamic;
 
+import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
@@ -59,8 +60,8 @@ public abstract class DynamicChemicalHandler<CHEMICAL extends Chemical<CHEMICAL>
 //    }
 
     @Override
-    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction) {
-        return canInsert.test(null) ? IMekanismChemicalHandler.super.insert(resource, maxAmount, transaction) : 0;
+    public long insert(CHEMICAL resource, long maxAmount, TransactionContext transaction, AutomationType automationType) {
+        return canInsert.test(null) ? IMekanismChemicalHandler.super.insert(resource, maxAmount, transaction, automationType) : 0;
     }
 
     @Override
