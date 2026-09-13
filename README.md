@@ -9,6 +9,7 @@
 * Wrong Energy ratio (assumes 1J = 1E, but is not the case)
 * Render problems when water is inside a tank
 * Integrations are missing (except mod menu)
+* The "all" jar file doesn't work
 
 # Mekanism for Minecraft 1.20 #
 
