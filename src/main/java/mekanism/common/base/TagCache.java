@@ -144,7 +144,7 @@ public final class TagCache {
     }
 
     public static boolean tagHasMinerBlacklisted(@NotNull String tag) {
-        HolderSet.Named<Block> blacklist = TagUtils.tag(BuiltInRegistries.BLOCK, MekanismTags.Blocks.MINER_BLACKLIST).orElse(null);
+        HolderSet.Named<Block> blacklist = TagUtils.tag(BuiltInRegistries.BLOCK, MekanismTags.Blocks.MINER_BLACKLIST);
         if (blacklist == null || blacklist.size() == 0) {
             return false;
         }
@@ -154,7 +154,7 @@ public final class TagCache {
     }
 
     public static boolean modIDHasMinerBlacklisted(@NotNull String modName) {
-        HolderSet.Named<Block> blacklist = TagUtils.tag(BuiltInRegistries.BLOCK, MekanismTags.Blocks.MINER_BLACKLIST).orElse(null);
+        HolderSet.Named<Block> blacklist = TagUtils.tag(BuiltInRegistries.BLOCK, MekanismTags.Blocks.MINER_BLACKLIST);
         if (blacklist == null || blacklist.size() == 0) {
             return false;
         }

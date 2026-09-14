@@ -102,7 +102,7 @@ public class ChemicalCrystallizerRecipeCategory extends BaseRecipeCategory<Chemi
                 if (!MekanismTags.Slurries.DIRTY_LOOKUP.contains(slurry)) {
                     TagKey<Item> oreTag = slurry.getOreTag();
                     if (oreTag != null) {
-                        tags.add(TagUtils.tag(BuiltInRegistries.ITEM, oreTag).get());
+                        tags.add(TagUtils.tag(BuiltInRegistries.ITEM, oreTag));
                     }
                 }
             }

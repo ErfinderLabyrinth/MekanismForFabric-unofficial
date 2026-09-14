@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 
 public class TagUtils {
 
-    public static <TYPE> Optional<HolderSet.Named<TYPE>> tag(Registry<TYPE> registry, TagKey<TYPE> key) {
-        return registry.getTag(key);
+    public static <TYPE> HolderSet.Named<TYPE> tag(Registry<TYPE> registry, TagKey<TYPE> key) {
+        return registry.getOrCreateTag(key);
     }
 
     public static <TYPE> HolderSet.Named<TYPE> createKey(Registry<TYPE> registry, ResourceLocation tag) {

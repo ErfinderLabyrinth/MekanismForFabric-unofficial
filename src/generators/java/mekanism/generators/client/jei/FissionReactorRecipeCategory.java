@@ -67,7 +67,7 @@ public class FissionReactorRecipeCategory extends BaseRecipeCategory<FissionJEIR
 
     private List<FluidStack> getWaterInput(FissionJEIRecipe recipe) {
         int amount = MathUtils.clampToInt(recipe.outputCoolant().getAmount());
-        return TagUtils.tag(BuiltInRegistries.FLUID, FluidTags.WATER).map(tag -> tag.stream().map(fluid -> new FluidStack(FluidVariant.of(fluid.value()), amount)).toList()).orElseGet(List::of);
+        return TagUtils.tag(BuiltInRegistries.FLUID, FluidTags.WATER).stream().map(fluid -> new FluidStack(FluidVariant.of(fluid.value()), amount)).toList();
     }
 
     @Override
