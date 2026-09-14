@@ -62,6 +62,7 @@ import mekanism.common.tags.MekanismTags;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
 import mekanism.common.world.GenHandler;
+import mekanism.common.world.modifier.OreBiomeModifier;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
@@ -241,6 +242,8 @@ public class Mekanism implements ModInitializer {
             }
             return false;
         });
+
+        OreBiomeModifier.register();
 
         launchCommon();
     }

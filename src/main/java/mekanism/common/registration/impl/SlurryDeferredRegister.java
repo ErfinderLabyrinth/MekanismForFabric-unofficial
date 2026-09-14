@@ -6,6 +6,7 @@ import mekanism.api.chemical.slurry.SlurryBuilder;
 import mekanism.common.registration.WrappedDeferredRegister;
 import mekanism.common.resource.PrimaryResource;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.UnaryOperator;
 
@@ -22,7 +23,7 @@ public class SlurryDeferredRegister extends WrappedDeferredRegister<Slurry> {
     }
 
     public SlurryRegistryObject<Slurry, Slurry> register(String baseName, UnaryOperator<SlurryBuilder> builderModifier) {
-        return new SlurryRegistryObject<>(Registry.register(internal, "dirty_" + baseName, new Slurry(builderModifier.apply(SlurryBuilder.dirty()))),
-                Registry.register(internal, "clean_" + baseName, new Slurry(builderModifier.apply(SlurryBuilder.clean()))));
+        return new SlurryRegistryObject<>(Registry.register(internal, new ResourceLocation(modid, "dirty_" + baseName), new Slurry(builderModifier.apply(SlurryBuilder.dirty()))),
+                Registry.register(internal, new ResourceLocation(modid, "clean_" + baseName), new Slurry(builderModifier.apply(SlurryBuilder.clean()))));
     }
 }
