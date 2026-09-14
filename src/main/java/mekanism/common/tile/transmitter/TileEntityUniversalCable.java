@@ -105,7 +105,7 @@ public class TileEntityUniversalCable extends TileEntityTransmitter implements I
         return updateTag;
     }
 
-    private EnergyStorage getEnergyContainers(@Nullable Direction side) {
+    public EnergyStorage getEnergyContainer(@Nullable Direction side) {
         return energyHandlerManager.getContainer(side);
     }
 

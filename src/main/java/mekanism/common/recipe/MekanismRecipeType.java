@@ -211,9 +211,10 @@ public class MekanismRecipeType<RECIPE extends MekanismRecipe, INPUT_CACHE exten
             //Make the list of cached recipes immutable and filter out any incomplete recipes
             // as there is no reason to potentially look the partial complete piece up if
             // the other portion of the recipe is incomplete
-            cachedRecipes = recipes.stream()
-                    .filter(recipe -> !recipe.isIncomplete())
-                    .toList();
+            cachedRecipes = recipes;
+//                    .stream()
+//                    .filter(recipe -> !recipe.isIncomplete())
+//                    .toList();
         }
         return cachedRecipes;
     }

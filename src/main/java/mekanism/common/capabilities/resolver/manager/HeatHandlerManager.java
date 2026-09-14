@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class HeatHandlerManager extends BasicSidedCapabilityResolver<ProxyHeatHandler, ISidedHeatHandler> {
     IHeatCapacitorHolder holder;
-    public HeatHandlerManager(@Nullable IHeatCapacitorHolder holder, @NotNull ISidedHeatHandler baseHandler) {
+    public HeatHandlerManager(@Nullable IHeatCapacitorHolder holder) {
         super(/*baseHandler,*/ ProxyHeatHandler::new, holder != null);
         this.holder = holder;
     }

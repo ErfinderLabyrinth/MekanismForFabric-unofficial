@@ -268,6 +268,13 @@ public class MechanicalPipe extends BufferedTransmitter<Storage<FluidVariant>, F
         return new CombinedStorage<>(tanks);
     }
 
+    public List<IExtendedFluidTank> getFluidTanks() {
+        if (hasTransmitterNetwork()) {
+            return getTransmitterNetwork().getFluidTanks();
+        }
+        return tanks;
+    }
+
     @Override
     public void onContentsChanged() {
         getTransmitterTile().setChanged();

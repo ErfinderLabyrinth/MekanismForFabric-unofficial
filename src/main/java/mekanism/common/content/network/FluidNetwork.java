@@ -231,6 +231,10 @@ public class FluidNetwork extends DynamicBufferedNetwork<Storage<FluidVariant>, 
         return new CombinedStorage<>(fluidTanks);
     }
 
+    public List<IExtendedFluidTank> getFluidTanks() {
+        return fluidTanks;
+    }
+
     @Override
     public void onContentsChanged() {
         markDirty();

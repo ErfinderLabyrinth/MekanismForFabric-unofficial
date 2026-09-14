@@ -12,6 +12,7 @@ import mekanism.common.content.network.transmitter.ThermodynamicConductor;
 import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
@@ -43,17 +44,11 @@ public class TileEntityThermodynamicConductor extends TileEntityTransmitter {
             public List<IHeatCapacitor> getAll() {
                 return List.of();
             }
-        }, new IMekanismHeatHandler() {
-            @NotNull
-            @Override
-            public List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction side) {
-                return heatHandlerManager.getContainers(side);
-            }
-
-            @Override
-            public void onContentsChanged() {
-            }
         });
+    }
+
+    public List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction side) {
+        return heatHandlerManager.getContainers(side);
     }
 
     @Override

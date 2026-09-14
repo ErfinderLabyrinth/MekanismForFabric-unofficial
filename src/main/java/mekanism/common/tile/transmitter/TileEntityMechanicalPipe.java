@@ -2,10 +2,13 @@ package mekanism.common.tile.transmitter;
 
 import mekanism.api.FluidStack;
 import mekanism.api.NBTConstants;
+import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.tier.BaseTier;
 import mekanism.common.block.states.BlockStateHelper;
 import mekanism.common.block.states.TransmitterType;
+import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
+import mekanism.common.capabilities.resolver.manager.FluidHandlerManager;
 import mekanism.common.content.network.FluidNetwork;
 import mekanism.common.content.network.transmitter.MechanicalPipe;
 import mekanism.common.integration.computer.IComputerTile;
@@ -15,6 +18,7 @@ import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.util.WorldUtils;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -22,21 +26,33 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TileEntityMechanicalPipe extends TileEntityTransmitter implements IComputerTile {
+import java.util.Collections;
+import java.util.List;
 
-//    private final FluidHandlerManager fluidHandlerManager;
+public class TileEntityMechanicalPipe extends TileEntityTransmitter implements IComputerTile, SidedStorageBlockEntity {
+
+    private final FluidHandlerManager fluidHandlerManager;
 
     public TileEntityMechanicalPipe(IBlockProvider blockProvider, BlockPos pos, BlockState state) {
         super(blockProvider, pos, state);
-//        fluidHandlerManager = new FluidHandlerManager(direction -> {
-//            MechanicalPipe pipe = getTransmitter();
-//            if (direction != null && (pipe.getConnectionTypeRaw(direction) == ConnectionType.NONE) || pipe.isRedstoneActivated()) {
-//                //If we actually have a side, and our connection type on that side is none, or we are currently activated by redstone,
-//                // then return that we have no tanks
-//                return Collections.emptyList();
-//            }
-//            return pipe.getFluidTanks(direction);
-//        }, new DynamicFluidHandler(this::getFluidTanks, getExtractPredicate(), getInsertPredicate(), null));
+        fluidHandlerManager = new FluidHandlerManager(new IFluidTankHolder() {
+            @Override
+            public @NotNull Storage<FluidVariant> getTanks(@Nullable Direction direction) {
+                MechanicalPipe pipe = getTransmitter();
+                if (direction != null && (pipe.getConnectionTypeRaw(direction) == ConnectionType.NONE) || pipe.isRedstoneActivated()) {
+                    //If we actually have a side, and our connection type on that side is none, or we are currently activated by redstone,
+                    // then return that we have no tanks
+                    return Storage.empty();
+                }
+                return pipe.getFluidTanks(direction);
+            }
+
+            @Override
+            public List<IExtendedFluidTank> getAll() {
+                MechanicalPipe pipe = getTransmitter();
+                return pipe.getFluidTanks();
+            }
+        });
 //        ComputerCapabilityHelper.addComputerCapabilities(this, this::addCapabilityResolver);
     }
 

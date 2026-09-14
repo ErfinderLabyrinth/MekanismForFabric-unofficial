@@ -245,7 +245,7 @@ public abstract class TileEntityMekanism extends TileEntityUpdateable implements
         energyHandlerManager = new EnergyHandlerManager(getInitialEnergyContainers(getListener(SubstanceType.ENERGY, saveOnlyListener)));
         itemHandlerManager = new ItemHandlerManager(getInitialInventory(getListener(null, saveOnlyListener)));
         CachedAmbientTemperature ambientTemperature = new CachedAmbientTemperature(this::getLevel, this::getBlockPos);
-        heatHandlerManager = new HeatHandlerManager(getInitialHeatCapacitors(getListener(SubstanceType.HEAT, saveOnlyListener), ambientTemperature), this);
+        heatHandlerManager = new HeatHandlerManager(getInitialHeatCapacitors(getListener(SubstanceType.HEAT, saveOnlyListener), ambientTemperature));
         this.ambientTemperature = canHandleHeat() ? ambientTemperature : null;
 
         frequencyComponent = new TileComponentFrequency(this);

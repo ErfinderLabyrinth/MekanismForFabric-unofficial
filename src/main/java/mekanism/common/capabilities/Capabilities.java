@@ -12,6 +12,7 @@ import mekanism.api.energy.IStrictEnergyHandler;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.api.radiation.capability.IRadiationEntity;
 import mekanism.common.Mekanism;
+import mekanism.common.capabilities.heat.ITileHeatHandler;
 import mekanism.common.capabilities.merged.IMergedHandler;
 import mekanism.common.lib.radiation.capability.DefaultRadiationEntity;
 import mekanism.common.storage.item.ItemStorageHandler;
@@ -19,6 +20,7 @@ import mekanism.common.tile.interfaces.chemical.IGasTile;
 import mekanism.common.tile.interfaces.chemical.IInfusionTile;
 import mekanism.common.tile.interfaces.chemical.IPigmentTile;
 import mekanism.common.tile.interfaces.chemical.ISlurryTile;
+import mekanism.common.tile.transmitter.TileEntityThermodynamicConductor;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
@@ -130,6 +132,13 @@ public class Capabilities {
             if (blockEntity instanceof IMergedHandler mergedHandler) return mergedHandler.getSlurryHandler();
             if (blockEntity instanceof ISlurryHandler slurryHandler) return slurryHandler;
             if (blockEntity instanceof ISlurryTile slurryTile) return slurryTile.getSlurryStorage(direction);
+            return null;
+        });
+
+        HEAT_HANDLER_BLOCK.registerFallback((level, blockPos, blockState, blockEntity, direction) -> {
+            if (blockEntity instanceof IHeatHandler mergedHandler) return mergedHandler;
+            //if (blockEntity instanceof ITileHeatHandler heatTile) return heatTile.getAdjacent(direction);
+            //if (blockEntity instanceof TileEntityThermodynamicConductor thermodynamicConductor) return thermodynamicConductor.getHeatCapacitors(direction);
             return null;
         });
     }

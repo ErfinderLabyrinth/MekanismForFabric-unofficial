@@ -23,7 +23,7 @@ public class EnergyAcceptorTarget extends Target<EnergyStorage, Long, Long> {
     @Override
     protected void acceptAmount(EnergyStorage handler, SplitInfo<Long> splitInfo, Long amount) {
         try(Transaction t=Transaction.openOuter()) {
-            splitInfo.send(amount - handler.insert(amount, t));
+            splitInfo.send(handler.insert(amount, t));
             t.commit();
         }
     }
@@ -31,7 +31,7 @@ public class EnergyAcceptorTarget extends Target<EnergyStorage, Long, Long> {
     @Override
     protected Long simulate(EnergyStorage handler, Long energyToSend) {
         try(Transaction t=Transaction.openOuter()) {
-            return energyToSend - handler.insert(energyToSend, t);
+            return handler.insert(energyToSend, t);
         }
     }
 }

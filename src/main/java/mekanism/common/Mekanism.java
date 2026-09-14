@@ -61,6 +61,7 @@ import mekanism.common.storage.item.ItemStorageHandler;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.transmitter.TileEntityTransmitter;
+import mekanism.common.tile.transmitter.TileEntityUniversalCable;
 import mekanism.common.world.GenHandler;
 import mekanism.common.world.modifier.OreBiomeModifier;
 import net.fabricmc.api.ModInitializer;
@@ -207,6 +208,8 @@ public class Mekanism implements ModInitializer {
                 if (tileEntityMekanism.canHandleEnergy()) {
                     return tileEntityMekanism.getEnergyContainer(context);
                 }
+            }else if (blockEntity instanceof TileEntityUniversalCable universalCable) {
+                return universalCable.getEnergyContainer(context);
             }
             return null;
         }));

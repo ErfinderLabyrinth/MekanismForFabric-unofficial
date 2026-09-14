@@ -29,6 +29,10 @@ import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.interfaces.ITileRadioactive;
+import mekanism.common.tile.interfaces.chemical.IGasTile;
+import mekanism.common.tile.interfaces.chemical.IInfusionTile;
+import mekanism.common.tile.interfaces.chemical.IPigmentTile;
+import mekanism.common.tile.interfaces.chemical.ISlurryTile;
 import mekanism.common.util.WorldUtils;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
@@ -41,7 +45,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.BiFunction;
 
-public class TileEntityPressurizedTube extends TileEntityTransmitter implements IComputerTile, ITileRadioactive{
+public class TileEntityPressurizedTube extends TileEntityTransmitter implements IComputerTile, ITileRadioactive, IGasTile, IInfusionTile, IPigmentTile, ISlurryTile {
 
 //    private static final Collection<Capability<?>> CAPABILITIES = Set.of(
 //          Capabilities.GAS_HANDLER,
@@ -230,4 +234,26 @@ public class TileEntityPressurizedTube extends TileEntityTransmitter implements 
     }
 
     //End methods IComputerTile
+
+
+    public GasHandlerManager getGasManager() {
+        return gasHandlerManager;
+    }
+
+    public InfusionHandlerManager getInfusionManager() {
+        return infusionHandlerManager;
+    }
+
+    public PigmentHandlerManager getPigmentManager() {
+        return pigmentHandlerManager;
+    }
+
+    public SlurryHandlerManager getSlurryManager() {
+        return slurryHandlerManager;
+    }
+
+    @Override
+    public void onContentsChanged() {
+        //Ignore
+    }
 }
