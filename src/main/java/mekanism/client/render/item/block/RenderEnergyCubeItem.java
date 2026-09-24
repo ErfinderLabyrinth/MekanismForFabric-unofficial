@@ -40,8 +40,8 @@ public class RenderEnergyCubeItem extends MekanismISTER {
     }
 
     @Override
-    public void renderByItem(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight) {
+    public void render(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
+                       int light, int overlayLight) {
         EnergyCubeTier tier = ((ItemBlockEnergyCube) stack.getItem()).getTier();
 
         CubeSideState[] sideStates = new CubeSideState[EnumUtils.SIDES.length];

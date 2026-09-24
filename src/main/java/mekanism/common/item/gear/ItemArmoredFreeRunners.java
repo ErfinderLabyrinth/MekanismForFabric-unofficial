@@ -3,9 +3,6 @@ package mekanism.common.item.gear;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.client.render.RenderPropertiesProvider;
-import mekanism.client.render.armor.ISpecialGear;
-import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.attribute.AttributeCache;
@@ -21,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttributeRefresher, ISpecialGearGetter {
+public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttributeRefresher {
 
     private static final ArmoredFreeRunnerMaterial ARMORED_FREE_RUNNER_MATERIAL = new ArmoredFreeRunnerMaterial();
 
@@ -31,11 +28,6 @@ public class ItemArmoredFreeRunners extends ItemFreeRunners implements IAttribut
         super(ARMORED_FREE_RUNNER_MATERIAL, properties);
         this.attributeCache = new AttributeCache(this, () -> MekanismConfig.COMMON.gear.armoredFreeRunnerArmor, () -> MekanismConfig.COMMON.gear.armoredFreeRunnerToughness,
                 () -> MekanismConfig.COMMON.gear.armoredFreeRunnerKnockbackResistance);
-    }
-
-    @Override
-    public ISpecialGear getSpecialGear() {
-        return RenderPropertiesProvider.armoredFreeRunners();
     }
 
     @Override

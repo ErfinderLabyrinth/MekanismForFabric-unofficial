@@ -7,8 +7,6 @@ import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.GuiRadialSelector;
 import mekanism.client.render.MekanismRenderer.Model3D;
 import mekanism.client.render.RenderResizableCuboid.FaceDisplay;
-import mekanism.client.render.armor.ICustomArmor;
-import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.client.render.armor.MekaSuitArmor;
 import mekanism.client.render.hud.RadiationOverlay;
 import mekanism.client.render.lib.Quad;
@@ -25,6 +23,7 @@ import mekanism.common.content.gear.IBlastingItem;
 import mekanism.common.item.ItemConfigurator;
 import mekanism.common.item.ItemConfigurator.ConfiguratorMode;
 import mekanism.common.item.gear.ItemFlamethrower;
+import mekanism.common.item.gear.ItemMekaSuitArmor;
 import mekanism.common.lib.effect.BoltEffect;
 import mekanism.common.lib.math.Pos3D;
 import mekanism.common.lib.transmitter.TransmissionType;
@@ -44,7 +43,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.model.HumanoidModel.ArmPose;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -58,7 +61,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -70,8 +72,14 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class RenderTickHandler {
@@ -199,10 +207,9 @@ public class RenderTickHandler {
         return false;
     }
 
-    public boolean renderArm(AbstractClientPlayer player, HumanoidArm arm, PoseStack poseStack, MultiBufferSource multiBufferSource, int packetLight) {
+    public boolean renderArm(AbstractClientPlayer player, HumanoidArm arm, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
         ItemStack chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
-        if (chestStack.getItem() instanceof ISpecialGearGetter armorItem) {
-            ICustomArmor armor = armorItem.getSpecialGear().getGearModel(ArmorItem.Type.CHESTPLATE);
+        if (chestStack.getItem() instanceof ItemMekaSuitArmor) {
             PlayerRenderer renderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
             PlayerModel<AbstractClientPlayer> model = renderer.getModel();
             model.setAllVisible(true);
@@ -217,9 +224,7 @@ public class RenderTickHandler {
             model.crouching = false;
             model.swimAmount = 0.0F;
             model.setupAnim(player, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-            if (armor instanceof MekaSuitArmor mekaSuitArmor) {
-                mekaSuitArmor.renderArm(model, poseStack, multiBufferSource, packetLight, OverlayTexture.NO_OVERLAY, player, chestStack, rightHand);
-            }
+            MekaSuitArmor.BODYARMOR.renderArm(model, poseStack, multiBufferSource, packedLight, OverlayTexture.NO_OVERLAY, player, chestStack, rightHand);
             return true;
         }
         return false;

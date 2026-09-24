@@ -15,7 +15,6 @@ import mekanism.api.radial.mode.IRadialMode;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.ILangEntry;
-import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
@@ -51,7 +50,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +66,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
-public class ItemAtomicDisassembler extends DiggerItem implements CreativeTabDeferredRegister.ICustomCreativeTabContents, IItemHUDProvider, IRadialEnumModeItem<DisassemblerMode>, IAttributeRefresher, RenderPropertiesProvider.MekRenderPropertiesGetter, ItemStorageHandler {
+public class ItemAtomicDisassembler extends DiggerItem implements CreativeTabDeferredRegister.ICustomCreativeTabContents, IItemHUDProvider, IRadialEnumModeItem<DisassemblerMode>, IAttributeRefresher, ItemStorageHandler {
 
     //All basic dig actions except shears
 //    public static final Set<ToolAction> ALWAYS_SUPPORTED_ACTIONS = Set.of(ToolActions.AXE_DIG, ToolActions.HOE_DIG, ToolActions.SHOVEL_DIG, ToolActions.PICKAXE_DIG,
@@ -84,11 +88,6 @@ public class ItemAtomicDisassembler extends DiggerItem implements CreativeTabDef
         super(1, -2.8F, Tiers.NETHERITE, null, properties.rarity(Rarity.RARE));
         //super(() -> MekanismConfig.gear.disassemblerChargeRate, () -> MekanismConfig.gear.disassemblerMaxEnergy, properties.rarity(Rarity.RARE));
         this.attributeCache = new AttributeCache(this, () -> MekanismConfig.COMMON.gear.disassemblerMaxDamage, () -> MekanismConfig.COMMON.gear.disassemblerAttackSpeed);
-    }
-
-    @Override
-    public RenderPropertiesProvider.MekRenderProperties getRenderProperties() {
-        return RenderPropertiesProvider.disassembler();
     }
 
     @Override

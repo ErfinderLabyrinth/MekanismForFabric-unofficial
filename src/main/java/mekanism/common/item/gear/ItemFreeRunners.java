@@ -7,9 +7,6 @@ import mekanism.api.math.MathUtils;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.ILangEntry;
-import mekanism.client.render.RenderPropertiesProvider;
-import mekanism.client.render.armor.ISpecialGear;
-import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
@@ -28,7 +25,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +38,7 @@ import team.reborn.energy.api.EnergyStorage;
 
 import java.util.List;
 
-public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvider, IModeItem, ICustomCreativeTabContents, ISpecialGearGetter, ItemStorageHandler, WalkableOnPowderSnow {
+public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvider, IModeItem, ICustomCreativeTabContents, ItemStorageHandler, WalkableOnPowderSnow {
 
     private static final FreeRunnerMaterial FREE_RUNNER_MATERIAL = new FreeRunnerMaterial();
 
@@ -46,11 +48,6 @@ public class ItemFreeRunners extends ItemSpecialArmor implements IItemHUDProvide
 
     public ItemFreeRunners(ArmorMaterial material, Properties properties) {
         super(material, ArmorItem.Type.BOOTS, properties.rarity(Rarity.RARE));
-    }
-
-    @Override
-    public ISpecialGear getSpecialGear() {
-        return RenderPropertiesProvider.freeRunners();
     }
 
     @Override

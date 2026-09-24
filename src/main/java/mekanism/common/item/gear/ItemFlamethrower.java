@@ -10,7 +10,6 @@ import mekanism.api.math.MathUtils;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.ILangEntry;
-import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.common.MekanismLang;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.item.interfaces.IGasItem;
@@ -26,7 +25,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,21 +37,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
-public class ItemFlamethrower extends Item implements IItemHUDProvider, IModeItem, IGasItem, ICustomCreativeTabContents, RenderPropertiesProvider.MekRenderPropertiesGetter {
+public class ItemFlamethrower extends Item implements IItemHUDProvider, IModeItem, IGasItem, ICustomCreativeTabContents {
 
     public ItemFlamethrower(Properties properties) {
         super(properties.stacksTo(1).rarity(Rarity.RARE));
-    }
-
-//    @Override
-//    public void initializeClient(@NotNull Consumer<IClientItemExtensions> consumer) {
-//        consumer.accept(RenderPropertiesProvider.flamethrower());
-//    }
-
-
-    @Override
-    public RenderPropertiesProvider.MekRenderProperties getRenderProperties() {
-        return RenderPropertiesProvider.flamethrower();
     }
 
     @Override

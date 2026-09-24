@@ -6,9 +6,6 @@ import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.providers.IGasProvider;
 import mekanism.api.text.EnumColor;
-import mekanism.client.render.RenderPropertiesProvider;
-import mekanism.client.render.armor.ISpecialGear;
-import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.Capabilities;
@@ -36,17 +33,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.LongSupplier;
 
-public class ItemScubaTank extends ItemGasArmor implements IItemHUDProvider, IModeItem, ISpecialGearGetter {
+public class ItemScubaTank extends ItemGasArmor implements IItemHUDProvider, IModeItem {
 
     private static final ScubaTankMaterial SCUBA_TANK_MATERIAL = new ScubaTankMaterial();
 
     public ItemScubaTank(Properties properties) {
         super(SCUBA_TANK_MATERIAL, ArmorItem.Type.CHESTPLATE, properties);
-    }
-
-    @Override
-    public ISpecialGear getSpecialGear() {
-        return RenderPropertiesProvider.scubaTank();
     }
 
     @Override

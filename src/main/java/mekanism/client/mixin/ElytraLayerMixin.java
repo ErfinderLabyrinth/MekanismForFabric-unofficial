@@ -2,7 +2,8 @@ package mekanism.client.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import mekanism.common.mixinhelper.ElytraLayerAddon;
+import com.llamalad7.mixinextras.sugar.Local;
+import mekanism.common.mixinhelper.ItemWithElytraLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -21,16 +22,13 @@ public class ElytraLayerMixin {
 
     @WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z"))
     public boolean addOtherElytren(ItemStack instance, Item item, Operation<Boolean> original) {
-        if (this instanceof ElytraLayerAddon addon) {
-            return addon.shouldRender(instance);
-        }
-        return original.call(instance, item);
+        return original.call(instance, item) || instance.getItem() instanceof ItemWithElytraLayer;
     }
 
     @ModifyVariable(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"))
-    private ResourceLocation modifyTexture(ResourceLocation resourceLocation) {
-        if(resourceLocation == WINGS_LOCATION && this instanceof ElytraLayerAddon addon) {
-            return addon.getElytraTexture();
+    private ResourceLocation modifyTexture(ResourceLocation resourceLocation, @Local ItemStack stack) {
+        if(resourceLocation == WINGS_LOCATION && stack.getItem() instanceof ItemWithElytraLayer item) {
+            return item.getElytraLayerTexture();
         }
         return resourceLocation;
     }

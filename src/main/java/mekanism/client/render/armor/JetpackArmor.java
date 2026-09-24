@@ -4,18 +4,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.model.ModelArmoredJetpack;
 import mekanism.client.model.ModelJetpack;
 import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class JetpackArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
+public class JetpackArmor implements ArmorRenderer, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
     public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "jetpack_armor");
     public static final ResourceLocation ARMORED_ID = new ResourceLocation(Mekanism.MODID, "armored_jetpack_armor");
     public static final JetpackArmor JETPACK = new JetpackArmor(false);
@@ -38,8 +41,7 @@ public class JetpackArmor implements ICustomArmor, ResourceManagerReloadListener
     }
 
     @Override
-    public void render(HumanoidModel<? extends LivingEntity> baseModel, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight, float partialTicks, boolean hasEffect, LivingEntity entity, ItemStack stack) {
+    public void render(PoseStack matrix, MultiBufferSource renderer, ItemStack stack, LivingEntity entity, EquipmentSlot slot, int light, HumanoidModel<LivingEntity> baseModel) {
         if (!baseModel.body.visible) {
             //If the body model shouldn't show don't bother displaying it
             return;
@@ -49,10 +51,10 @@ public class JetpackArmor implements ICustomArmor, ResourceManagerReloadListener
             float f1 = 1.0F / baseModel.babyBodyScale;
             matrix.scale(f1, f1, f1);
             matrix.translate(0.0D, baseModel.bodyYOffset / 16.0F, 0.0D);
-            renderJetpack(baseModel, matrix, renderer, light, overlayLight, hasEffect);
+            renderJetpack(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, stack.hasFoil());
             matrix.popPose();
         } else {
-            renderJetpack(baseModel, matrix, renderer, light, overlayLight, hasEffect);
+            renderJetpack(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, stack.hasFoil());
         }
     }
 

@@ -17,10 +17,6 @@ import mekanism.api.radiation.capability.IRadiationShielding;
 import mekanism.api.text.EnumColor;
 import mekanism.client.key.MekKeyHandler;
 import mekanism.client.key.MekanismKeyHandler;
-import mekanism.client.render.RenderPropertiesProvider;
-import mekanism.client.render.armor.ICustomArmor;
-import mekanism.client.render.armor.ISpecialGear;
-import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.Capabilities;
@@ -83,7 +79,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
@@ -92,11 +92,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
-public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContainerItem, IModeItem, IJetpackItem, IAttributeRefresher, ICustomCreativeTabContents, ISpecialGear, ISpecialGearGetter, WalkableOnPowderSnow, ItemStorageHandler, FabricElytraItem, IRadiationShielding, ILaserDissipation, CustomEnchantmentsItem, PiglinNeutralizingArmor {
+public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContainerItem, IModeItem, IJetpackItem, IAttributeRefresher, ICustomCreativeTabContents, WalkableOnPowderSnow, ItemStorageHandler, FabricElytraItem, IRadiationShielding, ILaserDissipation, CustomEnchantmentsItem, PiglinNeutralizingArmor {
 
     private static final MekaSuitMaterial MEKASUIT_MATERIAL = new MekaSuitMaterial();
 
@@ -628,16 +632,6 @@ public class ItemMekaSuitArmor extends ItemSpecialArmor implements IModuleContai
             }
         }
         return 0;
-    }
-
-    @Override
-    public @NotNull ICustomArmor getGearModel(Type type) {
-        return RenderPropertiesProvider.mekaSuit().getGearModel(type);
-    }
-
-    @Override
-    public ISpecialGear getSpecialGear() {
-        return RenderPropertiesProvider.mekaSuit();
     }
 
     @Override

@@ -6,36 +6,133 @@ import mekanism.api.gear.IModuleHelper;
 import mekanism.api.providers.IItemProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.api.tier.BaseTier;
-import mekanism.client.gui.*;
+import mekanism.client.gui.GuiBoilerStats;
+import mekanism.client.gui.GuiChemicalTank;
+import mekanism.client.gui.GuiDimensionalStabilizer;
+import mekanism.client.gui.GuiDynamicTank;
+import mekanism.client.gui.GuiEnergyCube;
+import mekanism.client.gui.GuiFluidTank;
+import mekanism.client.gui.GuiInductionMatrix;
+import mekanism.client.gui.GuiLaserAmplifier;
+import mekanism.client.gui.GuiLaserTractorBeam;
+import mekanism.client.gui.GuiLogisticalSorter;
+import mekanism.client.gui.GuiMatrixStats;
+import mekanism.client.gui.GuiModificationStation;
+import mekanism.client.gui.GuiModuleTweaker;
+import mekanism.client.gui.GuiPersonalStorageTile;
+import mekanism.client.gui.GuiQuantumEntangloporter;
+import mekanism.client.gui.GuiSPS;
+import mekanism.client.gui.GuiSecurityDesk;
+import mekanism.client.gui.GuiTeleporter;
+import mekanism.client.gui.GuiThermalEvaporationController;
+import mekanism.client.gui.GuiThermoelectricBoiler;
 import mekanism.client.gui.item.GuiDictionary;
 import mekanism.client.gui.item.GuiPersonalStorageItem;
 import mekanism.client.gui.item.GuiPortableTeleporter;
 import mekanism.client.gui.item.GuiSeismicReader;
-import mekanism.client.gui.machine.*;
-import mekanism.client.gui.qio.*;
-import mekanism.client.gui.robit.*;
+import mekanism.client.gui.machine.GuiAntiprotonicNucleosynthesizer;
+import mekanism.client.gui.machine.GuiChemicalCrystallizer;
+import mekanism.client.gui.machine.GuiChemicalDissolutionChamber;
+import mekanism.client.gui.machine.GuiChemicalInfuser;
+import mekanism.client.gui.machine.GuiChemicalOxidizer;
+import mekanism.client.gui.machine.GuiChemicalWasher;
+import mekanism.client.gui.machine.GuiCombiner;
+import mekanism.client.gui.machine.GuiDigitalMiner;
+import mekanism.client.gui.machine.GuiDigitalMinerConfig;
+import mekanism.client.gui.machine.GuiElectricPump;
+import mekanism.client.gui.machine.GuiElectrolyticSeparator;
+import mekanism.client.gui.machine.GuiFactory;
+import mekanism.client.gui.machine.GuiFluidicPlenisher;
+import mekanism.client.gui.machine.GuiFormulaicAssemblicator;
+import mekanism.client.gui.machine.GuiFuelwoodHeater;
+import mekanism.client.gui.machine.GuiIsotopicCentrifuge;
+import mekanism.client.gui.machine.GuiMetallurgicInfuser;
+import mekanism.client.gui.machine.GuiNutritionalLiquifier;
+import mekanism.client.gui.machine.GuiOredictionificator;
+import mekanism.client.gui.machine.GuiPRC;
+import mekanism.client.gui.machine.GuiPaintingMachine;
+import mekanism.client.gui.machine.GuiPigmentExtractor;
+import mekanism.client.gui.machine.GuiPigmentMixer;
+import mekanism.client.gui.machine.GuiPrecisionSawmill;
+import mekanism.client.gui.machine.GuiResistiveHeater;
+import mekanism.client.gui.machine.GuiRotaryCondensentrator;
+import mekanism.client.gui.machine.GuiSeismicVibrator;
+import mekanism.client.gui.machine.GuiSolarNeutronActivator;
+import mekanism.client.gui.qio.GuiPortableQIODashboard;
+import mekanism.client.gui.qio.GuiQIODashboard;
+import mekanism.client.gui.qio.GuiQIODriveArray;
+import mekanism.client.gui.qio.GuiQIOExporter;
+import mekanism.client.gui.qio.GuiQIOImporter;
+import mekanism.client.gui.qio.GuiQIOItemFrequencySelect;
+import mekanism.client.gui.qio.GuiQIORedstoneAdapter;
+import mekanism.client.gui.qio.GuiQIOTileFrequencySelect;
+import mekanism.client.gui.robit.GuiRobitCrafting;
+import mekanism.client.gui.robit.GuiRobitInventory;
+import mekanism.client.gui.robit.GuiRobitMain;
+import mekanism.client.gui.robit.GuiRobitRepair;
+import mekanism.client.gui.robit.GuiRobitSmelting;
 import mekanism.client.key.MekanismKeyHandler;
-import mekanism.client.model.*;
+import mekanism.client.model.MekanismModelCache;
+import mekanism.client.model.MekanismModelLoadingPlugin;
+import mekanism.client.model.ModelArmoredFreeRunners;
+import mekanism.client.model.ModelArmoredJetpack;
+import mekanism.client.model.ModelAtomicDisassembler;
+import mekanism.client.model.ModelBakingCompletedEvent;
+import mekanism.client.model.ModelEnergyCore;
+import mekanism.client.model.ModelFlamethrower;
+import mekanism.client.model.ModelFreeRunners;
+import mekanism.client.model.ModelIndustrialAlarm;
+import mekanism.client.model.ModelJetpack;
+import mekanism.client.model.ModelScubaMask;
+import mekanism.client.model.ModelScubaTank;
+import mekanism.client.model.ModelTransporterBox;
+import mekanism.client.model.TextureAtlasStitchEvent;
 import mekanism.client.model.baked.DigitalMinerBakedModel;
 import mekanism.client.model.baked.DriveArrayBakedModel;
 import mekanism.client.model.baked.ExtensionBakedModel.LightedBakedModel;
-import mekanism.client.particle.*;
+import mekanism.client.particle.JetpackFlameParticle;
+import mekanism.client.particle.JetpackSmokeParticle;
+import mekanism.client.particle.LaserParticle;
+import mekanism.client.particle.RadiationParticle;
+import mekanism.client.particle.ScubaBubbleParticle;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.MekanismShaders;
 import mekanism.client.render.RenderTickHandler;
 import mekanism.client.render.armor.FreeRunnerArmor;
 import mekanism.client.render.armor.JetpackArmor;
+import mekanism.client.render.armor.MekaSuitArmor;
 import mekanism.client.render.armor.ScubaMaskArmor;
 import mekanism.client.render.armor.ScubaTankArmor;
 import mekanism.client.render.entity.RenderFlame;
 import mekanism.client.render.entity.RenderRobit;
 import mekanism.client.render.item.block.RenderEnergyCubeItem;
 import mekanism.client.render.item.block.RenderFluidTankItem;
-import mekanism.client.render.item.gear.*;
-import mekanism.client.render.layer.MekanismArmorLayer;
-import mekanism.client.render.layer.MekanismElytraLayer;
-import mekanism.client.render.tileentity.*;
-import mekanism.client.render.transmitter.*;
+import mekanism.client.render.item.gear.RenderAtomicDisassembler;
+import mekanism.client.render.item.gear.RenderFlameThrower;
+import mekanism.client.render.item.gear.RenderFreeRunners;
+import mekanism.client.render.item.gear.RenderJetpack;
+import mekanism.client.render.item.gear.RenderScubaMask;
+import mekanism.client.render.item.gear.RenderScubaTank;
+import mekanism.client.render.tileentity.RenderBin;
+import mekanism.client.render.tileentity.RenderDigitalMiner;
+import mekanism.client.render.tileentity.RenderDimensionalStabilizer;
+import mekanism.client.render.tileentity.RenderDynamicTank;
+import mekanism.client.render.tileentity.RenderEnergyCube;
+import mekanism.client.render.tileentity.RenderFluidTank;
+import mekanism.client.render.tileentity.RenderIndustrialAlarm;
+import mekanism.client.render.tileentity.RenderNutritionalLiquifier;
+import mekanism.client.render.tileentity.RenderPersonalChest;
+import mekanism.client.render.tileentity.RenderPigmentMixer;
+import mekanism.client.render.tileentity.RenderSPS;
+import mekanism.client.render.tileentity.RenderSeismicVibrator;
+import mekanism.client.render.tileentity.RenderTeleporter;
+import mekanism.client.render.tileentity.RenderThermalEvaporationPlant;
+import mekanism.client.render.tileentity.RenderThermoelectricBoiler;
+import mekanism.client.render.transmitter.RenderLogisticalTransporter;
+import mekanism.client.render.transmitter.RenderMechanicalPipe;
+import mekanism.client.render.transmitter.RenderPressurizedTube;
+import mekanism.client.render.transmitter.RenderThermodynamicConductor;
+import mekanism.client.render.transmitter.RenderUniversalCable;
 import mekanism.common.Mekanism;
 import mekanism.common.base.HolidayManager;
 import mekanism.common.block.attribute.Attribute;
@@ -53,13 +150,19 @@ import mekanism.common.registration.impl.BlockRegistryObject;
 import mekanism.common.registration.impl.FluidDeferredRegister;
 import mekanism.common.registration.impl.FluidRegistryObject;
 import mekanism.common.registration.impl.ItemRegistryObject;
-import mekanism.common.registries.*;
+import mekanism.common.registries.MekanismBlocks;
+import mekanism.common.registries.MekanismContainerTypes;
+import mekanism.common.registries.MekanismEntityTypes;
+import mekanism.common.registries.MekanismFluids;
+import mekanism.common.registries.MekanismItems;
+import mekanism.common.registries.MekanismModules;
+import mekanism.common.registries.MekanismParticleTypes;
+import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.resource.IResource;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.resource.ResourceType;
 import mekanism.common.tile.qio.TileEntityQIOComponent;
 import mekanism.common.tile.transmitter.TileEntityLogisticalTransporter;
-import mekanism.common.util.RegistryUtils;
 import mekanism.common.util.WorldUtils;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -67,29 +170,22 @@ import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.*;
+import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
+import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.layers.ElytraLayer;
-import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -191,9 +287,9 @@ public class ClientRegistration {
         registerFluidRenderProperties();
         registerRenderers();
         registerItemRenderers();
+        registerArmorRenderers();
         registerRenderTypes();
 
-        LivingEntityFeatureRendererRegistrationCallback.EVENT.register(ClientRegistration::addLayers);
         CoreShaderRegistrationCallback.EVENT.register(MekanismShaders::registerShaders);
     }
 
@@ -336,6 +432,19 @@ public class ClientRegistration {
         ClientRegistrationUtil.registerISTER(RenderJetpack.RENDERER, MekanismItems.JETPACK);
         ClientRegistrationUtil.registerISTER(RenderScubaMask.RENDERER, MekanismItems.SCUBA_MASK);
         ClientRegistrationUtil.registerISTER(RenderScubaTank.RENDERER, MekanismItems.SCUBA_TANK);
+    }
+
+    public static void registerArmorRenderers() {
+        ArmorRenderer.register(JetpackArmor.ARMORED_JETPACK, MekanismItems.ARMORED_JETPACK);
+        ArmorRenderer.register(JetpackArmor.JETPACK, MekanismItems.JETPACK);
+        ArmorRenderer.register(FreeRunnerArmor.ARMORED_FREE_RUNNERS, MekanismItems.ARMORED_FREE_RUNNERS);
+        ArmorRenderer.register(FreeRunnerArmor.FREE_RUNNERS, MekanismItems.FREE_RUNNERS);
+        ArmorRenderer.register(ScubaMaskArmor.SCUBA_MASK, MekanismItems.SCUBA_MASK);
+        ArmorRenderer.register(ScubaTankArmor.SCUBA_TANK, MekanismItems.SCUBA_TANK);
+        ArmorRenderer.register(MekaSuitArmor.HELMET, MekanismItems.MEKASUIT_HELMET);
+        ArmorRenderer.register(MekaSuitArmor.BODYARMOR, MekanismItems.MEKASUIT_BODYARMOR);
+        ArmorRenderer.register(MekaSuitArmor.PANTS, MekanismItems.MEKASUIT_PANTS);
+        ArmorRenderer.register(MekaSuitArmor.BOOTS, MekanismItems.MEKASUIT_BOOTS);
     }
 
     public static void registerClientReloadListeners() {
@@ -555,54 +664,6 @@ public class ClientRegistration {
 //              MekanismBlocks.ADVANCED_THERMODYNAMIC_CONDUCTOR, MekanismBlocks.ELITE_THERMODYNAMIC_CONDUCTOR, MekanismBlocks.ULTIMATE_THERMODYNAMIC_CONDUCTOR,
 //              MekanismBlocks.BASIC_UNIVERSAL_CABLE, MekanismBlocks.ADVANCED_UNIVERSAL_CABLE, MekanismBlocks.ELITE_UNIVERSAL_CABLE, MekanismBlocks.ULTIMATE_UNIVERSAL_CABLE);
 //    }
-
-    public static void addLayers(EntityType<?> type, EntityRenderer renderer, LivingEntityFeatureRendererRegistrationCallback.RegistrationHelper registrationHelper, EntityRendererProvider.Context context) {
-        //Add our own custom armor layer to the various player renderers
-        if (!(renderer instanceof LivingEntityRenderer<?,?> livingRenderer)) {
-            return;
-        }
-
-        addCustomLayers(
-                type,
-                (LivingEntityRenderer<LivingEntity,HumanoidModel<LivingEntity>>)livingRenderer,
-                context.getModelManager()
-        );
-    }
-
-    private static <T extends LivingEntity, M extends HumanoidModel<T>> void addCustomLayers(EntityType<?> type, @Nullable LivingEntityRenderer<T, M> renderer,
-          ModelManager modelManager) {
-        if (renderer == null) {
-            return;
-        }
-        HumanoidArmorLayer<T, M, ?> bipedArmorLayer = null;
-        boolean hasElytra = false;
-        for (RenderLayer<T, M> layerRenderer : renderer.layers) {
-            //Validate against the layer render being null, as it seems like some mods do stupid things and add in null layers
-            if (layerRenderer != null) {
-                //Only allow an exact class match, so we don't add to modded entities that only have a modded extended armor or elytra layer
-                Class<?> layerClass = layerRenderer.getClass();
-                if (layerClass == HumanoidArmorLayer.class) {
-                    bipedArmorLayer = (HumanoidArmorLayer<T, M, ?>) layerRenderer;
-                    if (hasElytra) {
-                        break;
-                    }
-                } else if (layerClass == ElytraLayer.class) {
-                    hasElytra = true;
-                    if (bipedArmorLayer != null) {
-                        break;
-                    }
-                }
-            }
-        }
-        if (bipedArmorLayer != null) {
-            renderer.addLayer(new MekanismArmorLayer<>(renderer, bipedArmorLayer.innerModel, bipedArmorLayer.outerModel, modelManager));
-            Mekanism.logger.debug("Added Mekanism Armor Layer to entity of type: {}", RegistryUtils.getName(type));
-        }
-        if (hasElytra) {
-            renderer.addLayer(new MekanismElytraLayer<>(renderer, Minecraft.getInstance().getEntityModels()));
-            Mekanism.logger.debug("Added Mekanism Elytra Layer to entity of type: {}", RegistryUtils.getName(type));
-        }
-    }
 
     public static void addCustomModel(IItemProvider provider, CustomModelRegistryObject object) {
         customModels.put(provider.getRegistryName(), object);

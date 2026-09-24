@@ -16,6 +16,7 @@ import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.gear.ModuleData;
 import mekanism.api.providers.IModuleDataProvider;
+import mekanism.client.mixinhelper.HumanoidArmorLayerPartialTicks;
 import mekanism.client.model.BaseModelCache.MekanismModelData;
 import mekanism.client.model.BaseModelCache.OBJModelData;
 import mekanism.client.model.MekanismModelCache;
@@ -35,6 +36,7 @@ import mekanism.common.lib.effect.BoltEffect.SpawnFunction;
 import mekanism.common.registries.MekanismModules;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -42,6 +44,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -53,10 +56,19 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 
-public class MekaSuitArmor implements ICustomArmor {
+public class MekaSuitArmor implements ArmorRenderer {
 
     private static final String LED_TAG = "led";
     private static final String INACTIVE_TAG = "inactive_";
@@ -127,17 +139,16 @@ public class MekaSuitArmor implements ICustomArmor {
     }
 
     @Override
-    public void render(HumanoidModel<? extends LivingEntity> baseModel, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight, float partialTicks, boolean hasEffect, LivingEntity entity, ItemStack stack) {
+    public void render(PoseStack matrix, MultiBufferSource renderer, ItemStack stack, LivingEntity entity, EquipmentSlot slot, int light, HumanoidModel<LivingEntity> baseModel) {
         if (baseModel.young) {
             matrix.pushPose();
             float f1 = 1.0F / baseModel.babyBodyScale;
             matrix.scale(f1, f1, f1);
             matrix.translate(0.0D, baseModel.bodyYOffset / 16.0F, 0.0D);
-            renderMekaSuit(baseModel, matrix, renderer, light, overlayLight, getColor(stack), partialTicks, hasEffect, entity);
+            renderMekaSuit(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, getColor(stack), HumanoidArmorLayerPartialTicks.THREAD_LOCAL.get(), stack.hasFoil(), entity);
             matrix.popPose();
         } else {
-            renderMekaSuit(baseModel, matrix, renderer, light, overlayLight, getColor(stack), partialTicks, hasEffect, entity);
+            renderMekaSuit(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, getColor(stack), HumanoidArmorLayerPartialTicks.THREAD_LOCAL.get(), stack.hasFoil(), entity);
         }
     }
 

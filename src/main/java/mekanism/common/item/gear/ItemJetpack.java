@@ -6,9 +6,6 @@ import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.providers.IGasProvider;
 import mekanism.api.text.EnumColor;
-import mekanism.client.render.RenderPropertiesProvider;
-import mekanism.client.render.armor.ISpecialGear;
-import mekanism.client.render.armor.ISpecialGearGetter;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.capabilities.Capabilities;
@@ -37,7 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.LongSupplier;
 
-public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IModeItem, IJetpackItem, ISpecialGearGetter {
+public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IModeItem, IJetpackItem {
 
     private static final JetpackMaterial JETPACK_MATERIAL = new JetpackMaterial();
 
@@ -47,11 +44,6 @@ public class ItemJetpack extends ItemGasArmor implements IItemHUDProvider, IMode
 
     public ItemJetpack(ArmorMaterial material, Properties properties) {
         super(material, ArmorItem.Type.CHESTPLATE, properties);
-    }
-
-    @Override
-    public ISpecialGear getSpecialGear() {
-        return RenderPropertiesProvider.jetpack();
     }
 
     @Override

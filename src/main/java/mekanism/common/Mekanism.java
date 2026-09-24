@@ -17,7 +17,11 @@ import mekanism.common.capabilities.Capabilities;
 import mekanism.common.command.ChunkCommand;
 import mekanism.common.command.CommandMek;
 import mekanism.common.command.builders.BuildCommand;
-import mekanism.common.command.builders.Builders.*;
+import mekanism.common.command.builders.Builders.BoilerBuilder;
+import mekanism.common.command.builders.Builders.EvaporationBuilder;
+import mekanism.common.command.builders.Builders.MatrixBuilder;
+import mekanism.common.command.builders.Builders.SPSBuilder;
+import mekanism.common.command.builders.Builders.TankBuilder;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.boiler.BoilerMultiblockData;
 import mekanism.common.content.boiler.BoilerValidator;
@@ -52,11 +56,31 @@ import mekanism.common.lib.multiblock.MultiblockCache;
 import mekanism.common.lib.multiblock.MultiblockManager;
 import mekanism.common.lib.radiation.RadiationManager;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
-import mekanism.common.mixinhelper.ElytraFlyable;
 import mekanism.common.network.PacketHandler;
 import mekanism.common.network.to_client.PacketTransmitterUpdate;
 import mekanism.common.recipe.MekanismRecipeType;
-import mekanism.common.registries.*;
+import mekanism.common.registries.MekanismBlocks;
+import mekanism.common.registries.MekanismContainerTypes;
+import mekanism.common.registries.MekanismCreativeTabs;
+import mekanism.common.registries.MekanismDataSerializers;
+import mekanism.common.registries.MekanismEntityTypes;
+import mekanism.common.registries.MekanismFeatures;
+import mekanism.common.registries.MekanismFluids;
+import mekanism.common.registries.MekanismGameEvents;
+import mekanism.common.registries.MekanismGases;
+import mekanism.common.registries.MekanismHeightProviderTypes;
+import mekanism.common.registries.MekanismInfuseTypes;
+import mekanism.common.registries.MekanismIntProviderTypes;
+import mekanism.common.registries.MekanismItems;
+import mekanism.common.registries.MekanismModules;
+import mekanism.common.registries.MekanismParticleTypes;
+import mekanism.common.registries.MekanismPigments;
+import mekanism.common.registries.MekanismPlacementModifiers;
+import mekanism.common.registries.MekanismRecipeSerializers;
+import mekanism.common.registries.MekanismRobitSkins;
+import mekanism.common.registries.MekanismSlurries;
+import mekanism.common.registries.MekanismSounds;
+import mekanism.common.registries.MekanismTileEntityTypes;
 import mekanism.common.storage.item.ItemStorageHandler;
 import mekanism.common.tags.MekanismTags;
 import mekanism.common.tile.base.TileEntityMekanism;
@@ -66,7 +90,6 @@ import mekanism.common.world.GenHandler;
 import mekanism.common.world.modifier.OreBiomeModifier;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -87,7 +110,6 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -97,7 +119,11 @@ import org.slf4j.Logger;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class Mekanism implements ModInitializer {
 
@@ -234,16 +260,6 @@ public class Mekanism implements ModInitializer {
                     tileEntityTransmitter.onChunkUnloaded();
                 }
             }
-        });
-
-        EntityElytraEvents.CUSTOM.register((entity, tickElytra) -> {
-            ItemStack chestStack = entity.getItemBySlot(EquipmentSlot.CHEST);
-            if (chestStack.getItem() instanceof ElytraFlyable elytraFlyable) {
-                if (elytraFlyable.canElytraFly(chestStack, entity)) {
-                    return elytraFlyable.elytraFlightTick(chestStack, entity, entity.getFallFlyingTicks());
-                }
-            }
-            return false;
         });
 
         OreBiomeModifier.register();

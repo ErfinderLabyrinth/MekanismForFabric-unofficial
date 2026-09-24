@@ -4,18 +4,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import mekanism.client.model.ModelArmoredFreeRunners;
 import mekanism.client.model.ModelFreeRunners;
 import mekanism.common.Mekanism;
+import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
+public class FreeRunnerArmor implements ArmorRenderer, ResourceManagerReloadListener, IdentifiableResourceReloadListener {
     public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "free_runner_armor");
     public static final ResourceLocation ARMORED_ID = new ResourceLocation(Mekanism.MODID, "armored_free_runner_armor");
     public static final FreeRunnerArmor FREE_RUNNERS = new FreeRunnerArmor(false);
@@ -38,19 +41,18 @@ public class FreeRunnerArmor implements ICustomArmor, ResourceManagerReloadListe
     }
 
     @Override
-    public void render(HumanoidModel<? extends LivingEntity> baseModel, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight, float partialTicks, boolean hasEffect, LivingEntity entity, ItemStack stack) {
+    public void render(PoseStack matrix, MultiBufferSource renderer, ItemStack stack, LivingEntity entity, EquipmentSlot slot, int light, HumanoidModel<LivingEntity> baseModel) {
         if (baseModel.young) {
             matrix.pushPose();
             float f1 = 1.0F / baseModel.babyBodyScale;
             matrix.scale(f1, f1, f1);
             matrix.translate(0.0D, baseModel.bodyYOffset / 16.0F, 0.0D);
-            renderLeg(baseModel, matrix, renderer, light, overlayLight, hasEffect, true);
-            renderLeg(baseModel, matrix, renderer, light, overlayLight, hasEffect, false);
+            renderLeg(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, stack.hasFoil(), true);
+            renderLeg(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, stack.hasFoil(), false);
             matrix.popPose();
         } else {
-            renderLeg(baseModel, matrix, renderer, light, overlayLight, hasEffect, true);
-            renderLeg(baseModel, matrix, renderer, light, overlayLight, hasEffect, false);
+            renderLeg(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, stack.hasFoil(), true);
+            renderLeg(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, stack.hasFoil(), false);
         }
     }
 

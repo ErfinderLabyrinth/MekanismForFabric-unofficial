@@ -1,21 +1,26 @@
 package mekanism.common.mixin;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import mekanism.common.mixinhelper.PortalFrameBlock;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.portal.PortalShape;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PortalShape.class)
 public class PortalShapeMixin {
-    @Inject(method = "method_30487", at = @At("HEAD"), cancellable = true)
-    private static void checkForCustomPortalFrames(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
-        if (blockState.getBlock() instanceof PortalFrameBlock portalFrameBlock && portalFrameBlock.isPortalFrame(blockState, blockGetter, blockPos)) {
-            cir.setReturnValue(true);
-        }
+    @Definition(id = "FRAME", field = "Lnet/minecraft/world/level/portal/PortalShape;FRAME:Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate;")
+    @Expression("FRAME = @(?)")
+    @ModifyExpressionValue(method = "<clinit>", at = @At("MIXINEXTRAS:EXPRESSION"))
+    private static BlockBehaviour.StatePredicate checkForCustomPortalFrames(BlockBehaviour.StatePredicate original) {
+        return (blockState, blockGetter, blockPos) -> {
+            if (blockState.getBlock() instanceof PortalFrameBlock portalFrameBlock && portalFrameBlock.isPortalFrame(blockState, blockGetter, blockPos)) {
+                return true;
+            } else {
+                return original.test(blockState, blockGetter, blockPos);
+            }
+        };
     }
 }

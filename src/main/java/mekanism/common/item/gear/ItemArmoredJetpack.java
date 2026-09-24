@@ -3,8 +3,6 @@ package mekanism.common.item.gear;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.client.render.RenderPropertiesProvider;
-import mekanism.client.render.armor.ISpecialGear;
 import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.attribute.AttributeCache;
@@ -30,11 +28,6 @@ public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresh
         super(ARMORED_JETPACK_MATERIAL, properties);
         this.attributeCache = new AttributeCache(this, () -> MekanismConfig.COMMON.gear.armoredJetpackArmor, () -> MekanismConfig.COMMON.gear.armoredJetpackToughness,
                 () -> MekanismConfig.COMMON.gear.armoredJetpackKnockbackResistance);
-    }
-
-    @Override
-    public ISpecialGear getSpecialGear() {
-        return RenderPropertiesProvider.armoredJetpack();
     }
 
     @Override

@@ -30,8 +30,8 @@ public class RenderFluidTankItem extends MekanismISTER {
     }
 
     @Override
-    public void renderByItem(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight) {
+    public void render(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
+                       int light, int overlayLight) {
         FluidTankTier tier = ((ItemBlockFluidTank) stack.getItem()).getTier();
         FluidStack fluid = StorageUtils.getStoredFluidFromNBT(stack);
         if (!fluid.isEmpty()) {

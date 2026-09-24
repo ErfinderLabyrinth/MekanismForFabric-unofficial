@@ -2,7 +2,6 @@ package mekanism.tools.client;
 
 import mekanism.api.providers.IItemProvider;
 import mekanism.client.ClientRegistrationUtil;
-import mekanism.tools.client.render.ToolsRenderPropertiesProvider;
 import mekanism.tools.client.render.item.RenderMekanismShieldItem;
 import mekanism.tools.common.MekanismTools;
 import mekanism.tools.common.config.MekanismToolsConfig;
