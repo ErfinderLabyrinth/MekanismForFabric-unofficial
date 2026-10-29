@@ -1,5 +1,6 @@
 package mekanism.common.tile.component;
 
+import mekanism.api.AutomationType;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
@@ -124,7 +125,7 @@ public class TileComponentUpgrade implements ITileComponent, ISpecificContainerT
         if (installed > 0) {
             int toRemove = removeAll ? installed : 1;
             try(Transaction t=Transaction.openOuter()) {
-                toRemove = (int)upgradeOutputSlot.insert(ItemVariant.of(UpgradeUtils.getItem(upgrade)), toRemove, t);
+                toRemove = (int)upgradeOutputSlot.insert(ItemVariant.of(UpgradeUtils.getItem(upgrade)), toRemove, t, AutomationType.INTERNAL);
                 if (toRemove != 0) {
                     //We can fit at least one in the output slot
                     //Actually remove them and put them in the output slot

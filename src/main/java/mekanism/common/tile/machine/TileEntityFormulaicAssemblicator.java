@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
@@ -147,7 +148,7 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
                     if (!indices.isEmpty()) {
                         if (stockControl) {
                             HashedItem stockItem = stockControlMap[index];
-                            return stockItem == null || ItemEntity.areMergable(stockItem.getInternalStack(), stack);
+                            return stockItem == null || InventoryUtils.areItemsStackable(stockItem.getInternalStack(), stack);
                         }
                         return true;
                     }
@@ -630,7 +631,7 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
 
     private ItemStack tryMoveToInput(ItemStack stack) {
         try(Transaction t=Transaction.openOuter()) {
-            ItemStack result = InventoryUtils.insertItem(inputSlots, stack, t);
+            ItemStack result = InventoryUtils.insertItem(inputSlots, stack, t, AutomationType.INTERNAL);
             t.commit();
             return result;
         }
@@ -641,7 +642,7 @@ public class TileEntityFormulaicAssemblicator extends TileEntityConfigurableMach
         // We can then continue on to the next slot if we did not fit it all and try to insert it.
         // The logic is relatively simple due to only having one stack we are trying to insert, so we don't have to worry
         // about the fact the slot doesn't actually get updated if we simulated, and then is invalid for the next simulation
-        stack = InventoryUtils.insertItem(outputSlots, stack, t);
+        stack = InventoryUtils.insertItem(outputSlots, stack, t, AutomationType.INTERNAL);
         return stack.isEmpty();
     }
 

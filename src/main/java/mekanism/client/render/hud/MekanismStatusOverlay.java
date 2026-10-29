@@ -36,7 +36,7 @@ public class MekanismStatusOverlay {
                     Color color = Color.rgbad(1, 1, 1, modeSwitchTimer / 100F);
                     Font font = gui.getFont();
                     int componentWidth = font.width(scrollTextComponent);
-                    int targetShift = 0;//Math.max(59, Math.max(gui.leftHeight, gui.rightHeight));
+                    int targetShift = 59; //Math.max(59, Math.max(minecraft.gui.leftHeight, gui.rightHeight));
                     if (minecraft.gameMode != null && !minecraft.gameMode.canHurtPlayer()) {
                         //Same shift as done in Gui#renderSelectedItemName
                         targetShift -= 14;

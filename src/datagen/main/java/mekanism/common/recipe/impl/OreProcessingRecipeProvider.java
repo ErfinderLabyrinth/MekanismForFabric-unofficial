@@ -32,6 +32,7 @@ import mekanism.common.tags.MekanismTags;
 import mekanism.common.util.EnumUtils;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -460,7 +461,7 @@ class OreProcessingRecipeProvider implements ISubRecipeProvider {
     private void addRedstoneProcessingRecipes(Consumer<FinishedRecipe> consumer, String basePath) {
         //from ore
         ItemStackToItemStackRecipeBuilder.enriching(
-              IngredientCreatorAccess.item().from(ConventionalItemTags.REDSTONE_DUSTS),
+              IngredientCreatorAccess.item().from(ItemTags.REDSTONE_ORES),
               new ItemStack(Items.REDSTONE, 12)
         ).build(consumer, Mekanism.rl(basePath + "from_ore"));
         ItemStackIngredient forOre = IngredientCreatorAccess.item().from(ConventionalItemTags.REDSTONE_DUSTS, 16);

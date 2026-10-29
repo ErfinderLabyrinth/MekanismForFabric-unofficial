@@ -1127,7 +1127,7 @@ public abstract class TileEntityMekanism extends TileEntityUpdateable implements
     @NotNull
     @Override
     public final List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction side) {
-        return heatHandlerManager.getHolder().getAll();
+        return heatHandlerManager.getContainers(side);
     }
     //End methods for IInWorldHeatHandler
 

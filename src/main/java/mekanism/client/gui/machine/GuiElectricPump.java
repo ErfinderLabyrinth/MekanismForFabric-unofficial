@@ -15,6 +15,8 @@ import mekanism.common.inventory.warning.WarningTracker.WarningType;
 import mekanism.common.tile.machine.TileEntityElectricPump;
 import mekanism.common.util.text.EnergyDisplay;
 import mekanism.common.util.text.TextUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -43,7 +45,7 @@ public class GuiElectricPump extends GuiMekanismTile<TileEntityElectricPump, Mek
                 if (fallBack.isEmpty()) {
                     list.add(MekanismLang.NO_FLUID.translate());
                 } else {
-                    list.add(Component.literal("COMING SOON (GuiElectricPump)"));
+                    list.add(FluidVariantAttributes.getName(fallBack.variant()));
                 }
             } else {
                 list.add(MekanismLang.GENERIC_STORED_MB.translate(fluidStack, TextUtils.format(fluidStack.amount())));

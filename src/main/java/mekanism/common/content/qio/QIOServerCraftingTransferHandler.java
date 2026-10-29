@@ -21,6 +21,7 @@ import mekanism.common.inventory.container.slot.InsertableSlot;
 import mekanism.common.inventory.container.slot.MainInventorySlot;
 import mekanism.common.inventory.slot.CraftingWindowInventorySlot;
 import mekanism.common.lib.inventory.HashedItem;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -259,7 +260,7 @@ public class QIOServerCraftingTransferHandler {
             }
             //We copy the stack in case any mods do dumb things in their recipes and would end up mutating our stacks that shouldn't be mutated by accident
             recipeToTest.set(targetSlot, slotStack.copy());
-        } else if (!ItemEntity.areMergable(currentRecipeTarget, slotStack)) {
+        } else if (!InventoryUtils.areItemsStackable(currentRecipeTarget, slotStack)) {
             //If our stack can't stack with the item we already are going to put in the slot, fail "gracefully"
             //Note: debug level because this may happen due to not knowing all NBT
             Mekanism.logger.debug("Received transfer request from: {}, for: {}, but found items for target slot: {} cannot stack. "
@@ -465,7 +466,7 @@ public class QIOServerCraftingTransferHandler {
                 byte targetSlot = entry.getByteKey();
                 if (targetContents.containsKey(targetSlot)) {
                     ItemStack existing = targetContents.get(targetSlot);
-                    if (ItemEntity.areMergable(existing, stack.createStack())) {
+                    if (InventoryUtils.areItemsStackable(existing, stack.createStack())) {
                         int needed = existing.getMaxStackSize() - existing.getCount();
                         if (stack.amount() <= needed) {
                             existing.grow((int)stack.amount());
@@ -541,7 +542,7 @@ public class QIOServerCraftingTransferHandler {
                 //If we couldn't insert it all, try recombining with the slots they were in the crafting window
                 // (only if the type matches though)
                 CraftingWindowInventorySlot inputSlot = craftingWindow.getInputSlot(entry.getByteKey());
-                if (ItemEntity.areMergable(inputSlot.getStack(), stack)) {
+                if (InventoryUtils.areItemsStackable(inputSlot.getStack(), stack)) {
                     ItemVariant resource = ItemVariant.of(stack);
                     try(Transaction t=Transaction.openOuter()) {
                         stack = resource.toStack(stack.getCount() - (int)inputSlot.insert(resource, stack.getCount(), t));
@@ -598,7 +599,7 @@ public class QIOServerCraftingTransferHandler {
         for (Byte2ObjectMap.Entry<ItemStack> entry : remainingCraftingGridContents.byte2ObjectEntrySet()) {
             ItemStack stack = entry.getValue();
             CraftingWindowInventorySlot inputSlot = craftingWindow.getInputSlot(entry.getByteKey());
-            if (ItemEntity.areMergable(inputSlot.getStack(), stack)) {
+            if (InventoryUtils.areItemsStackable(inputSlot.getStack(), stack)) {
                 ItemVariant resource = ItemVariant.of(stack);
                 try(Transaction t=Transaction.openOuter()) {
                     stack = resource.toStack(stack.getCount() - (int)inputSlot.insert(resource, stack.getCount(), t));

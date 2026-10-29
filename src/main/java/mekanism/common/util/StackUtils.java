@@ -52,7 +52,7 @@ public final class StackUtils {
                         //Add any remainder to the rejects (if this is zero this will no-op
                         addStack(rejects, toAddStack.copyWithCount(toAddStack.getCount() - max));
                     }
-                } else if (ItemEntity.areMergable(origSlot.getStack(), toAddStack)) {
+                } else if (InventoryUtils.areItemsStackable(origSlot.getStack(), toAddStack)) {
                     int added = origSlot.growStack(toAddStack.getCount());
                     //Add any remainder to the rejects (if this is zero this will no-op
                     addStack(rejects, toAddStack.copyWithCount(toAddStack.getCount() - added));
@@ -70,7 +70,7 @@ public final class StackUtils {
         if (!stack.isEmpty()) {
             for (ItemStack existingStack : stacks) {
                 int needed = existingStack.getMaxStackSize() - existingStack.getCount();
-                if (needed > 0 && ItemEntity.areMergable(existingStack, stack)) {
+                if (needed > 0 && InventoryUtils.areItemsStackable(existingStack, stack)) {
                     //This stack needs some items and can stack with the one we are adding
                     int toAdd = Math.min(needed, stack.getCount());
                     //Add the amount we can

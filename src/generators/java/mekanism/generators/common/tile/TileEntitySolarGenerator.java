@@ -77,7 +77,8 @@ public class TileEntitySolarGenerator extends TileEntityGenerator {
             setActive(true);
             long production = getProduction();
             try(Transaction t = Transaction.openOuter()) {
-                lastProductionAmount = getEnergyContainer().insert(production, t);
+                lastProductionAmount = getEnergyContainer().insert(production, t, AutomationType.INTERNAL);
+                t.commit();
             }
         } else {
             setActive(false);

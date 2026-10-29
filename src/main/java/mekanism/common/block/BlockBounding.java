@@ -53,6 +53,16 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
         return null;
     }
 
+    @Nullable
+    public static BlockPos getMainBlockPos(BlockEntity blockEntity, BlockPos thisPos) {
+        if (blockEntity instanceof TileEntityBoundingBlock te) {
+            if (te.hasReceivedCoords() && !thisPos.equals(te.getMainPos())) {
+                return te.getMainPos();
+            }
+        }
+        return null;
+    }
+
     public BlockBounding() {
         //Note: We require setting variable opacity so that the block state does not cache the ability of if blocks can be placed on top of the bounding block
         // Torches cannot be placed on the sides due to vanilla checking the incorrect shape
@@ -131,12 +141,26 @@ public class BlockBounding extends Block implements IHasTileEntity<TileEntityBou
         return mainState.getBlock().getCloneItemStack(world, mainPos, mainState);
     }
 
+
     @Override
-    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity te, ItemStack stack) {
+    public void playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
         BlockPos mainPos = getMainBlockPos(world, pos);
         if (mainPos != null) {
             BlockState mainState = world.getBlockState(mainPos);
-            mainState.getBlock().playerDestroy(world, player, mainPos, mainState, WorldUtils.getTileEntity(world, mainPos), stack);
+            mainState.getBlock().playerDestroy(world, player, mainPos, mainState, WorldUtils.getTileEntity(world, mainPos), player.getMainHandItem());
+        } else {
+            super.playerWillDestroy(world, pos, state, player);
+        }
+        world.removeBlock(pos, false);
+    }
+
+    @Override
+    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity te, ItemStack stack) {
+        BlockPos mainPos = getMainBlockPos(te, pos);
+        if (mainPos != null) {
+            // Now in playerWinnDestroy() because here the main block is already air
+//            BlockState mainState = world.getBlockState(mainPos);
+//            mainState.getBlock().playerDestroy(world, player, mainPos, mainState, WorldUtils.getTileEntity(world, mainPos), stack);
         } else {
             super.playerDestroy(world, player, pos, state, te, stack);
         }

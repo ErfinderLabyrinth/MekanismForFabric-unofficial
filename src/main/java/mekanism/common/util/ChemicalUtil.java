@@ -72,15 +72,15 @@ public class ChemicalUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <CHEMICAL extends Chemical<CHEMICAL>, HANDLER extends Storage<CHEMICAL>> BlockApiLookup<HANDLER, Direction> getBlockLookupForChemical(CHEMICAL chemical) {
+    public static <CHEMICAL extends Chemical<CHEMICAL>> BlockApiLookup<Storage<CHEMICAL>, Direction> getBlockLookupForChemical(CHEMICAL chemical) {
         if (chemical instanceof Gas) {
-            return (BlockApiLookup<HANDLER, Direction>) Capabilities.GAS_HANDLER_BLOCK;
+            return (BlockApiLookup<Storage<CHEMICAL>, Direction>) (BlockApiLookup<?, ?>) Capabilities.GAS_HANDLER_BLOCK;
         } else if (chemical instanceof InfuseType) {
-            return (BlockApiLookup<HANDLER, Direction>) Capabilities.INFUSION_HANDLER_BLOCK;
+            return (BlockApiLookup<Storage<CHEMICAL>, Direction>) (BlockApiLookup<?, ?>) Capabilities.INFUSION_HANDLER_BLOCK;
         } else if (chemical instanceof Pigment) {
-            return (BlockApiLookup<HANDLER, Direction>) Capabilities.PIGMENT_HANDLER_BLOCK;
+            return (BlockApiLookup<Storage<CHEMICAL>, Direction>) (BlockApiLookup<?, ?>) Capabilities.PIGMENT_HANDLER_BLOCK;
         } else if (chemical instanceof Slurry) {
-            return (BlockApiLookup<HANDLER, Direction>) Capabilities.SLURRY_HANDLER_BLOCK;
+            return (BlockApiLookup<Storage<CHEMICAL>, Direction>) (BlockApiLookup<?, ?>) Capabilities.SLURRY_HANDLER_BLOCK;
         } else {
             throw new IllegalStateException("Unknown Chemical Type: " + chemical.getClass().getName());
         }
@@ -91,7 +91,7 @@ public class ChemicalUtil {
         return getItemLookupForChemical(stack.getType());
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> BlockApiLookup<HANDLER, Direction>
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> BlockApiLookup<Storage<CHEMICAL>, Direction>
     getBlockLookupForChemical(STACK stack) {
         return getBlockLookupForChemical(stack.getType());
     }
@@ -102,7 +102,7 @@ public class ChemicalUtil {
         return getItemLookupForChemical(tank.getEmptyStack());
     }
 
-    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends IChemicalHandler<CHEMICAL, STACK, ?>> BlockApiLookup<HANDLER, Direction>
+    public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>> BlockApiLookup<Storage<CHEMICAL>, Direction>
     getBlockLookupForChemical(IChemicalTank<CHEMICAL, STACK> tank) {
         //Note: We just use getEmptyStack as it still has enough information
         return getBlockLookupForChemical(tank.getEmptyStack());
@@ -338,11 +338,11 @@ public class ChemicalUtil {
         if (stack.isEmpty() || sides.isEmpty()) {
             return 0;
         }
-        BlockApiLookup<IChemicalHandler<CHEMICAL, STACK, ?>, Direction> capability = getBlockLookupForChemical(stack);
-        ChemicalHandlerTarget<CHEMICAL, STACK, IChemicalHandler<CHEMICAL, STACK, ?>> target = new ChemicalHandlerTarget<>(stack, 6);
+        BlockApiLookup<Storage<CHEMICAL>, Direction> capability = getBlockLookupForChemical(stack);
+        ChemicalHandlerTarget<CHEMICAL, STACK, Storage<CHEMICAL>> target = new ChemicalHandlerTarget<>(stack, 6);
         EmitUtils.forEachSidePos(pos, sides, (neighbor, side) -> {
             //Insert to access side and collect the cap if it is present, and we can insert the type of the stack into it
-            IChemicalHandler<CHEMICAL, STACK, ?> handler = capability.find(level, neighbor, side.getOpposite());
+            Storage<CHEMICAL> handler = capability.find(level, neighbor, side.getOpposite());
             if(handler != null) {
                 if (canInsert(handler, stack)) {
                     target.addHandler(handler);
@@ -356,7 +356,7 @@ public class ChemicalUtil {
     }
 
     public static <CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, HANDLER extends Storage<CHEMICAL>> boolean canInsert(
-          HANDLER handler, @NotNull STACK stack) {
+          Storage<CHEMICAL> handler, @NotNull STACK stack) {
         try(Transaction t=Transaction.openOuter()) {
             return handler.insert(stack.getType(), stack.getAmount(), t) > 0;
         }

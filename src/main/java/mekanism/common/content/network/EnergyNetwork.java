@@ -131,7 +131,7 @@ public class EnergyNetwork extends DynamicBufferedNetwork<EnergyStorage, EnergyN
                 lazyAcceptor.ifPresent(acceptor -> {
                     boolean shouldAdd;
                     try(Transaction t = Transaction.openOuter()) {
-                        shouldAdd = acceptor.insert(energyToSend, t) < energyToSend;
+                        shouldAdd = acceptor.insert(energyToSend, t) > 0;
                     }
                     if (shouldAdd) {
                         target.addHandler(acceptor);
@@ -160,6 +160,7 @@ public class EnergyNetwork extends DynamicBufferedNetwork<EnergyStorage, EnergyN
             prevTransferAmount = FloatingLong.create(tickEmit(energyContainer.getEnergy()));
             try(Transaction t = Transaction.openOuter()) {
                 energyContainer.extract(prevTransferAmount.longValue(), t);
+                t.commit();
             }
         }
     }

@@ -628,7 +628,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         //Try to simulate inserting into slots that are not currently empty
         for (int i = 0; i < slots; i++) {
             ItemCount cachedItem = cachedStacks.get(i);
-            if (cachedItem != null && ItemEntity.areMergable(stack, cachedItem.stack)) {
+            if (cachedItem != null && InventoryUtils.areItemsStackable(stack, cachedItem.stack)) {
                 //Ensure that our stack can stack with the item that is already in the slot
                 IInventorySlot slot = mainSlots.get(i);
                 int limit = slot.getLimit(stack);
@@ -656,7 +656,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
                 // this will succeed and insert the entire stack
                 long inserted;
                 try(Transaction t=Transaction.openOuter()) {
-                    inserted = slot.insert(ItemVariant.of(stack), stackSize, t);
+                    inserted = slot.insert(ItemVariant.of(stack), stackSize, t, AutomationType.INTERNAL);
                 }
                 //int remainderSize = stack.getCount();
                 if (inserted != 0) {
@@ -682,7 +682,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
         for (ItemStack stack : stacks) {
             //Try inserting it first where it can stack and then into empty slots
             try(Transaction t=Transaction.openOuter()) {
-                stack = InventoryUtils.insertItem(mainSlots, stack, t);
+                stack = InventoryUtils.insertItem(mainSlots, stack, t, AutomationType.INTERNAL);
                 t.commit();
             }
             if (!stack.isEmpty()) {
@@ -721,7 +721,7 @@ public class TileEntityDigitalMiner extends TileEntityMekanism implements ISusta
                 //Note: Inserting properly handles oversized stacks, so we don't have to handle the case that amount might be greater than
                 // the max stack size here as the different slots will only accept up to the item's max stack size
                 try(Transaction t=Transaction.openOuter()) {
-                    stack = InventoryUtils.insertItem(mainSlots, stack, t);
+                    stack = InventoryUtils.insertItem(mainSlots, stack, t, AutomationType.INTERNAL);
                     t.commit();
                 }
                 //Note: We do not need to mark the miner for saving if something gets moved from overflow to a slot as the slot will do so

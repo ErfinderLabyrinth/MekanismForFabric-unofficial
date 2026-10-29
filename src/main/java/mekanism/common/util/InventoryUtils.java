@@ -1,5 +1,6 @@
 package mekanism.common.util;
 
+import mekanism.api.AutomationType;
 import mekanism.api.BigItemStack;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.api.security.ISecurityUtils;
@@ -92,6 +93,9 @@ public final class InventoryUtils {
      * @return true if they are compatible
      */
     public static boolean areItemsStackable(ItemStack toInsert, ItemStack inSlot) {
+        if (toInsert.isEmpty() || inSlot.isEmpty()) {
+            return true;
+        }
         return ItemStack.isSameItemSameTags(toInsert, inSlot);
     }
 
@@ -142,9 +146,9 @@ public final class InventoryUtils {
      *
      * @return Remainder
      */
-    public static ItemStack insertItem(List<? extends IInventorySlot> slots, @NotNull ItemStack stack, TransactionContext t) {
-        stack = insertItem(slots, stack, true, false, t);
-        return insertItem(slots, stack, false, false, t);
+    public static ItemStack insertItem(List<? extends IInventorySlot> slots, @NotNull ItemStack stack, TransactionContext t, AutomationType automationType) {
+        stack = insertItem(slots, stack, true, false, t, automationType);
+        return insertItem(slots, stack, false, false, t, automationType);
     }
 
     /**
@@ -161,7 +165,7 @@ public final class InventoryUtils {
      * @see mekanism.common.inventory.container.MekanismContainer#insertItem(List, ItemStack, boolean, boolean, SelectedWindowData, TransactionContext)
      */
     @NotNull
-    public static ItemStack insertItem(List<? extends IInventorySlot> slots, @NotNull ItemStack stack, boolean ignoreEmpty, boolean checkAll, TransactionContext t) {
+    public static ItemStack insertItem(List<? extends IInventorySlot> slots, @NotNull ItemStack stack, boolean ignoreEmpty, boolean checkAll, TransactionContext t, AutomationType automationType) {
         if (stack.isEmpty()) {
             //Skip doing anything if the stack is already empty.
             // Makes it easier to chain calls, rather than having to check if the stack is empty after our previous call
@@ -173,11 +177,12 @@ public final class InventoryUtils {
                 //Skip checking empty stacks if we want to ignore them, and skip non-empty stacks if we don't want ot ignore them
                 continue;
             }
-            amountInserted = slot.insert(ItemVariant.of(stack), stack.getCount(), t);
+            amountInserted = slot.insert(ItemVariant.of(stack), stack.getCount(), t, automationType);
+            stack = stack.copyWithCount(stack.getCount() - (int) amountInserted);
             if (stack.isEmpty()) {
                 break;
             }
         }
-        return stack.copyWithCount(stack.getCount() - (int) amountInserted);
+        return stack;
     }
 }

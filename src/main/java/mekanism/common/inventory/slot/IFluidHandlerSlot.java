@@ -6,6 +6,7 @@ import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.inventory.SimpleSingleStackStorage;
 import mekanism.common.tile.interfaces.IFluidContainerManager.ContainerEditMode;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
@@ -277,7 +278,7 @@ public interface IFluidHandlerSlot extends IInventorySlot {
             outputSlot.setStack(stackToMove);
         } else {
             ItemStack outputStack = outputSlot.getStack();
-            if (!ItemEntity.areMergable(outputStack, stackToMove) || outputStack.getCount() >= outputSlot.getLimit(outputStack)) {
+            if (!InventoryUtils.areItemsStackable(outputStack, stackToMove) || outputStack.getCount() >= outputSlot.getLimit(outputStack)) {
                 //We won't be able to move our container to the output slot so exit
                 return false;
             }

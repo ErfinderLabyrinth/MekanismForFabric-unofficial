@@ -29,14 +29,14 @@ public class BasicFluidTank extends SnapshotParticipant<FluidStack> implements I
     public static final BiPredicate<@NotNull FluidStack, @NotNull AutomationType> internalOnly = ConstantPredicates.internalOnly();
     public static final BiPredicate<@NotNull FluidStack, @NotNull AutomationType> notExternal = ConstantPredicates.notExternal();
 
-    public static BasicFluidTank create(int capacity, @Nullable IContentsListener listener) {
+    public static BasicFluidTank create(long capacity, @Nullable IContentsListener listener) {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity must be at least zero");
         }
         return new BasicFluidTank(capacity, alwaysTrueBi, alwaysTrueBi, alwaysTrue, listener);
     }
 
-    public static BasicFluidTank create(int capacity, Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
+    public static BasicFluidTank create(long capacity, Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity must be at least zero");
         }
@@ -44,12 +44,12 @@ public class BasicFluidTank extends SnapshotParticipant<FluidStack> implements I
         return new BasicFluidTank(capacity, alwaysTrueBi, alwaysTrueBi, validator, listener);
     }
 
-    public static BasicFluidTank create(int capacity, Predicate<@NotNull FluidStack> canExtract, Predicate<@NotNull FluidStack> canInsert,
+    public static BasicFluidTank create(long capacity, Predicate<@NotNull FluidStack> canExtract, Predicate<@NotNull FluidStack> canInsert,
           @Nullable IContentsListener listener) {
         return create(capacity, canExtract, canInsert, alwaysTrue, listener);
     }
 
-    public static BasicFluidTank input(int capacity, Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
+    public static BasicFluidTank input(long capacity, Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity must be at least zero");
         }
@@ -57,7 +57,7 @@ public class BasicFluidTank extends SnapshotParticipant<FluidStack> implements I
         return new BasicFluidTank(capacity, notExternal, alwaysTrueBi, validator, listener);
     }
 
-    public static BasicFluidTank input(int capacity, Predicate<@NotNull FluidStack> canInsert, Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
+    public static BasicFluidTank input(long capacity, Predicate<@NotNull FluidStack> canInsert, Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity must be at least zero");
         }
@@ -66,14 +66,14 @@ public class BasicFluidTank extends SnapshotParticipant<FluidStack> implements I
         return new BasicFluidTank(capacity, notExternal, (stack, automationType) -> canInsert.test(stack), validator, listener);
     }
 
-    public static BasicFluidTank output(int capacity, @Nullable IContentsListener listener) {
+    public static BasicFluidTank output(long capacity, @Nullable IContentsListener listener) {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity must be at least zero");
         }
         return new BasicFluidTank(capacity, alwaysTrueBi, internalOnly, alwaysTrue, listener);
     }
 
-    public static BasicFluidTank create(int capacity, Predicate<@NotNull FluidStack> canExtract, Predicate<@NotNull FluidStack> canInsert,
+    public static BasicFluidTank create(long capacity, Predicate<@NotNull FluidStack> canExtract, Predicate<@NotNull FluidStack> canInsert,
           Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity must be at least zero");
@@ -84,7 +84,7 @@ public class BasicFluidTank extends SnapshotParticipant<FluidStack> implements I
         return new BasicFluidTank(capacity, canExtract, canInsert, validator, listener);
     }
 
-    public static BasicFluidTank create(int capacity, BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canExtract,
+    public static BasicFluidTank create(long capacity, BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canExtract,
           BiPredicate<@NotNull FluidStack, @NotNull AutomationType> canInsert, Predicate<@NotNull FluidStack> validator, @Nullable IContentsListener listener) {
         if (capacity < 0) {
             throw new IllegalArgumentException("Capacity must be at least zero");
@@ -340,14 +340,20 @@ public class BasicFluidTank extends SnapshotParticipant<FluidStack> implements I
         return stored.variant();
     }
 
+
+
     @Override
     public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+        return insert(resource, maxAmount, transaction, AutomationType.EXTERNAL);
+    }
+
+    public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction, AutomationType automationType) {
         updateSnapshots(transaction);
-        if (resource.isBlank() || maxAmount == 0 || !isFluidValid(new FluidStack(resource, maxAmount)) || !canInsert.test(new FluidStack(resource, maxAmount), null)) {
+        if (resource.isBlank() || maxAmount == 0 || !isFluidValid(new FluidStack(resource, maxAmount)) || !canInsert.test(new FluidStack(resource, maxAmount), automationType)) {
             //"Fail quick" if the given stack is empty, or we can never insert the fluid or currently are unable to insert it
             return 0;
         }
-        long needed = Math.min(getRate(null), getNeeded());
+        long needed = Math.min(getRate(automationType), getNeeded());
         if (needed <= 0) {
             //Fail if we are a full tank or our rate is zero
             return 0;

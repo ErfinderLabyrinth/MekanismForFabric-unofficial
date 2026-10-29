@@ -2,6 +2,7 @@ package mekanism.common.recipe.upgrade;
 
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.inventory.BinMekanismInventory;
+import mekanism.common.util.InventoryUtils;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +19,7 @@ public class LockRecipeData implements RecipeUpgradeData<LockRecipeData> {
     @Nullable
     @Override
     public LockRecipeData merge(LockRecipeData other) {
-        return ItemEntity.areMergable(lock, other.lock) ? this : null;
+        return InventoryUtils.areItemsStackable(lock, other.lock) ? this : null;
     }
 
     @Override

@@ -83,7 +83,7 @@ public class InventoryContainerSlot extends Slot implements IInsertableSlot {
         }
         //Otherwise, we need to check if we can extract the current item
         try(Transaction t=Transaction.openOuter()) {
-            if (slot.extract(slot.getResource(), 1, t) == 0) {
+            if (slot.extract(slot.getResource(), 1, t, AutomationType.MANUAL) == 0) {
                 //If we can't, fail
                 return false;
             }

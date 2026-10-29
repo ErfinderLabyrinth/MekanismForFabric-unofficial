@@ -50,10 +50,7 @@ import mekanism.common.registries.MekanismRobitSkins.SkinLookup;
 import mekanism.common.tile.TileEntityChargepad;
 import mekanism.common.tile.interfaces.ISustainedInventory;
 import mekanism.common.tile.prefab.TileEntityRecipeMachine;
-import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.NBTUtils;
-import mekanism.common.util.SecurityUtils;
-import mekanism.common.util.WorldUtils;
+import mekanism.common.util.*;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -324,7 +321,7 @@ public class EntityRobit extends PathfinderMob implements IRobit, IMekanismInven
                         }
                         ItemStack itemStack = slot.getStack();
                         int maxSize = slot.getLimit(itemStack);
-                        if (ItemEntity.areMergable(itemStack, item.getItem()) && itemStack.getCount() < maxSize) {
+                        if (InventoryUtils.areItemsStackable(itemStack, item.getItem()) && itemStack.getCount() < maxSize) {
                             int needed = maxSize - itemStack.getCount();
                             int toAdd = Math.min(needed, item.getItem().getCount());
                             MekanismUtils.logMismatchedStackSize(slot.growStack(toAdd), toAdd);

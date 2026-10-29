@@ -3,6 +3,7 @@ package mekanism.common.lib.radiation;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import mekanism.api.NBTConstants;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -178,7 +179,7 @@ public class Meltdown {
         for (int i = 0, size = dropPositions.size(); i < size; ++i) {
             Pair<ItemStack, BlockPos> pair = dropPositions.get(i);
             ItemStack itemstack = pair.getFirst();
-            if (ItemEntity.areMergable(itemstack, stack)) {
+            if (InventoryUtils.areItemsStackable(itemstack, stack)) {
                 ItemStack itemstack1 = ItemEntity.merge(itemstack, stack, 16);
                 dropPositions.set(i, Pair.of(itemstack1, pair.getSecond()));
                 if (stack.isEmpty()) {

@@ -88,7 +88,7 @@ public interface IInventorySlot extends NBTSerializable<CompoundTag>, IContentsL
             return 0;
         }
         boolean sameType = false;
-        if (isEmpty() || (sameType = ItemEntity.areMergable(getStack(), stack))) {
+        if (isEmpty() || (sameType = ItemStack.isSameItemSameTags(getStack(), stack))) {
             int toAdd = Math.min(stack.getCount(), needed);
             //If we want to actually insert the item, then update the current item
             if (sameType) {

@@ -1,6 +1,7 @@
 package mekanism.common.lib.inventory;
 
 import mekanism.common.lib.WildcardMatcher;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
@@ -20,7 +21,7 @@ public interface Finder {
     }
 
     static Finder strict(ItemStack itemType) {
-        return stack -> ItemEntity.areMergable(itemType, stack);
+        return stack -> InventoryUtils.areItemsStackable(itemType, stack);
     }
 
     static Finder tag(String tagName) {

@@ -1,5 +1,6 @@
 package mekanism.common.inventory.container.slot;
 
+import mekanism.common.util.InventoryUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
@@ -45,7 +46,7 @@ public class InsertableSlot extends Slot implements IInsertableSlot {
             //Fail if we are a full slot
             return 0;
         }
-        if (current.isEmpty() || ItemEntity.areMergable(current, stack)) {
+        if (current.isEmpty() || InventoryUtils.areItemsStackable(current, stack)) {
             int toAdd = Math.min(stack.getCount(), needed);
             set(stack.copyWithCount(current.getCount() + toAdd));
             return toAdd;
@@ -97,7 +98,7 @@ public class InsertableSlot extends Slot implements IInsertableSlot {
 //            //Fail if we are a full slot
 //            return stack;
 //        }
-//        if (current.isEmpty() || ItemEntity.areMergable(current, stack)) {
+//        if (current.isEmpty() || InventoryUtils.areItemsStackable(current, stack)) {
 //            int toAdd = Math.min(stack.getCount(), needed);
 //            if (action.execute()) {
 //                //If we want to actually insert the item, then update the current item

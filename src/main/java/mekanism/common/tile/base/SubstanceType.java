@@ -27,11 +27,19 @@ public enum SubstanceType {
     }
 
     public void write(TileEntityMekanism tile, CompoundTag tag) {
-        tag.put(containerTag, DataHandlerUtils.writeContainers(containerSupplier.apply(tile)));
+        if (this == ENERGY) {
+            tag.put(containerTag, containerSupplier.apply(tile).get(0).serializeNBT());
+        }else {
+            tag.put(containerTag, DataHandlerUtils.writeContainers(containerSupplier.apply(tile)));
+        }
     }
 
     public void read(TileEntityMekanism tile, CompoundTag tag) {
-        DataHandlerUtils.readContainers(containerSupplier.apply(tile), tag.getList(containerTag, Tag.TAG_COMPOUND));
+        if (this == ENERGY) {
+            containerSupplier.apply(tile).get(0).deserializeNBT(tag.getCompound(containerTag));
+        }else {
+            DataHandlerUtils.readContainers(containerSupplier.apply(tile), tag.getList(containerTag, Tag.TAG_COMPOUND));
+        }
     }
 
     public String getContainerTag() {

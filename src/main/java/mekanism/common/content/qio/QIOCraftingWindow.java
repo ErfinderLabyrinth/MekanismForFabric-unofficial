@@ -22,6 +22,7 @@ import mekanism.common.inventory.slot.CraftingWindowInventorySlot;
 import mekanism.common.inventory.slot.CraftingWindowOutputInventorySlot;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.recipe.MekanismRecipeType;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -111,7 +112,7 @@ public class QIOCraftingWindow implements IContentsListener {
      * Checks if the stack is equivalent to the current output.
      */
     public boolean isOutput(@NotNull ItemStack stack) {
-        return ItemEntity.areMergable(outputSlot.getStack(), stack);
+        return InventoryUtils.areItemsStackable(outputSlot.getStack(), stack);
     }
 
     @Override

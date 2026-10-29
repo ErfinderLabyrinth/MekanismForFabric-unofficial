@@ -8,6 +8,7 @@ import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.inventory.container.slot.InventoryContainerSlot;
 import mekanism.common.item.block.ItemBlockBin;
 import mekanism.common.tier.BinTier;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.NBTUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -44,7 +45,7 @@ public class BinInventorySlot extends BasicInventorySlot {
     public long insert(ItemVariant resource, long amount, TransactionContext transaction, AutomationType automationType) {
         updateSnapshots(transaction);
         if (isEmpty()) {
-            if (isLocked() && !ItemEntity.areMergable(lockStack, resource.toStack((int) amount))) {
+            if (isLocked() && !InventoryUtils.areItemsStackable(lockStack, resource.toStack((int) amount))) {
                 // When locked, we need to make sure the correct item type is being inserted
                 return 0;
             } else if (isCreative) {

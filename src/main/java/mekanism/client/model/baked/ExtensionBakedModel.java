@@ -158,12 +158,12 @@ public class ExtensionBakedModel<T> implements BakedModel, CustomPerspectiveMode
 
         @Override
         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
-            return QuadUtils.transformBakedQuads(super.getQuads(state, side, rand), transform);
+            return super.getQuads(state, side, rand);
         }
 
         @Override
         public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, Object object) {
-            return QuadUtils.transformBakedQuads(super.getQuads(state, side, rand, object), transform);
+            return super.getQuads(state, side, rand, object);
         }
 
 //        @Override

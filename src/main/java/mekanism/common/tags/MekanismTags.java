@@ -220,7 +220,6 @@ public class MekanismTags {
 
         public static final TagKey<Item> WOODEN_CHESTS = cTag("wooden_chests");
 
-
         private static TagKey<Item> cTag(String name) {
             return TagKey.create(Registries.ITEM, new ResourceLocation("c", name));
         }

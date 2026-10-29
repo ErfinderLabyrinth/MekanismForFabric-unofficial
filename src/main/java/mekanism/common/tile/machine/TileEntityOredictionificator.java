@@ -27,6 +27,7 @@ import mekanism.common.tile.component.TileComponentEjector;
 import mekanism.common.tile.interfaces.ISustainedData;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
 import mekanism.common.tile.prefab.TileEntityConfigurableMachine;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
@@ -90,7 +91,7 @@ public class TileEntityOredictionificator extends TileEntityConfigurableMachine 
                     inputSlot.shrinkStack(1);
                     outputSlot.setStack(result);
                     didProcess = true;
-                } else if (ItemEntity.areMergable(outputStack, result) && outputStack.getCount() < outputSlot.getLimit(outputStack)) {
+                } else if (InventoryUtils.areItemsStackable(outputStack, result) && outputStack.getCount() < outputSlot.getLimit(outputStack)) {
                     inputSlot.shrinkStack(1);
                     outputSlot.growStack(1);
                     didProcess = true;

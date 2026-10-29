@@ -77,7 +77,7 @@ public class TileEntityBioGenerator extends TileEntityGenerator {
         if (MekanismUtils.canFunction(this) && !bioFuelTank.isEmpty()) {
             boolean isInserted = false;
             try(Transaction t = Transaction.openOuter()) {
-                if(getEnergyContainer().insert(MekanismGeneratorsConfig.generators.bioGeneration, t) == MekanismGeneratorsConfig.generators.bioGeneration) {
+                if(getEnergyContainer().insert(MekanismGeneratorsConfig.generators.bioGeneration, t, AutomationType.INTERNAL) == MekanismGeneratorsConfig.generators.bioGeneration) {
                     t.commit();
                     isInserted = true;
                 }

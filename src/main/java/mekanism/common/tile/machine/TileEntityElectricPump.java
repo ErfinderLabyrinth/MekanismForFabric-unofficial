@@ -29,6 +29,7 @@ import mekanism.common.registries.MekanismFluids;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.*;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
@@ -99,7 +100,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
     @Override
     protected IFluidTankHolder getInitialFluidTanks(IContentsListener listener) {
         FluidTankHelper builder = FluidTankHelper.forSide(this::getDirection);
-        builder.addTank(fluidTank = BasicFluidTank.output(10_000, listener), RelativeSide.TOP);
+        builder.addTank(fluidTank = BasicFluidTank.output(10 * FluidConstants.BUCKET, listener), RelativeSide.TOP);
         return builder.build();
     }
 
@@ -129,7 +130,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
         long clientEnergyUsed = 0;
         if (MekanismUtils.canFunction(this) && (fluidTank.isEmpty() || estimateIncrementAmount() <= fluidTank.getNeeded())) {
             long energyPerTick = energyContainer.getEnergyPerTick();
-            boolean b1;
+            boolean active = false;
             try(Transaction t = Transaction.openOuter()) {
                 if (energyContainer.extract(energyPerTick, t) == energyPerTick) {
                     if (!activeType.isEmpty()) {
@@ -139,18 +140,24 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
                         t.commit();
                         clientEnergyUsed = energyPerTick;
                     }
-                    operatingTicks++;
-                    if (operatingTicks >= ticksRequired) {
-                        operatingTicks = 0;
-                        if (suck()) {
-                            if (clientEnergyUsed == 0) {
-                                //If it didn't already have an active type (hasn't used energy this tick), then extract energy
+                    active = true;
+                }
+            }
+            if (active) {
+                operatingTicks++;
+                if (operatingTicks >= ticksRequired) {
+                    operatingTicks = 0;
+                    if (suck()) {
+                        if (clientEnergyUsed == 0) {
+                            //If it didn't already have an active type (hasn't used energy this tick), then extract energy
+                            try(Transaction t = Transaction.openOuter()) {
+                                energyContainer.extract(energyPerTick, t);
                                 t.commit();
                                 clientEnergyUsed = energyPerTick;
                             }
-                        } else {
-                            reset();
                         }
+                    } else {
+                        reset();
                     }
                 }
             }
@@ -162,7 +169,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
     }
 
     public long estimateIncrementAmount() {
-        return fluidTank.getFluid().getFluid() == MekanismFluids.HEAVY_WATER.getFluid() ? MekanismConfig.COMMON.general.pumpHeavyWaterAmount : 81000;
+        return fluidTank.getFluid().getFluid() == MekanismFluids.HEAVY_WATER.getFluid() ? MekanismConfig.COMMON.general.pumpHeavyWaterAmount : FluidConstants.BUCKET;
     }
 
     private boolean suck() {
@@ -253,7 +260,7 @@ public class TileEntityElectricPump extends TileEntityMekanism implements IConfi
             recurringNodes.add(pos);
         }
         try(Transaction t=Transaction.openOuter()) {
-            fluidTank.insert(fluidStack.variant(), fluidStack.amount(), t);
+            fluidTank.insert(fluidStack.variant(), fluidStack.amount(), t, AutomationType.INTERNAL);
             t.commit();
         }
         level.gameEvent(null, GameEvent.FLUID_PICKUP, pos);

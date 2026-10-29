@@ -17,6 +17,8 @@ import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class MekanismTileContainer<TILE extends TileEntityMekanism> extends MekanismContainer {
 
     private VirtualInventoryContainerSlot upgradeSlot;
@@ -77,13 +79,11 @@ public class MekanismTileContainer<TILE extends TileEntityMekanism> extends Meka
         }
         if (tile.hasInventory()) {
             //Get all the inventory slots the tile has
-            Storage<ItemVariant> inventorySlots = tile.getItemStorage(null);
-            for (StorageView<ItemVariant> view : inventorySlots) {
-                if (view instanceof IInventorySlot inventorySlot) {
-                    Slot containerSlot = inventorySlot.createContainerSlot();
-                    if (containerSlot != null) {
-                        addSlot(containerSlot);
-                    }
+            List<IInventorySlot> inventorySlots = tile.getItemManager().canHandle() ? tile.getItemManager().getHolder().getAll() : List.of();
+            for (IInventorySlot inventorySlot : inventorySlots) {
+                Slot containerSlot = inventorySlot.createContainerSlot();
+                if (containerSlot != null) {
+                    addSlot(containerSlot);
                 }
             }
         }

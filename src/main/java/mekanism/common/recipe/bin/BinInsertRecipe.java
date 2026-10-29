@@ -7,6 +7,7 @@ import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.inventory.slot.BinInventorySlot;
 import mekanism.common.item.block.ItemBlockBin;
 import mekanism.common.registries.MekanismRecipeSerializers;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.ItemDataUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -47,7 +48,7 @@ public class BinInsertRecipe extends BinRecipe {
                     binStack = stackInSlot;
                 } else if (foundType.isEmpty()) {
                     foundType = stackInSlot;
-                } else if (!ItemEntity.areMergable(foundType, stackInSlot)) {
+                } else if (!InventoryUtils.areItemsStackable(foundType, stackInSlot)) {
                     //If we have types that don't stack in the grid at once,
                     // then we cannot combine them both into the bin
                     return false;
@@ -85,7 +86,7 @@ public class BinInsertRecipe extends BinRecipe {
                     continue;
                 } else if (foundType.isEmpty()) {
                     foundType = stackInSlot;
-                } else if (!ItemEntity.areMergable(foundType, stackInSlot)) {
+                } else if (!InventoryUtils.areItemsStackable(foundType, stackInSlot)) {
                     //If we have types that don't stack in the grid at once,
                     // then we cannot combine them both into the bin
                     return ItemStack.EMPTY;
@@ -147,7 +148,7 @@ public class BinInsertRecipe extends BinRecipe {
                     continue;
                 } else if (foundType.isEmpty()) {
                     foundType = stackInSlot;
-                } else if (!ItemEntity.areMergable(foundType, stackInSlot)) {
+                } else if (!InventoryUtils.areItemsStackable(foundType, stackInSlot)) {
                     //If we have types that don't stack in the grid at once,
                     // then we cannot combine them both into the bin
                     return remainingItems;

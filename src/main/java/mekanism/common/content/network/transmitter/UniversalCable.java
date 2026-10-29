@@ -130,7 +130,7 @@ public class UniversalCable extends BufferedTransmitter<EnergyStorage, EnergyNet
     @Override
     public void read(@NotNull CompoundTag nbtTags) {
         super.read(nbtTags);
-        if (nbtTags.contains(NBTConstants.ENERGY_STORED, Tag.TAG_STRING)) {
+        if (nbtTags.contains(NBTConstants.ENERGY_STORED, Tag.TAG_LONG)) {
             try {
                 lastWrite = nbtTags.getLong(NBTConstants.ENERGY_STORED);
             } catch (NumberFormatException e) {

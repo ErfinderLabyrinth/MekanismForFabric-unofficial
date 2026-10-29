@@ -10,6 +10,7 @@ import mekanism.common.inventory.container.slot.InsertableSlot;
 import mekanism.common.inventory.container.slot.MainInventorySlot;
 import mekanism.common.lib.inventory.HashedItem;
 import mekanism.common.lib.inventory.HashedItem.UUIDAwareHashedItem;
+import mekanism.common.util.InventoryUtils;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -318,7 +319,7 @@ public class QIOCraftingTransferHelper {
                 int currentAmount = stackSizes[slot];
                 int max = slotLimits[slot];
                 //If the slot has any room left, and our stack is able to stack with it
-                if (currentAmount < max && ItemEntity.areMergable(inventory[slot], stack)) {
+                if (currentAmount < max && InventoryUtils.areItemsStackable(inventory[slot], stack)) {
                     int toPlace = Math.min(max - currentAmount, amount);
                     stackSizes[slot] = currentAmount + toPlace;
                     amount -= toPlace;

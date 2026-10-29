@@ -111,7 +111,7 @@ public class TileEntitySawingFactory extends TileEntityFactory<SawmillRecipe> im
                     return true;
                 }
                 ItemStack secondaryOutput = chanceOutput.getMaxSecondaryOutput();
-                return secondaryOutput.isEmpty() || ItemEntity.areMergable(secondaryOutput, extra);
+                return secondaryOutput.isEmpty() || InventoryUtils.areItemsStackable(secondaryOutput, extra);
             }
             return false;
         });

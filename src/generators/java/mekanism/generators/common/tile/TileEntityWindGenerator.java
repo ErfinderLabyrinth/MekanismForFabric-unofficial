@@ -70,7 +70,7 @@ public class TileEntityWindGenerator extends TileEntityGenerator implements IBou
         }
         if (currentMultiplier != 0 && MekanismUtils.canFunction(this) && getEnergyContainer().getNeeded() != 0) {
             try(Transaction t = Transaction.openOuter()) {
-                getEnergyContainer().insert(MekanismGeneratorsConfig.generators.windGenerationMin * currentMultiplier, t);
+                getEnergyContainer().insert(MekanismGeneratorsConfig.generators.windGenerationMin * currentMultiplier, t, AutomationType.INTERNAL);
                 t.commit();
             }
         }

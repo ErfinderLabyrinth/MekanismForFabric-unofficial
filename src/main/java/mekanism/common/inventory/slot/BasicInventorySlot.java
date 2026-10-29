@@ -13,6 +13,7 @@ import mekanism.common.inventory.container.slot.SlotOverlay;
 import mekanism.common.inventory.warning.ISupportsWarning;
 import mekanism.common.storage.util.TransactionBiPredicate;
 import mekanism.common.storage.util.TransactionPredicate;
+import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.RegistryUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -314,7 +315,7 @@ public class BasicInventorySlot extends SnapshotParticipant<ItemStack> implement
             return 0;
         }
         boolean sameType = false;
-        if (isEmpty() || (sameType = ItemEntity.areMergable(current.getStack(), stack))) {
+        if (isEmpty() || (sameType = InventoryUtils.areItemsStackable(current.getStack(), stack))) {
             int toAdd = Math.min(stack.getCount(), needed);
             //If we want to actually insert the item, then update the current item
             if (sameType) {

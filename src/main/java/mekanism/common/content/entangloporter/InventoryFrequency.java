@@ -298,8 +298,9 @@ public class InventoryFrequency extends Frequency implements /*IMekanismInventor
             });
             transferHandlers.add(() -> {
                 if (target.getHandlerCount() > 0) {
+                    long amountToExtract = EmitUtils.sendToAcceptors(target, toSend);
                     try(Transaction t = Transaction.openOuter()) {
-                        storedEnergy.extract(EmitUtils.sendToAcceptors(target, toSend), t);
+                        storedEnergy.extract(amountToExtract, t);
                         t.commit();
                     }
                 }
@@ -339,10 +340,10 @@ public class InventoryFrequency extends Frequency implements /*IMekanismInventor
         }
         STACK toSend = (STACK) tank.getResource().getStack(toSendAmount);
         if (!toSend.isEmpty()) {
-            BlockApiLookup<IChemicalHandler<CHEMICAL, STACK, ?>, Direction> capability = ChemicalUtil.getBlockLookupForChemical(toSend);
-            ChemicalHandlerTarget<CHEMICAL, STACK, IChemicalHandler<CHEMICAL, STACK, ?>> target = new ChemicalHandlerTarget<>(toSend, expected);
+            BlockApiLookup<Storage<CHEMICAL>, Direction> capability = ChemicalUtil.getBlockLookupForChemical(toSend);
+            ChemicalHandlerTarget<CHEMICAL, STACK, Storage<CHEMICAL>> target = new ChemicalHandlerTarget<>(toSend, expected);
             typesToEject.put(chemicalType, (tile, side) -> {
-                IChemicalHandler<CHEMICAL, STACK, ?> handler = capability.find(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
+                Storage<CHEMICAL> handler = capability.find(tile.getLevel(), tile.getBlockPos(), side.getOpposite());
                 if(handler != null) {
                     if (ChemicalUtil.canInsert(handler, toSend)) {
                         target.addHandler(handler);
