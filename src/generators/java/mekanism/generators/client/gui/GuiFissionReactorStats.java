@@ -1,6 +1,8 @@
 package mekanism.generators.client.gui;
 
 import java.util.Collections;
+
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.bar.GuiBar.IBarInfoHandler;
 import mekanism.client.gui.element.bar.GuiDynamicHorizontalRateBar;
@@ -71,7 +73,7 @@ public class GuiFissionReactorStats extends GuiMekanismTile<TileEntityFissionRea
                 if (limit >= 0 && limit <= tile.getMultiblock().getMaxBurnRate()) {
                     // round to two decimals
                     limit = UnitDisplayUtils.roundDecimals(limit);
-                    MekanismGenerators.packetHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.INJECTION_RATE, tile, limit));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.INJECTION_RATE, tile, limit));
                     rateLimitField.setText("");
                 }
             } catch (NumberFormatException ignored) {

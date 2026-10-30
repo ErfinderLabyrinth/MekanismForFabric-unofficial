@@ -1,6 +1,6 @@
 package mekanism.client.gui.element.bar;
 
-import java.util.List;
+import mekanism.api.FluidStack;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.MekanismRenderer;
@@ -11,8 +11,9 @@ import mekanism.common.util.text.TextUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class GuiFluidBar extends GuiTankBar<FluidStack> {
 
@@ -57,15 +58,15 @@ public class GuiFluidBar extends GuiTankBar<FluidStack> {
             public Component getTooltip() {
                 if (tank.isEmpty()) {
                     return MekanismLang.EMPTY.translate();
-                } else if (tank.getFluidAmount() == Integer.MAX_VALUE) {
+                } else if (tank.getAmount() == Integer.MAX_VALUE) {
                     return MekanismLang.GENERIC_STORED.translate(tank.getFluid(), MekanismLang.INFINITE);
                 }
-                return MekanismLang.GENERIC_STORED_MB.translate(tank.getFluid(), TextUtils.format(tank.getFluidAmount()));
+                return MekanismLang.GENERIC_STORED_MB.translate(tank.getFluid(), TextUtils.format(tank.getAmount()));
             }
 
             @Override
             public double getLevel() {
-                return tank.getFluidAmount() / (double) tank.getCapacity();
+                return tank.getAmount() / (double) tank.getCapacity();
             }
         };
     }

@@ -1,10 +1,11 @@
 package mekanism.common.inventory.container.sync;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import mekanism.common.network.to_client.container.property.IntPropertyData;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Version of {@link net.minecraft.world.inventory.DataSlot} for making it easier to handle enums

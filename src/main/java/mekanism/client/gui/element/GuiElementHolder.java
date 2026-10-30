@@ -1,7 +1,6 @@
 package mekanism.client.gui.element;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import java.io.InputStream;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.Mekanism;
 import mekanism.common.lib.Color;
@@ -12,6 +11,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.InputStream;
 
 public class GuiElementHolder extends GuiScalableElement {
 

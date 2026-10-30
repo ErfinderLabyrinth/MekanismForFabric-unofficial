@@ -40,4 +40,8 @@ public class GeneratorsContainerTypes {
     public static final ContainerTypeRegistryObject<MekanismTileContainer<TileEntityAdvancedSolarGenerator>> ADVANCED_SOLAR_GENERATOR = CONTAINER_TYPES.register("advanced_solar_generator", TileEntityAdvancedSolarGenerator.class);
     public static final ContainerTypeRegistryObject<EmptyTileContainer<TileEntityTurbineCasing>> TURBINE_STATS = CONTAINER_TYPES.registerEmpty("turbine_stats", TileEntityTurbineCasing.class);
     public static final ContainerTypeRegistryObject<MekanismTileContainer<TileEntityWindGenerator>> WIND_GENERATOR = CONTAINER_TYPES.register(GeneratorsBlocks.WIND_GENERATOR, TileEntityWindGenerator.class);
+
+    public static void register() {
+
+    }
 }

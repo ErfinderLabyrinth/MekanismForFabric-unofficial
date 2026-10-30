@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tag": "forge:deuterium"
+    "tagSupplier": "c:deuterium"
   },
   "fluidOutput": {
     "amount": 1,
@@ -10,7 +10,7 @@
   },
   "gasInput": {
     "amount": 1,
-    "tag": "mekanism:deuterium"
+    "tagSupplier": "mekanism:deuterium"
   },
   "gasOutput": {
     "amount": 1,

@@ -2,13 +2,13 @@
   "type": "mekanism:combining",
   "extraInput": {
     "ingredient": {
-      "tag": "forge:cobblestone/normal"
+      "tag": "c:normal_cobblestones"
     }
   },
   "mainInput": {
     "amount": 20,
     "ingredient": {
-      "tag": "forge:raw_materials/copper"
+      "tag": "c:raw_copper_ores"
     }
   },
   "output": {

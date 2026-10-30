@@ -5,7 +5,7 @@
       "item": "minecraft:iron_bars"
     },
     "S": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     }
   },
   "pattern": [

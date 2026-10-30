@@ -2,7 +2,7 @@
   "type": "mekanism:sawing",
   "input": {
     "ingredient": {
-      "tag": "forge:bookshelves"
+      "tag": "c:bookshelves"
     }
   },
   "mainOutput": {

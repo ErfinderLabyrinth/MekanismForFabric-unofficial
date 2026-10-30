@@ -1,9 +1,5 @@
 package mekanism.common.block.attribute;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
@@ -15,6 +11,11 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface Attribute {
 

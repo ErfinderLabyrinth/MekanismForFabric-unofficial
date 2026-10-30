@@ -12,28 +12,24 @@ import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class ExtendedAdvancementBuilder {
 
     private final Advancement.Builder internal = Advancement.Builder.advancement();
     private final MekanismAdvancement advancement;
-    private final ExistingFileHelper existingFileHelper;
 
-    private ExtendedAdvancementBuilder(MekanismAdvancement advancement, ExistingFileHelper existingFileHelper) {
+    private ExtendedAdvancementBuilder(MekanismAdvancement advancement) {
         this.advancement = advancement;
-        this.existingFileHelper = existingFileHelper;
         if (this.advancement.parent() != null) {
             internal.parent(this.advancement.parent().name());
         }
     }
 
-    public static ExtendedAdvancementBuilder advancement(MekanismAdvancement advancement, ExistingFileHelper existingFileHelper) {
-        return new ExtendedAdvancementBuilder(advancement, existingFileHelper);
+    public static ExtendedAdvancementBuilder advancement(MekanismAdvancement advancement) {
+        return new ExtendedAdvancementBuilder(advancement);
     }
 
     public ExtendedAdvancementBuilder display(ItemStack stack, @Nullable ResourceLocation background, FrameType frame, boolean showToast, boolean announceToChat,
@@ -106,6 +102,10 @@ public class ExtendedAdvancementBuilder {
         return addCriterion(RegistryUtils.getPath(item.asItem()), InventoryChangeTrigger.TriggerInstance.hasItems(item));
     }
 
+    public ExtendedAdvancementBuilder parent(Advancement parent) {
+        return runInternal(builder -> builder.parent(parent));
+    }
+
     public ExtendedAdvancementBuilder requirements(String[][] requirements) {
         return runInternal(builder -> builder.requirements(requirements));
     }
@@ -116,8 +116,6 @@ public class ExtendedAdvancementBuilder {
     }
 
     public Advancement save(Consumer<Advancement> consumer) {
-        Advancement built = internal.save(consumer, advancement.name(), existingFileHelper);
-        existingFileHelper.trackGenerated(built.getId(), PackType.SERVER_DATA, ".json", "advancements");
-        return built;
+        return internal.save(consumer, advancement.name().toString());
     }
 }

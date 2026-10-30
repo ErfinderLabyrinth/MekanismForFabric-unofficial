@@ -1,16 +1,19 @@
 package mekanism.common.capabilities.holder.slot;
 
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import mekanism.api.RelativeSide;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.capabilities.holder.BasicHolder;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class InventorySlotHolder extends BasicHolder<IInventorySlot> implements IInventorySlotHolder {
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+public class InventorySlotHolder extends BasicHolder<IInventorySlot, ItemVariant> implements IInventorySlotHolder {
 
     @Nullable
     private final Predicate<RelativeSide> insertPredicate;
@@ -27,12 +30,6 @@ public class InventorySlotHolder extends BasicHolder<IInventorySlot> implements 
         addSlotInternal(slot, sides);
     }
 
-    @NotNull
-    @Override
-    public List<IInventorySlot> getInventorySlots(@Nullable Direction direction) {
-        return getSlots(direction);
-    }
-
     @Override
     public boolean canInsert(@Nullable Direction direction) {
         //If the insert predicate is null then we can insert from any side, don't bother looking up our facing
@@ -43,5 +40,10 @@ public class InventorySlotHolder extends BasicHolder<IInventorySlot> implements 
     public boolean canExtract(@Nullable Direction direction) {
         //If the extract predicate is null then we can extract from any side, don't bother looking up our facing
         return direction != null && (extractPredicate == null || extractPredicate.test(RelativeSide.fromDirections(facingSupplier.get(), direction)));
+    }
+
+    @Override
+    public @NotNull Storage<ItemVariant> getInventorySlots(@Nullable Direction side) {
+        return new CombinedStorage<>(getSlots(side));
     }
 }

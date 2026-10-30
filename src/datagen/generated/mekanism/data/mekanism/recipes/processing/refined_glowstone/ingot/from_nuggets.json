@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:nuggets/refined_glowstone"
+      "tag": "c:refined_glowstone_nuggets"
     },
     "P": {
       "item": "mekanism:nugget_refined_glowstone"

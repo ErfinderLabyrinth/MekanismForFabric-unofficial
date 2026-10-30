@@ -6,9 +6,9 @@
   },
   "itemInput": {
     "ingredient": {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
-        "tag": "forge:fence_gates/plastic"
+        "tag": "c:plastic_fence_gates"
       },
       "subtracted": {
         "item": "mekanismadditions:light_blue_plastic_fence_gate"

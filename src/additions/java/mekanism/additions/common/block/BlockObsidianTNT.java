@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockObsidianTNT extends TntBlock implements IStateFluidLoggable {
-
+    public static final ThreadLocal<Boolean> OBSIDIAN_TNT_EXPLODING = ThreadLocal.withInitial(() -> false);
     private static final VoxelShape bounds = VoxelShapeUtils.combine(
           box(0, 0, 0, 16, 3, 16),//Wooden1
           box(0, 8, 0, 16, 11, 16),//Wooden2
@@ -72,15 +72,7 @@ public class BlockObsidianTNT extends TntBlock implements IStateFluidLoggable {
         return BlockStateHelper.getStateForPlacement(this, super.getStateForPlacement(context), context);
     }
 
-    @Override
-    public int getFlammability(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
-        //300 is 100% chance fire will spread to this block, 100 is default for TNT
-        // Given we are "obsidian" make ours slightly more stable against fire being spread than vanilla TNT
-        return 75;
-    }
-
-    @Override
-    public void onCaughtFire(@NotNull BlockState state, Level world, @NotNull BlockPos pos, @Nullable Direction side, @Nullable LivingEntity igniter) {
+    public static void explode(Level world, @NotNull BlockPos pos, @Nullable LivingEntity igniter) {
         if (!world.isClientSide && createAndAddEntity(world, pos, igniter)) {
             world.gameEvent(igniter, GameEvent.PRIME_FUSE, pos);
         }

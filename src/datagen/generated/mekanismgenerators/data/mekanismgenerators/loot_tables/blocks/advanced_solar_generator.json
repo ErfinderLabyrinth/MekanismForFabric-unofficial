@@ -36,8 +36,8 @@
                 },
                 {
                   "op": "replace",
-                  "source": "EnergyContainers",
-                  "target": "mekData.EnergyContainers"
+                  "source": "EnergyContainer",
+                  "target": "mekData.EnergyContainer"
                 },
                 {
                   "op": "replace",
@@ -51,7 +51,6 @@
           "name": "mekanismgenerators:advanced_solar_generator"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
   ],

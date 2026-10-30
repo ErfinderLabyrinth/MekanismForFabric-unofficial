@@ -1,7 +1,9 @@
 package mekanism.generators.common.network.to_server;
 
+import mekanism.api.MekanismAPI;
 import mekanism.api.functions.TriConsumer;
 import mekanism.common.network.IMekanismPacket;
+import mekanism.common.network.to_server.PacketPortableTeleporterTeleport;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.WorldUtils;
 import mekanism.generators.common.tile.fission.TileEntityFissionReactorCasing;
@@ -10,16 +12,19 @@ import mekanism.generators.common.tile.fission.TileEntityFissionReactorLogicAdap
 import mekanism.generators.common.tile.fusion.TileEntityFusionReactorBlock;
 import mekanism.generators.common.tile.fusion.TileEntityFusionReactorLogicAdapter;
 import mekanism.generators.common.tile.fusion.TileEntityFusionReactorLogicAdapter.FusionReactorLogic;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
 
 /**
  * Used for informing the server that an action happened in a GUI
  */
 public class PacketGeneratorsGuiInteract implements IMekanismPacket {
+    public static final PacketType<PacketGeneratorsGuiInteract> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "generators_gui_interact"), PacketGeneratorsGuiInteract::decode);
 
     private final GeneratorsGuiInteraction interaction;
     private final BlockPos tilePosition;
@@ -44,8 +49,7 @@ public class PacketGeneratorsGuiInteract implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        Player player = context.getSender();
+    public void handle(Player player, PacketSender sender) {
         if (player != null) {
             TileEntityMekanism tile = WorldUtils.getTileEntity(TileEntityMekanism.class, player.level(), tilePosition);
             if (tile != null) {
@@ -63,6 +67,11 @@ public class PacketGeneratorsGuiInteract implements IMekanismPacket {
 
     public static PacketGeneratorsGuiInteract decode(FriendlyByteBuf buffer) {
         return new PacketGeneratorsGuiInteract(buffer.readEnum(GeneratorsGuiInteraction.class), buffer.readBlockPos(), buffer.readDouble());
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 
     public enum GeneratorsGuiInteraction {

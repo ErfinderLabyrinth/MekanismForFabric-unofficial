@@ -1,12 +1,13 @@
 package mekanism.api.tier;
 
-import java.util.Locale;
 import mekanism.api.SupportsColorMap;
 import mekanism.api.math.MathUtils;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 /**
  * The default tiers used in Mekanism.

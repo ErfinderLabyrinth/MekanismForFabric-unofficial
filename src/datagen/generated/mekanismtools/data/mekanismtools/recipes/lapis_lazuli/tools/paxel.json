@@ -3,13 +3,13 @@
   "category": "equipment",
   "key": {
     "A": {
-      "tag": "forge:tools/axes/lapis_lazuli"
+      "tag": "c:lapis_lazuli_axes"
     },
     "P": {
       "tag": "forge:tools/pickaxes/lapis_lazuli"
     },
     "R": {
-      "tag": "forge:rods/wooden"
+      "item": "minecraft:stick"
     },
     "S": {
       "tag": "forge:tools/shovels/lapis_lazuli"

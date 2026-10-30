@@ -7,7 +7,7 @@
   "itemInput": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:raw_materials/gold"
+      "tag": "c:raw_gold_ores"
     }
   },
   "output": {

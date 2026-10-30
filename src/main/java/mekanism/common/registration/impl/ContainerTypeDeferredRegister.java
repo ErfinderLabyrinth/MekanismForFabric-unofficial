@@ -1,6 +1,5 @@
 package mekanism.common.registration.impl;
 
-import java.util.function.Supplier;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.inventory.container.entity.IEntityContainer;
 import mekanism.common.inventory.container.entity.robit.RobitContainer;
@@ -10,26 +9,28 @@ import mekanism.common.inventory.container.type.MekanismContainerType;
 import mekanism.common.inventory.container.type.MekanismContainerType.IMekanismContainerFactory;
 import mekanism.common.inventory.container.type.MekanismItemContainerType;
 import mekanism.common.inventory.container.type.MekanismItemContainerType.IMekanismItemContainerFactory;
-import mekanism.common.registration.INamedEntry;
 import mekanism.common.registration.WrappedDeferredRegister;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.network.IContainerFactory;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
-public class ContainerTypeDeferredRegister extends WrappedDeferredRegister<MenuType<?>> {
+import java.util.function.Supplier;
 
+public class ContainerTypeDeferredRegister extends WrappedDeferredRegister<MenuType<?>> {
+    String modid;
     public ContainerTypeDeferredRegister(String modid) {
-        super(modid, ForgeRegistries.MENU_TYPES);
+        super(BuiltInRegistries.MENU);
+        this.modid = modid;
     }
 
-    public <TILE extends TileEntityMekanism> ContainerTypeRegistryObject<MekanismTileContainer<TILE>> register(INamedEntry nameProvider, Class<TILE> tileClass) {
+    public <TILE extends TileEntityMekanism> ContainerTypeRegistryObject<MekanismTileContainer<TILE>> register(mekanism.api.providers.INameProvider nameProvider, Class<TILE> tileClass) {
         return register(nameProvider.getInternalRegistryName(), tileClass);
     }
 
@@ -37,10 +38,10 @@ public class ContainerTypeDeferredRegister extends WrappedDeferredRegister<MenuT
         //Temporarily generate this using null as we replace it with a proper value before we actually use this, so it is fine
         ContainerTypeRegistryObject<MekanismTileContainer<TILE>> registryObject = new ContainerTypeRegistryObject<>(null);
         IMekanismContainerFactory<TILE, MekanismTileContainer<TILE>> factory = (id, inv, data) -> new MekanismTileContainer<>(registryObject, id, inv, data);
-        return register(name, () -> MekanismContainerType.tile(tileClass, factory), registryObject::setRegistryObject);
+        return register(new ResourceLocation(modid, name), () -> MekanismContainerType.tile(tileClass, factory), registryObject::setRegistryObject);
     }
 
-    public <TILE extends TileEntityMekanism> ContainerTypeRegistryObject<EmptyTileContainer<TILE>> registerEmpty(INamedEntry nameProvider, Class<TILE> tileClass) {
+    public <TILE extends TileEntityMekanism> ContainerTypeRegistryObject<EmptyTileContainer<TILE>> registerEmpty(mekanism.api.providers.INameProvider nameProvider, Class<TILE> tileClass) {
         return registerEmpty(nameProvider.getInternalRegistryName(), tileClass);
     }
 
@@ -48,11 +49,11 @@ public class ContainerTypeDeferredRegister extends WrappedDeferredRegister<MenuT
         //Temporarily generate this using null as we replace it with a proper value before we actually use this, so it is fine
         ContainerTypeRegistryObject<EmptyTileContainer<TILE>> registryObject = new ContainerTypeRegistryObject<>(null);
         IMekanismContainerFactory<TILE, EmptyTileContainer<TILE>> factory = (id, inv, data) -> new EmptyTileContainer<>(registryObject, id, inv, data);
-        return register(name, () -> MekanismContainerType.tile(tileClass, factory), registryObject::setRegistryObject);
+        return register(new ResourceLocation(modid, name), () -> MekanismContainerType.tile(tileClass, factory), registryObject::setRegistryObject);
     }
 
-    public <TILE extends TileEntityMekanism, CONTAINER extends MekanismTileContainer<TILE>> ContainerTypeRegistryObject<CONTAINER> register(INamedEntry nameProvider,
-          Class<TILE> tileClass, IMekanismContainerFactory<TILE, CONTAINER> factory) {
+    public <TILE extends TileEntityMekanism, CONTAINER extends MekanismTileContainer<TILE>> ContainerTypeRegistryObject<CONTAINER> register(mekanism.api.providers.INameProvider nameProvider,
+                                                                                                                                            Class<TILE> tileClass, IMekanismContainerFactory<TILE, CONTAINER> factory) {
         return register(nameProvider.getInternalRegistryName(), tileClass, factory);
     }
 
@@ -70,11 +71,11 @@ public class ContainerTypeDeferredRegister extends WrappedDeferredRegister<MenuT
         //Temporarily generate this using null as we replace it with a proper value before we actually use this, so it is fine
         ContainerTypeRegistryObject<RobitContainer> registryObject = new ContainerTypeRegistryObject<>(null);
         IMekanismContainerFactory<EntityRobit, RobitContainer> factory = (id, inv, data) -> new RobitContainer(registryObject, id, inv, data);
-        return register(name, () -> MekanismContainerType.entity(EntityRobit.class, factory), registryObject::setRegistryObject);
+        return register(new ResourceLocation(modid, name), () -> MekanismContainerType.entity(EntityRobit.class, factory), registryObject::setRegistryObject);
     }
 
-    public <ITEM extends Item, CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(INamedEntry nameProvider, Class<ITEM> itemClass,
-          IMekanismItemContainerFactory<ITEM, CONTAINER> factory) {
+    public <ITEM extends Item, CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(mekanism.api.providers.INameProvider nameProvider, Class<ITEM> itemClass,
+                                                                                                                        IMekanismItemContainerFactory<ITEM, CONTAINER> factory) {
         return register(nameProvider.getInternalRegistryName(), itemClass, factory);
     }
 
@@ -83,19 +84,19 @@ public class ContainerTypeDeferredRegister extends WrappedDeferredRegister<MenuT
         return register(name, () -> MekanismItemContainerType.item(itemClass, factory));
     }
 
-    public <CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(String name, IContainerFactory<CONTAINER> factory) {
-        return register(name, () -> new MenuType<>(factory, FeatureFlags.VANILLA_SET));
+    public <CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(String name, ExtendedScreenHandlerType.ExtendedFactory<CONTAINER> factory) {
+        return register(name, () -> new ExtendedScreenHandlerType<>(factory));
     }
 
-    public <CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(INamedEntry nameProvider, Supplier<MenuType<CONTAINER>> supplier) {
+    public <CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(mekanism.api.providers.INameProvider nameProvider, Supplier<MenuType<CONTAINER>> supplier) {
         return register(nameProvider.getInternalRegistryName(), supplier);
     }
 
     public <CONTAINER extends AbstractContainerMenu> ContainerTypeRegistryObject<CONTAINER> register(String name, Supplier<MenuType<CONTAINER>> supplier) {
-        return register(name, supplier, ContainerTypeRegistryObject::new);
+        return register(new ResourceLocation(modid, name), supplier, ContainerTypeRegistryObject::new);
     }
 
-    public <TILE extends TileEntityMekanism> ContainerBuilder<TILE> custom(INamedEntry nameProvider, Class<TILE> tileClass) {
+    public <TILE extends TileEntityMekanism> ContainerBuilder<TILE> custom(mekanism.api.providers.INameProvider nameProvider, Class<TILE> tileClass) {
         return custom(nameProvider.getInternalRegistryName(), tileClass);
     }
 
@@ -157,7 +158,7 @@ public class ContainerTypeDeferredRegister extends WrappedDeferredRegister<MenuT
                     }
                 }
             };
-            return register(name, () -> MekanismContainerType.tile(tileClass, factory), registryObject::setRegistryObject);
+            return register(new ResourceLocation(modid, name), () -> MekanismContainerType.tile(tileClass, factory), registryObject::setRegistryObject);
         }
     }
 }

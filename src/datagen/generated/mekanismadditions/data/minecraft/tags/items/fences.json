@@ -1,5 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "#forge:fences/plastic"
+    "#c:plastic_fences"
   ]
 }

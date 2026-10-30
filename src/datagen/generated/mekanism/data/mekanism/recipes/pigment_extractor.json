@@ -5,10 +5,10 @@
       "item": "minecraft:flint"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:redstone_dusts"
     },
     "X": {
       "item": "mekanism:steel_casing"

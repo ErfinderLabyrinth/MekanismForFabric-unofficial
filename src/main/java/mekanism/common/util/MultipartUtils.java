@@ -1,6 +1,5 @@
 package mekanism.common.util;
 
-import java.util.Collection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -9,6 +8,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.Collection;
 
 public final class MultipartUtils {
 
@@ -28,7 +29,8 @@ public final class MultipartUtils {
         float lookZ = f1 * f3;
         double reach = 5.0D;
         if (entity instanceof Player player) {
-            reach = player.getBlockReach();
+            //TODO
+            //reach = player..getBlockReach();
         }
         Vec3 end = start.add(lookX * reach, lookY * reach, lookZ * reach);
         return new RayTraceVectors(start, end);

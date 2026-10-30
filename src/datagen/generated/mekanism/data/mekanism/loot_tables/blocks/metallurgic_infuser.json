@@ -46,8 +46,8 @@
                 },
                 {
                   "op": "replace",
-                  "source": "EnergyContainers",
-                  "target": "mekData.EnergyContainers"
+                  "source": "EnergyContainer",
+                  "target": "mekData.EnergyContainer"
                 },
                 {
                   "op": "replace",
@@ -66,9 +66,7 @@
           "name": "mekanism:metallurgic_infuser"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/metallurgic_infuser"
+  ]
 }

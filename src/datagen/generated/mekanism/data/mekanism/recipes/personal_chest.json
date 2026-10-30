@@ -2,16 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "G": {
-      "tag": "forge:glass/silica"
+      "tag": "c:glass_blocks"
     },
     "P": {
-      "tag": "forge:chests/wooden"
+      "tag": "c:wooden_chests"
     },
     "S": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     }
   },
   "pattern": [

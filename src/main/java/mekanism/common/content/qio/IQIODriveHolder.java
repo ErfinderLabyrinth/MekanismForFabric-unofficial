@@ -1,9 +1,10 @@
 package mekanism.common.content.qio;
 
-import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.Mekanism;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 public interface IQIODriveHolder extends IQIOFrequencyHolder {
 

@@ -5,10 +5,10 @@
       "item": "minecraft:diamond_pickaxe"
     },
     "A": {
-      "tag": "forge:alloys/elite"
+      "tag": "c:elite_alloys"
     },
     "H": {
-      "tag": "forge:pellets/polonium"
+      "tag": "c:polonium_pellets"
     },
     "P": {
       "item": "mekanism:module_base"

@@ -1,14 +1,15 @@
 package mekanism.common.capabilities.fluid;
 
-import java.util.function.BooleanSupplier;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.capabilities.merged.MergedTank;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.BooleanSupplier;
 
 /**
  * Like {@link mekanism.api.chemical.merged.ChemicalTankWrapper}
@@ -41,15 +42,40 @@ public class FluidTankWrapper implements IExtendedFluidTank {
         internal.setStackUnchecked(stack);
     }
 
+//    @Override
+//    public FluidStack insert(FluidStack stack, Action action, AutomationType automationType) {
+//        //Only allow inserting if we pass the check
+//        return insertCheck.getAsBoolean() ? internal.insert(stack, action, automationType) : stack;
+//    }
+
+//    @Override
+//    public FluidStack extract(int amount, Action action, AutomationType automationType) {
+//        return internal.extract(amount, action, automationType);
+//    }
+
     @Override
-    public FluidStack insert(FluidStack stack, Action action, AutomationType automationType) {
-        //Only allow inserting if we pass the check
-        return insertCheck.getAsBoolean() ? internal.insert(stack, action, automationType) : stack;
+    public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+        return insertCheck.getAsBoolean() ? internal.insert(resource, maxAmount, transaction) : 0;
     }
 
     @Override
-    public FluidStack extract(int amount, Action action, AutomationType automationType) {
-        return internal.extract(amount, action, automationType);
+    public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+        return internal.extract(resource, maxAmount, transaction);
+    }
+
+    @Override
+    public boolean isResourceBlank() {
+        return internal.isResourceBlank();
+    }
+
+    @Override
+    public FluidVariant getResource() {
+        return internal.getResource();
+    }
+
+    @Override
+    public long getAmount() {
+        return internal.getAmount();
     }
 
     @Override
@@ -58,18 +84,18 @@ public class FluidTankWrapper implements IExtendedFluidTank {
     }
 
     @Override
-    public int setStackSize(int amount, Action action) {
-        return internal.setStackSize(amount, action);
+    public long setStackSize(long amount) {
+        return internal.setStackSize(amount);
     }
 
     @Override
-    public int growStack(int amount, Action action) {
-        return internal.growStack(amount, action);
+    public long growStack(long amount) {
+        return internal.growStack(amount);
     }
 
     @Override
-    public int shrinkStack(int amount, Action action) {
-        return internal.shrinkStack(amount, action);
+    public long shrinkStack(long amount) {
+        return internal.shrinkStack(amount);
     }
 
     @Override
@@ -88,7 +114,7 @@ public class FluidTankWrapper implements IExtendedFluidTank {
     }
 
     @Override
-    public int getNeeded() {
+    public long getNeeded() {
         return internal.getNeeded();
     }
 
@@ -108,13 +134,13 @@ public class FluidTankWrapper implements IExtendedFluidTank {
         return internal.getFluid();
     }
 
-    @Override
-    public int getFluidAmount() {
-        return internal.getFluidAmount();
-    }
+//    @Override
+//    public long getFluidAmount() {
+//        return internal.getFluid().amount();
+//    }
 
     @Override
-    public int getCapacity() {
+    public long getCapacity() {
         return internal.getCapacity();
     }
 

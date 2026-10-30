@@ -1,15 +1,12 @@
 package mekanism.common.inventory.warning;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.MekanismLang;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.function.BooleanSupplier;
 
 public class WarningTracker implements IWarningTracker {
 

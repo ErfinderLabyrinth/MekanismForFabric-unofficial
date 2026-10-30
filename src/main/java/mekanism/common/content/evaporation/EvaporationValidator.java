@@ -1,7 +1,6 @@
 package mekanism.common.content.evaporation;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import java.util.EnumSet;
 import mekanism.common.MekanismLang;
 import mekanism.common.content.blocktype.BlockType;
 import mekanism.common.lib.math.voxel.VoxelCuboid;
@@ -19,6 +18,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+
+import java.util.EnumSet;
 
 public class EvaporationValidator extends CuboidStructureValidator<EvaporationMultiblockData> {
 

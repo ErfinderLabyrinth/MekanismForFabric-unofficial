@@ -5,13 +5,13 @@
       "item": "mekanism:basic_fluid_tank"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "E": {
       "item": "mekanism:energy_tablet"
     },
     "G": {
-      "tag": "forge:glass/silica"
+      "tag": "c:glass_blocks"
     },
     "T": {
       "item": "mekanism:basic_chemical_tank"

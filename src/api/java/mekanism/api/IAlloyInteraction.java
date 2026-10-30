@@ -3,7 +3,6 @@ package mekanism.api;
 import mekanism.api.tier.AlloyTier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -11,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author aidancbrady
  */
-@AutoRegisterCapability
+//@AutoRegisterCapability //TODO
 public interface IAlloyInteraction {
 
     /**

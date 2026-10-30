@@ -1,16 +1,19 @@
 package mekanism.common.capabilities.holder.fluid;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.capabilities.holder.ConfigHolder;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.component.TileComponentConfig;
 import mekanism.common.tile.component.config.slot.FluidSlotInfo;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.function.Supplier;
 
 public class ConfigFluidTankHolder extends ConfigHolder<IExtendedFluidTank> implements IFluidTankHolder {
 
@@ -27,9 +30,8 @@ public class ConfigFluidTankHolder extends ConfigHolder<IExtendedFluidTank> impl
         return TransmissionType.FLUID;
     }
 
-    @NotNull
     @Override
-    public List<IExtendedFluidTank> getTanks(@Nullable Direction direction) {
-        return getSlots(direction, slotInfo -> slotInfo instanceof FluidSlotInfo info ? info.getTanks() : Collections.emptyList());
+    public @NotNull Storage<FluidVariant> getTanks(@Nullable Direction direction) {
+        return new CombinedStorage<>(getSlots(direction, slotInfo -> slotInfo instanceof FluidSlotInfo info ? info.getTanks() : Collections.emptyList()));
     }
 }

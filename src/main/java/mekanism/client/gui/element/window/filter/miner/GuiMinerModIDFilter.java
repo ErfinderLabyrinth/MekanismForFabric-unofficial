@@ -1,7 +1,5 @@
 package mekanism.client.gui.element.window.filter.miner;
 
-import java.util.Collections;
-import java.util.List;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.window.filter.GuiModIDFilter;
 import mekanism.common.base.TagCache;
@@ -10,6 +8,9 @@ import mekanism.common.tile.machine.TileEntityDigitalMiner;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 public class GuiMinerModIDFilter extends GuiModIDFilter<MinerModIDFilter, TileEntityDigitalMiner> implements GuiMinerFilterHelper {
 

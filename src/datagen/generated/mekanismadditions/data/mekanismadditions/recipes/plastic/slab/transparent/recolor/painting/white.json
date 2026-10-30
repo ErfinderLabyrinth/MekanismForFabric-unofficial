@@ -6,9 +6,9 @@
   },
   "itemInput": {
     "ingredient": {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
-        "tag": "forge:slabs/plastic/transparent"
+        "tag": "c:transparent_plastic_slabs"
       },
       "subtracted": {
         "item": "mekanismadditions:white_plastic_transparent_slab"

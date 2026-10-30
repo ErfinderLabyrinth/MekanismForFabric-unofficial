@@ -9,7 +9,6 @@
 		"particle": "mekanism:block/models/logistical_sorter",
 		"all": "mekanism:block/models/logistical_sorter"
 	},
-	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"name": "portBackLarge",
@@ -207,7 +206,7 @@
 			"faces": {
 				"north": {"uv": [0, 0, 5, 5], "texture": "#3", "cullface": "north"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

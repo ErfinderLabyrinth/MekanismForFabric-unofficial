@@ -1,6 +1,5 @@
 package mekanism.common.tile.multiblock;
 
-import mekanism.api.Action;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
@@ -14,15 +13,23 @@ import mekanism.api.chemical.pigment.PigmentStack;
 import mekanism.api.chemical.slurry.ISlurryTank;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
+import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
 import mekanism.common.registries.MekanismBlocks;
 import mekanism.common.tile.base.SubstanceType;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class TileEntityDynamicValve extends TileEntityDynamicTank {
 
@@ -33,31 +40,81 @@ public class TileEntityDynamicValve extends TileEntityDynamicTank {
     @NotNull
     @Override
     protected IFluidTankHolder getInitialFluidTanks(IContentsListener listener) {
-        return side -> getMultiblock().getFluidTanks(side);
+        return new IFluidTankHolder() {
+            @Override
+            public @NotNull Storage<FluidVariant> getTanks(@Nullable Direction side) {
+                return getMultiblock().getFluidStorage(side);
+            }
+
+            @Override
+            public List<IExtendedFluidTank> getAll() {
+                return getMultiblock().fluidTanks;
+            }
+        };
     }
 
     @NotNull
     @Override
     public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(IContentsListener listener) {
-        return side -> getMultiblock().getGasTanks(side);
+        return new IChemicalTankHolder<>() {
+            @Override
+            public @NotNull Storage<Gas> getTanks(@Nullable Direction side) {
+                return getMultiblock().getGasStorage(side);
+            }
+
+            @Override
+            public List<IGasTank> getAll() {
+                return getMultiblock().getGasTanks();
+            }
+        };
     }
 
     @NotNull
     @Override
     public IChemicalTankHolder<InfuseType, InfusionStack, IInfusionTank> getInitialInfusionTanks(IContentsListener listener) {
-        return side -> getMultiblock().getInfusionTanks(side);
+        return new IChemicalTankHolder<>() {
+            @Override
+            public @NotNull Storage<InfuseType> getTanks(@Nullable Direction side) {
+                return getMultiblock().getInfusionStorage(side);
+            }
+
+            @Override
+            public List<IInfusionTank> getAll() {
+                return getMultiblock().getInfusionTanks();
+            }
+        };
     }
 
     @NotNull
     @Override
     public IChemicalTankHolder<Pigment, PigmentStack, IPigmentTank> getInitialPigmentTanks(IContentsListener listener) {
-        return side -> getMultiblock().getPigmentTanks(side);
+        return new IChemicalTankHolder<>() {
+            @Override
+            public @NotNull Storage<Pigment> getTanks(@Nullable Direction side) {
+                return getMultiblock().getPigmentStorage(side);
+            }
+
+            @Override
+            public List<IPigmentTank> getAll() {
+                return getMultiblock().getPigmentTanks();
+            }
+        };
     }
 
     @NotNull
     @Override
     public IChemicalTankHolder<Slurry, SlurryStack, ISlurryTank> getInitialSlurryTanks(IContentsListener listener) {
-        return side -> getMultiblock().getSlurryTanks(side);
+        return new IChemicalTankHolder<>() {
+            @Override
+            public @NotNull Storage<Slurry> getTanks(@Nullable Direction side) {
+                return getMultiblock().getSlurryStorage(side);
+            }
+
+            @Override
+            public List<ISlurryTank> getAll() {
+                return getMultiblock().getSlurryTanks();
+            }
+        };
     }
 
     @Override
@@ -69,14 +126,29 @@ public class TileEntityDynamicValve extends TileEntityDynamicTank {
         return super.persists(type);
     }
 
-    @NotNull
     @Override
-    public FluidStack insertFluid(@NotNull FluidStack stack, Direction side, @NotNull Action action) {
-        FluidStack ret = super.insertFluid(stack, side, action);
-        if (action.execute() && ret.getAmount() < stack.getAmount()) {
-            getMultiblock().triggerValveTransfer(this);
-        }
-        return ret;
+    public @Nullable Storage<FluidVariant> getFluidStorage(@Nullable Direction side) {
+        Storage<FluidVariant> original = super.getFluidStorage(side);
+        return new Storage<FluidVariant>() {
+            @Override
+            public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+                long amountInserted = original.insert(resource, maxAmount, transaction);
+                if (amountInserted != 0) {
+                    getMultiblock().triggerValveTransfer(TileEntityDynamicValve.this);
+                }
+                return amountInserted;
+            }
+
+            @Override
+            public long extract(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+                return original.extract(resource, maxAmount, transaction);
+            }
+
+            @Override
+            public Iterator<StorageView<FluidVariant>> iterator() {
+                return original.iterator();
+            }
+        };
     }
 
     @Override

@@ -1,8 +1,7 @@
 package mekanism.client;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Map;
-import java.util.UUID;
+import mekanism.client.network.ClientPacketHandler;
 import mekanism.client.render.RenderTickHandler;
 import mekanism.client.render.tileentity.RenderSPS;
 import mekanism.client.sound.SoundHandler;
@@ -13,15 +12,24 @@ import mekanism.common.lib.security.SecurityData;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
 import mekanism.common.network.to_server.PacketKey;
 import mekanism.common.recipe.MekanismRecipeType;
+import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-public class MekanismClient {
+import java.util.Map;
+import java.util.UUID;
 
-    private MekanismClient() {
+public class MekanismClient implements ClientModInitializer {
+    private static ClientPacketHandler clientPacketHandler = new ClientPacketHandler();
+
+    @Override
+    public void onInitializeClient() {
+        ClientRegistration.init();
+        clientPacketHandler.initialize();
     }
 
     public static final Map<UUID, SecurityData> clientSecurityMap = new Object2ObjectOpenHashMap<>();
@@ -38,10 +46,14 @@ public class MekanismClient {
             UUID playerUUID = Minecraft.getInstance().player.getUUID();
             boolean down = Minecraft.getInstance().screen == null && pressed;
             if (down != Mekanism.keyMap.has(playerUUID, type)) {
-                Mekanism.packetHandler().sendToServer(new PacketKey(type, down));
+                clientPacketHandler.sendToServer(new PacketKey(type, down));
                 Mekanism.keyMap.update(playerUUID, type, down);
             }
         }
+    }
+
+    public static ClientPacketHandler clientPacketHandler() {
+        return clientPacketHandler;
     }
 
     public static void reset() {
@@ -74,6 +86,11 @@ public class MekanismClient {
     @Nullable
     public static Level tryGetClientWorld() {
         return Minecraft.getInstance().level;
+    }
+
+    @Nullable
+    public static IntegratedServer tryGetSingleplayerServer() {
+        return Minecraft.getInstance().getSingleplayerServer();
     }
 
     @Nullable

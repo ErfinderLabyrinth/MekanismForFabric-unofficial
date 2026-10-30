@@ -1,7 +1,6 @@
 package mekanism.common.recipe.serializer;
 
 import com.google.gson.JsonObject;
-import java.util.function.Function;
 import mekanism.common.Mekanism;
 import mekanism.common.recipe.WrappedShapedRecipe;
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,6 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
 
 public class WrappedShapedRecipeSerializer<RECIPE extends WrappedShapedRecipe> implements RecipeSerializer<RECIPE> {
 

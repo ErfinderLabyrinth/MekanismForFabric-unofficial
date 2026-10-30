@@ -51,11 +51,11 @@ public interface IHashedItem {
     }
 
     /**
-     * Helper to get the tag of the internal {@link ItemStack} that backs this item type. It is <strong>IMPORTANT</strong> to not modify the returned tag.
+     * Helper to get the tagSupplier of the internal {@link ItemStack} that backs this item type. It is <strong>IMPORTANT</strong> to not modify the returned tagSupplier.
      *
      * @return Tag of the internal {@link ItemStack} that backs this item type.
      *
-     * @apiNote Do not modify the returned tag.
+     * @apiNote Do not modify the returned tagSupplier.
      */
     @Nullable
     default CompoundTag getInternalTag() {

@@ -1,6 +1,7 @@
 package mekanism.common.block.basic;
 
 import mekanism.common.block.BlockMekanism;
+import mekanism.common.mixinhelper.PortalFrameBlock;
 import mekanism.common.resource.BlockResourceInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -8,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
-public class BlockResource extends BlockMekanism {
+public class BlockResource extends BlockMekanism implements PortalFrameBlock {
 
     @NotNull
     private final BlockResourceInfo resource;

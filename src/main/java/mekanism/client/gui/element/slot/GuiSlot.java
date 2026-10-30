@@ -1,8 +1,5 @@
 package mekanism.client.gui.element.slot;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
@@ -20,6 +17,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class GuiSlot extends GuiTexturedElement implements IJEIGhostTarget, ISupportsWarning<GuiSlot> {
 
@@ -78,7 +79,7 @@ public class GuiSlot extends GuiTexturedElement implements IJEIGhostTarget, ISup
 
     public GuiSlot click(IClickable onClick) {
         //Use default click sound
-        return click(onClick, SoundEvents.UI_BUTTON_CLICK);
+        return click(onClick, SoundEvents.UI_BUTTON_CLICK::value);
     }
 
     public GuiSlot click(IClickable onClick, @Nullable Supplier<SoundEvent> clickSound) {

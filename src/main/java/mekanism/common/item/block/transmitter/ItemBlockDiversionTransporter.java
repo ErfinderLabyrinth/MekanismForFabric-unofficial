@@ -1,6 +1,5 @@
 package mekanism.common.item.block.transmitter;
 
-import java.util.List;
 import mekanism.api.text.EnumColor;
 import mekanism.client.key.MekKeyHandler;
 import mekanism.client.key.MekanismKeyHandler;
@@ -13,6 +12,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ItemBlockDiversionTransporter extends ItemBlockMekanism<BlockDiversionTransporter> {
 

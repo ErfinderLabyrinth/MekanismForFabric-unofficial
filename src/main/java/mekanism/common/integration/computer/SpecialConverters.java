@@ -1,16 +1,8 @@
 package mekanism.common.integration.computer;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import mekanism.api.text.EnumColor;
-import mekanism.common.content.filter.BaseFilter;
-import mekanism.common.content.filter.FilterType;
-import mekanism.common.content.filter.IFilter;
-import mekanism.common.content.filter.IItemStackFilter;
-import mekanism.common.content.filter.IModIDFilter;
-import mekanism.common.content.filter.ITagFilter;
+import mekanism.common.content.filter.*;
 import mekanism.common.content.miner.MinerFilter;
 import mekanism.common.content.oredictionificator.OredictionificatorFilter;
 import mekanism.common.content.oredictionificator.OredictionificatorItemFilter;
@@ -20,15 +12,19 @@ import mekanism.common.content.transporter.SorterFilter;
 import mekanism.common.content.transporter.SorterItemStackFilter;
 import mekanism.common.tile.machine.TileEntityOredictionificator;
 import mekanism.common.util.text.InputValidator;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class SpecialConverters {
 
@@ -67,7 +63,7 @@ public class SpecialConverters {
         if (rawName instanceof String name) {
             ResourceLocation itemName = ResourceLocation.tryParse(name);
             if (itemName != null) {
-                Item item = ForgeRegistries.ITEMS.getValue(itemName);
+                Item item = BuiltInRegistries.ITEM.get(itemName);
                 if (item != null) {
                     return item;
                 }
@@ -194,9 +190,9 @@ public class SpecialConverters {
     }
 
     private static void decodeTagFilter(@NotNull Map<?, ?> map, ITagFilter<?> tagFilter) throws ComputerException {
-        String tag = tryGetFilterTag(map.get("tag"));
+        String tag = tryGetFilterTag(map.get("tagSupplier"));
         if (tag == null) {
-            throw new ComputerException("Invalid or missing tag specified for Tag filter");
+            throw new ComputerException("Invalid or missing tagSupplier specified for Tag filter");
         }
         tagFilter.setTagName(tag);
     }
@@ -217,7 +213,7 @@ public class SpecialConverters {
         itemFilter.setItemStack(stack);
     }
 
-    static Map<String, Object> wrapStack(ResourceLocation name, String sizeKey, int amount, @Nullable CompoundTag tag) {
+    static Map<String, Object> wrapStack(ResourceLocation name, String sizeKey, long amount, @Nullable CompoundTag tag) {
         boolean hasTag = tag != null && !tag.isEmpty() && amount > 0;
         Map<String, Object> wrapped = new HashMap<>(hasTag ? 3 : 2);
         wrapped.put("name", name == null ? "unknown" : name.toString());

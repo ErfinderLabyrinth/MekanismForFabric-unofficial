@@ -1,13 +1,14 @@
 package mekanism.common.inventory;
 
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.inventory.slot.BinInventorySlot;
 import mekanism.common.item.block.ItemBlockBin;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 public class BinMekanismInventory extends ItemStackMekanismInventory {
 

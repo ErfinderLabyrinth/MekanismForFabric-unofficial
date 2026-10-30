@@ -1,7 +1,8 @@
 package mekanism.common.tile.component.config.slot;
 
-import java.util.List;
 import mekanism.api.fluid.IExtendedFluidTank;
+
+import java.util.List;
 
 public class FluidSlotInfo extends BaseSlotInfo {
 

@@ -1,9 +1,7 @@
 package mekanism.client.gui.qio;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.text.EnumColor;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.GuiInnerScreen;
@@ -14,14 +12,9 @@ import mekanism.client.gui.element.tab.GuiQIOFrequencyTab;
 import mekanism.client.gui.element.window.filter.qio.GuiQIOItemStackFilter;
 import mekanism.client.gui.element.window.filter.qio.GuiQIOModIDFilter;
 import mekanism.client.gui.element.window.filter.qio.GuiQIOTagFilter;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.base.TagCache;
-import mekanism.common.content.filter.IFilter;
-import mekanism.common.content.filter.IItemStackFilter;
-import mekanism.common.content.filter.IModIDFilter;
-import mekanism.common.content.filter.ITagFilter;
-import mekanism.common.content.filter.SortableFilterManager;
+import mekanism.common.content.filter.*;
 import mekanism.common.content.qio.IQIOFrequencyHolder;
 import mekanism.common.content.qio.QIOFrequency;
 import mekanism.common.content.qio.filter.QIOFilter;
@@ -38,6 +31,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class GuiQIOFilterHandler<TILE extends TileEntityQIOFilterHandler> extends GuiMekanismTile<TILE, MekanismTileContainer<TILE>> {
 
@@ -94,14 +91,14 @@ public class GuiQIOFilterHandler<TILE extends TileEntityQIOFilterHandler> extend
             addRenderableWidget(new MovableFilterButton(this, 10, 31 + i * 22, 142, 22, i, scrollBar::getCurrentSelection, filterManager, index -> {
                 if (index > 0) {
                     GuiInteraction interaction = hasShiftDown() ? GuiInteraction.MOVE_FILTER_TO_TOP : GuiInteraction.MOVE_FILTER_UP;
-                    Mekanism.packetHandler().sendToServer(new PacketGuiInteract(interaction, tile, index));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(interaction, tile, index));
                 }
             }, index -> {
                 if (index < filterManager.count() - 1) {
                     GuiInteraction interaction = hasShiftDown() ? GuiInteraction.MOVE_FILTER_TO_BOTTOM : GuiInteraction.MOVE_FILTER_DOWN;
-                    Mekanism.packetHandler().sendToServer(new PacketGuiInteract(interaction, tile, index));
+                    MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(interaction, tile, index));
                 }
-            }, this::onClick, index -> Mekanism.packetHandler().sendToServer(new PacketGuiInteract(GuiInteraction.TOGGLE_FILTER_STATE, tile, index)), filter -> {
+            }, this::onClick, index -> MekanismClient.clientPacketHandler().sendToServer(new PacketGuiInteract(GuiInteraction.TOGGLE_FILTER_STATE, tile, index)), filter -> {
                 List<ItemStack> list = new ArrayList<>();
                 if (filter != null) {
                     if (filter instanceof IItemStackFilter<?> itemFilter) {

@@ -2,9 +2,6 @@ package mekanism.common.recipe.ingredient.chemical;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import mekanism.api.JsonConstants;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -12,23 +9,28 @@ import mekanism.api.chemical.ChemicalTags;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient;
 import mekanism.common.Mekanism;
 import mekanism.common.recipe.ingredient.chemical.ChemicalIngredientDeserializer.IngredientType;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.registries.tags.ITag;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public abstract class TaggedChemicalStackIngredient<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>>
       implements ChemicalStackIngredient<CHEMICAL, STACK> {
 
     @NotNull
-    private final ITag<CHEMICAL> tag;
+    private final HolderSet.Named<CHEMICAL> tag;
     private final long amount;
 
     protected TaggedChemicalStackIngredient(@NotNull ChemicalTags<CHEMICAL> tags, @NotNull TagKey<CHEMICAL> tag, long amount) {
-        this(tags.getManager().map(manager -> manager.getTag(tag)).orElseThrow(), amount);
+        this(tags.getTags().get().getOrThrow(tag), amount);
     }
 
-    protected TaggedChemicalStackIngredient(@NotNull ITag<CHEMICAL> tag, long amount) {
+    protected TaggedChemicalStackIngredient(@NotNull HolderSet.Named<CHEMICAL> tag, long amount) {
         this.tag = tag;
         this.amount = amount;
     }
@@ -47,14 +49,14 @@ public abstract class TaggedChemicalStackIngredient<CHEMICAL extends Chemical<CH
 
     @Override
     public boolean testType(@NotNull CHEMICAL chemical) {
-        return tag.contains(Objects.requireNonNull(chemical));
+        return tag.stream().anyMatch(chemicalHolder -> chemicalHolder.value() == chemical);
     }
 
     @NotNull
     @Override
     public STACK getMatchingInstance(@NotNull STACK chemicalStack) {
         if (test(chemicalStack)) {
-            //Our chemical is in the tag, so we make a new stack with the given amount
+            //Our chemical is in the tagSupplier, so we make a new stack with the given amount
             return getIngredientInfo().createStack(chemicalStack, amount);
         }
         return getIngredientInfo().getEmptyStack();
@@ -67,13 +69,13 @@ public abstract class TaggedChemicalStackIngredient<CHEMICAL extends Chemical<CH
 
     @Override
     public boolean hasNoMatchingInstances() {
-        return tag.isEmpty();
+        return tag.size() == 0;
     }
 
     @Override
     public void logMissingTags() {
-        if (tag.isEmpty()) {
-            Mekanism.logger.error("Empty tag: {}", tag.getKey());
+        if (tag.size() == 0) {
+            Mekanism.logger.error("Empty tagSupplier: {}", tag.key());
         }
     }
 
@@ -83,8 +85,8 @@ public abstract class TaggedChemicalStackIngredient<CHEMICAL extends Chemical<CH
         ChemicalIngredientInfo<CHEMICAL, STACK> ingredientInfo = getIngredientInfo();
         //TODO: Can this be cached somehow
         List<@NotNull STACK> representations = new ArrayList<>();
-        for (CHEMICAL chemical : tag) {
-            representations.add(ingredientInfo.createStack(chemical, amount));
+        for (Holder<CHEMICAL> chemical : tag) {
+            representations.add(ingredientInfo.createStack(chemical.value(), amount));
         }
         return representations;
     }
@@ -92,14 +94,14 @@ public abstract class TaggedChemicalStackIngredient<CHEMICAL extends Chemical<CH
     /**
      * For use in recipe input caching.
      */
-    public Iterable<CHEMICAL> getRawInput() {
+    public Iterable<Holder<CHEMICAL>> getRawInput() {
         return tag;
     }
 
     @Override
     public void write(FriendlyByteBuf buffer) {
         buffer.writeEnum(IngredientType.TAGGED);
-        buffer.writeResourceLocation(tag.getKey().location());
+        buffer.writeResourceLocation(tag.key().location());
         buffer.writeVarLong(amount);
     }
 
@@ -108,7 +110,7 @@ public abstract class TaggedChemicalStackIngredient<CHEMICAL extends Chemical<CH
     public JsonElement serialize() {
         JsonObject json = new JsonObject();
         json.addProperty(JsonConstants.AMOUNT, amount);
-        json.addProperty(JsonConstants.TAG, tag.getKey().location().toString());
+        json.addProperty(JsonConstants.TAG, tag.key().location().toString());
         return json;
     }
 

@@ -2,7 +2,7 @@
   "type": "mekanism:crushing",
   "input": {
     "ingredient": {
-      "tag": "forge:ingots/netherite"
+      "tag": "c:netherite_ingots"
     }
   },
   "output": {

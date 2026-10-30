@@ -3,7 +3,7 @@ package mekanism.api.energy;
 import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.math.FloatingLong;
-import mekanism.api.math.FloatingLongTransferUtils;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,12 +32,12 @@ public interface ISidedStrictEnergyHandler extends IStrictEnergyHandler {
      *
      * @return The number of containers available
      */
-    int getEnergyContainerCount(@Nullable Direction side);
-
-    @Override
-    default int getEnergyContainerCount() {
-        return getEnergyContainerCount(getEnergySideFor());
-    }
+//    int getEnergyContainerCount(@Nullable Direction side);
+//
+//    @Override
+//    default int getEnergyContainerCount() {
+//        return getEnergyContainerCount(getEnergySideFor());
+//    }
 
     /**
      * A sided variant of {@link IStrictEnergyHandler#getEnergy(int)}, docs copied for convenience.
@@ -58,30 +58,12 @@ public interface ISidedStrictEnergyHandler extends IStrictEnergyHandler {
      *
      * @return Energy in a given container. {@link FloatingLong#ZERO} if the container has no energy stored.
      */
-    FloatingLong getEnergy(int container, @Nullable Direction side);
-
-    @Override
-    default FloatingLong getEnergy(int container) {
-        return getEnergy(container, getEnergySideFor());
-    }
-
-    /**
-     * A sided variant of {@link IStrictEnergyHandler#setEnergy(int, FloatingLong)}, docs copied for convenience.
-     * <p>
-     * Overrides the energy stored in the given container. This method may throw an error if it is called unexpectedly.
-     *
-     * @param container Container to modify
-     * @param energy    Energy to set the container to (may be {@link FloatingLong#ZERO}).
-     * @param side      The side we are interacting with the handler from (null for internal).
-     *
-     * @throws RuntimeException if the handler is called in a way that the handler was not expecting. Such as if it was not expecting this to be called at all.
-     **/
-    void setEnergy(int container, FloatingLong energy, @Nullable Direction side);
-
-    @Override
-    default void setEnergy(int container, FloatingLong energy) {
-        setEnergy(container, energy, getEnergySideFor());
-    }
+//    FloatingLong getEnergy(int container, @Nullable Direction side);
+//
+//    @Override
+//    default FloatingLong getEnergy(int container) {
+//        return getEnergy(container, getEnergySideFor());
+//    }
 
     /**
      * A sided variant of {@link IStrictEnergyHandler#getMaxEnergy(int)}, docs copied for convenience.
@@ -102,12 +84,12 @@ public interface ISidedStrictEnergyHandler extends IStrictEnergyHandler {
      *
      * @return The maximum energy that can be stored in the container.
      */
-    FloatingLong getMaxEnergy(int container, @Nullable Direction side);
-
-    @Override
-    default FloatingLong getMaxEnergy(int container) {
-        return getMaxEnergy(container, getEnergySideFor());
-    }
+//    FloatingLong getMaxEnergy(int container, @Nullable Direction side);
+//
+//    @Override
+//    default FloatingLong getMaxEnergy(int container) {
+//        return getMaxEnergy(container, getEnergySideFor());
+//    }
 
     /**
      * A sided variant of {@link IStrictEnergyHandler#getNeededEnergy(int)}, docs copied for convenience.
@@ -128,37 +110,45 @@ public interface ISidedStrictEnergyHandler extends IStrictEnergyHandler {
      *
      * @return The energy needed to fill the container.
      */
-    FloatingLong getNeededEnergy(int container, @Nullable Direction side);
+//    FloatingLong getNeededEnergy(int container, @Nullable Direction side);
 
-    @Override
-    default FloatingLong getNeededEnergy(int container) {
-        return getNeededEnergy(container, getEnergySideFor());
-    }
+//    @Override
+//    default FloatingLong getNeededEnergy(int container) {
+//        return getNeededEnergy(container, getEnergySideFor());
+//    }
 
-    /**
-     * A sided variant of {@link IStrictEnergyHandler#insertEnergy(int, FloatingLong, Action)}, docs copied for convenience.
-     *
-     * <p>
-     * Inserts energy into a given container and return the remainder. The {@link FloatingLong} <em>should not</em> be modified in this function!
-     * </p>
-     * Note: This behaviour is subtly different from
-     * {@link net.minecraftforge.fluids.capability.IFluidHandler#fill(net.minecraftforge.fluids.FluidStack,
-     * net.minecraftforge.fluids.capability.IFluidHandler.FluidAction)}
-     *
-     * @param container Container to insert to.
-     * @param amount    Energy to insert. This must not be modified by the container.
-     * @param action    The action to perform, either {@link Action#EXECUTE} or {@link Action#SIMULATE}
-     * @param side      The side we are interacting with the handler from (null for internal).
-     *
-     * @return The remaining energy that was not inserted (if the entire amount is accepted, then return {@link FloatingLong#ZERO}). The returned {@link FloatingLong} can
-     * be safely modified afterwards.
-     */
-    FloatingLong insertEnergy(int container, FloatingLong amount, @Nullable Direction side, Action action);
+//    /**
+//     * A sided variant of {@link IStrictEnergyHandler#insertEnergy(int, FloatingLong, Action)}, docs copied for convenience.
+//     *
+//     * <p>
+//     * Inserts energy into a given container and return the remainder. The {@link FloatingLong} <em>should not</em> be modified in this function!
+//     * </p>
+//     * Note: This behaviour is subtly different from
+//     * {@link net.minecraftforge.fluids.capability.IFluidHandler#fill(net.minecraftforge.fluids.FluidStack,
+//     * net.minecraftforge.fluids.capability.IFluidHandler.FluidAction)}
+//     *
+//     * @param container Container to insert to.
+//     * @param amount    Energy to insert. This must not be modified by the container.
+//     * @param action    The action to perform, either {@link Action#EXECUTE} or {@link Action#SIMULATE}
+//     * @param side      The side we are interacting with the handler from (null for internal).
+//     *
+//     * @return The remaining energy that was not inserted (if the entire amount is accepted, then return {@link FloatingLong#ZERO}). The returned {@link FloatingLong} can
+//     * be safely modified afterwards.
+//     */
+//    default FloatingLong insertEnergy(FloatingLong amount, @Nullable Direction side, Action action) {
+//        try(Transaction t = Transaction.openOuter()) {
+//            FloatingLong inserted = insertEnergy(container, amount, side, t);
+//            if(action.execute()) {
+//                t.commit();
+//            }
+//            return inserted;
+//        }
+//    }
 
-    @Override
-    default FloatingLong insertEnergy(int container, FloatingLong amount, Action action) {
-        return insertEnergy(container, amount, getEnergySideFor(), action);
-    }
+//    @Override
+//    default FloatingLong insertEnergy(int container, FloatingLong amount, TransactionContext t) {
+//        return insertEnergy(container, amount, getEnergySideFor(), t);
+//    }
 
     /**
      * A sided variant of {@link IStrictEnergyHandler#extractEnergy(int, FloatingLong, Action)}, docs copied for convenience.
@@ -176,12 +166,22 @@ public interface ISidedStrictEnergyHandler extends IStrictEnergyHandler {
      * @return Energy extracted from the container, must be {@link FloatingLong#ZERO} if no energy can be extracted. The returned {@link FloatingLong} can be safely
      * modified after, so the container should return a new or copied {@link FloatingLong}.
      */
-    FloatingLong extractEnergy(int container, FloatingLong amount, @Nullable Direction side, Action action);
+//    FloatingLong extractEnergy(int container, FloatingLong amount, @Nullable Direction side, TransactionContext t);
+//
+//    default FloatingLong extractEnergy(int container, FloatingLong amount, @Nullable Direction side, Action action) {
+//        try(Transaction t = Transaction.openOuter()) {
+//            FloatingLong extracted = extractEnergy(container, amount, side, t);
+//            if(action.execute()) {
+//                t.commit();
+//            }
+//            return extracted;
+//        }
+//    }
 
-    @Override
-    default FloatingLong extractEnergy(int container, FloatingLong amount, Action action) {
-        return extractEnergy(container, amount, getEnergySideFor(), action);
-    }
+//    @Override
+//    default FloatingLong extractEnergy(int container, FloatingLong amount, TransactionContext t) {
+//        return extractEnergy(container, amount, getEnergySideFor(), t);
+//    }
 
     /**
      * A sided variant of {@link IStrictEnergyHandler#insertEnergy(FloatingLong, Action)}, docs copied for convenience.
@@ -205,10 +205,7 @@ public interface ISidedStrictEnergyHandler extends IStrictEnergyHandler {
      * inserting into any empty containers.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IStrictEnergyHandler} ends up distributing the insertion.
      */
-    default FloatingLong insertEnergy(FloatingLong amount, @Nullable Direction side, Action action) {
-        return FloatingLongTransferUtils.insert(amount, action, () -> getEnergyContainerCount(side), container -> getEnergy(container, side),
-              (container, a, act) -> insertEnergy(container, a, side, act));
-    }
+    long insertEnergy(long amount, @Nullable Direction side, TransactionContext t);
 
     /**
      * A sided variant of {@link IStrictEnergyHandler#extractEnergy(FloatingLong, Action)}, docs copied for convenience.
@@ -228,7 +225,5 @@ public interface ISidedStrictEnergyHandler extends IStrictEnergyHandler {
      * @implNote The default implementation of this method, extracts across all containers to try and reach the desired amount to extract.
      * @apiNote It is not guaranteed that the default implementation will be how this {@link IStrictEnergyHandler} ends up distributing the extraction.
      */
-    default FloatingLong extractEnergy(FloatingLong amount, @Nullable Direction side, Action action) {
-        return FloatingLongTransferUtils.extract(amount, action, () -> getEnergyContainerCount(side), (container, a, act) -> extractEnergy(container, a, side, act));
-    }
+    long extractEnergy(long amount, @Nullable Direction side, TransactionContext t);
 }

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#c:raw_osmium",
+    "#c:raw_tin",
+    "#c:raw_lead",
+    "#c:raw_uranium"
+  ]
+}

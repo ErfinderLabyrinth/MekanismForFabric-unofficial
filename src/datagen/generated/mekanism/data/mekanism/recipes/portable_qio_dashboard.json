@@ -5,7 +5,7 @@
       "item": "mekanism:qio_dashboard"
     },
     "A": {
-      "tag": "forge:pellets/polonium"
+      "tag": "c:polonium_pellets"
     },
     "T": {
       "item": "mekanism:teleportation_core"

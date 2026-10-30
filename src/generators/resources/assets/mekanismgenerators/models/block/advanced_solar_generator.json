@@ -6,7 +6,6 @@
 		"2": "mekanism:block/models/ports_led",
 		"particle": "mekanismgenerators:block/model/advanced_solar_generator"
 	},
-	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"name": "pole",
@@ -182,7 +181,7 @@
 			"faces": {
 				"north": {"uv": [8, 8, 16, 16], "texture": "#2", "cullface": "north"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -202,7 +201,7 @@
 			"faces": {
 				"down": {"uv": [8, 8, 16, 16], "texture": "#2", "cullface": "down"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

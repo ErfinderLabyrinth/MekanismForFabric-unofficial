@@ -1,6 +1,5 @@
 {
 	"parent": "block/cube_all",
-	"render_type": "minecraft:cutout",
 	"textures": {
 		"2": "mekanism:block/models/ports",
 		"3": "mekanism:block/models/ports_large",
@@ -216,7 +215,7 @@
 			"faces": {
 				"west": {"uv": [0, 0, 5, 5], "texture": "#4", "cullface": "west"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -239,7 +238,7 @@
 			"faces": {
 				"east": {"uv": [0, 0, 8, 8], "texture": "#5", "cullface": "east"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

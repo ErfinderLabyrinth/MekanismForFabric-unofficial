@@ -3,16 +3,16 @@
   "category": "building",
   "key": {
     "#": {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
-        "tag": "forge:slabs/plastic"
+        "tag": "c:plastic_slabs"
       },
       "subtracted": {
         "item": "mekanismadditions:light_gray_plastic_slab"
       }
     },
     "D": {
-      "tag": "forge:dyes/light_gray"
+      "tag": "c:light_gray_dyes"
     }
   },
   "pattern": [

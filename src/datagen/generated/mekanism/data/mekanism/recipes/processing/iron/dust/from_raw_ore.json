@@ -3,7 +3,7 @@
   "input": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:raw_materials/iron"
+      "tag": "c:raw_iron_ores"
     }
   },
   "output": {

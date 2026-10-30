@@ -9,7 +9,6 @@
 		"particle": "mekanism:block/models/logistical_sorter",
 		"all": "mekanism:block/models/logistical_sorter"
 	},
-	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"name": "portBackLarge",
@@ -207,7 +206,7 @@
 			"faces": {
 				"north": {"uv": [0, 0, 5, 5], "texture": "#4", "cullface": "north"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -291,7 +290,7 @@
 				"up": {"uv": [0, 0, 1, 1], "texture": "#leds"},
 				"down": {"uv": [0, 0, 1, 1], "texture": "#leds"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -308,7 +307,7 @@
 				"up": {"uv": [0, 0, 1, 1], "texture": "#leds"},
 				"down": {"uv": [0, 0, 1, 1], "texture": "#leds"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -325,7 +324,7 @@
 				"up": {"uv": [0, 0, 1, 1], "texture": "#leds"},
 				"down": {"uv": [0, 0, 1, 1], "texture": "#leds"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -342,7 +341,7 @@
 				"up": {"uv": [0, 0, 1, 1], "texture": "#leds"},
 				"down": {"uv": [0, 0, 1, 1], "texture": "#leds"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

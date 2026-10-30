@@ -2,13 +2,14 @@ package mekanism.common.resource.ore;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.List;
 import mekanism.common.resource.IResource;
 import mekanism.common.resource.MiscResource;
 import mekanism.common.resource.PrimaryResource;
 import mekanism.common.world.height.HeightShape;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public enum OreType implements StringRepresentable {
     TIN(PrimaryResource.TIN,

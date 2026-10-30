@@ -2,11 +2,11 @@
   "type": "mekanism:injecting",
   "chemicalInput": {
     "amount": 1,
-    "tag": "mekanism:water_vapor"
+    "tagSupplier": "mekanism:water_vapor"
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ingots/brick"
+      "tag": "c:bricks"
     }
   },
   "output": {

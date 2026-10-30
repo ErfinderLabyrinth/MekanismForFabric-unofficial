@@ -1,10 +1,11 @@
 package mekanism.api.gear.config;
 
-import java.util.List;
-import java.util.Objects;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.text.IHasTextComponent;
 import net.minecraft.nbt.CompoundTag;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Enum based implementation of {@link ModuleConfigData}.

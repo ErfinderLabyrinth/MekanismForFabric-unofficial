@@ -1,24 +1,19 @@
 package mekanism.common.tile.laser;
 
-import java.util.ArrayList;
-import java.util.List;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
-import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.CommonWorldTickHandler;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
 import mekanism.common.capabilities.energy.LaserEnergyContainer;
 import mekanism.common.capabilities.holder.energy.EnergyContainerHelper;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.integration.computer.ComputerException;
-import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.inventory.container.slot.ContainerSlotType;
 import mekanism.common.inventory.slot.OutputInventorySlot;
 import mekanism.common.registries.MekanismBlocks;
-import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -27,8 +22,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TileEntityLaserTractorBeam extends TileEntityLaserReceptor {
 
@@ -65,18 +62,23 @@ public class TileEntityLaserTractorBeam extends TileEntityLaserReceptor {
         breakBlock(state, hitPos);
         CommonWorldTickHandler.fallbackItemCollector = null;
         if (!drops.isEmpty()) {
-            Lazy<Direction> direction = Lazy.of(this::getDirection);
-            Lazy<BlockPos> dropPos = Lazy.of(() -> worldPosition.relative(direction.get(), 2));
-            Lazy<Direction> opposite = Lazy.of(() -> direction.get().getOpposite());
-            List<IInventorySlot> inventorySlots = getInventorySlots(null);
+            Direction direction = this.getDirection();
+            BlockPos dropPos = worldPosition.relative(direction, 2);
+            Direction opposite = direction.getOpposite();
+            Storage<ItemVariant> inventorySlots = this.getItemStorage(null);
             for (ItemStack drop : drops) {
                 //Try inserting it first where it can stack and then into empty slots
-                drop = InventoryUtils.insertItem(inventorySlots, drop, Action.EXECUTE, AutomationType.INTERNAL);
+                long amountInserted;
+                try(Transaction t=Transaction.openOuter()) {
+                    amountInserted = inventorySlots.insert(ItemVariant.of(drop), drop.getCount(), t);
+                    t.commit();
+                }
+                drop.setCount(drop.getCount() - (int)amountInserted);
                 if (!drop.isEmpty()) {
                     //If we have some drop left over that we couldn't fit, then spawn it into the world
                     // Note: We use an adjusted position and an opposite direction to provide the item with momentum towards the tractor beam
                     // so that even though we couldn't fit the items into our inventory we can still have them appear to be "pulled" to the tractor beam
-                    Block.popResourceFromFace(level, dropPos.get(), opposite.get(), drop);
+                    Block.popResourceFromFace(level, dropPos, opposite, drop);
                 }
             }
         }
@@ -86,27 +88,17 @@ public class TileEntityLaserTractorBeam extends TileEntityLaserReceptor {
     protected boolean handleHitItem(ItemEntity entity) {
         ItemStack stack = entity.getItem();
         //Try inserting it first where it can stack and then into empty slots
-        stack = InventoryUtils.insertItem(getInventorySlots(null), stack, Action.EXECUTE, AutomationType.INTERNAL);
-        if (stack.isEmpty()) {
+        long amountInserted;
+        try(Transaction t=Transaction.openOuter()) {
+            amountInserted = getItemStorage(null).insert(ItemVariant.of(stack), stack.getCount(), t);
+            t.commit();
+        }
+        stack.setCount(stack.getCount() - (int)amountInserted);
+        if (amountInserted == stack.getCount()) {
             //If we have finished grabbing it all then remove the entity
             entity.discard();
         }
         return true;
-    }
-
-    //Methods relating to IComputerTile
-    @ComputerMethod
-    int getSlotCount() {
-        return getSlots();
-    }
-
-    @ComputerMethod
-    ItemStack getItemInSlot(int slot) throws ComputerException {
-        int slots = getSlotCount();
-        if (slot < 0 || slot >= slots) {
-            throw new ComputerException("Slot: '%d' is out of bounds, as this laser amplifier only has '%d' slots (zero indexed).", slot, slots);
-        }
-        return getStackInSlot(slot);
     }
     //End methods IComputerTile
 }

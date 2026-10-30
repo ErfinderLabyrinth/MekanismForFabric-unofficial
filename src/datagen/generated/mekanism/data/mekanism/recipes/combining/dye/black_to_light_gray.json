@@ -3,12 +3,12 @@
   "extraInput": {
     "amount": 2,
     "ingredient": {
-      "tag": "forge:dyes/white"
+      "tag": "c:white_dyes"
     }
   },
   "mainInput": {
     "ingredient": {
-      "tag": "forge:dyes/black"
+      "tag": "c:black_dyes"
     }
   },
   "output": {

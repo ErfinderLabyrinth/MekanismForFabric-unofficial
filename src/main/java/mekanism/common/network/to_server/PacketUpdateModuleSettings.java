@@ -1,28 +1,28 @@
 package mekanism.common.network.to_server;
 
-import java.util.List;
-import java.util.function.Predicate;
 import mekanism.api.MekanismAPI;
 import mekanism.api.gear.ModuleData;
-import mekanism.api.gear.config.ModuleBooleanData;
-import mekanism.api.gear.config.ModuleColorData;
-import mekanism.api.gear.config.ModuleConfigData;
-import mekanism.api.gear.config.ModuleEnumData;
-import mekanism.api.gear.config.ModuleIntegerData;
+import mekanism.api.gear.config.*;
 import mekanism.api.math.MathUtils;
 import mekanism.common.content.gear.IModuleContainerItem;
 import mekanism.common.content.gear.Module;
 import mekanism.common.content.gear.ModuleConfigItem;
 import mekanism.common.content.gear.ModuleHelper;
 import mekanism.common.network.IMekanismPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+
+import java.util.List;
+import java.util.function.Predicate;
 
 //TODO: Eventually it would be nice to make this more generic in terms of how it can sync module data so that we can support custom types
 // though given the module tweaker screen doesn't currently have a way to support custom types it isn't that big a deal to make this support it yet either
 public class PacketUpdateModuleSettings implements IMekanismPacket {
+    public static final PacketType<PacketUpdateModuleSettings> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "update_module_settings"), PacketUpdateModuleSettings::decode);
 
     public static PacketUpdateModuleSettings create(int slotId, ModuleData<?> moduleType, int dataIndex, ModuleConfigData<?> configData) {
         if (configData instanceof ModuleEnumData<?> enumData) {
@@ -51,8 +51,7 @@ public class PacketUpdateModuleSettings implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        Player player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null && dataIndex >= 0 && value != null) {
             ItemStack stack = player.getInventory().getItem(slotId);
             if (!stack.isEmpty() && stack.getItem() instanceof IModuleContainerItem) {
@@ -80,7 +79,7 @@ public class PacketUpdateModuleSettings implements IMekanismPacket {
     @Override
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeVarInt(slotId);
-        buffer.writeRegistryId(MekanismAPI.moduleRegistry(), moduleType);
+        buffer.writeResourceLocation(MekanismAPI.moduleRegistry().getKey(moduleType));
         buffer.writeVarInt(dataIndex);
         buffer.writeEnum(dataType);
         switch (dataType) {
@@ -93,7 +92,7 @@ public class PacketUpdateModuleSettings implements IMekanismPacket {
 
     public static PacketUpdateModuleSettings decode(FriendlyByteBuf buffer) {
         int slotId = buffer.readVarInt();
-        ModuleData<?> moduleType = buffer.readRegistryIdSafe(ModuleData.class);
+        ModuleData<?> moduleType = MekanismAPI.moduleRegistry().get(buffer.readResourceLocation());
         int dataIndex = buffer.readVarInt();
         ModuleDataType dataType = buffer.readEnum(ModuleDataType.class);
         Object data = switch (dataType) {
@@ -102,6 +101,11 @@ public class PacketUpdateModuleSettings implements IMekanismPacket {
             case INTEGER, ENUM -> buffer.readVarInt();
         };
         return new PacketUpdateModuleSettings(slotId, moduleType, dataIndex, dataType, data);
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 
     private enum ModuleDataType {

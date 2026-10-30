@@ -2,7 +2,7 @@
   "type": "mekanism:enriching",
   "input": {
     "ingredient": {
-      "tag": "forge:ores/emerald"
+      "tag": "minecraft:emerald_ores"
     }
   },
   "output": {

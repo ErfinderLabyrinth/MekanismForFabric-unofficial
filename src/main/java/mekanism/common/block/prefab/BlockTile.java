@@ -1,7 +1,5 @@
 package mekanism.common.block.prefab;
 
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.attribute.AttributeGui;
@@ -14,7 +12,6 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.content.blocktype.BlockTypeTile;
 import mekanism.common.registration.impl.TileEntityTypeRegistryObject;
 import mekanism.common.tile.base.TileEntityMekanism;
-import mekanism.common.tile.base.WrenchResult;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,6 +29,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class BlockTile<TILE extends TileEntityMekanism, TYPE extends BlockTypeTile<TILE>> extends BlockBase<TYPE> implements IHasTileEntity<TILE> {
 
@@ -58,9 +58,11 @@ public class BlockTile<TILE extends TileEntityMekanism, TYPE extends BlockTypeTi
         if (tile == null) {
             return InteractionResult.PASS;
         } else if (world.isClientSide) {
-            return genericClientActivated(player, hand);
-        } else if (tile.tryWrench(state, player, hand, hit) != WrenchResult.PASS) {
-            return InteractionResult.SUCCESS;
+            return genericClientActivated(player, hand, tile);
+        }
+        InteractionResult wrenchResult = tile.tryWrench(state, player, hand, hit).getInteractionResult();
+        if (wrenchResult != InteractionResult.PASS) {
+            return wrenchResult;
         }
         return type.has(AttributeGui.class) ? tile.openGui(player) : InteractionResult.PASS;
     }
@@ -74,7 +76,7 @@ public class BlockTile<TILE extends TileEntityMekanism, TYPE extends BlockTypeTi
     @Override
     public void animateTick(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull RandomSource random) {
         super.animateTick(state, world, pos, random);
-        if (MekanismConfig.client.machineEffects.get()) {
+        if (MekanismConfig.CLIENT.client.machineEffects) {
             AttributeParticleFX particleFX = type.get(AttributeParticleFX.class);
             if (particleFX != null && Attribute.isActive(state)) {
                 Direction facing = Attribute.getFacing(state);
@@ -108,15 +110,16 @@ public class BlockTile<TILE extends TileEntityMekanism, TYPE extends BlockTypeTi
     }
 
     @Override
-    @Deprecated
     public boolean isSignalSource(@NotNull BlockState state) {
         return type.has(AttributeRedstoneEmitter.class);
     }
 
-    @Override
-    public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side) {
-        return type.has(AttributeRedstoneEmitter.class) || super.canConnectRedstone(state, world, pos, side);
-    }
+//    @Override
+//    public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side) {
+//        return type.has(AttributeRedstoneEmitter.class) || super.canConnectRedstone(state, world, pos, side);
+//    }
+
+
 
     @Override
     @Deprecated

@@ -1,21 +1,17 @@
 package mekanism.common.tile;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Collections;
-import java.util.Map;
-import mekanism.api.Action;
+import mekanism.api.FluidStack;
 import mekanism.api.IConfigurable;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.block.attribute.Attribute;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.fluid.FluidTankFluidTank;
 import mekanism.common.capabilities.holder.fluid.FluidTankHelper;
 import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerFluidTankWrapper;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
@@ -38,6 +34,10 @@ import mekanism.common.util.FluidUtils;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -47,9 +47,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.Map;
 
 public class TileEntityFluidTank extends TileEntityMekanism implements IConfigurable, IFluidContainerManager, ISustainedData {
 
@@ -62,7 +64,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
 
     public int valve;
     @NotNull
-    public FluidStack valveFluid = FluidStack.EMPTY;
+    public mekanism.api.FluidStack valveFluid = FluidStack.EMPTY;
 
     public float prevScale;
 
@@ -77,8 +79,6 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
 
     public TileEntityFluidTank(IBlockProvider blockProvider, BlockPos pos, BlockState state) {
         super(blockProvider, pos, state);
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIGURABLE, this));
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIG_CARD, this));
     }
 
     @Override
@@ -165,7 +165,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
 
     @Override
     public int getRedstoneLevel() {
-        return MekanismUtils.redstoneLevelFromContents(fluidTank.getFluidAmount(), fluidTank.getCapacity());
+        return MekanismUtils.redstoneLevelFromContents(fluidTank.getAmount(), fluidTank.getCapacity());
     }
 
     @Override
@@ -173,19 +173,19 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
         return type == SubstanceType.FLUID;
     }
 
-    @NotNull
-    @Override
-    public FluidStack insertFluid(int tank, @NotNull FluidStack stack, @Nullable Direction side, @NotNull Action action) {
-        FluidStack remainder = super.insertFluid(tank, stack, side, action);
-        if (side == Direction.UP && action.execute() && remainder.getAmount() < stack.getAmount() && !isRemote()) {
-            if (valve == 0) {
-                needsPacket = true;
-            }
-            valve = 20;
-            valveFluid = new FluidStack(stack, 1);
-        }
-        return remainder;
-    }
+//    @NotNull
+//    @Override
+//    public FluidStack insertFluid(int tank, @NotNull FluidStack stack, @Nullable Direction side, @NotNull Action action) {
+//        FluidStack remainder = super.insertFluid(tank, stack, side, action);
+//        if (side == Direction.UP && action.execute() && remainder.amount() < stack.amount() && !isRemote()) {
+//            if (valve == 0) {
+//                needsPacket = true;
+//            }
+//            valve = 20;
+//            valveFluid = new FluidStack(stack, 1);
+//        }
+//        return remainder;
+//    }
 
     @Override
     public InteractionResult onSneakRightClick(Player player) {
@@ -193,7 +193,7 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
             setActive(!getActive());
             Level world = getLevel();
             if (world != null) {
-                world.playSound(null, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), SoundEvents.UI_BUTTON_CLICK.get(), SoundSource.BLOCKS, 0.3F, 1);
+                world.playSound(null, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.3F, 1);
             }
         }
         return InteractionResult.SUCCESS;
@@ -299,4 +299,38 @@ public class TileEntityFluidTank extends TileEntityMekanism implements IConfigur
         previousMode();
     }
     //End methods IComputerTile
+
+
+    @Override
+    public @Nullable Storage<FluidVariant> getFluidStorage(@Nullable Direction side) {
+        Storage<FluidVariant> storage = super.getFluidStorage(side);
+        if(side == Direction.UP) {
+            return new FluidTankWrapper(storage);
+        } else {
+            return storage;
+        }
+    }
+
+    public class FluidTankWrapper extends FilteringStorage<FluidVariant> {
+        public FluidTankWrapper(Storage<FluidVariant> backingStorage) {
+            super(backingStorage);
+        }
+
+        @Override
+        public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+            long inserted = super.insert(resource, maxAmount, transaction);
+            if (inserted != 0 && !isRemote()) {
+                transaction.addOuterCloseCallback(result -> {
+                    if(result.wasCommitted()) {
+                        if (valve == 0) {
+                            needsPacket = true;
+                        }
+                        valve = 20;
+                        valveFluid = new FluidStack(resource, 1);
+                    }
+                });
+            }
+            return inserted;
+        }
+    }
 }

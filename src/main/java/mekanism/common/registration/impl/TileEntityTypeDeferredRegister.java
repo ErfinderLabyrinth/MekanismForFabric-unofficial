@@ -2,17 +2,19 @@ package mekanism.common.registration.impl;
 
 import mekanism.common.registration.WrappedDeferredRegister;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntityTypeDeferredRegister extends WrappedDeferredRegister<BlockEntityType<?>> {
-
+    String modid;
     public TileEntityTypeDeferredRegister(String modid) {
-        super(modid, ForgeRegistries.BLOCK_ENTITY_TYPES);
+        super(BuiltInRegistries.BLOCK_ENTITY_TYPE);
+        this.modid = modid;
     }
 
     public <BE extends TileEntityMekanism> TileEntityTypeRegistryObject<BE> register(BlockRegistryObject<?, ?> block, BlockEntitySupplier<? extends BE> factory, BlockEntityTicker<BE> serverTicker, BlockEntityTicker<BE> clientTicker) {
@@ -68,9 +70,10 @@ public class TileEntityTypeDeferredRegister extends WrappedDeferredRegister<Bloc
 
         @SuppressWarnings("ConstantConditions")
         public TileEntityTypeRegistryObject<BE> build() {
+            String name = BuiltInRegistries.BLOCK.getKey(block.getBlock()).getPath();
             TileEntityTypeRegistryObject<BE> registryObject = new TileEntityTypeRegistryObject<>(null);
             registryObject.clientTicker(clientTicker).serverTicker(serverTicker);
-            return register(block.getInternalRegistryName(), () -> BlockEntityType.Builder.<BE>of(factory, block.getBlock()).build(null),
+            return register(new ResourceLocation(modid, name), () -> BlockEntityType.Builder.<BE>of(factory, block.getBlock()).build(null),
                   registryObject::setRegistryObject);
         }
     }

@@ -2,7 +2,7 @@
   "type": "mekanism:pigment_extracting",
   "input": {
     "ingredient": {
-      "tag": "forge:dyes/pink"
+      "tag": "c:pink_dyes"
     }
   },
   "output": {

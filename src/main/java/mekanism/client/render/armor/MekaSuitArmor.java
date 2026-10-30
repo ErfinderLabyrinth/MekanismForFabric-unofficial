@@ -8,27 +8,15 @@ import com.google.common.collect.Table;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Predicate;
 import mekanism.api.gear.IModule;
 import mekanism.api.gear.IModuleHelper;
 import mekanism.api.gear.ModuleData;
 import mekanism.api.providers.IModuleDataProvider;
+import mekanism.client.mixinhelper.HumanoidArmorLayerPartialTicks;
 import mekanism.client.model.BaseModelCache.MekanismModelData;
 import mekanism.client.model.BaseModelCache.OBJModelData;
 import mekanism.client.model.MekanismModelCache;
@@ -48,17 +36,16 @@ import mekanism.common.lib.effect.BoltEffect.SpawnFunction;
 import mekanism.common.registries.MekanismModules;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -66,13 +53,22 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.ModelEvent.BakingCompleted;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MekaSuitArmor implements ICustomArmor {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Predicate;
+
+public class MekaSuitArmor implements ArmorRenderer {
 
     private static final String LED_TAG = "led";
     private static final String INACTIVE_TAG = "inactive_";
@@ -143,17 +139,16 @@ public class MekaSuitArmor implements ICustomArmor {
     }
 
     @Override
-    public void render(HumanoidModel<? extends LivingEntity> baseModel, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight, float partialTicks, boolean hasEffect, LivingEntity entity, ItemStack stack) {
+    public void render(PoseStack matrix, MultiBufferSource renderer, ItemStack stack, LivingEntity entity, EquipmentSlot slot, int light, HumanoidModel<LivingEntity> baseModel) {
         if (baseModel.young) {
             matrix.pushPose();
             float f1 = 1.0F / baseModel.babyBodyScale;
             matrix.scale(f1, f1, f1);
             matrix.translate(0.0D, baseModel.bodyYOffset / 16.0F, 0.0D);
-            renderMekaSuit(baseModel, matrix, renderer, light, overlayLight, getColor(stack), partialTicks, hasEffect, entity);
+            renderMekaSuit(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, getColor(stack), HumanoidArmorLayerPartialTicks.THREAD_LOCAL.get(), stack.hasFoil(), entity);
             matrix.popPose();
         } else {
-            renderMekaSuit(baseModel, matrix, renderer, light, overlayLight, getColor(stack), partialTicks, hasEffect, entity);
+            renderMekaSuit(baseModel, matrix, renderer, light, OverlayTexture.NO_OVERLAY, getColor(stack), HumanoidArmorLayerPartialTicks.THREAD_LOCAL.get(), stack.hasFoil(), entity);
         }
     }
 
@@ -199,7 +194,7 @@ public class MekaSuitArmor implements ICustomArmor {
 
     private void putQuads(List<BakedQuad> quads, VertexConsumer builder, PoseStack.Pose pose, int light, int overlayLight, Color color) {
         for (BakedQuad quad : quads) {
-            builder.putBulkData(pose, quad, color.rf(), color.gf(), color.bf(), color.af(), light, overlayLight, false);
+            builder.putBulkData(pose, quad, color.rf(), color.gf(), color.bf(), light, overlayLight);
         }
     }
 
@@ -209,10 +204,10 @@ public class MekaSuitArmor implements ICustomArmor {
         //Note: We need to use a new list to not accidentally pollute the cached bake quads with the LED quads that we match them with
         // this also means that we can avoid even baking the data against empty part lists entirely
         if (!parts.isEmpty()) {
-            quads.addAll(data.bake(new MekaSuitModelConfiguration(parts)).getQuads(null, null, random, ModelData.EMPTY, null));
+            quads.addAll(data.bake(parts, null).getQuads(null, null, random));
         }
         if (!ledParts.isEmpty()) {
-            List<BakedQuad> ledQuads = data.bake(new MekaSuitModelConfiguration(ledParts)).getQuads(null, null, random, ModelData.EMPTY, null);
+            List<BakedQuad> ledQuads = data.bake(ledParts, null).getQuads(null, null, random);
             quads.addAll(QuadUtils.transformBakedQuads(ledQuads, QuadTransformation.fullbright));
         }
         if (transform != null) {
@@ -334,12 +329,12 @@ public class MekaSuitArmor implements ICustomArmor {
     }
 
     private static void processMekaTool(OBJModelData mekaToolModel, Set<String> ignored) {
-        for (String name : mekaToolModel.getModel().getRootComponentNames()) {
-            if (name.contains(OVERRIDDEN_TAG)) {
-                //Note: We just ignore the pieces here as the override will be rendered as part of the item's model
-                ignored.add(processOverrideName(name, "mekatool"));
-            }
-        }
+//        for (String name : mekaToolModel.getModel().getRootComponentNames()) {
+//            if (name.contains(OVERRIDDEN_TAG)) {
+//                //Note: We just ignore the pieces here as the override will be rendered as part of the item's model
+//                ignored.add(processOverrideName(name, "mekatool"));
+//            }
+//        }
     }
 
     private record OverrideData(MekanismModelData modelData, String name) {
@@ -405,7 +400,7 @@ public class MekaSuitArmor implements ICustomArmor {
 
         Map<ModelPos, Set<String>> armorQuadsToRender = new EnumMap<>(ModelPos.class);
         Map<ModelPos, Set<String>> armorLEDQuadsToRender = new EnumMap<>(ModelPos.class);
-        for (String name : MekanismModelCache.INSTANCE.MEKASUIT.getModel().getRootComponentNames()) {
+        for (String name : MekanismModelCache.INSTANCE.MEKASUIT.getObjModel().getGroup("default").getRawObjects().keySet()) {
             if (!checkEquipment(type, name)) {
                 // skip if it's the wrong equipment type
                 continue;
@@ -578,107 +573,107 @@ public class MekaSuitArmor implements ICustomArmor {
             return active ? specData.active() : specData.inactive();
         }
 
-        @Override
-        protected void reload(BakingCompleted evt) {
-            super.reload(evt);
-            Collection<ModuleModelSpec> modules = moduleModelSpec.values();
-            for (String name : getModel().getRootComponentNames()) {
-                //Find the "best" spec by checking all the specs and finding out which one is listed first
-                // this way if we are overriding another module, then we just put the module that is overriding
-                // the other one first in the name so that it gets the spec matched to it
-                ModuleModelSpec matchingSpec = null;
-                int bestScore = -1;
-                for (ModuleModelSpec spec : modules) {
-                    int score = spec.score(name);
-                    if (score != -1 && (bestScore == -1 || score < bestScore)) {
-                        bestScore = score;
-                        matchingSpec = spec;
-                    }
-                }
-                if (matchingSpec != null) {
-                    SpecData specData = specParts.computeIfAbsent(matchingSpec, spec -> new SpecData(new HashSet<>(), new HashSet<>()));
-                    if (name.contains(INACTIVE_TAG + matchingSpec.name + "_")) {
-                        specData.inactive().add(name);
-                    } else {
-                        specData.active().add(name);
-                    }
-                }
-            }
-            //Update entries to reclaim some memory for empty sets
-            for (Map.Entry<ModuleModelSpec, SpecData> entry : specParts.entrySet()) {
-                SpecData specData = entry.getValue();
-                if (specData.active().isEmpty()) {
-                    entry.setValue(new SpecData(Collections.emptySet(), specData.inactive()));
-                } else if (specData.inactive().isEmpty()) {
-                    entry.setValue(new SpecData(specData.active(), Collections.emptySet()));
-                }
-            }
-        }
+//        @Override
+//        protected void reload(BakingCompleted evt) {
+//            super.reload(evt);
+//            Collection<ModuleModelSpec> modules = moduleModelSpec.values();
+//            for (String name : getModel().getRootComponentNames()) {
+//                //Find the "best" spec by checking all the specs and finding out which one is listed first
+//                // this way if we are overriding another module, then we just put the module that is overriding
+//                // the other one first in the name so that it gets the spec matched to it
+//                ModuleModelSpec matchingSpec = null;
+//                int bestScore = -1;
+//                for (ModuleModelSpec spec : modules) {
+//                    int score = spec.score(name);
+//                    if (score != -1 && (bestScore == -1 || score < bestScore)) {
+//                        bestScore = score;
+//                        matchingSpec = spec;
+//                    }
+//                }
+//                if (matchingSpec != null) {
+//                    SpecData specData = specParts.computeIfAbsent(matchingSpec, spec -> new SpecData(new HashSet<>(), new HashSet<>()));
+//                    if (name.contains(INACTIVE_TAG + matchingSpec.name + "_")) {
+//                        specData.inactive().add(name);
+//                    } else {
+//                        specData.active().add(name);
+//                    }
+//                }
+//            }
+//            //Update entries to reclaim some memory for empty sets
+//            for (Map.Entry<ModuleModelSpec, SpecData> entry : specParts.entrySet()) {
+//                SpecData specData = entry.getValue();
+//                if (specData.active().isEmpty()) {
+//                    entry.setValue(new SpecData(Collections.emptySet(), specData.inactive()));
+//                } else if (specData.inactive().isEmpty()) {
+//                    entry.setValue(new SpecData(specData.active(), Collections.emptySet()));
+//                }
+//            }
+//        }
     }
 
-    private record MekaSuitModelConfiguration(Set<String> parts) implements IGeometryBakingContext {
-
-        private static final Material NO_MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation());
-
-        private MekaSuitModelConfiguration {
-            parts = parts.isEmpty() ? Collections.emptySet() : Collections.unmodifiableSet(parts);
-        }
-
-        @NotNull
-        @Override
-        public String getModelName() {
-            return "mekanism:mekasuit";
-        }
-
-        @Override
-        public boolean hasMaterial(@NotNull String name) {
-            return false;
-        }
-
-        @NotNull
-        @Override
-        public Material getMaterial(@NotNull String name) {
-            return NO_MATERIAL;
-        }
-
-        @Override
-        public boolean isGui3d() {
-            return false;
-        }
-
-        @Override
-        public boolean useBlockLight() {
-            return false;
-        }
-
-        @Override
-        public boolean useAmbientOcclusion() {
-            return true;
-        }
-
-        @NotNull
-        @Override
-        @Deprecated
-        public ItemTransforms getTransforms() {
-            return ItemTransforms.NO_TRANSFORMS;
-        }
-
-        @NotNull
-        @Override
-        public Transformation getRootTransform() {
-            return Transformation.identity();
-        }
-
-        @Nullable
-        @Override
-        public ResourceLocation getRenderTypeHint() {
-            return null;
-        }
-
-        @Override
-        public boolean isComponentVisible(String component, boolean fallback) {
-            //Ignore fallback as we always have a true or false answer
-            return parts.contains(component);
-        }
-    }
+//    private record MekaSuitModelConfiguration(Set<String> parts) implements IGeometryBakingContext {
+//
+//        private static final Material NO_MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation());
+//
+//        private MekaSuitModelConfiguration {
+//            parts = parts.isEmpty() ? Collections.emptySet() : Collections.unmodifiableSet(parts);
+//        }
+//
+//        @NotNull
+//        @Override
+//        public String getModelName() {
+//            return "mekanism:mekasuit";
+//        }
+//
+//        @Override
+//        public boolean hasMaterial(@NotNull String name) {
+//            return false;
+//        }
+//
+//        @NotNull
+//        @Override
+//        public Material getMaterial(@NotNull String name) {
+//            return NO_MATERIAL;
+//        }
+//
+//        @Override
+//        public boolean isGui3d() {
+//            return false;
+//        }
+//
+//        @Override
+//        public boolean useBlockLight() {
+//            return false;
+//        }
+//
+//        @Override
+//        public boolean useAmbientOcclusion() {
+//            return true;
+//        }
+//
+//        @NotNull
+//        @Override
+//        @Deprecated
+//        public ItemTransforms getTransforms() {
+//            return ItemTransforms.NO_TRANSFORMS;
+//        }
+//
+//        @NotNull
+//        @Override
+//        public Transformation getRootTransform() {
+//            return Transformation.identity();
+//        }
+//
+//        @Nullable
+//        @Override
+//        public ResourceLocation getRenderTypeHint() {
+//            return null;
+//        }
+//
+//        @Override
+//        public boolean isComponentVisible(String component, boolean fallback) {
+//            //Ignore fallback as we always have a true or false answer
+//            return parts.contains(component);
+//        }
+//    }
 }

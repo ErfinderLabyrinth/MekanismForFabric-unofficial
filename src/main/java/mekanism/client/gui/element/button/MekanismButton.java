@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.button;
 
-import java.util.Objects;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
 import net.minecraft.client.gui.GuiGraphics;
@@ -10,6 +9,8 @@ import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.Objects;
 
 /**
  * Extends our "Widget" class (GuiElement) instead of Button so that we can easier utilize common code
@@ -34,7 +35,7 @@ public class MekanismButton extends GuiElement {
         this.onHover = onHover;
         this.onLeftClick = Objects.requireNonNull(onLeftClick, "Buttons must have a left click behavior");
         this.onRightClick = onRightClick;
-        this.clickSound = SoundEvents.UI_BUTTON_CLICK;
+        this.clickSound = SoundEvents.UI_BUTTON_CLICK::value;
         setButtonBackground(ButtonBackground.DEFAULT);
     }
 

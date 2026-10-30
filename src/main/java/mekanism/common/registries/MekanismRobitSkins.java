@@ -1,9 +1,6 @@
 package mekanism.common.registries;
 
 import com.mojang.serialization.Codec;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import mekanism.api.MekanismAPI;
 import mekanism.api.robit.AdvancementBasedRobitSkin;
 import mekanism.api.robit.RobitSkin;
@@ -17,20 +14,23 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.IEventBus;
+
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class MekanismRobitSkins {
 
     private MekanismRobitSkins() {
     }
 
-    private static final RobitSkinDeferredRegister ROBIT_SKINS = new RobitSkinDeferredRegister(Mekanism.MODID);
+    public static final RobitSkinDeferredRegister ROBIT_SKINS = new RobitSkinDeferredRegister(Mekanism.MODID);
 
     @SuppressWarnings("FieldCanBeLocal")//Cannot be local as we reflect and grab it from the API
     private static Codec<RobitSkin> DIRECT_CODEC;
 
-    public static void createAndRegisterDatapack(IEventBus modEventBus) {
-        DIRECT_CODEC = MekanismRobitSkins.ROBIT_SKINS.createAndRegisterDatapack(modEventBus, RobitSkin::codec, RobitSkinSerializationHelper.NETWORK_CODEC);
+    public static void createAndRegisterDatapack() {
+        DIRECT_CODEC = MekanismRobitSkins.ROBIT_SKINS.createAndRegisterDatapack(RobitSkin::codec, RobitSkinSerializationHelper.NETWORK_CODEC);
     }
 
     public static Codec<RobitSkin> getDirectCodec() {

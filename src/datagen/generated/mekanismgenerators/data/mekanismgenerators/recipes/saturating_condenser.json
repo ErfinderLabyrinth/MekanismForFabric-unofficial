@@ -5,10 +5,10 @@
       "item": "minecraft:bucket"
     },
     "I": {
-      "tag": "forge:ingots/tin"
+      "tag": "c:tin_ingots"
     },
     "S": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     }
   },
   "pattern": [

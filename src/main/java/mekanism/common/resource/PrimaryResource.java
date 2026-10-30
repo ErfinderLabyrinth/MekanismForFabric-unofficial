@@ -1,18 +1,19 @@
 package mekanism.common.resource;
 
-import java.util.function.Supplier;
 import mekanism.common.resource.ore.OreType;
 import mekanism.common.tags.MekanismTags;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.Tags;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 public enum PrimaryResource implements IResource {
-    IRON("iron", 0xFFAF8E77, Tags.Items.ORES_IRON),
-    GOLD("gold", 0xFFF2CD67, Tags.Items.ORES_GOLD),
+    IRON("iron", 0xFFAF8E77, ConventionalItemTags.IRON_INGOTS),
+    GOLD("gold", 0xFFF2CD67, ConventionalItemTags.GOLD_INGOTS),
     OSMIUM("osmium", 0xFF1E79C3, () -> MekanismTags.Items.ORES.get(OreType.OSMIUM), BlockResourceInfo.OSMIUM, BlockResourceInfo.RAW_OSMIUM),
-    COPPER("copper", 0xFFAA4B19, Tags.Items.ORES_COPPER),
+    COPPER("copper", 0xFFAA4B19, ConventionalItemTags.COPPER_INGOTS),
     TIN("tin", 0xFFCCCCD9, () -> MekanismTags.Items.ORES.get(OreType.TIN), BlockResourceInfo.TIN, BlockResourceInfo.RAW_TIN),
     LEAD("lead", 0xFF3A404A, () -> MekanismTags.Items.ORES.get(OreType.LEAD), BlockResourceInfo.LEAD, BlockResourceInfo.RAW_LEAD),
     URANIUM("uranium", 0xFF46664F, () -> MekanismTags.Items.ORES.get(OreType.URANIUM), BlockResourceInfo.URANIUM, BlockResourceInfo.RAW_URANIUM);

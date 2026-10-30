@@ -1,10 +1,11 @@
 package mekanism.client.gui.element.text;
 
-import java.util.function.BiFunction;
 import mekanism.client.gui.element.GuiElement.ButtonBackground;
 import mekanism.client.gui.element.button.MekanismImageButton;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.MekanismUtils.ResourceType;
+
+import java.util.function.BiFunction;
 
 public enum ButtonType {
     NORMAL((field, callback) -> new MekanismImageButton(field.gui(), field.getRelativeX() + field.getWidth() - field.getHeight(), field.getRelativeY(),

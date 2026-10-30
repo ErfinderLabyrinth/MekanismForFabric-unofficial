@@ -27,8 +27,8 @@
                 },
                 {
                   "op": "replace",
-                  "source": "EnergyContainers",
-                  "target": "mekData.EnergyContainers"
+                  "source": "EnergyContainer",
+                  "target": "mekData.EnergyContainer"
                 }
               ],
               "source": "block_entity"
@@ -37,9 +37,7 @@
           "name": "mekanism:laser"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/laser"
+  ]
 }

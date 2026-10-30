@@ -1,7 +1,5 @@
 package mekanism.api.gear;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.nbt.CompoundTag;
@@ -9,6 +7,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Abstract implementation to make creating custom modules that provide a specific enchantment when installed easier, while also properly "hiding" the fact that there is

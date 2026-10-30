@@ -1,12 +1,13 @@
 package mekanism.common.recipe.lookup.cache.type;
 
+import mekanism.api.FluidStack;
 import mekanism.api.recipes.MekanismRecipe;
 import mekanism.api.recipes.ingredients.FluidStackIngredient;
 import mekanism.common.recipe.ingredient.creator.FluidStackIngredientCreator.MultiFluidStackIngredient;
 import mekanism.common.recipe.ingredient.creator.FluidStackIngredientCreator.SingleFluidStackIngredient;
 import mekanism.common.recipe.ingredient.creator.FluidStackIngredientCreator.TaggedFluidStackIngredient;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
 
 public class FluidInputCache<RECIPE extends MekanismRecipe> extends NBTSensitiveInputCache<Fluid, FluidStack, FluidStack, FluidStackIngredient, RECIPE> {
 
@@ -15,8 +16,8 @@ public class FluidInputCache<RECIPE extends MekanismRecipe> extends NBTSensitive
         if (inputIngredient instanceof SingleFluidStackIngredient single) {
             addNbtInputCache(single.getInputRaw(), recipe);
         } else if (inputIngredient instanceof TaggedFluidStackIngredient tagged) {
-            for (Fluid input : tagged.getRawInput()) {
-                addInputCache(input, recipe);
+            for (Holder<Fluid> input : tagged.getRawInput()) {
+                addInputCache(input.value(), recipe);
             }
         } else if (inputIngredient instanceof MultiFluidStackIngredient multi) {
             return mapMultiInputs(recipe, multi);
@@ -35,7 +36,7 @@ public class FluidInputCache<RECIPE extends MekanismRecipe> extends NBTSensitive
 
     @Override
     protected FluidStack createNbtKey(FluidStack stack) {
-        //Note: We can use FluidStacks directly as the Nbt key as they compare only on fluid and tag on equals and hashcode
+        //Note: We can use FluidStacks directly as the Nbt key as they compare only on fluid and tagSupplier on equals and hashcode
         // and don't take the amount into account
         return stack;
     }

@@ -1,13 +1,12 @@
 package mekanism.client.gui;
 
-import java.util.Set;
 import mekanism.api.inventory.IInventorySlot;
+import mekanism.api.security.ISecurityObject;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.element.tab.GuiRedstoneControlTab;
 import mekanism.client.gui.element.tab.GuiSecurityTab;
 import mekanism.client.gui.element.tab.window.GuiUpgradeWindowTab;
 import mekanism.common.MekanismLang;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.inventory.container.slot.InventoryContainerSlot;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
 import mekanism.common.item.ItemConfigurator;
@@ -25,6 +24,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Set;
 
 public abstract class GuiMekanismTile<TILE extends TileEntityMekanism, CONTAINER extends MekanismTileContainer<TILE>> extends GuiMekanism<CONTAINER> {
 
@@ -58,7 +59,7 @@ public abstract class GuiMekanismTile<TILE extends TileEntityMekanism, CONTAINER
             addRenderableWidget(new GuiRedstoneControlTab(this, tile));
         }
         //Note: We check if the capability is present rather than calling hasSecurity so that we don't add the tab to the security desk
-        if (tile.getCapability(Capabilities.SECURITY_OBJECT).isPresent()) {
+        if (tile instanceof ISecurityObject) {
             addSecurityTab();
         }
     }
@@ -73,7 +74,7 @@ public abstract class GuiMekanismTile<TILE extends TileEntityMekanism, CONTAINER
         if (tile instanceof ISideConfiguration) {
             ItemStack stack = getCarriedItem();
             if (!stack.isEmpty() && stack.getItem() instanceof ItemConfigurator) {
-                Slot slot = getSlotUnderMouse();
+                Slot slot = hoveredSlot;
                 if (slot != null) {
                     DataType data = getFromSlot(slot);
                     if (data != null) {
@@ -86,7 +87,7 @@ public abstract class GuiMekanismTile<TILE extends TileEntityMekanism, CONTAINER
     }
 
     private DataType getFromSlot(Slot slot) {
-        if (slot.index < tile.getSlots() && slot instanceof InventoryContainerSlot containerSlot) {
+        if (slot.index < menu.slots.size() && slot instanceof InventoryContainerSlot containerSlot) {
             ISideConfiguration config = (ISideConfiguration) tile;
             ConfigInfo info = config.getConfig().getConfig(TransmissionType.ITEM);
             if (info != null) {

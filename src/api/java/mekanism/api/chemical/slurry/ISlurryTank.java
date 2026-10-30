@@ -18,6 +18,11 @@ public interface ISlurryTank extends IChemicalTank<Slurry, SlurryStack>, IEmptyS
     }
 
     @Override
+    default SlurryStack createStack(Slurry slurry, long size) {
+        return new SlurryStack(slurry, size);
+    }
+
+    @Override
     default void deserializeNBT(CompoundTag nbt) {
         if (nbt.contains(NBTConstants.STORED, Tag.TAG_COMPOUND)) {
             setStackUnchecked(SlurryStack.readFromNBT(nbt.getCompound(NBTConstants.STORED)));

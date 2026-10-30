@@ -1,17 +1,11 @@
 package mekanism.common.recipe.upgrade;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.api.inventory.IMekanismInventory;
 import mekanism.api.recipes.ItemStackToEnergyRecipe;
+import mekanism.client.MekanismClient;
 import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.inventory.slot.BasicInventorySlot;
 import mekanism.common.item.ItemRobit;
@@ -21,16 +15,25 @@ import mekanism.common.item.interfaces.IItemSustainedInventory;
 import mekanism.common.lib.inventory.personalstorage.PersonalStorageManager;
 import mekanism.common.recipe.MekanismRecipeType;
 import mekanism.common.tile.base.TileEntityMekanism;
-import net.minecraft.core.Direction;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @NothingNullByDefault
 public class ItemRecipeData implements RecipeUpgradeData<ItemRecipeData> {
@@ -54,36 +57,45 @@ public class ItemRecipeData implements RecipeUpgradeData<ItemRecipeData> {
     }
 
     @Override
-    public boolean applyToStack(ItemStack stack) {
+    public ItemStack applyToStack(ItemStack stack) {
         if (slots.isEmpty()) {
-            return true;
+            return stack;
         }
+        Storage<ItemVariant> handler;
+
         Item item = stack.getItem();
         List<IInventorySlot> stackSlots = new ArrayList<>();
         if (item instanceof ItemBlockPersonalStorage<?>) {
             //Add the slots in the same way we would for a PersonalStorageItemInventory and if we can transfer to the item,
             // we will copy them over directly
             PersonalStorageManager.createSlots(stackSlots::add, BasicInventorySlot.alwaysTrueBi, null);
-            return applyToStack(slots, stackSlots, (ListTag toWrite) -> PersonalStorageManager.createInventoryFor(stack, stackSlots));
+            List<IInventorySlot> finalStackSlots = stackSlots;
+            boolean works = applyToStack(slots, stackSlots, (ListTag toWrite) -> PersonalStorageManager.createInventoryFor(stack, finalStackSlots, FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT ? MekanismClient.tryGetSingleplayerServer() : (MinecraftServer) FabricLoader.getInstance().getGameInstance()));
+            return works ? stack : null;
         }
         boolean isBin = item instanceof ItemBlockBin;
-        Optional<IItemHandler> capability = stack.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
-        if (capability.isPresent()) {
-            IItemHandler itemHandler = capability.get();
-            for (int i = 0, slots = itemHandler.getSlots(); i < slots; i++) {
-                int slot = i;
-                stackSlots.add(new DummyInventorySlot(itemHandler.getSlotLimit(slot), itemStack -> itemHandler.isItemValid(slot, itemStack), isBin));
-            }
-        } else if (item instanceof BlockItem blockItem) {
-            TileEntityMekanism tile = getTileFromBlock(blockItem.getBlock());
+
+        TileEntityMekanism tile;
+
+//        Optional<IItemHandler> capability = stack.getCapability(ForgeCapabilities.ITEM_HANDLER).resolve();
+//        if (capability.isPresent()) {
+//            IItemHandler itemHandler = capability.get();
+//            for (int i = 0, slots = itemHandler.getSlots(); i < slots; i++) {
+//                int slot = i;
+//                stackSlots.add(new DummyInventorySlot(itemHandler.getSlotLimit(slot), itemStack -> itemHandler.isItemValid(slot, itemStack), isBin));
+//            }
+        /*} else*/ if (item instanceof BlockItem blockItem) {
+            tile = getTileFromBlock(blockItem.getBlock());
             if (tile == null || !tile.persistInventory()) {
                 //Something went wrong
-                return false;
+                return null;
             }
-            for (int i = 0, slots = tile.getSlots(); i < slots; i++) {
-                int slot = i;
-                stackSlots.add(new DummyInventorySlot(tile.getSlotLimit(slot), itemStack -> tile.isItemValid(slot, itemStack), isBin));
-            }
+
+            stackSlots = tile.getItemManager().canHandle() ? tile.getItemManager().getHolder().getAll() : stackSlots;
+//            for (int i = 0, slots = tile.getSlots(); i < slots; i++) {
+//                int slot = i;
+//                stackSlots.add(new DummyInventorySlot(tile.getSlotLimit(slot), itemStack -> tile.isItemValid(slot, itemStack), isBin));
+//            }
         } else if (item instanceof ItemRobit) {
             //Special casing for the robit so that we don't void items from a personal chest when upgrading to a robit
             //Inventory slots
@@ -110,14 +122,14 @@ public class ItemRecipeData implements RecipeUpgradeData<ItemRecipeData> {
                 if (!slot.isEmpty()) {
                     //We have no information about what our item supports, but we have at least some stacks we want to transfer
                     sustainedInventory.setSustainedInventory(DataHandlerUtils.writeContainers(slots), stack);
-                    return true;
+                    return stack;
                 }
             }
-            return true;
+            return stack;
         } else {
-            return false;
+            return null;
         }
-        return applyToStack(slots, stackSlots, (ListTag toWrite) -> ((IItemSustainedInventory) item).setSustainedInventory(toWrite, stack));
+        return applyToStack(slots, stackSlots, (ListTag toWrite) -> ((IItemSustainedInventory) item).setSustainedInventory(toWrite, stack)) ? stack : null;
     }
 
     static boolean applyToStack(List<IInventorySlot> dataSlots, List<IInventorySlot> stackSlots, Consumer<ListTag> stackWriter) {
@@ -132,23 +144,27 @@ public class ItemRecipeData implements RecipeUpgradeData<ItemRecipeData> {
             return true;
         }
         //TODO: Improve the logic so that it maybe tries multiple different slot combinations
-        IMekanismInventory outputHandler = new IMekanismInventory() {
-            @NotNull
-            @Override
-            public List<IInventorySlot> getInventorySlots(@Nullable Direction side) {
-                return stackSlots;
-            }
-
-            @Override
-            public void onContentsChanged() {
-            }
-        };
+//        IMekanismInventory outputHandler = new IMekanismInventory() {
+//            @NotNull
+//            @Override
+//            public List<IInventorySlot> getItemStorage(@Nullable Direction side) {
+//                return stackSlots;
+//            }
+//
+//            @Override
+//            public void onContentsChanged() {
+//            }
+//        };
         boolean hasData = false;
         for (IInventorySlot slot : dataSlots) {
             if (!slot.isEmpty()) {
-                if (!ItemHandlerHelper.insertItemStacked(outputHandler, slot.getStack(), false).isEmpty()) {
-                    //If we have a remainder something failed so bail
-                    return false;
+                int count = slot.getStack().getCount();
+                try(Transaction t=Transaction.openOuter()) {
+                    if (new CombinedStorage<>(stackSlots).insert(slot.getResource(), count, t) != count) {
+                        //If we have a remainder something failed so bail
+                        return false;
+                    }
+                    t.commit();
                 }
                 hasData = true;
             }

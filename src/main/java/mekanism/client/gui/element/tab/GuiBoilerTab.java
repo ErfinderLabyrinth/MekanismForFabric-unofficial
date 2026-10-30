@@ -1,11 +1,11 @@
 package mekanism.client.gui.element.tab;
 
 import mekanism.api.text.ILangEntry;
+import mekanism.client.MekanismClient;
 import mekanism.client.SpecialColors;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.tab.GuiBoilerTab.BoilerTab;
 import mekanism.client.render.lib.ColorAtlas.ColorRegistryObject;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.network.to_server.PacketGuiButtonPress;
 import mekanism.common.network.to_server.PacketGuiButtonPress.ClickedTileButton;
@@ -44,7 +44,7 @@ public class GuiBoilerTab extends GuiTabElementType<TileEntityBoilerCasing, Boil
 
         @Override
         public void onClick(TileEntityBoilerCasing tile) {
-            Mekanism.packetHandler().sendToServer(new PacketGuiButtonPress(button, tile));
+            MekanismClient.clientPacketHandler().sendToServer(new PacketGuiButtonPress(button, tile));
         }
 
         @Override

@@ -3,13 +3,13 @@
   "category": "equipment",
   "key": {
     "A": {
-      "tag": "forge:tools/axes/bronze"
+      "tag": "c:bronze_axes"
     },
     "P": {
       "tag": "forge:tools/pickaxes/bronze"
     },
     "R": {
-      "tag": "forge:rods/wooden"
+      "item": "minecraft:stick"
     },
     "S": {
       "tag": "forge:tools/shovels/bronze"

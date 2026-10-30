@@ -18,6 +18,11 @@ public interface IPigmentTank extends IChemicalTank<Pigment, PigmentStack>, IEmp
     }
 
     @Override
+    default PigmentStack createStack(Pigment pigment, long size) {
+        return new PigmentStack(pigment, size);
+    }
+
+    @Override
     default void deserializeNBT(CompoundTag nbt) {
         if (nbt.contains(NBTConstants.STORED, Tag.TAG_COMPOUND)) {
             setStackUnchecked(PigmentStack.readFromNBT(nbt.getCompound(NBTConstants.STORED)));

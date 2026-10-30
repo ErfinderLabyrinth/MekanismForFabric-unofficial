@@ -83,11 +83,11 @@ public class Coord4D {//TODO - V11: Continue working on replacing uses of this w
     }
 
     /**
-     * Returns a new Coord4D from a tag compound.
+     * Returns a new Coord4D from a tagSupplier compound.
      *
-     * @param tag - tag compound to read from
+     * @param tag - tagSupplier compound to read from
      *
-     * @return the Coord4D from the tag compound
+     * @return the Coord4D from the tagSupplier compound
      */
     public static Coord4D read(CompoundTag tag) {
         return new Coord4D(tag.getInt(NBTConstants.X), tag.getInt(NBTConstants.Y), tag.getInt(NBTConstants.Z),
@@ -133,9 +133,9 @@ public class Coord4D {//TODO - V11: Continue working on replacing uses of this w
     /**
      * Writes this Coord4D's data to an CompoundNBT.
      *
-     * @param nbtTags - tag compound to write to
+     * @param nbtTags - tagSupplier compound to write to
      *
-     * @return the tag compound with this Coord4D's data
+     * @return the tagSupplier compound with this Coord4D's data
      */
     public CompoundTag write(CompoundTag nbtTags) {
         nbtTags.putInt(NBTConstants.X, x);

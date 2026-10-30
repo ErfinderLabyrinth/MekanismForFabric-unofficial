@@ -1,6 +1,6 @@
 package mekanism.client.render.data;
 
-import java.util.Objects;
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -15,8 +15,9 @@ import mekanism.client.render.data.ChemicalRenderData.SlurryRenderData;
 import mekanism.common.lib.multiblock.MultiblockData;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 @NothingNullByDefault
 public abstract class RenderData {

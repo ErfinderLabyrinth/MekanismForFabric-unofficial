@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "#c:tin_ores",
+    "#c:osmium_ores",
+    "#c:uranium_ores",
+    "#c:fluorite_ores",
+    "#c:lead_ores"
+  ]
+}

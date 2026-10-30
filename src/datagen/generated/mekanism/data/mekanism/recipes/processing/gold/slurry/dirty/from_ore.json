@@ -6,7 +6,7 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ores/gold"
+      "tag": "c:gold_ingots"
     }
   },
   "output": {

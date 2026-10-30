@@ -1,19 +1,12 @@
 package mekanism.common.item;
 
-import java.util.List;
-import java.util.UUID;
 import mekanism.api.MekanismAPI;
 import mekanism.api.NBTConstants;
-import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.robit.RobitSkin;
-import mekanism.api.security.ISecurityObject;
-import mekanism.api.security.ISecurityUtils;
-import mekanism.api.security.SecurityMode;
+import mekanism.api.security.*;
 import mekanism.api.text.EnumColor;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
-import mekanism.common.capabilities.Capabilities;
-import mekanism.common.capabilities.ItemCapabilityWrapper.ItemCapability;
 import mekanism.common.capabilities.security.item.ItemStackSecurityObject;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.item.interfaces.IItemSustainedInventory;
@@ -23,18 +16,16 @@ import mekanism.common.tile.TileEntityChargepad;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.InventoryUtils;
 import mekanism.common.util.ItemDataUtils;
-import mekanism.common.util.StorageUtils;
 import mekanism.common.util.WorldUtils;
 import mekanism.common.util.text.BooleanStateDisplay.YesNo;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -44,16 +35,21 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
 
-public class ItemRobit extends ItemEnergized implements IItemSustainedInventory {
+import java.util.List;
+import java.util.UUID;
+
+public class ItemRobit extends ItemEnergized implements IItemSustainedInventory,IItemOwnerObjectGetter {
 
     public ItemRobit(Properties properties) {
-        super(() -> EntityRobit.MAX_ENERGY.multiply(0.005), () -> EntityRobit.MAX_ENERGY, properties.rarity(Rarity.RARE));
+        super(() -> (long) (EntityRobit.MAX_ENERGY * 0.005), () -> EntityRobit.MAX_ENERGY, properties.rarity(Rarity.RARE));
     }
 
     @Override
-    public void onDestroyed(@NotNull ItemEntity item, @NotNull DamageSource damageSource) {
-        InventoryUtils.dropItemContents(item, damageSource);
+    public void onDestroyed(@NotNull ItemEntity item) {
+        InventoryUtils.dropItemContents(item, null);
     }
 
     @Override
@@ -83,22 +79,26 @@ public class ItemRobit extends ItemEnergized implements IItemSustainedInventory 
                     return InteractionResult.FAIL;
                 }
                 robit.setHome(chargepad.getTileCoord());
-                IEnergyContainer energyContainer = StorageUtils.getEnergyContainer(stack, 0);
-                if (energyContainer != null) {
-                    robit.getEnergyContainer().setEnergy(energyContainer.getEnergy());
+                EnergyStorage energyStorage = ContainerItemContext.forPlayerInteraction(context.getPlayer(), context.getHand()).find(EnergyStorage.ITEM);
+                if (energyStorage != null) {
+                    robit.getEnergyContainer().setEnergy(energyStorage.getAmount());
                 }
                 ISecurityUtils securityUtils = ISecurityUtils.INSTANCE;
                 UUID ownerUUID = securityUtils.getOwnerUUID(stack);
                 if (ownerUUID == null) {
                     robit.setOwnerUUID(player.getUUID());
                     //If the robit doesn't already have an owner, make sure we portray this
-                    Mekanism.packetHandler().sendToAll(new PacketSecurityUpdate(player.getUUID()));
+                    Mekanism.packetHandler().sendToAll(new PacketSecurityUpdate(player.getUUID()), world.getServer());
                 } else {
                     robit.setOwnerUUID(ownerUUID);
                 }
                 robit.setSustainedInventory(getSustainedInventory(stack));
                 robit.setCustomName(getRobitName(stack));
-                robit.setSecurityMode(stack.getCapability(Capabilities.SECURITY_OBJECT).map(ISecurityObject::getSecurityMode).orElse(SecurityMode.PUBLIC));
+                SecurityMode stackMode = SecurityMode.PUBLIC;
+                if (stack.getItem() instanceof IItemOwnerObjectGetter ownerObjectGetter && ownerObjectGetter.getOwnerObject(stack) instanceof ISecurityObject securityObject) {
+                    stackMode = securityObject.getSecurityMode();
+                }
+                robit.setSecurityMode(stackMode);
                 robit.setSkin(getRobitSkin(stack), player);
                 world.addFreshEntity(robit);
                 world.gameEvent(player, GameEvent.ENTITY_PLACE, robit.blockPosition());
@@ -135,8 +135,7 @@ public class ItemRobit extends ItemEnergized implements IItemSustainedInventory 
     }
 
     @Override
-    protected void gatherCapabilities(List<ItemCapability> capabilities, ItemStack stack, CompoundTag nbt) {
-        capabilities.add(new ItemStackSecurityObject());
-        super.gatherCapabilities(capabilities, stack, nbt);
+    public @Nullable IOwnerObject getOwnerObject(ItemStack stack) {
+        return new ItemStackSecurityObject(stack);
     }
 }

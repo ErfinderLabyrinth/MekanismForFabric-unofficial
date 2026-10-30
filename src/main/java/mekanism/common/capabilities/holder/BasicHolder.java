@@ -1,17 +1,14 @@
 package mekanism.common.capabilities.holder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 import mekanism.api.RelativeSide;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BasicHolder<TYPE> implements IHolder {
+import java.util.*;
+import java.util.function.Supplier;
+
+public abstract class BasicHolder<TYPE, VARIANT> implements IHolder<TYPE> {
 
     private final Map<RelativeSide, List<TYPE>> directionalSlots = new EnumMap<>(RelativeSide.class);
     private final List<TYPE> inventorySlots = new ArrayList<>();
@@ -40,5 +37,10 @@ public class BasicHolder<TYPE> implements IHolder {
             return Collections.emptyList();
         }
         return slots;
+    }
+
+    @Override
+    public List<TYPE> getAll() {
+        return inventorySlots;
     }
 }

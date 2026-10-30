@@ -2,13 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:dusts/osmium"
+      "tag": "c:osmium_dusts"
     },
     "A": {
       "tag": "mekanism:alloys/infused"
     },
     "G": {
-      "tag": "forge:glass/silica"
+      "tag": "c:glass_blocks"
     }
   },
   "pattern": [

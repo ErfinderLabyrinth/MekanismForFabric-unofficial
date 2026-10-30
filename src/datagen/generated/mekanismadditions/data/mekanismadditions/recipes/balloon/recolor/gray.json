@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
         "tag": "mekanismadditions:balloons"
       },
@@ -11,7 +11,7 @@
       }
     },
     {
-      "tag": "forge:dyes/gray"
+      "tag": "c:gray_dyes"
     }
   ],
   "result": {

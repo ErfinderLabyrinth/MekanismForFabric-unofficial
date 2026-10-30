@@ -2,7 +2,7 @@
   "type": "mekanism:infusion_conversion",
   "input": {
     "ingredient": {
-      "tag": "forge:dusts/tin"
+      "tag": "c:tin_dusts"
     }
   },
   "output": {

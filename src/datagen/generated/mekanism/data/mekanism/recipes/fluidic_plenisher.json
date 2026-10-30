@@ -2,10 +2,10 @@
   "type": "mekanism:mek_data",
   "key": {
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "I": {
-      "tag": "forge:ingots/tin"
+      "tag": "c:tin_ingots"
     },
     "P": {
       "item": "mekanism:electric_pump"

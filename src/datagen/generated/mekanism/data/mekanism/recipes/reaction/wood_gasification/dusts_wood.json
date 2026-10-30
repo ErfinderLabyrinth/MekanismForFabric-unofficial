@@ -3,7 +3,7 @@
   "duration": 37,
   "fluidInput": {
     "amount": 25,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "gasInput": {
     "amount": 25,
@@ -16,7 +16,7 @@
   "itemInput": {
     "amount": 8,
     "ingredient": {
-      "tag": "forge:dusts/wood"
+      "tag": "c:wood_dusts"
     }
   }
 }

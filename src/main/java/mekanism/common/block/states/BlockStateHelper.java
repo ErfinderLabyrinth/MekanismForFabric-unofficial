@@ -1,8 +1,5 @@
 package mekanism.common.block.states;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.ToIntFunction;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.block.attribute.Attribute;
 import mekanism.common.block.attribute.AttributeState;
@@ -23,6 +20,10 @@ import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.ToIntFunction;
 
 public class BlockStateHelper {
 

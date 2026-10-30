@@ -7,7 +7,6 @@
 		"4": "mekanism:block/bottom",
 		"particle": "mekanismgenerators:block/model/heat_generator"
 	},
-	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"name": "drum",
@@ -137,7 +136,7 @@
 			"faces": {
 				"north": {"uv": [8, 8, 16, 16], "texture": "#3", "cullface": "north"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

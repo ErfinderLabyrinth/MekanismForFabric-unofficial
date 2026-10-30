@@ -3,9 +3,10 @@ package mekanism.common.tier;
 import mekanism.api.heat.HeatAPI;
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedDoubleValue;
 import mekanism.common.lib.Color;
 import mekanism.common.util.EnumUtils;
+
+import java.util.function.DoubleSupplier;
 
 public enum ConductorTier implements ITier {
     BASIC(BaseTier.BASIC, 5, HeatAPI.DEFAULT_HEAT_CAPACITY, 10, Color.rgbad(0.2, 0.2, 0.2, 1)),
@@ -18,9 +19,9 @@ public enum ConductorTier implements ITier {
     private final double baseHeatCapacity;
     private final double baseConductionInsulation;
     private final BaseTier baseTier;
-    private CachedDoubleValue conductionReference;
-    private CachedDoubleValue capacityReference;
-    private CachedDoubleValue insulationReference;
+    private DoubleSupplier conductionReference;
+    private DoubleSupplier capacityReference;
+    private DoubleSupplier insulationReference;
 
     ConductorTier(BaseTier tier, double conduction, double heatCapacity, double conductionInsulation, Color color) {
         baseConduction = conduction;
@@ -46,15 +47,15 @@ public enum ConductorTier implements ITier {
     }
 
     public double getInverseConduction() {
-        return conductionReference == null ? getBaseConduction() : conductionReference.getOrDefault();
+        return conductionReference == null ? getBaseConduction() : conductionReference.getAsDouble();
     }
 
     public double getInverseConductionInsulation() {
-        return insulationReference == null ? getBaseConductionInsulation() : insulationReference.getOrDefault();
+        return insulationReference == null ? getBaseConductionInsulation() : insulationReference.getAsDouble();
     }
 
     public double getHeatCapacity() {
-        return capacityReference == null ? getBaseHeatCapacity() : capacityReference.getOrDefault();
+        return capacityReference == null ? getBaseHeatCapacity() : capacityReference.getAsDouble();
     }
 
     public Color getBaseColor() {
@@ -76,7 +77,7 @@ public enum ConductorTier implements ITier {
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the BinTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedDoubleValue conductionReference, CachedDoubleValue capacityReference, CachedDoubleValue insulationReference) {
+    public void setConfigReference(DoubleSupplier conductionReference, DoubleSupplier capacityReference, DoubleSupplier insulationReference) {
         this.conductionReference = conductionReference;
         this.capacityReference = capacityReference;
         this.insulationReference = insulationReference;

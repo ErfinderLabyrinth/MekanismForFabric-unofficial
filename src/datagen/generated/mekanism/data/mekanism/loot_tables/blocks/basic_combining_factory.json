@@ -51,8 +51,8 @@
                 },
                 {
                   "op": "replace",
-                  "source": "EnergyContainers",
-                  "target": "mekData.EnergyContainers"
+                  "source": "EnergyContainer",
+                  "target": "mekData.EnergyContainer"
                 },
                 {
                   "op": "replace",
@@ -66,9 +66,7 @@
           "name": "mekanism:basic_combining_factory"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/basic_combining_factory"
+  ]
 }

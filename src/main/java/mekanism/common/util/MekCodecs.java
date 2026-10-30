@@ -2,10 +2,11 @@ package mekanism.common.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.Arrays;
-import java.util.Collections;
 import mekanism.common.integration.computer.MethodRestriction;
 import net.minecraft.util.ExtraCodecs;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 public class MekCodecs {
 

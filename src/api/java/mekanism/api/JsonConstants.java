@@ -12,7 +12,7 @@ public class JsonConstants {
     public static final String INGREDIENT = "ingredient";
     public static final String AMOUNT = "amount";
     public static final String COUNT = "count";
-    public static final String TAG = "tag";
+    public static final String TAG = "tagSupplier";
     public static final String NBT = "nbt";
     public static final String ITEM = "item";
     public static final String GAS = "gas";

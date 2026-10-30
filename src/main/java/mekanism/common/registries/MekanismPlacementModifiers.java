@@ -13,4 +13,8 @@ public class MekanismPlacementModifiers {
     public static final PlacementModifierDeferredRegister PLACEMENT_MODIFIERS = new PlacementModifierDeferredRegister(Mekanism.MODID);
 
     public static final PlacementModifierRegistryObject<DisableableFeaturePlacement> DISABLEABLE = PLACEMENT_MODIFIERS.register("disableable", DisableableFeaturePlacement.CODEC);
+
+    public static void register() {
+
+    }
 }

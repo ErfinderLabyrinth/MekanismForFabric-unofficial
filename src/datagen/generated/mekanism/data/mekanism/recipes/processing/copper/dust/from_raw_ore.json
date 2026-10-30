@@ -3,7 +3,7 @@
   "input": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:raw_materials/copper"
+      "tag": "c:raw_copper_ores"
     }
   },
   "output": {

@@ -1,17 +1,10 @@
 package mekanism.common.util;
 
-import java.lang.invoke.CallSite;
-import java.lang.invoke.LambdaMetafactory;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.ObjDoubleConsumer;
-import java.util.function.ObjIntConsumer;
-import java.util.function.ObjLongConsumer;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.invoke.*;
+import java.lang.reflect.Field;
+import java.util.function.*;
 
 /**
  * Utility class to help with interacting with {@link LambdaMetafactory} without primitives causing issues in Java versions greater than Java 8

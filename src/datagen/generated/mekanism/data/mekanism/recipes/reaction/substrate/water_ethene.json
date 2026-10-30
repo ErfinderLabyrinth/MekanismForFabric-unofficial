@@ -4,7 +4,7 @@
   "energyRequired": 200,
   "fluidInput": {
     "amount": 200,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "gasInput": {
     "amount": 100,

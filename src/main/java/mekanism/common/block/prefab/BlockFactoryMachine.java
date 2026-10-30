@@ -1,6 +1,5 @@
 package mekanism.common.block.prefab;
 
-import java.util.function.UnaryOperator;
 import mekanism.common.block.states.IStateFluidLoggable;
 import mekanism.common.content.blocktype.Factory;
 import mekanism.common.content.blocktype.Machine.FactoryMachine;
@@ -8,6 +7,8 @@ import mekanism.common.resource.BlockResourceInfo;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.factory.TileEntityFactory;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+
+import java.util.function.UnaryOperator;
 
 public class BlockFactoryMachine<TILE extends TileEntityMekanism, MACHINE extends FactoryMachine<TILE>> extends BlockTile<TILE, MACHINE> {
 

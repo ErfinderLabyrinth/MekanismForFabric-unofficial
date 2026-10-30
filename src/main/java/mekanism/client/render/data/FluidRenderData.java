@@ -1,13 +1,14 @@
 package mekanism.client.render.data;
 
-import java.util.Objects;
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.client.render.MekanismRenderer.FluidTextureType;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraftforge.fluids.FluidStack;
+
+import java.util.Objects;
 
 @NothingNullByDefault
 public class FluidRenderData extends RenderData {
@@ -50,6 +51,6 @@ public class FluidRenderData extends RenderData {
 
     @Override
     public boolean equals(Object data) {
-        return super.equals(data) && data instanceof FluidRenderData other && fluidType.isFluidEqual(other.fluidType);
+        return super.equals(data) && data instanceof FluidRenderData other && fluidType.equals(other.fluidType);
     }
 }

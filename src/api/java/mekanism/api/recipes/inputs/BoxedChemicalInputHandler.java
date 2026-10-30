@@ -1,7 +1,5 @@
 package mekanism.api.recipes.inputs;
 
-import java.util.Objects;
-import mekanism.api.Action;
 import mekanism.api.MekanismAPI;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalType;
@@ -20,6 +18,8 @@ import mekanism.api.recipes.ingredients.ChemicalStackIngredient.GasStackIngredie
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient.InfusionStackIngredient;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient.PigmentStackIngredient;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient.SlurryStackIngredient;
+
+import java.util.Objects;
 
 /**
  * Specialized version of {@link ILongInputHandler} for handling boxed chemicals.
@@ -109,7 +109,7 @@ public class BoxedChemicalInputHandler {
         BoxedChemicalStack inputGas = getInput();
         if (!inputGas.isEmpty()) {
             long amount = recipeInput.getChemicalStack().getAmount() * operations;
-            logMismatchedStackSize(chemicalTank.getTankForType(inputGas.getChemicalType()).shrinkStack(amount, Action.EXECUTE), amount);
+            logMismatchedStackSize(chemicalTank.getTankForType(inputGas.getChemicalType()).shrinkStack(amount), amount);
         }
     }
 

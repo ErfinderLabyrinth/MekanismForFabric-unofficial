@@ -1,30 +1,26 @@
 package mekanism.common.lib.transmitter.acceptor;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import mekanism.common.content.network.transmitter.Transmitter;
 import mekanism.common.lib.transmitter.TransmitterNetworkRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraftforge.common.util.LazyOptional;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class NetworkAcceptorCache<ACCEPTOR> {
 
-    private final Map<BlockPos, Map<Direction, LazyOptional<ACCEPTOR>>> cachedAcceptors = new Object2ObjectOpenHashMap<>();
+    private final Map<BlockPos, Map<Direction, Optional<ACCEPTOR>>> cachedAcceptors = new Object2ObjectOpenHashMap<>();
     private final Map<Transmitter<ACCEPTOR, ?, ?>, Set<Direction>> changedAcceptors = new Object2ObjectOpenHashMap<>();
 
     public void updateTransmitterOnSide(Transmitter<ACCEPTOR, ?, ?> transmitter, Direction side) {
-        LazyOptional<ACCEPTOR> acceptor = transmitter.canConnectToAcceptor(side) ? transmitter.getAcceptor(side) : LazyOptional.empty();
+        Optional<ACCEPTOR> acceptor = transmitter.canConnectToAcceptor(side) ? transmitter.getAcceptor(side) : Optional.empty();
         BlockPos acceptorPos = transmitter.getTilePos().relative(side);
         if (acceptor.isPresent()) {
             cachedAcceptors.computeIfAbsent(acceptorPos, pos -> new EnumMap<>(Direction.class)).put(side.getOpposite(), acceptor);
         } else if (cachedAcceptors.containsKey(acceptorPos)) {
-            Map<Direction, LazyOptional<ACCEPTOR>> cached = cachedAcceptors.get(acceptorPos);
+            Map<Direction, Optional<ACCEPTOR>> cached = cachedAcceptors.get(acceptorPos);
             cached.remove(side.getOpposite());
             if (cached.isEmpty()) {
                 cachedAcceptors.remove(acceptorPos);
@@ -35,7 +31,7 @@ public class NetworkAcceptorCache<ACCEPTOR> {
     }
 
     public void adoptAcceptors(NetworkAcceptorCache<ACCEPTOR> other) {
-        for (Entry<BlockPos, Map<Direction, LazyOptional<ACCEPTOR>>> entry : other.cachedAcceptors.entrySet()) {
+        for (Entry<BlockPos, Map<Direction, Optional<ACCEPTOR>>> entry : other.cachedAcceptors.entrySet()) {
             BlockPos pos = entry.getKey();
             if (cachedAcceptors.containsKey(pos)) {
                 cachedAcceptors.get(pos).putAll(entry.getValue());
@@ -81,14 +77,14 @@ public class NetworkAcceptorCache<ACCEPTOR> {
     /**
      * @apiNote Listeners should not be added to these LazyOptionals here as they may not correspond to an actual handler and may not get invalidated.
      */
-    public Set<Map.Entry<BlockPos, Map<Direction, LazyOptional<ACCEPTOR>>>> getAcceptorEntrySet() {
+    public Set<Map.Entry<BlockPos, Map<Direction, Optional<ACCEPTOR>>>> getAcceptorEntrySet() {
         return cachedAcceptors.entrySet();
     }
 
     /**
      * @apiNote Listeners should not be added to these LazyOptionals here as they may not correspond to an actual handler and may not get invalidated.
      */
-    public Collection<Map<Direction, LazyOptional<ACCEPTOR>>> getAcceptorValues() {
+    public Collection<Map<Direction, Optional<ACCEPTOR>>> getAcceptorValues() {
         return cachedAcceptors.values();
     }
 

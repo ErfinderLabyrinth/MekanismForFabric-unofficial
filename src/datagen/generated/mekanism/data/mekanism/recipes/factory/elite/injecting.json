@@ -5,10 +5,10 @@
       "tag": "mekanism:alloys/reinforced"
     },
     "C": {
-      "tag": "forge:circuits/elite"
+      "tag": "c:elite_circuits"
     },
     "I": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:gold_ingots"
     },
     "P": {
       "item": "mekanism:advanced_injecting_factory"

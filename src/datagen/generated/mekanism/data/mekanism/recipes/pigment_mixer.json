@@ -8,7 +8,7 @@
       "tag": "mekanism:alloys/reinforced"
     },
     "C": {
-      "tag": "forge:circuits/elite"
+      "tag": "c:elite_circuits"
     },
     "X": {
       "item": "mekanism:steel_casing"

@@ -1,16 +1,17 @@
 package mekanism.common.base;
 
 import com.mojang.authlib.GameProfile;
+import mekanism.common.Mekanism;
+import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.entity.FakePlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffectInstance;
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
-import mekanism.common.Mekanism;
-import mekanism.common.util.MekanismUtils;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraftforge.common.util.FakePlayer;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Global, shared FakePlayer for Mekanism-specific uses
@@ -136,7 +137,7 @@ public class MekFakePlayer extends FakePlayer {
         @Override
         public String getName() {
             UUID emulatingUUID = getEmulatingUUID();
-            return emulatingUUID == null ? super.getName() : MekanismUtils.getLastKnownUsername(emulatingUUID);
+            return emulatingUUID == null || myFakePlayer == null ? super.getName() : MekanismUtils.getLastKnownUsername(emulatingUUID, myFakePlayer.server);
         }
 
         //NB: super check they're the same class, we only check that name & id match

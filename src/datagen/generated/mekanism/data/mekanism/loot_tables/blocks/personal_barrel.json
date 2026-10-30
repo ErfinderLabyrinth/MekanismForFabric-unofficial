@@ -23,6 +23,11 @@
                   "op": "replace",
                   "source": "componentSecurity.securityMode",
                   "target": "mekData.securityMode"
+                },
+                {
+                  "op": "replace",
+                  "source": "Items",
+                  "target": "mekData.Items"
                 }
               ],
               "source": "block_entity"
@@ -34,9 +39,7 @@
           "name": "mekanism:personal_barrel"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/personal_barrel"
+  ]
 }

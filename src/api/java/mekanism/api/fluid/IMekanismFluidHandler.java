@@ -1,16 +1,14 @@
 package mekanism.api.fluid;
 
-import java.util.List;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.Direction;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 @NothingNullByDefault
-public interface IMekanismFluidHandler extends ISidedFluidHandler, IContentsListener {
+public interface IMekanismFluidHandler extends IContentsListener {
 
     /**
      * Used to check if an instance of {@link IMekanismFluidHandler} actually has the ability to handle fluid.
@@ -36,62 +34,6 @@ public interface IMekanismFluidHandler extends ISidedFluidHandler, IContentsList
      * @implNote When side is null (an internal request), this method <em>MUST</em> return all tanks in the handler. Additionally, if {@link #canHandleFluid()} is false,
      * this <em>MUST</em> return an empty list.
      */
-    List<IExtendedFluidTank> getFluidTanks(@Nullable Direction side);
+    Storage<FluidVariant> getFluidTanks(@Nullable Direction side);
 
-    /**
-     * Returns the {@link IExtendedFluidTank} that has the given index from the list of tanks on the given side.
-     *
-     * @param tank The index of the tank to retrieve.
-     * @param side The side we are interacting with the handler from (null for internal).
-     *
-     * @return The {@link IExtendedFluidTank} that has the given index from the list of tanks on the given side.
-     */
-    @Nullable
-    default IExtendedFluidTank getFluidTank(int tank, @Nullable Direction side) {
-        List<IExtendedFluidTank> tanks = getFluidTanks(side);
-        return tank >= 0 && tank < tanks.size() ? tanks.get(tank) : null;
-    }
-
-    @Override
-    default int getTanks(@Nullable Direction side) {
-        return getFluidTanks(side).size();
-    }
-
-    @Override
-    default FluidStack getFluidInTank(int tank, @Nullable Direction side) {
-        IExtendedFluidTank fluidTank = getFluidTank(tank, side);
-        return fluidTank == null ? FluidStack.EMPTY : fluidTank.getFluid();
-    }
-
-    @Override
-    default void setFluidInTank(int tank, FluidStack stack, @Nullable Direction side) {
-        IExtendedFluidTank fluidTank = getFluidTank(tank, side);
-        if (fluidTank != null) {
-            fluidTank.setStack(stack);
-        }
-    }
-
-    @Override
-    default int getTankCapacity(int tank, @Nullable Direction side) {
-        IExtendedFluidTank fluidTank = getFluidTank(tank, side);
-        return fluidTank == null ? 0 : fluidTank.getCapacity();
-    }
-
-    @Override
-    default boolean isFluidValid(int tank, FluidStack stack, @Nullable Direction side) {
-        IExtendedFluidTank fluidTank = getFluidTank(tank, side);
-        return fluidTank != null && fluidTank.isFluidValid(stack);
-    }
-
-    @Override
-    default FluidStack insertFluid(int tank, FluidStack stack, @Nullable Direction side, Action action) {
-        IExtendedFluidTank fluidTank = getFluidTank(tank, side);
-        return fluidTank == null ? stack : fluidTank.insert(stack, action, side == null ? AutomationType.INTERNAL : AutomationType.EXTERNAL);
-    }
-
-    @Override
-    default FluidStack extractFluid(int tank, int amount, @Nullable Direction side, Action action) {
-        IExtendedFluidTank fluidTank = getFluidTank(tank, side);
-        return fluidTank == null ? FluidStack.EMPTY : fluidTank.extract(amount, action, side == null ? AutomationType.INTERNAL : AutomationType.EXTERNAL);
-    }
 }

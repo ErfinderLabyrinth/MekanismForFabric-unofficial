@@ -1,12 +1,15 @@
 package mekanism.common.block.attribute;
 
-import java.util.function.Supplier;
 import mekanism.api.text.ILangEntry;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import mekanism.common.tile.base.TileEntityMekanism;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.MenuProvider;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class AttributeGui implements Attribute {
 
@@ -19,8 +22,8 @@ public class AttributeGui implements Attribute {
         this.customName = customName;
     }
 
-    public <TILE extends TileEntityMekanism> MenuProvider getProvider(TILE tile) {
-        return containerRegistrar.get().getProvider(customName == null ? tile.getDisplayName() : customName.translate(), tile);
+    public <TILE extends TileEntityMekanism> MenuProvider getProvider(TILE tile, Consumer<FriendlyByteBuf> sendAdditionalData) {
+        return containerRegistrar.get().getProvider(customName == null ? tile.getDisplayName() : customName.translate(), tile, sendAdditionalData);
     }
 
     /**

@@ -3,7 +3,7 @@
   "duration": 100,
   "fluidInput": {
     "amount": 10,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "gasInput": {
     "amount": 100,
@@ -16,7 +16,7 @@
   "itemInput": {
     "amount": 2,
     "ingredient": {
-      "tag": "forge:fuels/bio"
+      "tag": "c:biofuels"
     }
   },
   "itemOutput": {

@@ -1,11 +1,5 @@
 package mekanism.common.recipe.upgrade;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import mekanism.api.NBTConstants;
 import mekanism.api.Upgrade;
 import mekanism.api.annotations.NothingNullByDefault;
@@ -19,6 +13,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 @NothingNullByDefault
 public class UpgradesRecipeData implements RecipeUpgradeData<UpgradesRecipeData> {
@@ -81,18 +77,18 @@ public class UpgradesRecipeData implements RecipeUpgradeData<UpgradesRecipeData>
     }
 
     @Override
-    public boolean applyToStack(ItemStack stack) {
+    public ItemStack applyToStack(ItemStack stack) {
         if (upgrades.isEmpty() && slots.isEmpty()) {
-            return true;
+            return stack;
         }
         AttributeUpgradeSupport upgradeSupport = Attribute.get(((BlockItem) stack.getItem()).getBlock(), AttributeUpgradeSupport.class);
         if (upgradeSupport == null) {
-            return false;
+            return null;
         }
         Set<Upgrade> supportedUpgrades = upgradeSupport.supportedUpgrades();
         if (!supportedUpgrades.containsAll(upgrades.keySet())) {
             //Not all upgrades are supported, fail
-            return false;
+            return null;
         }
         List<IInventorySlot> stackSlots = List.of(
               UpgradeInventorySlot.input(null, supportedUpgrades),
@@ -107,8 +103,8 @@ public class UpgradesRecipeData implements RecipeUpgradeData<UpgradesRecipeData>
             //Try merging stored stacks, writing if needed. If we did merge (even if we didn't have to write)
             // then save and return that we applied to our stack
             ItemDataUtils.setCompound(stack, NBTConstants.COMPONENT_UPGRADE, nbt);
-            return true;
+            return stack;
         }
-        return false;
+        return null;
     }
 }

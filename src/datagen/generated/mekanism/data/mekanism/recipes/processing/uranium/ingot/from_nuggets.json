@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:nuggets/uranium"
+      "tag": "c:uranium_nuggets"
     },
     "P": {
       "item": "mekanism:nugget_uranium"

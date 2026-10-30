@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:nuggets/lead"
+      "tag": "c:lead_nuggets"
     },
     "P": {
       "item": "mekanism:nugget_lead"

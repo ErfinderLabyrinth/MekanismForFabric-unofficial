@@ -89,11 +89,11 @@ public class BoxedChemicalStack implements IHasTextComponent {
     }
 
     /**
-     * Writes this BoxedChemicalStack to a defined tag compound.
+     * Writes this BoxedChemicalStack to a defined tagSupplier compound.
      *
-     * @param nbt - tag compound to write to
+     * @param nbt - tagSupplier compound to write to
      *
-     * @return tag compound with this BoxedChemicalStack's data
+     * @return tagSupplier compound with this BoxedChemicalStack's data
      */
     public CompoundTag write(CompoundTag nbt) {
         chemicalType.write(nbt);

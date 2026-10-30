@@ -1,13 +1,14 @@
 package mekanism.api.math;
 
+import mekanism.api.annotations.NothingNullByDefault;
+import net.minecraft.network.FriendlyByteBuf;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Objects;
-import mekanism.api.annotations.NothingNullByDefault;
-import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * A class representing a positive number with an internal value defined by an unsigned long, and a floating point number stored in a short

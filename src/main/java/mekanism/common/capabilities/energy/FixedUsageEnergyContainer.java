@@ -1,35 +1,35 @@
 package mekanism.common.capabilities.energy;
 
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.block.attribute.AttributeEnergy;
 import mekanism.common.tile.base.TileEntityMekanism;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+
 @NothingNullByDefault
 public class FixedUsageEnergyContainer<TILE extends TileEntityMekanism> extends MachineEnergyContainer<TILE> {
 
-    public static <TILE extends TileEntityMekanism> FixedUsageEnergyContainer<TILE> input(TILE tile, BiFunction<FloatingLong, TILE, FloatingLong> baseEnergyCalculator,
+    public static <TILE extends TileEntityMekanism> FixedUsageEnergyContainer<TILE> input(TILE tile, BiFunction<Long, TILE, Long> baseEnergyCalculator,
           @Nullable IContentsListener listener) {
         AttributeEnergy electricBlock = validateBlock(tile);
         return new FixedUsageEnergyContainer<>(electricBlock.getStorage(), electricBlock.getUsage(), notExternal, alwaysTrue, tile, baseEnergyCalculator, listener);
     }
 
-    private final BiFunction<FloatingLong, TILE, FloatingLong> baseEnergyCalculator;
+    private final BiFunction<Long, TILE, Long> baseEnergyCalculator;
 
-    protected FixedUsageEnergyContainer(FloatingLong maxEnergy, FloatingLong energyPerTick, Predicate<@NotNull AutomationType> canExtract,
-          Predicate<@NotNull AutomationType> canInsert, TILE tile, BiFunction<FloatingLong, TILE, FloatingLong> baseEnergyCalculator, @Nullable IContentsListener listener) {
+    protected FixedUsageEnergyContainer(long maxEnergy, long energyPerTick, Predicate<@NotNull AutomationType> canExtract,
+          Predicate<@NotNull AutomationType> canInsert, TILE tile, BiFunction<Long, TILE, Long> baseEnergyCalculator, @Nullable IContentsListener listener) {
         super(maxEnergy, energyPerTick, canExtract, canInsert, tile, listener);
         this.baseEnergyCalculator = baseEnergyCalculator;
     }
 
     @Override
-    public FloatingLong getBaseEnergyPerTick() {
+    public long getBaseEnergyPerTick() {
         return baseEnergyCalculator.apply(super.getBaseEnergyPerTick(), tile);
     }
 

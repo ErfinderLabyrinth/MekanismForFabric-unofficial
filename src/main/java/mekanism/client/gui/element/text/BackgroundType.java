@@ -1,10 +1,11 @@
 package mekanism.client.gui.element.text;
 
-import java.util.function.BiConsumer;
 import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.GuiInnerScreen;
 import net.minecraft.client.gui.GuiGraphics;
+
+import java.util.function.BiConsumer;
 
 public enum BackgroundType {
     INNER_SCREEN((field, guiGraphics) -> GuiUtils.renderBackgroundTexture(guiGraphics, GuiInnerScreen.SCREEN, GuiInnerScreen.SCREEN_SIZE, GuiInnerScreen.SCREEN_SIZE, field.getRelativeX() - 1, field.getRelativeY() - 1, field.getWidth() + 2, field.getHeight() + 2, 256, 256)),

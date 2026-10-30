@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.custom;
 
-import java.util.function.Supplier;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.GuiInnerScreen;
@@ -9,6 +8,8 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Supplier;
 
 public class GuiEntityPreview extends GuiElement {
 
@@ -41,7 +42,7 @@ public class GuiEntityPreview extends GuiElement {
     @Override
     public void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         super.renderForeground(guiGraphics, mouseX, mouseY);
-        InventoryScreen.renderEntityInInventoryFollowsAngle(guiGraphics, relativeX + width / 2, relativeY + height - 2 - border - (height - size) / 2,
+        InventoryScreen.renderEntityInInventoryFollowsMouse(guiGraphics, relativeX + width / 2, relativeY + height - 2 - border - (height - size) / 2,
               scale, rotation, 0, preview.get());
     }
 

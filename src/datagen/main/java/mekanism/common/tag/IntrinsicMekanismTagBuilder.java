@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
+import net.minecraft.tags.TagKey;
 
 //Based off of IntrinsicHolderTagsProvider.IntrinsicTagAppender but with a few shortcuts for forge registry entries and also a few more helpers and addition of SafeVarargs annotations
 public class IntrinsicMekanismTagBuilder<TYPE> extends MekanismTagBuilder<TYPE, IntrinsicMekanismTagBuilder<TYPE>> {
@@ -38,10 +39,5 @@ public class IntrinsicMekanismTagBuilder<TYPE> extends MekanismTagBuilder<TYPE, 
     @SafeVarargs
     public final IntrinsicMekanismTagBuilder<TYPE> addOptional(TYPE... elements) {
         return addOptional(this::getKey, elements);
-    }
-
-    @SafeVarargs
-    public final IntrinsicMekanismTagBuilder<TYPE> remove(TYPE... elements) {
-        return remove(this::getKey, elements);
     }
 }

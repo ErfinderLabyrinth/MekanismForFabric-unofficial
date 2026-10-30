@@ -2,18 +2,20 @@ package mekanism.client.texture;
 
 import mekanism.common.Mekanism;
 import mekanism.common.registries.MekanismFluids;
+import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
+
+import java.util.List;
 
 public class MekanismSpriteSourceProvider extends BaseSpriteSourceProvider {
 
-    public MekanismSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-        super(output, Mekanism.MODID, fileHelper);
+    public MekanismSpriteSourceProvider(PackOutput output) {
+        super(output, Mekanism.MODID);
     }
 
     @Override
     protected void addSources() {
-        SourceList atlas = atlas(BLOCKS_ATLAS);
+        List<SpriteSource> atlas = atlas(BLOCKS_ATLAS);
         addFiles(atlas, Mekanism.rl("liquid/energy"));
         addFiles(atlas, Mekanism.rl("liquid/heat"));
         addFiles(atlas, Mekanism.rl("icon/redstone_control_pulse"));
@@ -37,7 +39,7 @@ public class MekanismSpriteSourceProvider extends BaseSpriteSourceProvider {
         addChemicalSprites(atlas);
         addFluids(atlas, MekanismFluids.FLUIDS);
 
-        SourceList robitAtlas = atlas(Mekanism.rl("entity/robit"));
+        List<SpriteSource> robitAtlas = atlas(Mekanism.rl("entity/robit"));
         addDirectory(robitAtlas, "entity/robit", "");
     }
 }

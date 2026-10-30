@@ -1,0 +1,28 @@
+{
+  "replace": false,
+  "values": [
+    "#c:iron_dusts",
+    "#c:gold_dusts",
+    "#c:osmium_dusts",
+    "#c:copper_dusts",
+    "#c:tin_dusts",
+    "#c:lead_dusts",
+    "#c:uranium_dusts",
+    "#c:bronze_dusts",
+    "#c:charcoal_dusts",
+    "#c:coal_dusts",
+    "#c:diamond_dusts",
+    "#c:emerald_dusts",
+    "#c:netherite_dusts",
+    "#c:lapis_dusts",
+    "#c:lithium_dusts",
+    "#c:obsidian_dusts",
+    "#c:quartz_dusts",
+    "#c:refined_obsidian_dusts",
+    "#c:salt_dusts",
+    "#c:steel_dusts",
+    "#c:sulfur_dusts",
+    "#c:wood_dusts",
+    "#c:fluorite_dusts"
+  ]
+}

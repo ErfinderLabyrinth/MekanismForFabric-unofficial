@@ -2,14 +2,13 @@ package mekanism.api;
 
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
 /**
  * Expose this as a capability on your TileEntity to allow if your block to be modified by a Configurator.
  *
  * @author aidancbrady
  */
-@AutoRegisterCapability
+//@AutoRegisterCapability //TODO
 public interface IConfigurable {
 
     /**

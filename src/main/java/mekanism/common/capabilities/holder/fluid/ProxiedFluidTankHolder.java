@@ -1,15 +1,19 @@
 package mekanism.common.capabilities.holder.fluid;
 
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.capabilities.holder.ProxiedHolder;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ProxiedFluidTankHolder extends ProxiedHolder implements IFluidTankHolder {
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+public class ProxiedFluidTankHolder extends ProxiedHolder<IExtendedFluidTank> implements IFluidTankHolder {
 
     private final Function<Direction, List<IExtendedFluidTank>> tankFunction;
 
@@ -24,9 +28,13 @@ public class ProxiedFluidTankHolder extends ProxiedHolder implements IFluidTankH
         this.tankFunction = tankFunction;
     }
 
-    @NotNull
     @Override
-    public List<IExtendedFluidTank> getTanks(@Nullable Direction side) {
-        return tankFunction.apply(side);
+    public @NotNull Storage<FluidVariant> getTanks(@Nullable Direction side) {
+        return new CombinedStorage<>(tankFunction.apply(side));
+    }
+
+    @Override
+    public List<IExtendedFluidTank> getAll() {
+        return tankFunction.apply(null);
     }
 }

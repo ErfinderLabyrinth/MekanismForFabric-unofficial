@@ -5,7 +5,6 @@ import mekanism.client.model.data.TransmitterModelData;
 import mekanism.common.block.states.TransmitterType;
 import mekanism.common.content.network.transmitter.DiversionTransporter;
 import mekanism.common.content.network.transmitter.DiversionTransporter.DiversionControl;
-import mekanism.common.integration.computer.ComputerCapabilityHelper;
 import mekanism.common.integration.computer.IComputerTile;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.registries.MekanismBlocks;
@@ -18,7 +17,7 @@ public class TileEntityDiversionTransporter extends TileEntityLogisticalTranspor
 
     public TileEntityDiversionTransporter(BlockPos pos, BlockState state) {
         super(MekanismBlocks.DIVERSION_TRANSPORTER, pos, state);
-        ComputerCapabilityHelper.addComputerCapabilities(this, this::addCapabilityResolver);
+//        ComputerCapabilityHelper.addComputerCapabilities(this, this::addCapabilityResolver);
     }
 
     @Override

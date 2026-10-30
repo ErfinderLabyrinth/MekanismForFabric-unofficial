@@ -1,10 +1,5 @@
 package mekanism.client.gui.element.gauge;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalTank;
@@ -13,6 +8,7 @@ import mekanism.api.text.TextComponentUtil;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.MekanismLang;
+import mekanism.common.capabilities.holder.IHolder;
 import mekanism.common.network.to_server.PacketDropperUse.TankType;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.text.TextUtils;
@@ -23,6 +19,12 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+
 public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>, TANK extends IChemicalTank<CHEMICAL, STACK>>
       extends GuiTankGauge<CHEMICAL, TANK> {
 
@@ -32,12 +34,12 @@ public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STAC
         super(type, gui, x, y, sizeX, sizeY, handler, tankType);
     }
 
-    public GuiChemicalGauge(Supplier<TANK> tankSupplier, Supplier<List<TANK>> tanksSupplier, GaugeType type, IGuiWrapper gui, int x, int y, TankType tankType) {
-        this(tankSupplier, tanksSupplier, type, gui, x, y, type.getGaugeOverlay().getWidth() + 2, type.getGaugeOverlay().getHeight() + 2, tankType);
+    public GuiChemicalGauge(Supplier<TANK> tankSupplier, Supplier<IHolder<TANK>> tankHolder, GaugeType type, IGuiWrapper gui, int x, int y, TankType tankType) {
+        this(tankSupplier, tankHolder, type, gui, x, y, type.getGaugeOverlay().getWidth() + 2, type.getGaugeOverlay().getHeight() + 2, tankType);
     }
 
-    public GuiChemicalGauge(Supplier<TANK> tankSupplier, Supplier<List<TANK>> tanksSupplier, GaugeType type, IGuiWrapper gui, int x, int y, int sizeX, int sizeY,
-          TankType tankType) {
+    public GuiChemicalGauge(Supplier<TANK> tankSupplier, Supplier<IHolder<TANK>> tankHolder, GaugeType type, IGuiWrapper gui, int x, int y, int sizeX, int sizeY,
+                            TankType tankType) {
         this(new ITankInfoHandler<>() {
             @Nullable
             @Override
@@ -48,7 +50,11 @@ public abstract class GuiChemicalGauge<CHEMICAL extends Chemical<CHEMICAL>, STAC
             @Override
             public int getTankIndex() {
                 TANK tank = getTank();
-                return tank == null ? -1 : tanksSupplier.get().indexOf(tank);
+                IHolder<TANK> holder = tankHolder.get();
+                if (holder == null) {
+                    return -1;
+                }
+                return tank == null ? -1 : holder.indexOf(tank);
             }
         }, type, gui, x, y, sizeX, sizeY, tankType);
     }

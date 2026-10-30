@@ -9,7 +9,7 @@
       "item": "mekanism:pellet_polonium"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "E": {
       "item": "mekanism:basic_induction_cell"

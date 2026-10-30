@@ -30,9 +30,9 @@ body:
       required: true
   - type: input
     attributes:
-      label: (Neo)Forge version
-      description: What version of (Neo)Forge are you using? (Please specify whether you are using Forge or NeoForge)
-      placeholder: e.g. 47.1.35 NeoForge
+      label: Fabric version
+      description: What version of Fabric are you using?
+      placeholder: e.g. 0.92.12+1.20.1
     validations:
       required: true
   - type: dropdown
@@ -42,9 +42,6 @@ body:
       description: What version of Mekanism are you using?
       options:
         - Current Dev Branch (Manually Compiled, specify git commit hash)
-        - 10.4.6 (Latest)
-        - 10.4.5
-        - 10.4.4
         - Older
     validations:
       required: true

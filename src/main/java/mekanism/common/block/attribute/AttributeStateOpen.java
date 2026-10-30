@@ -1,11 +1,12 @@
 package mekanism.common.block.attribute;
 
-import java.util.List;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class AttributeStateOpen implements AttributeState {
 

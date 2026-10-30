@@ -1,12 +1,11 @@
 package mekanism.common.recipe.upgrade;
 
-import java.util.UUID;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.security.ISecurityUtils;
-import mekanism.api.security.SecurityMode;
-import mekanism.common.capabilities.Capabilities;
+import mekanism.api.security.*;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 @NothingNullByDefault
 public class SecurityRecipeData implements RecipeUpgradeData<SecurityRecipeData> {
@@ -31,11 +30,14 @@ public class SecurityRecipeData implements RecipeUpgradeData<SecurityRecipeData>
     }
 
     @Override
-    public boolean applyToStack(ItemStack stack) {
-        stack.getCapability(Capabilities.OWNER_OBJECT).ifPresent(ownerObject -> {
+    public ItemStack applyToStack(ItemStack stack) {
+        IOwnerObject ownerObject;
+        if (stack.getItem() instanceof IItemOwnerObjectGetter ownerObjectGetter && (ownerObject = ownerObjectGetter.getOwnerObject(stack)) != null) {
             ownerObject.setOwnerUUID(owner);
-            stack.getCapability(Capabilities.SECURITY_OBJECT).ifPresent(security -> security.setSecurityMode(mode));
-        });
-        return true;
+            if (stack.getItem() instanceof ISecurityObject securityObject) {
+                securityObject.setSecurityMode(mode);
+            }
+        }
+        return stack;
     }
 }

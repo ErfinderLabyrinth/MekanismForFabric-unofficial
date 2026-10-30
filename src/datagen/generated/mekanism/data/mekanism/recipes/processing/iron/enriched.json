@@ -2,11 +2,11 @@
   "type": "mekanism:metallurgic_infusing",
   "chemicalInput": {
     "amount": 10,
-    "tag": "mekanism:carbon"
+    "tagSupplier": "mekanism:carbon"
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     }
   },
   "output": {

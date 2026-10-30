@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 @MethodsReturnNonnullByDefault
-public interface IBaseProvider extends IHasTextComponent, IHasTranslationKey {
+public interface IBaseProvider extends IHasTextComponent, IHasTranslationKey, INameProvider {
 
     /**
      * Gets the registry name of the element represented by this provider.
@@ -22,6 +22,11 @@ public interface IBaseProvider extends IHasTextComponent, IHasTranslationKey {
      */
     default String getName() {
         return getRegistryName().getPath();
+    }
+
+    @Override
+    default String getInternalRegistryName() {
+        return getName();
     }
 
     @Override

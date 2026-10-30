@@ -40,7 +40,7 @@ public class PaxelRecipe extends WrappedShapedRecipe {
             //Note: We check if the item for the stack is damageable rather than if the stack is damageable
             // so that if an item has the unbreakable flag on it, we still can take the percentage durability
             // into account properly.
-            if (!stack.isEmpty() && stack.getItem().isDamageable(stack)) {
+            if (!stack.isEmpty() && stack.getItem().canBeDepleted()) {
                 //Note: We can just add all the damage values and max damage values together as no item should have
                 // more durability than the maximum durability it can handle. Which means we can then calculate the
                 // percent durability directly with these two numbers without having to care how many inputs were

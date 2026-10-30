@@ -1,9 +1,10 @@
 package mekanism.common.lib.math;
 
-import java.util.Random;
 import mekanism.common.lib.math.voxel.VoxelCuboid;
 import mekanism.common.lib.math.voxel.VoxelCuboid.CuboidSide;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Random;
 
 // can add to this as we see necessary
 public record Plane(Vec3 minPos, Vec3 maxPos) {

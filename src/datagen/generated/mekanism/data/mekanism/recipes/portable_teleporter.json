@@ -2,7 +2,7 @@
   "type": "mekanism:mek_data",
   "key": {
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "E": {
       "item": "mekanism:energy_tablet"

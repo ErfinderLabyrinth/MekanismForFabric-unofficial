@@ -1,14 +1,5 @@
 package mekanism.common.tile.component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Consumer;
 import mekanism.api.NBTConstants;
 import mekanism.api.RelativeSide;
 import mekanism.api.chemical.gas.IGasTank;
@@ -19,10 +10,8 @@ import mekanism.api.energy.IEnergyContainer;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.inventory.IInventorySlot;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
-import mekanism.common.integration.energy.EnergyCompatUtils;
 import mekanism.common.inventory.container.MekanismContainer.ISpecificContainerTracker;
 import mekanism.common.inventory.container.sync.ISyncableData;
 import mekanism.common.inventory.container.sync.SyncableBoolean;
@@ -30,25 +19,22 @@ import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.tile.component.config.ConfigInfo;
 import mekanism.common.tile.component.config.DataType;
-import mekanism.common.tile.component.config.slot.BaseSlotInfo;
+import mekanism.common.tile.component.config.slot.*;
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.GasSlotInfo;
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.InfusionSlotInfo;
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.PigmentSlotInfo;
 import mekanism.common.tile.component.config.slot.ChemicalSlotInfo.SlurrySlotInfo;
-import mekanism.common.tile.component.config.slot.EnergySlotInfo;
-import mekanism.common.tile.component.config.slot.FluidSlotInfo;
-import mekanism.common.tile.component.config.slot.HeatSlotInfo;
-import mekanism.common.tile.component.config.slot.ISlotInfo;
-import mekanism.common.tile.component.config.slot.InventorySlotInfo;
 import mekanism.common.util.EnumUtils;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 public class TileComponentConfig implements ITileComponent, ISpecificContainerTracker {
 
@@ -82,16 +68,6 @@ public class TileComponentConfig implements ITileComponent, ISpecificContainerTr
     }
 
     private void sideChangedBasic(TransmissionType transmissionType, Direction direction) {
-        switch (transmissionType) {
-            case ENERGY -> tile.invalidateCapabilities(EnergyCompatUtils.getEnabledEnergyCapabilities(), direction);
-            case FLUID -> tile.invalidateCapability(ForgeCapabilities.FLUID_HANDLER, direction);
-            case GAS -> tile.invalidateCapability(Capabilities.GAS_HANDLER, direction);
-            case INFUSION -> tile.invalidateCapability(Capabilities.INFUSION_HANDLER, direction);
-            case PIGMENT -> tile.invalidateCapability(Capabilities.PIGMENT_HANDLER, direction);
-            case SLURRY -> tile.invalidateCapability(Capabilities.SLURRY_HANDLER, direction);
-            case ITEM -> tile.invalidateCapability(ForgeCapabilities.ITEM_HANDLER, direction);
-            case HEAT -> tile.invalidateCapability(Capabilities.HEAT_HANDLER, direction);
-        }
         tile.markForSave();
         //And invalidate any "listeners" we may have that the side changed for a specific transmission type
         for (Consumer<Direction> listener : configChangeListeners.getOrDefault(transmissionType, Collections.emptyList())) {
@@ -115,38 +91,38 @@ public class TileComponentConfig implements ITileComponent, ISpecificContainerTr
         }
     }
 
-    public boolean isCapabilityDisabled(@NotNull Capability<?> capability, Direction side) {
-        TransmissionType type = null;
-        if (capability == ForgeCapabilities.ITEM_HANDLER) {
-            type = TransmissionType.ITEM;
-        } else if (capability == Capabilities.GAS_HANDLER) {
-            type = TransmissionType.GAS;
-        } else if (capability == Capabilities.INFUSION_HANDLER) {
-            type = TransmissionType.INFUSION;
-        } else if (capability == Capabilities.PIGMENT_HANDLER) {
-            type = TransmissionType.PIGMENT;
-        } else if (capability == Capabilities.SLURRY_HANDLER) {
-            type = TransmissionType.SLURRY;
-        } else if (capability == Capabilities.HEAT_HANDLER) {
-            type = TransmissionType.HEAT;
-        } else if (capability == ForgeCapabilities.FLUID_HANDLER) {
-            type = TransmissionType.FLUID;
-        } else if (EnergyCompatUtils.isEnergyCapability(capability)) {
-            type = TransmissionType.ENERGY;
-        }
-        if (type != null) {
-            ConfigInfo info = getConfig(type);
-            if (info != null && side != null) {
-                //If we support this config type, and we have a side so are not the read only "internal" check
-                ISlotInfo slotInfo = info.getSlotInfo(getSide(side));
-                //Return that it is disabled:
-                // If we don't know how to handle the data type that is on that side config (such as for NONE)
-                // or the slot is not enabled then return that it is disabled
-                return slotInfo == null || !slotInfo.isEnabled();
-            }
-        }
-        return false;
-    }
+//    public boolean isCapabilityDisabled(@NotNull Capability<?> capability, Direction side) {
+//        TransmissionType type = null;
+//        if (capability == ForgeCapabilities.ITEM_HANDLER) {
+//            type = TransmissionType.ITEM;
+//        } else if (capability == Capabilities.GAS_HANDLER) {
+//            type = TransmissionType.GAS;
+//        } else if (capability == Capabilities.INFUSION_HANDLER) {
+//            type = TransmissionType.INFUSION;
+//        } else if (capability == Capabilities.PIGMENT_HANDLER) {
+//            type = TransmissionType.PIGMENT;
+//        } else if (capability == Capabilities.SLURRY_HANDLER) {
+//            type = TransmissionType.SLURRY;
+//        } else if (capability == Capabilities.HEAT_HANDLER) {
+//            type = TransmissionType.HEAT;
+//        } else if (capability == ForgeCapabilities.FLUID_HANDLER) {
+//            type = TransmissionType.FLUID;
+//        } else if (EnergyCompatUtils.isEnergyCapability(capability)) {
+//            type = TransmissionType.ENERGY;
+//        }
+//        if (type != null) {
+//            ConfigInfo info = getConfig(type);
+//            if (info != null && side != null) {
+//                //If we support this config type, and we have a side so are not the read only "internal" check
+//                ISlotInfo slotInfo = info.getSlotInfo(getSide(side));
+//                //Return that it is disabled:
+//                // If we don't know how to handle the data type that is on that side config (such as for NONE)
+//                // or the slot is not enabled then return that it is disabled
+//                return slotInfo == null || !slotInfo.isEnabled();
+//            }
+//        }
+//        return false;
+//    }
 
     @Nullable
     public ConfigInfo getConfig(TransmissionType type) {

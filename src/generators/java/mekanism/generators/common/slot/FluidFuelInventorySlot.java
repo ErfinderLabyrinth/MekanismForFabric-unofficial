@@ -7,15 +7,19 @@ import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import mekanism.api.Action;
 import mekanism.api.AutomationType;
+import mekanism.api.FluidStack;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.fluid.IExtendedFluidTank;
 import mekanism.common.inventory.slot.FluidInventorySlot;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,16 +30,15 @@ import org.jetbrains.annotations.Nullable;
 public class FluidFuelInventorySlot extends FluidInventorySlot {
 
     public static FluidFuelInventorySlot forFuel(IExtendedFluidTank fluidTank, ToIntFunction<@NotNull ItemStack> fuelValue,
-          Int2ObjectFunction<@NotNull FluidStack> fuelCreator, @Nullable IContentsListener listener, int x, int y) {
+                                                 Int2ObjectFunction<@NotNull FluidStack> fuelCreator, @Nullable IContentsListener listener, int x, int y) {
         Objects.requireNonNull(fluidTank, "Fluid tank cannot be null");
         Objects.requireNonNull(fuelCreator, "Fuel fluid stack creator cannot be null");
         Objects.requireNonNull(fuelValue, "Fuel value calculator cannot be null");
         return new FluidFuelInventorySlot(fluidTank, fuelValue, fuelCreator, stack -> {
-            Optional<IFluidHandlerItem> cap = FluidUtil.getFluidHandler(stack).resolve();
-            if (cap.isPresent()) {
-                IFluidHandlerItem fluidHandlerItem = cap.get();
-                for (int tank = 0; tank < fluidHandlerItem.getTanks(); tank++) {
-                    if (fluidTank.isFluidValid(fluidHandlerItem.getFluidInTank(tank))) {
+            Storage<FluidVariant> fluidHandlerItem = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
+            if (fluidHandlerItem != null) {
+                for (StorageView<FluidVariant> storageView : fluidHandlerItem) {
+                    if (fluidTank.isFluidValid(new FluidStack(storageView.getResource(), storageView.getAmount()))) {
                         //False if the items contents are still valid
                         return false;
                     }
@@ -46,15 +49,15 @@ public class FluidFuelInventorySlot extends FluidInventorySlot {
             // This might happen after a reload for example
             return fuelValue.applyAsInt(stack) == 0;
         }, stack -> {
-            Optional<IFluidHandlerItem> cap = FluidUtil.getFluidHandler(stack).resolve();
-            if (cap.isPresent()) {
-                IFluidHandlerItem fluidHandlerItem = cap.get();
-                for (int tank = 0; tank < fluidHandlerItem.getTanks(); tank++) {
-                    FluidStack fluidInTank = fluidHandlerItem.getFluidInTank(tank);
-                    if (!fluidInTank.isEmpty() && fluidTank.insert(fluidInTank, Action.SIMULATE, AutomationType.INTERNAL).getAmount() < fluidInTank.getAmount()) {
-                        //True if we can fill the tank with any of our contents
-                        // Note: We need to recheck the fact the chemical is not empty in case the item has multiple tanks and only some of the chemicals are valid
-                        return true;
+            Storage<FluidVariant> fluidHandlerItem = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
+            if (fluidHandlerItem != null) {
+                for (StorageView<FluidVariant> storageView : fluidHandlerItem) {
+                    try(Transaction t = Transaction.openOuter()) {
+                        if (!storageView.isResourceBlank() && fluidTank.insert(storageView.getResource(), storageView.getAmount(), t) > 0) {
+                            //True if we can fill the tank with any of our contents
+                            // Note: We need to recheck the fact the chemical is not empty in case the item has multiple tanks and only some of the chemicals are valid
+                            return true;
+                        }
                     }
                 }
             }
@@ -80,24 +83,28 @@ public class FluidFuelInventorySlot extends FluidInventorySlot {
      */
     public void fillOrBurn() {
         if (!isEmpty()) {
-            int needed = fluidTank.getNeeded();
+            long needed = fluidTank.getNeeded();
             //Fill the tank from the item
             if (needed > 0 && !fillTank()) {
                 //If filling from item failed, try doing it by conversion
-                int fuel = fuelValue.applyAsInt(current);
+                int fuel = fuelValue.applyAsInt(current.getStack());
                 if (fuel > 0 && fuel <= needed) {
-                    boolean hasContainer = current.hasCraftingRemainingItem();
-                    if (hasContainer && current.getCount() > 1) {
+                    boolean hasContainer = current.getStack().getItem().hasCraftingRemainingItem();
+                    if (hasContainer && current.getStack().getCount() > 1) {
                         //If we have a container but have more than a single stack of it somehow just exit
                         return;
                     }
-                    fluidTank.insert(fuelCreator.apply(fuel), Action.EXECUTE, AutomationType.INTERNAL);
+                    FluidStack toInsert = fuelCreator.apply(fuel);
+                    try(Transaction t = Transaction.openOuter()) {
+                        fluidTank.insert(toInsert.variant(), toInsert.amount(), t);
+                        t.commit();
+                    }
                     if (hasContainer) {
                         //If the item has a container, then replace it with the container
-                        setStack(current.getCraftingRemainingItem());
+                        setStack(current.getStack().getItem().getCraftingRemainingItem().getDefaultInstance());
                     } else {
                         //Otherwise, shrink the size of the stack by one
-                        MekanismUtils.logMismatchedStackSize(shrinkStack(1, Action.EXECUTE), 1);
+                        MekanismUtils.logMismatchedStackSize(shrinkStack(1), 1);
                     }
                 }
             }

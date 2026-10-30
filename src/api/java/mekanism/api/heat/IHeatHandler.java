@@ -1,10 +1,9 @@
 package mekanism.api.heat;
 
 import mekanism.api.annotations.NothingNullByDefault;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
 @NothingNullByDefault
-@AutoRegisterCapability
+//@AutoRegisterCapability //TODO
 public interface IHeatHandler {
 
     /**

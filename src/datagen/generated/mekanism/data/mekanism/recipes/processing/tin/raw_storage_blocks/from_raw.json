@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:raw_materials/tin"
+      "tag": "c:raw_tin"
     },
     "P": {
       "item": "mekanism:raw_tin"

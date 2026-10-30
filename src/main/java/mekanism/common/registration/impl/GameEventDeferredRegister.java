@@ -1,16 +1,18 @@
 package mekanism.common.registration.impl;
 
-import java.util.function.Supplier;
 import mekanism.common.registration.WrappedDeferredRegister;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.gameevent.GameEvent;
+
+import java.util.function.Supplier;
 
 public class GameEventDeferredRegister extends WrappedDeferredRegister<GameEvent> {
 
     private final String modid;
 
     public GameEventDeferredRegister(String modid) {
-        super(modid, Registries.GAME_EVENT);
+        super(BuiltInRegistries.GAME_EVENT);
         this.modid = modid;
     }
 
@@ -22,7 +24,7 @@ public class GameEventDeferredRegister extends WrappedDeferredRegister<GameEvent
         return register(name, () -> new GameEvent(modid + ":" + name, notificationRadius));
     }
 
-    public <GAME_EVENT extends GameEvent> GameEventRegistryObject<GAME_EVENT> register(String name, Supplier<? extends GAME_EVENT> sup) {
-        return register(name, sup, GameEventRegistryObject::new);
+    public <GAME_EVENT extends GameEvent> GameEventRegistryObject<GAME_EVENT> register(String name, Supplier<GAME_EVENT> sup) {
+        return register(new ResourceLocation(modid, name), sup, GameEventRegistryObject::new);
     }
 }

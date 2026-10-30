@@ -1,11 +1,12 @@
 package mekanism.common.inventory.slot;
 
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.common.inventory.container.slot.ContainerSlotType;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 public class FormulaicCraftingSlot extends BasicInventorySlot {
 

@@ -1,13 +1,5 @@
 package mekanism.common.capabilities.holder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import mekanism.api.RelativeSide;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.component.TileComponentConfig;
@@ -17,7 +9,12 @@ import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class ConfigHolder<TYPE> implements IHolder {
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+public abstract class ConfigHolder<TYPE> implements IHolder<TYPE> {
 
     /**
      * Dummy ISlotInfo used for representing we have no config
@@ -136,5 +133,10 @@ public abstract class ConfigHolder<TYPE> implements IHolder {
         }
         cachedSlotInfo.put(side, slotInfo);
         return slotInfo;
+    }
+
+    @Override
+    public List<TYPE> getAll() {
+        return slots;
     }
 }

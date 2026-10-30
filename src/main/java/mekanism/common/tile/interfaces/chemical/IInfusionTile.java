@@ -1,17 +1,18 @@
 package mekanism.common.tile.interfaces.chemical;
 
-import java.util.List;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.infuse.IInfusionTank;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
-import mekanism.common.capabilities.chemical.dynamic.DynamicChemicalHandler.DynamicInfusionHandler;
 import mekanism.common.capabilities.chemical.dynamic.IInfusionTracker;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.capabilities.resolver.manager.ChemicalHandlerManager.InfusionHandlerManager;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 @MethodsReturnNonnullByDefault
 public interface IInfusionTile extends IInfusionTracker {
@@ -22,8 +23,7 @@ public interface IInfusionTile extends IInfusionTracker {
      * @apiNote This should not be overridden, or directly called except for initial creation
      */
     default InfusionHandlerManager getInitialInfusionManager(IContentsListener listener) {
-        return new InfusionHandlerManager(getInitialInfusionTanks(listener), new DynamicInfusionHandler(this::getInfusionTanks, this::extractInfusionCheck,
-              this::insertInfusionCheck, listener));
+        return new InfusionHandlerManager(getInitialInfusionTanks(listener));
     }
 
     /**
@@ -45,8 +45,16 @@ public interface IInfusionTile extends IInfusionTracker {
      * @apiNote This should not be overridden
      */
     @Override
-    default List<IInfusionTank> getInfusionTanks(@Nullable Direction side) {
+    default Storage<InfuseType> getInfusionStorage(@Nullable Direction side) {
         return getInfusionManager().getContainers(side);
+    }
+
+    @Override
+    default List<IInfusionTank> getInfusionTanks() {
+        if (getInfusionManager().canHandle()) {
+            return getInfusionManager().getHolder().getAll();
+        }
+        return List.of();
     }
 
     default boolean extractInfusionCheck(int tank, @Nullable Direction side) {

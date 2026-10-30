@@ -2,12 +2,12 @@
   "type": "mekanism:combining",
   "extraInput": {
     "ingredient": {
-      "tag": "forge:dyes/pink"
+      "tag": "c:pink_dyes"
     }
   },
   "mainInput": {
     "ingredient": {
-      "tag": "forge:dyes/purple"
+      "tag": "c:purple_dyes"
     }
   },
   "output": {

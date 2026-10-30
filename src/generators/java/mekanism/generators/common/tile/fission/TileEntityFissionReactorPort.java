@@ -1,12 +1,16 @@
 package mekanism.generators.common.tile.fission;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import mekanism.api.Action;
+import mekanism.api.FluidStack;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasTank;
+import mekanism.api.fluid.IExtendedFluidTank;
+import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.api.text.EnumColor;
 import mekanism.common.MekanismLang;
@@ -17,21 +21,25 @@ import mekanism.common.capabilities.holder.fluid.IFluidTankHolder;
 import mekanism.common.capabilities.holder.heat.IHeatCapacitorHolder;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
 import mekanism.common.lib.multiblock.IMultiblockEjector;
+import mekanism.common.tile.TileEntityFluidTank;
 import mekanism.common.tile.base.SubstanceType;
-import mekanism.common.util.CapabilityUtils;
 import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.WorldUtils;
 import mekanism.generators.common.block.attribute.AttributeStateFissionPortMode;
 import mekanism.generators.common.block.attribute.AttributeStateFissionPortMode.FissionPortMode;
 import mekanism.generators.common.content.fission.FissionReactorMultiblockData;
 import mekanism.generators.common.registries.GeneratorsBlocks;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,9 +57,9 @@ public class TileEntityFissionReactorPort extends TileEntityFissionReactorCasing
         if (multiblock.isFormed()) {
             FissionPortMode mode = getMode();
             if (mode == FissionPortMode.OUTPUT_COOLANT) {
-                ChemicalUtil.emit(outputDirections, multiblock.heatedCoolantTank, this);
+                ChemicalUtil.emit(outputDirections, multiblock.heatedCoolantTank, this.level, this.worldPosition);
             } else if (mode == FissionPortMode.OUTPUT_WASTE) {
-                ChemicalUtil.emit(outputDirections, multiblock.wasteTank, this);
+                ChemicalUtil.emit(outputDirections, multiblock.wasteTank, this.level, this.worldPosition);
             }
         }
         return needsPacket;
@@ -63,7 +71,7 @@ public class TileEntityFissionReactorPort extends TileEntityFissionReactorCasing
         if (canHandleHeat() && getHeatCapacitorCount(side) > 0) {
             BlockEntity adj = WorldUtils.getTileEntity(getLevel(), getBlockPos().relative(side));
             if (!(adj instanceof TileEntityFissionReactorPort)) {
-                return CapabilityUtils.getCapability(adj, Capabilities.HEAT_HANDLER, side.getOpposite()).resolve().orElse(null);
+                return Capabilities.HEAT_HANDLER_BLOCK.find(getLevel(), getBlockPos().relative(side), side.getOpposite());
             }
         }
         return null;
@@ -72,19 +80,49 @@ public class TileEntityFissionReactorPort extends TileEntityFissionReactorCasing
     @NotNull
     @Override
     public IChemicalTankHolder<Gas, GasStack, IGasTank> getInitialGasTanks(IContentsListener listener) {
-        return side -> getMultiblock().getGasTanks(side);
+        return new IChemicalTankHolder<>() {
+            @Override
+            public @NotNull Storage<Gas> getTanks(@Nullable Direction side) {
+                return getMultiblock().getGasStorage(side);
+            }
+
+            @Override
+            public List<IGasTank> getAll() {
+                return getMultiblock().getGasTanks();
+            }
+        };
     }
 
     @NotNull
     @Override
     protected IFluidTankHolder getInitialFluidTanks(IContentsListener listener) {
-        return side -> getMultiblock().getFluidTanks(side);
+        return new IFluidTankHolder() {
+            @Override
+            public @NotNull Storage<FluidVariant> getTanks(@Nullable Direction side) {
+                return getMultiblock().getFluidStorage(side);
+            }
+
+            @Override
+            public List<IExtendedFluidTank> getAll() {
+                return getMultiblock().getFluidTanks();
+            }
+        };
     }
 
     @NotNull
     @Override
     protected IHeatCapacitorHolder getInitialHeatCapacitors(IContentsListener listener, CachedAmbientTemperature ambientTemperature) {
-        return side -> getMultiblock().getHeatCapacitors(side);
+        return new IHeatCapacitorHolder() {
+            @Override
+            public List<IHeatCapacitor> getAll() {
+                return getMultiblock().getHeatCapacitors(null);
+            }
+
+            @Override
+            public @NotNull List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction side) {
+                return getMultiblock().getHeatCapacitors(side);
+            }
+        };
     }
 
     @Override
@@ -122,15 +160,16 @@ public class TileEntityFissionReactorPort extends TileEntityFissionReactorCasing
         return InteractionResult.SUCCESS;
     }
 
-    @NotNull
-    @Override
-    public FluidStack insertFluid(@NotNull FluidStack stack, Direction side, @NotNull Action action) {
-        FluidStack ret = super.insertFluid(stack, side, action);
-        if (ret.getAmount() < stack.getAmount() && action.execute()) {
-            getMultiblock().triggerValveTransfer(this);
-        }
-        return ret;
-    }
+    //TODO
+//    @NotNull
+//    @Override
+//    public FluidStack insertFluid(@NotNull FluidStack stack, Direction side, @NotNull Action action) {
+//        FluidStack ret = super.insertFluid(stack, side, action);
+//        if (ret.getAmount() < stack.getAmount() && action.execute()) {
+//            getMultiblock().triggerValveTransfer(this);
+//        }
+//        return ret;
+//    }
 
     @Override
     public boolean insertGasCheck(int tank, @Nullable Direction side) {
@@ -173,4 +212,35 @@ public class TileEntityFissionReactorPort extends TileEntityFissionReactorCasing
         setMode(getMode().getPrevious());
     }
     //End methods IComputerTile
+
+    @Override
+    public @Nullable Storage<FluidVariant> getFluidStorage(@Nullable Direction side) {
+        Storage<FluidVariant> storage = super.getFluidStorage(side);
+        if(side == Direction.UP) {
+            return new FluidTankWrapper(storage);
+        } else {
+            return storage;
+        }
+    }
+
+    public class FluidTankWrapper extends FilteringStorage<FluidVariant> {
+        public FluidTankWrapper(Storage<FluidVariant> backingStorage) {
+            super(backingStorage);
+        }
+
+        @Override
+        public long insert(FluidVariant resource, long maxAmount, TransactionContext transaction) {
+            long inserted = super.insert(resource, maxAmount, transaction);
+
+            if(inserted > 0) {
+                transaction.addOuterCloseCallback(result -> {
+                    if(result.wasCommitted()) {
+                        getMultiblock().triggerValveTransfer(TileEntityFissionReactorPort.this);
+                    }
+                });
+            }
+
+            return inserted;
+        }
+    }
 }

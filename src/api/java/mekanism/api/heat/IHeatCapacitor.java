@@ -2,12 +2,12 @@ package mekanism.api.heat;
 
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
+import mekanism.api.NBTSerializable;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.util.INBTSerializable;
 
 @NothingNullByDefault
-public interface IHeatCapacitor extends INBTSerializable<CompoundTag>, IContentsListener {
+public interface IHeatCapacitor extends NBTSerializable<CompoundTag>, IContentsListener {
 
     /**
      * Returns the temperature of this capacitor.

@@ -3,9 +3,10 @@ package mekanism.api.math;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import java.util.function.IntSupplier;
-import mekanism.api.Action;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+
+import java.util.function.IntSupplier;
 
 @NothingNullByDefault
 public class FloatingLongTransferUtils {
@@ -16,10 +17,10 @@ public class FloatingLongTransferUtils {
     /**
      * Util method for a generic insert implementation for various handlers. Mainly for internal use only
      */
-    public static FloatingLong insert(FloatingLong stack, Action action, IntSupplier containerCount, Int2ObjectFunction<FloatingLong> inContainerGetter, InsertFloatingLong insert) {
+    public static FloatingLong insert(FloatingLong stack, TransactionContext t, IntSupplier containerCount, Int2ObjectFunction<FloatingLong> inContainerGetter, InsertFloatingLong insert) {
         int containers = containerCount.getAsInt();
         if (containers == 1) {
-            return insert.insert(0, stack, action);
+            return insert.insert(0, stack, t);
         }
         IntList matchingContainers = new IntArrayList();
         IntList emptyContainers = new IntArrayList();
@@ -34,7 +35,7 @@ public class FloatingLongTransferUtils {
         FloatingLong toInsert = stack;
         //Start by trying to insert into the tanks that have the same type
         for (int container : matchingContainers) {
-            FloatingLong remainder = insert.insert(container, toInsert, action);
+            FloatingLong remainder = insert.insert(container, toInsert, t);
             if (remainder.isZero()) {
                 //If we have no remainder, return that we fit it all
                 return FloatingLong.ZERO;
@@ -43,7 +44,7 @@ public class FloatingLongTransferUtils {
             toInsert = remainder;
         }
         for (int container : emptyContainers) {
-            FloatingLong remainder = insert.insert(container, toInsert, action);
+            FloatingLong remainder = insert.insert(container, toInsert, t);
             if (remainder.isZero()) {
                 //If we have no remainder, return that we fit it all
                 return FloatingLong.ZERO;
@@ -57,15 +58,15 @@ public class FloatingLongTransferUtils {
     /**
      * Util method for a generic extraction implementation for various handlers. Mainly for internal use only
      */
-    public static FloatingLong extract(FloatingLong amount, Action action, IntSupplier containerCount, ExtractFloatingLong extract) {
+    public static FloatingLong extract(FloatingLong amount, TransactionContext t, IntSupplier containerCount, ExtractFloatingLong extract) {
         int containers = containerCount.getAsInt();
         if (containers == 1) {
-            return extract.extract(0, amount, action);
+            return extract.extract(0, amount, t);
         }
         FloatingLong extracted = FloatingLong.ZERO;
         FloatingLong toExtract = amount.copy();
         for (int container = 0; container < containers; container++) {
-            FloatingLong drained = extract.extract(container, toExtract, action);
+            FloatingLong drained = extract.extract(container, toExtract, t);
             if (!drained.isZero()) {
                 //If we were able to extract something, do so
                 if (extracted.isZero()) {
@@ -87,12 +88,12 @@ public class FloatingLongTransferUtils {
     @FunctionalInterface
     public interface InsertFloatingLong {
 
-        FloatingLong insert(int container, FloatingLong amount, Action action);
+        FloatingLong insert(int container, FloatingLong amount, TransactionContext t);
     }
 
     @FunctionalInterface
     public interface ExtractFloatingLong {
 
-        FloatingLong extract(int container, FloatingLong amount, Action action);
+        FloatingLong extract(int container, FloatingLong amount, TransactionContext t);
     }
 }

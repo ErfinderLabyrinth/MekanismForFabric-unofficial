@@ -5,10 +5,10 @@
       "tag": "mekanism:alloys/infused"
     },
     "I": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:gold_ingots"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:redstone_dusts"
     }
   },
   "pattern": [

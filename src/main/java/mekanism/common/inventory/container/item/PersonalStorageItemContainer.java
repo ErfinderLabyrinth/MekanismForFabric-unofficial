@@ -1,6 +1,5 @@
 package mekanism.common.inventory.container.item;
 
-import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.inventory.container.slot.HotBarSlot;
 import mekanism.common.lib.inventory.personalstorage.AbstractPersonalStorageItemInventory;
@@ -15,6 +14,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class PersonalStorageItemContainer extends MekanismItemContainer {
 
     private final AbstractPersonalStorageItemInventory itemInventory;
@@ -22,7 +23,7 @@ public class PersonalStorageItemContainer extends MekanismItemContainer {
     public PersonalStorageItemContainer(int id, Inventory inv, InteractionHand hand, ItemStack stack, boolean isRemote) {
         super(MekanismContainerTypes.PERSONAL_STORAGE_ITEM, id, inv, hand, stack);
         //We have to initialize this before actually adding the slots
-        itemInventory = !isRemote ? PersonalStorageManager.getInventoryFor(stack).orElseThrow(()->new IllegalStateException("Inventory not available")) : new ClientSidePersonalStorageInventory();
+        itemInventory = !isRemote ? PersonalStorageManager.getInventoryFor(stack, inv.player.getServer()).orElseThrow(()->new IllegalStateException("Inventory not available")) : new ClientSidePersonalStorageInventory();
         super.addSlotsAndOpen();
     }
 
@@ -35,7 +36,7 @@ public class PersonalStorageItemContainer extends MekanismItemContainer {
     protected void addSlots() {
         super.addSlots();
         //Get all the inventory slots the tile has
-        List<IInventorySlot> inventorySlots = itemInventory.getInventorySlots(null);
+        List<IInventorySlot> inventorySlots = itemInventory.getSlots();
         for (IInventorySlot inventorySlot : inventorySlots) {
             Slot containerSlot = inventorySlot.createContainerSlot();
             if (containerSlot != null) {

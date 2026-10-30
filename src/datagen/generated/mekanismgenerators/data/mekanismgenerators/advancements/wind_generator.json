@@ -1,5 +1,5 @@
 {
-  "parent": "mekanismgenerators:heat_generator",
+  "parent": "mekanism:materials",
   "criteria": {
     "wind_generator": {
       "conditions": {

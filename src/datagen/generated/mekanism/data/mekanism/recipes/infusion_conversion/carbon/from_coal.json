@@ -3,7 +3,7 @@
   "input": {
     "ingredient": [
       {
-        "tag": "forge:dusts/coal"
+        "tag": "c:coal_dusts"
       },
       {
         "item": "minecraft:coal"

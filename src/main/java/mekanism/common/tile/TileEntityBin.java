@@ -1,15 +1,13 @@
 package mekanism.common.tile;
 
-import mekanism.api.Action;
+import mekanism.api.BigItemStack;
 import mekanism.api.IConfigurable;
 import mekanism.api.IContentsListener;
 import mekanism.api.NBTConstants;
 import mekanism.api.providers.IBlockProvider;
 import mekanism.common.block.attribute.Attribute;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
 import mekanism.common.integration.computer.ComputerException;
 import mekanism.common.integration.computer.SpecialComputerMethodWrapper.ComputerIInventorySlotWrapper;
 import mekanism.common.integration.computer.annotation.ComputerMethod;
@@ -51,7 +49,6 @@ public class TileEntityBin extends TileEntityMekanism implements IConfigurable {
 
     public TileEntityBin(IBlockProvider blockProvider, BlockPos pos, BlockState state) {
         super(blockProvider, pos, state);
-        addCapabilityResolver(BasicCapabilityResolver.constant(Capabilities.CONFIGURABLE, this));
     }
 
     @Override
@@ -89,17 +86,17 @@ public class TileEntityBin extends TileEntityMekanism implements IConfigurable {
         if (delayTicks == 0) {
             if (getActive()) {
                 BlockEntity tile = WorldUtils.getTileEntity(getLevel(), getBlockPos().below());
-                TileTransitRequest request = new TileTransitRequest(this, Direction.DOWN);
-                request.addItem(binSlot.getBottomStack(), 0);
+                TileTransitRequest request = new TileTransitRequest(getLevel(), getBlockPos(), Direction.DOWN);
+                request.addItem(BigItemStack.of(binSlot.getBottomStack()), getBinSlot());
                 TransitResponse response;
                 if (tile instanceof TileEntityLogisticalTransporterBase transporter) {
-                    response = transporter.getTransmitter().insert(this, request, transporter.getTransmitter().getColor(), true, 0);
+                    response = transporter.getTransmitter().insert(getLevel(), getBlockPos(), request, transporter.getTransmitter().getColor(), true, 0);
                 } else {
-                    response = request.addToInventory(tile, Direction.DOWN, 0, false);
+                    response = request.addToInventory(getLevel(), getBlockPos().below(), Direction.DOWN, 0, false);
                 }
                 if (!response.isEmpty() && tier != BinTier.CREATIVE) {
-                    int sendingAmount = response.getSendingAmount();
-                    MekanismUtils.logMismatchedStackSize(binSlot.shrinkStack(sendingAmount, Action.EXECUTE), sendingAmount);
+                    long sendingAmount = response.getSendingAmount();
+                    MekanismUtils.logMismatchedStackSize(binSlot.shrinkStack((int) sendingAmount), sendingAmount);
                 }
                 delayTicks = 10;
             }
@@ -113,7 +110,7 @@ public class TileEntityBin extends TileEntityMekanism implements IConfigurable {
         setActive(!getActive());
         Level world = getLevel();
         if (world != null) {
-            world.playSound(null, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), SoundEvents.UI_BUTTON_CLICK.get(), SoundSource.BLOCKS, 0.3F, 1);
+            world.playSound(null, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.3F, 1);
         }
         return InteractionResult.SUCCESS;
     }
@@ -132,7 +129,7 @@ public class TileEntityBin extends TileEntityMekanism implements IConfigurable {
             if (getLevel() != null && !isRemote()) {
                 sendUpdatePacket();
                 markForSave();
-                getLevel().playSound(null, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), SoundEvents.UI_BUTTON_CLICK.get(), SoundSource.BLOCKS, 0.3F, 1);
+                getLevel().playSound(null, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.BLOCKS, 0.3F, 1);
             }
             return true;
         }
@@ -174,8 +171,8 @@ public class TileEntityBin extends TileEntityMekanism implements IConfigurable {
     }
 
     @Override
-    public void handleUpdateTag(@NotNull CompoundTag tag) {
-        super.handleUpdateTag(tag);
+    public void load(@NotNull CompoundTag tag) {
+        super.load(tag);
         NBTUtils.setCompoundIfPresent(tag, NBTConstants.ITEM, nbt -> binSlot.deserializeNBT(nbt));
     }
 

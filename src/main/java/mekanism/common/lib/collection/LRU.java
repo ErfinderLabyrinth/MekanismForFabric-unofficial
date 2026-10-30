@@ -1,12 +1,13 @@
 package mekanism.common.lib.collection;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.AbstractCollection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
 
 public class LRU<T> extends AbstractCollection<T> {
 

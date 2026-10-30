@@ -5,10 +5,10 @@
       "tag": "mekanism:alloys/basic"
     },
     "C": {
-      "tag": "forge:circuits/basic"
+      "tag": "c:basic_circuits"
     },
     "G": {
-      "tag": "forge:glass/silica"
+      "tag": "c:glass_blocks"
     },
     "X": {
       "item": "mekanism:steel_casing"

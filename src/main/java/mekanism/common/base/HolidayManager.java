@@ -1,20 +1,23 @@
 package mekanism.common.base;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.Arrays;
-import java.util.Set;
 import mekanism.api.text.EnumColor;
 import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.registration.impl.SoundEventRegistryObject;
 import mekanism.common.registries.MekanismSounds;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Arrays;
+import java.util.Set;
 
 public final class HolidayManager {
 
@@ -40,7 +43,7 @@ public final class HolidayManager {
     }
 
     public static void notify(Player player) {
-        if (MekanismConfig.client.holidays.get()) {
+        if (MekanismConfig.CLIENT.client.holidays) {
             for (Holiday holiday : holidays) {
                 if (holiday.isToday() && !holiday.hasNotified()) {
                     holiday.notify(player);
@@ -51,7 +54,7 @@ public final class HolidayManager {
 
     public static SoundEventRegistryObject<SoundEvent> filterSound(SoundEventRegistryObject<SoundEvent> sound) {
         //Only filter sounds when on the client
-        if (MekanismConfig.client.isLoaded() && MekanismConfig.client.holidays.get()) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && MekanismConfig.CLIENT.client.holidays) {
             for (Holiday holiday : holidays) {
                 if (holiday.isToday()) {
                     return holiday.filterSound(sound);

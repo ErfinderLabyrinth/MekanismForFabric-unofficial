@@ -6,7 +6,7 @@
       "item": "mekanism:hdpe_sheet"
     },
     "D": {
-      "tag": "forge:dyes/brown"
+      "tag": "c:brown_dyes"
     }
   },
   "pattern": [

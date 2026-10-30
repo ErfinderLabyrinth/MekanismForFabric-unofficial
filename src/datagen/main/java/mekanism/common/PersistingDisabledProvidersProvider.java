@@ -12,8 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import mekanism.api.functions.ConstantPredicates;
-import mekanism.common.lib.FieldReflectionHelper;
+
+import mekanism.common.mixinhelper.DataGeneratorHashCache;
+import mekanism.common.mixinhelper.HashCacheExtension;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -29,9 +30,9 @@ public class PersistingDisabledProvidersProvider implements DataProvider {
     private static HashCache globalCache;
 
     //Called by a core mod
-    public static void captureGlobalCache(HashCache cache) {
-        globalCache = cache;
-    }
+//    public static void captureGlobalCache(HashCache cache) {
+//        globalCache = cache;
+//    }
 
     private static final Set<String> PATHS_TO_SKIP = Set.of(
           //"/scripts/",//CraftTweaker script files
@@ -54,6 +55,7 @@ public class PersistingDisabledProvidersProvider implements DataProvider {
     @NotNull
     @Override
     public CompletableFuture<?> run(@NotNull CachedOutput cache) {
+        globalCache = DataGeneratorHashCache.globalCache;
         if (globalCache == null) {
             throw new RuntimeException("Failed to retrieve global cache");
         }
@@ -66,15 +68,15 @@ public class PersistingDisabledProvidersProvider implements DataProvider {
             return;
         }
 
-        FieldReflectionHelper<HashCache, Map<String, ProviderCache>> existingCaches = new FieldReflectionHelper<>(HashCache.class, "f_252445_", () -> null);
-        FieldReflectionHelper<HashCache, Map<String, ProviderCache>> originalCachesField = new FieldReflectionHelper<>(HashCache.class, "originalCaches", () -> null);
-        FieldReflectionHelper<HashCache, Set<Path>> cachePaths = new FieldReflectionHelper<>(HashCache.class, "f_236084_", () -> null);
-        FieldReflectionHelper<HashCache, Integer> initialCount = new FieldReflectionHelper<>(HashCache.class, "f_236085_", () -> 0);
-        FieldReflectionHelper<HashCache, Integer> writes = new FieldReflectionHelper<>(HashCache.class, "f_252434_", () -> 0);
-        FieldReflectionHelper<ProviderCache, ImmutableMap<Path, HashCode>> providerCacheData = new FieldReflectionHelper<>(ProviderCache.class, "f_236127_", () -> null);
+//        FieldReflectionHelper<HashCache, Map<String, ProviderCache>> existingCaches = new FieldReflectionHelper<>(HashCache.class, "caches", () -> null);
+//        FieldReflectionHelper<HashCache, Map<String, ProviderCache>> originalCachesField = new FieldReflectionHelper<>(HashCache.class, "originalCaches", () -> null);
+//        FieldReflectionHelper<HashCache, Set<Path>> cachePaths = new FieldReflectionHelper<>(HashCache.class, "cachePaths", () -> null);
+//        FieldReflectionHelper<HashCache, Integer> initialCount = new FieldReflectionHelper<>(HashCache.class, "initialCount", () -> 0);
+//        FieldReflectionHelper<HashCache, Integer> writes = new FieldReflectionHelper<>(HashCache.class, "writes", () -> 0);
+//        FieldReflectionHelper<ProviderCache, ImmutableMap<Path, HashCode>> providerCacheData = new FieldReflectionHelper<>(ProviderCache.class, "data", () -> null);
 
-        Map<String, ProviderCache> caches = existingCaches.getValue(cache);
-        Map<String, ProviderCache> originalCaches = originalCachesField.getValue(cache);
+        Map<String, ProviderCache> caches = cache.caches;
+        Map<String, ProviderCache> originalCaches = ((HashCacheExtension)cache).mekanism$originalCache();
 
         int additionalWrites = 0;
         //Persist data from previous runs that is in the correct format into the current run
@@ -82,9 +84,9 @@ public class PersistingDisabledProvidersProvider implements DataProvider {
             String id = entry.getKey();
             ProviderCache newCache = caches.get(id);
             ProviderCache oldCache = originalCaches.get(id);
-            Map<Path, HashCode> newCacheData = new HashMap<>(providerCacheData.getValue(newCache));
+            Map<Path, HashCode> newCacheData = new HashMap<>(newCache.data);
             boolean changed = false;
-            ImmutableMap<Path, HashCode> oldCacheData = providerCacheData.getValue(oldCache);
+            ImmutableMap<Path, HashCode> oldCacheData = oldCache.data;
             for (Map.Entry<Path, HashCode> oldEntry : oldCacheData.entrySet()) {
                 Path dataPath = oldEntry.getKey();
                 if (!newCacheData.containsKey(dataPath) && shouldPersist(dataPath) && Files.exists(dataPath)) {
@@ -101,12 +103,12 @@ public class PersistingDisabledProvidersProvider implements DataProvider {
 
         //Technically this is unused except in a logging message but log it anyway, if we didn't end up having any caches to add though we can ignore it
         int totalAdditionalWrites = additionalWrites;
-        writes.transformValue(cache, ConstantPredicates.alwaysTrue(), c -> c + totalAdditionalWrites);
+        cache.writes += totalAdditionalWrites;
 
-        FieldReflectionHelper<HashCache, Set<String>> cachesToWrite = new FieldReflectionHelper<>(HashCache.class, "f_236083_", () -> null);
-        Set<String> toWrite = cachesToWrite.getValue(cache);
+//        FieldReflectionHelper<HashCache, Set<String>> cachesToWrite = new FieldReflectionHelper<>(HashCache.class, "f_236083_", () -> null);
+        Set<String> toWrite = cache.cachesToWrite;
         Map<String, ProviderCache> fakeCaches = new HashMap<>();
-        Set<Path> paths = cachePaths.getValue(cache);
+        Set<Path> paths = cache.cachePaths;
         Path cacheDir = baseOutputPath.resolve(".cache");
         //Load and inject any providers we have that are fully disabled into the cache system
         // We do this after copying things to persist, so we don't have to copy these as well
@@ -117,21 +119,20 @@ public class PersistingDisabledProvidersProvider implements DataProvider {
             paths.add(path);
             caches.put(fakeProvider, provider);
             fakeCaches.put(fakeProvider, provider);
-            additional += providerCacheData.getValue(provider).size();
+            additional += provider.data.size();
             //Initialize the cache as one that should be written when we loop caches to write
             //toWrite.add(fakeProvider);
         }
         if (!fakeCaches.isEmpty()) {
             //Reset the original caches to a fresh copy
-            existingCaches.transformValue(cache, ConstantPredicates.alwaysTrue(), value -> {
+            HashMap<String, ProviderCache> map = new HashMap<>(caches);
+            map.putAll(fakeCaches);
+
+            cache.caches = map;
                 //Add the fake caches as having existed in the original
-                HashMap<String, ProviderCache> map = new HashMap<>(caches);
-                map.putAll(fakeCaches);
-                return map;
-            });
             //Technically this is unused except in a logging message but log it anyway, if we didn't end up having any caches to add though we can ignore it
             int totalAdditional = additional;
-            initialCount.transformValue(cache, ConstantPredicates.alwaysTrue(), c -> c + totalAdditional);
+            cache.initialCount += totalAdditional;
         }
     }
 

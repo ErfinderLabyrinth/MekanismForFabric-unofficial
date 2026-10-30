@@ -1,10 +1,11 @@
 package mekanism.client.render.data;
 
-import java.util.Objects;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.lib.multiblock.IValveHandler.ValveData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+
+import java.util.Objects;
 
 @NothingNullByDefault
 public class ValveRenderData extends FluidRenderData {

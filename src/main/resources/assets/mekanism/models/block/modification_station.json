@@ -7,7 +7,6 @@
 		"4": "mekanism:block/models/ports_led",
 		"particle": "mekanism:block/models/modification_station"
 	},
-	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"name": "desk_top",
@@ -160,7 +159,7 @@
 				"west": {"uv": [0, 0, 2, 2], "rotation": 180, "texture": "#3"},
 				"down": {"uv": [0, 0, 2, 2], "rotation": 180, "texture": "#3"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -283,7 +282,7 @@
 				"west": {"uv": [0, 0, 2, 2], "texture": "#3"},
 				"down": {"uv": [0, 0, 2, 2], "texture": "#3"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -311,7 +310,7 @@
 				"west": {"uv": [0, 0, 2, 2], "texture": "#3"},
 				"down": {"uv": [0, 0, 2, 2], "texture": "#3"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -382,7 +381,7 @@
 			"faces": {
 				"south": {"uv": [8, 8, 16, 16], "texture": "#4", "cullface": "south"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

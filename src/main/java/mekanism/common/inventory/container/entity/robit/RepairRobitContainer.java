@@ -8,7 +8,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +46,7 @@ public class RepairRobitContainer extends AnvilMenu implements IEntityContainer<
 
     @Nullable
     @Override
-    public ICapabilityProvider getSecurityObject() {
+    public Object getSecurityObject() {
         return entity;
     }
 }

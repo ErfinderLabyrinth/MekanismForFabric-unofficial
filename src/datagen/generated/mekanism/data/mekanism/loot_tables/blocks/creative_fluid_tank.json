@@ -46,9 +46,7 @@
           "name": "mekanism:creative_fluid_tank"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/creative_fluid_tank"
+  ]
 }

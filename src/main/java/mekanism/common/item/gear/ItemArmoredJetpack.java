@@ -2,10 +2,7 @@ package mekanism.common.item.gear;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import java.util.UUID;
-import java.util.function.Consumer;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.common.Mekanism;
 import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.attribute.AttributeCache;
@@ -17,8 +14,9 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresher {
 
@@ -28,13 +26,8 @@ public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresh
 
     public ItemArmoredJetpack(Properties properties) {
         super(ARMORED_JETPACK_MATERIAL, properties);
-        this.attributeCache = new AttributeCache(this, MekanismConfig.gear.armoredJetpackArmor, MekanismConfig.gear.armoredJetpackToughness,
-              MekanismConfig.gear.armoredJetpackKnockbackResistance);
-    }
-
-    @Override
-    public void initializeClient(@NotNull Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(RenderPropertiesProvider.armoredJetpack());
+        this.attributeCache = new AttributeCache(this, () -> MekanismConfig.COMMON.gear.armoredJetpackArmor, () -> MekanismConfig.COMMON.gear.armoredJetpackToughness,
+                () -> MekanismConfig.COMMON.gear.armoredJetpackKnockbackResistance);
     }
 
     @Override
@@ -49,7 +42,7 @@ public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresh
 
     @NotNull
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(@NotNull EquipmentSlot slot, @NotNull ItemStack stack) {
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(@NotNull ItemStack stack, @NotNull EquipmentSlot slot) {
         return slot == getEquipmentSlot() ? attributeCache.get() : ImmutableMultimap.of();
     }
 
@@ -67,7 +60,7 @@ public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresh
 
         @Override
         public int getDefenseForType(ArmorItem.Type armorType) {
-            return armorType == ArmorItem.Type.CHESTPLATE ? MekanismConfig.gear.armoredJetpackArmor.getOrDefault() : 0;
+            return armorType == ArmorItem.Type.CHESTPLATE ? MekanismConfig.COMMON.gear.armoredJetpackArmor : 0;
         }
 
         @Override
@@ -77,12 +70,12 @@ public class ItemArmoredJetpack extends ItemJetpack implements IAttributeRefresh
 
         @Override
         public float getToughness() {
-            return MekanismConfig.gear.armoredJetpackToughness.getOrDefault();
+            return MekanismConfig.COMMON.gear.armoredJetpackToughness;
         }
 
         @Override
         public float getKnockbackResistance() {
-            return MekanismConfig.gear.armoredJetpackKnockbackResistance.getOrDefault();
+            return MekanismConfig.COMMON.gear.armoredJetpackKnockbackResistance;
         }
     }
 }

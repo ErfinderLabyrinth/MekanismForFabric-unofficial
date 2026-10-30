@@ -2,7 +2,7 @@
   "type": "mekanism:metallurgic_infusing",
   "chemicalInput": {
     "amount": 10,
-    "tag": "mekanism:fungi"
+    "tagSupplier": "mekanism:fungi"
   },
   "itemInput": {
     "ingredient": {

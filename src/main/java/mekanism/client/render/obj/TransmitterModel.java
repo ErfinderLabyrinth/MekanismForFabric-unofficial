@@ -1,20 +1,18 @@
 package mekanism.client.render.obj;
 
-import java.util.function.Function;
+import mekanism.client.model.CustomGeometry;
+import mekanism.client.model.obj.ObjModel;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
-import net.minecraftforge.client.model.obj.ObjModel;
 import org.jetbrains.annotations.Nullable;
 
-public class TransmitterModel implements IUnbakedGeometry<TransmitterModel> {
+import java.util.Set;
+import java.util.function.Function;
+
+public class TransmitterModel extends CustomGeometry {
 
     private final ObjModel internal;
     @Nullable
@@ -26,16 +24,21 @@ public class TransmitterModel implements IUnbakedGeometry<TransmitterModel> {
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
-          ItemOverrides overrides, ResourceLocation modelLocation) {
-        return new TransmitterBakedModel(internal, glass, owner, baker, spriteGetter, modelTransform, overrides, modelLocation);
+    public BakedModel bake(BlockModel blockModel, @Nullable Set<String> parts, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
+                           ItemOverrides overrides, ResourceLocation modelLocation, BakedModel alreadyBaked) {
+        return new TransmitterBakedModel(internal.bake(blockModel, spriteGetter), glass == null ? null : glass.bake(blockModel, spriteGetter), baker, spriteGetter, modelTransform, overrides, modelLocation, blockModel, alreadyBaked);
     }
 
     @Override
-    public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, IGeometryBakingContext context) {
-        internal.resolveParents(modelGetter, context);
-        if (glass != null) {
-            glass.resolveParents(modelGetter, context);
-        }
+    public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter) {
+//        internal.resolveParents(modelGetter);
+//        if (glass != null) {
+//            glass.resolveParents(modelGetter);
+//        }
+    }
+
+    @Override
+    public CustomGeometry clone() {
+        return new TransmitterModel(this.internal, this.glass);
     }
 }

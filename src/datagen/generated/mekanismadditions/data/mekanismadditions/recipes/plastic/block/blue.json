@@ -6,7 +6,7 @@
       "item": "mekanism:hdpe_sheet"
     },
     "D": {
-      "tag": "forge:dyes/blue"
+      "tag": "c:blue_dyes"
     }
   },
   "pattern": [

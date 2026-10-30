@@ -1,12 +1,13 @@
 package mekanism.client.model.data;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Objects;
 import mekanism.client.model.data.TransmitterModelData.Diversion;
 import mekanism.common.lib.transmitter.ConnectionType;
 import mekanism.common.util.EnumUtils;
 import net.minecraft.core.Direction;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Objects;
 
 public sealed class TransmitterModelData permits Diversion {
 

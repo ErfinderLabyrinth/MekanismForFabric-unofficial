@@ -10,7 +10,6 @@
 		"particle": "mekanism:block/models/resistive_heater_sides_2"
 	},
 	"parent": "block/block",
-	"render_type": "minecraft:cutout",
 	"elements": [
 		{
 			"name": "port_left",
@@ -35,7 +34,7 @@
 			"faces": {
 				"west": {"uv": [8, 8, 16, 16], "texture": "#6", "cullface": "west"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -47,7 +46,7 @@
 			"faces": {
 				"east": {"uv": [8, 8, 16, 16], "texture": "#6", "cullface": "east"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

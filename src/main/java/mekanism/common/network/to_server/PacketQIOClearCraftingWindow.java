@@ -1,14 +1,18 @@
 package mekanism.common.network.to_server;
 
+import mekanism.api.MekanismAPI;
 import mekanism.common.Mekanism;
 import mekanism.common.content.qio.QIOCraftingWindow;
 import mekanism.common.inventory.container.QIOItemViewerContainer;
 import mekanism.common.network.IMekanismPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 public class PacketQIOClearCraftingWindow implements IMekanismPacket {
+    public static final PacketType<PacketQIOClearCraftingWindow> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "qio_clear_crafting_window"), PacketQIOClearCraftingWindow::decode);
 
     private final byte window;
     private final boolean toPlayerInv;
@@ -19,8 +23,7 @@ public class PacketQIOClearCraftingWindow implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        ServerPlayer player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null && player.containerMenu instanceof QIOItemViewerContainer container) {
             byte selectedCraftingGrid = container.getSelectedCraftingGrid(player.getUUID());
             if (selectedCraftingGrid == -1) {
@@ -42,5 +45,10 @@ public class PacketQIOClearCraftingWindow implements IMekanismPacket {
 
     public static PacketQIOClearCraftingWindow decode(FriendlyByteBuf buffer) {
         return new PacketQIOClearCraftingWindow(buffer.readByte(), buffer.readBoolean());
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 }

@@ -1,6 +1,5 @@
 package mekanism.common.item;
 
-import java.util.List;
 import mekanism.api.Upgrade;
 import mekanism.api.text.APILang;
 import mekanism.api.text.EnumColor;
@@ -22,6 +21,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ItemUpgrade extends Item implements IUpgradeItem {
 

@@ -2,17 +2,17 @@ package mekanism.generators.client;
 
 import mekanism.client.model.BaseBlockModelProvider;
 import mekanism.generators.common.MekanismGenerators;
-import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.minecraft.data.models.BlockModelGenerators;
 
 public class GeneratorsBlockModelProvider extends BaseBlockModelProvider {
 
-    public GeneratorsBlockModelProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
-        super(output, MekanismGenerators.MODID, existingFileHelper);
+    public GeneratorsBlockModelProvider(FabricDataOutput output) {
+        super(output, MekanismGenerators.MODID);
     }
 
     @Override
-    protected void registerModels() {
+    public void generateBlockStateModels(BlockModelGenerators blockStateModelGenerator) {
 
     }
 }

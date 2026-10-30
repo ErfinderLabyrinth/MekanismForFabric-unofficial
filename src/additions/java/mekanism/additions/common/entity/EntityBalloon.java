@@ -1,16 +1,17 @@
 package mekanism.additions.common.entity;
 
-import java.util.Optional;
-import java.util.UUID;
 import mekanism.additions.common.AdditionsTags;
+import mekanism.additions.common.network.to_client.PacketSpawnBalloon;
 import mekanism.additions.common.registries.AdditionsEntityTypes;
 import mekanism.additions.common.registries.AdditionsItems;
 import mekanism.additions.common.registries.AdditionsSounds;
 import mekanism.api.NBTConstants;
 import mekanism.api.text.EnumColor;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.util.NBTUtils;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.entity.EntityPickInteractionAware;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -25,12 +26,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -38,13 +34,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
-public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData {
+import java.util.Optional;
+import java.util.UUID;
+
+public class EntityBalloon extends Entity implements EntityPickInteractionAware {
 
     private static final EntityDataAccessor<Byte> IS_LATCHED = SynchedEntityData.defineId(EntityBalloon.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> LATCHED_X = SynchedEntityData.defineId(EntityBalloon.class, EntityDataSerializers.INT);
@@ -53,8 +50,8 @@ public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData 
     private static final EntityDataAccessor<Integer> LATCHED_ID = SynchedEntityData.defineId(EntityBalloon.class, EntityDataSerializers.INT);
     private static final double OFFSET = -0.275;
 
-    private EnumColor color = EnumColor.DARK_BLUE;
-    private BlockPos latched;
+    public EnumColor color = EnumColor.DARK_BLUE;
+    public BlockPos latched;
     public LivingEntity latchedEntity;
     /* server-only */
     private boolean hasCachedEntity;
@@ -310,39 +307,12 @@ public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData 
         return true;
     }
 
-    @NotNull
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-
-    @Override
-    public void writeSpawnData(FriendlyByteBuf data) {
-        BasePacketHandler.writeVector3d(data, position());
-        data.writeEnum(color);
-        if (latched != null) {
-            data.writeByte((byte) 1);
-            data.writeBlockPos(latched);
-        } else if (latchedEntity != null) {
-            data.writeByte((byte) 2);
-            data.writeVarInt(latchedEntity.getId());
-        } else {
-            data.writeByte((byte) 0);
-        }
-    }
-
-    @Override
-    public void readSpawnData(FriendlyByteBuf data) {
-        setPos(BasePacketHandler.readVector3d(data));
-        color = data.readEnum(EnumColor.class);
-        byte type = data.readByte();
-        if (type == 1) {
-            latched = data.readBlockPos();
-        } else if (type == 2) {
-            latchedEntity = (LivingEntity) level().getEntity(data.readVarInt());
-        } else {
-            latched = null;
-        }
+        PacketSpawnBalloon spawnBalloon = new PacketSpawnBalloon(this);
+        FriendlyByteBuf buffer = PacketByteBufs.create();
+        spawnBalloon.write(buffer);
+        return ServerPlayNetworking.createS2CPacket(PacketSpawnBalloon.TYPE.getId(), buffer);
     }
 
     @Override
@@ -421,7 +391,7 @@ public class EntityBalloon extends Entity implements IEntityAdditionalSpawnData 
     }
 
     @Override
-    public ItemStack getPickedResult(HitResult target) {
+    public ItemStack getPickedStack(Player player, HitResult result) {
         return AdditionsItems.BALLOONS.get(color).getItemStack();
     }
 }

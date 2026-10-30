@@ -1,6 +1,5 @@
 package mekanism.common.tile;
 
-import java.util.function.BiPredicate;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.providers.IBlockProvider;
@@ -9,7 +8,6 @@ import mekanism.api.security.SecurityMode;
 import mekanism.common.capabilities.holder.slot.IInventorySlotHolder;
 import mekanism.common.capabilities.holder.slot.InventorySlotHelper;
 import mekanism.common.inventory.container.tile.MekanismTileContainer;
-import mekanism.common.inventory.slot.BasicInventorySlot;
 import mekanism.common.lib.inventory.personalstorage.PersonalStorageManager;
 import mekanism.common.tile.base.TileEntityMekanism;
 import net.minecraft.core.BlockPos;
@@ -23,6 +21,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.BiPredicate;
 
 public abstract class TileEntityPersonalStorage extends TileEntityMekanism {
 

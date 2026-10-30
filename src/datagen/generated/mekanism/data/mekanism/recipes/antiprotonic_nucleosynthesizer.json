@@ -5,10 +5,10 @@
       "item": "mekanism:alloy_atomic"
     },
     "A": {
-      "tag": "forge:pellets/antimatter"
+      "tag": "c:antimatter_pellets"
     },
     "C": {
-      "tag": "forge:circuits/ultimate"
+      "tag": "c:ultimate_circuits"
     },
     "X": {
       "item": "mekanism:steel_casing"

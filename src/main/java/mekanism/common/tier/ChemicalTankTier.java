@@ -1,24 +1,25 @@
 package mekanism.common.tier;
 
-import java.util.Locale;
 import mekanism.api.tier.BaseTier;
 import mekanism.api.tier.ITier;
-import mekanism.common.config.value.CachedLongValue;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+import java.util.function.LongSupplier;
+
 public enum ChemicalTankTier implements ITier, StringRepresentable {
-    BASIC(BaseTier.BASIC, 64_000, 1_000),
-    ADVANCED(BaseTier.ADVANCED, 256_000, 16_000),
-    ELITE(BaseTier.ELITE, 1_024_000, 128_000),
-    ULTIMATE(BaseTier.ULTIMATE, 8_192_000, 512_000),
+    BASIC(BaseTier.BASIC, 64_000 * 81, 1_000 * 81),
+    ADVANCED(BaseTier.ADVANCED, 256_000 * 81, 16_000 * 81),
+    ELITE(BaseTier.ELITE, 1_024_000 * 81, 128_000 * 81),
+    ULTIMATE(BaseTier.ULTIMATE, 8_192_000 * 81, 512_000 * 81),
     CREATIVE(BaseTier.CREATIVE, Long.MAX_VALUE, Long.MAX_VALUE / 2);
 
     private final long baseStorage;
     private final long baseOutput;
     private final BaseTier baseTier;
-    private CachedLongValue storageReference;
-    private CachedLongValue outputReference;
+    private LongSupplier storageReference;
+    private LongSupplier outputReference;
 
     ChemicalTankTier(BaseTier tier, long s, long o) {
         baseStorage = s;
@@ -38,11 +39,11 @@ public enum ChemicalTankTier implements ITier, StringRepresentable {
     }
 
     public long getStorage() {
-        return storageReference == null ? getBaseStorage() : storageReference.getOrDefault();
+        return storageReference == null ? getBaseStorage() : storageReference.getAsLong();
     }
 
     public long getOutput() {
-        return outputReference == null ? getBaseOutput() : outputReference.getOrDefault();
+        return outputReference == null ? getBaseOutput() : outputReference.getAsLong();
     }
 
     public long getBaseStorage() {
@@ -56,7 +57,7 @@ public enum ChemicalTankTier implements ITier, StringRepresentable {
     /**
      * ONLY CALL THIS FROM TierConfig. It is used to give the GasTankTier a reference to the actual config value object
      */
-    public void setConfigReference(CachedLongValue storageReference, CachedLongValue outputReference) {
+    public void setConfigReference(LongSupplier storageReference, LongSupplier outputReference) {
         this.storageReference = storageReference;
         this.outputReference = outputReference;
     }

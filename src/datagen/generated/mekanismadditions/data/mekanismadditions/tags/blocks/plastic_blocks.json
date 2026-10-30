@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "#mekanismadditions:plastic_blocks/glow",
     "#mekanismadditions:plastic_blocks/plastic",

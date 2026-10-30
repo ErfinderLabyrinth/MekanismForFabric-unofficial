@@ -1,6 +1,5 @@
 {
 	"credit": "Made with love by CyanideX using Blockbench",
-	"render_type": "minecraft:cutout",
 	"textures": {
 		"#led": "#led",
 		"#front": "#front",
@@ -31,7 +30,7 @@
 			"faces": {
 				"north": {"uv": [1, 1, 15, 15], "texture": "#led", "cullface": "north"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

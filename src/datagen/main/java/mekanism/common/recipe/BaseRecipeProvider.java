@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import mekanism.api.annotations.NothingNullByDefault;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.FabricIngredient;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
@@ -16,25 +18,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.DifferenceIngredient;
-import net.minecraftforge.common.data.ExistingFileHelper;
 
 @NothingNullByDefault
 public abstract class BaseRecipeProvider extends RecipeProvider {
-
-    private final ExistingFileHelper existingFileHelper;
-
-    protected BaseRecipeProvider(PackOutput output, ExistingFileHelper existingFileHelper, String modid) {
+    protected BaseRecipeProvider(PackOutput output, String modid) {
         super(output);
-        this.existingFileHelper = existingFileHelper;
     }
 
     @Override
-    protected final void buildRecipes(Consumer<FinishedRecipe> consumer) {
-        Consumer<FinishedRecipe> trackingConsumer = consumer.andThen(recipe ->
-              existingFileHelper.trackGenerated(recipe.getId(), PackType.SERVER_DATA, ".json", "recipes"));
-        addRecipes(trackingConsumer);
-        getSubRecipeProviders().forEach(subRecipeProvider -> subRecipeProvider.addRecipes(trackingConsumer));
+    public final void buildRecipes(Consumer<FinishedRecipe> consumer) {
+        addRecipes(consumer);
+        getSubRecipeProviders().forEach(subRecipeProvider -> subRecipeProvider.addRecipes(consumer));
     }
 
     protected abstract void addRecipes(Consumer<FinishedRecipe> consumer);
@@ -65,6 +59,6 @@ public abstract class BaseRecipeProvider extends RecipeProvider {
     }
 
     public static Ingredient difference(TagKey<Item> base, ItemLike subtracted) {
-        return DifferenceIngredient.of(Ingredient.of(base), Ingredient.of(subtracted));
+        return DefaultCustomIngredients.difference(Ingredient.of(base), Ingredient.of(subtracted));
     }
 }

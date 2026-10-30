@@ -1,17 +1,17 @@
 package mekanism.common.inventory.slot;
 
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
-import mekanism.api.Action;
 import mekanism.api.AutomationType;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.util.MekanismUtils;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 @NothingNullByDefault
 public class FuelInventorySlot extends BasicInventorySlot {
@@ -31,18 +31,18 @@ public class FuelInventorySlot extends BasicInventorySlot {
         if (isEmpty()) {
             return 0;
         }
-        int burnTime = ForgeHooks.getBurnTime(current, null) / 2;
+        int burnTime = FuelRegistry.INSTANCE.get(current.getStack().getItem()) / 2;
         if (burnTime > 0) {
-            if (current.hasCraftingRemainingItem()) {
-                if (current.getCount() > 1) {
+            if (current.getStack().getItem().hasCraftingRemainingItem()) {
+                if (current.getStack().getCount() > 1) {
                     //If we have a container but have more than a single stack of it somehow just exit
                     return 0;
                 }
                 //If the item has a container, then replace it with the container
-                setStack(current.getCraftingRemainingItem());
+                setStack(current.getStack().getItem().getCraftingRemainingItem().getDefaultInstance());
             } else {
                 //Otherwise, shrink the size of the stack by one
-                MekanismUtils.logMismatchedStackSize(shrinkStack(1, Action.EXECUTE), 1);
+                MekanismUtils.logMismatchedStackSize(shrinkStack(1), 1);
             }
         }
         return burnTime;

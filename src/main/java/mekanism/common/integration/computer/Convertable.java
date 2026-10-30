@@ -1,7 +1,7 @@
 package mekanism.common.integration.computer;
 
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
-import net.minecraftforge.fluids.FluidStack;
 
 import java.util.function.BiFunction;
 

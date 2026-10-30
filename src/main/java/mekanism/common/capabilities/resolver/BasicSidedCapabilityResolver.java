@@ -1,34 +1,30 @@
 package mekanism.common.capabilities.resolver;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.common.capabilities.holder.IHolder;
 import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+
 @NothingNullByDefault
-public class BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER extends HANDLER> implements ICapabilityResolver {
+public class BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER> {
 
     private final ProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator;
-    private final Map<Direction, LazyOptional<HANDLER>> handlers;
-    private final List<Capability<?>> supportedCapability;
-    private final SIDED_HANDLER baseHandler;
+    private final Map<Direction, HANDLER> handlers;
+    //private final SIDED_HANDLER baseHandler;
     @Nullable
-    private LazyOptional<HANDLER> readOnlyHandler;
+    private HANDLER readOnlyHandler;
 
-    public BasicSidedCapabilityResolver(SIDED_HANDLER baseHandler, Capability<HANDLER> supportedCapability, BasicProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator) {
-        this(baseHandler, supportedCapability, proxyCreator, true);
+    public BasicSidedCapabilityResolver(/*SIDED_HANDLER baseHandler,*/ BasicProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator) {
+        this(/*baseHandler,*/ proxyCreator, true);
     }
 
-    protected BasicSidedCapabilityResolver(SIDED_HANDLER baseHandler, Capability<HANDLER> supportedCapability, ProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator,
+    protected BasicSidedCapabilityResolver(/*SIDED_HANDLER baseHandler,*/ ProxyCreator<HANDLER, SIDED_HANDLER> proxyCreator,
           boolean canHandle) {
-        this.supportedCapability = Collections.singletonList(supportedCapability);
-        this.baseHandler = baseHandler;
+        //this.baseHandler = baseHandler;
         this.proxyCreator = proxyCreator;
         if (canHandle) {
             handlers = new EnumMap<>(Direction.class);
@@ -37,14 +33,9 @@ public class BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER extends HANDLER
         }
     }
 
-    public SIDED_HANDLER getInternal() {
-        return baseHandler;
-    }
-
-    @Override
-    public List<Capability<?>> getSupportedCapabilities() {
-        return supportedCapability;
-    }
+    //public SIDED_HANDLER getInternal() {
+    //    return baseHandler;
+    //}
 
     @Nullable
     protected IHolder getHolder() {
@@ -54,57 +45,28 @@ public class BasicSidedCapabilityResolver<HANDLER, SIDED_HANDLER extends HANDLER
     /**
      * Lazily get and cache a handler instance for the given side, and make it be read only if something else is trying to interact with us using the null side
      */
-    @Override
-    public <T> LazyOptional<T> resolve(Capability<T> capability, @Nullable Direction side) {
-        if (side == null) {
-            if (readOnlyHandler == null || !readOnlyHandler.isPresent()) {
-                readOnlyHandler = LazyOptional.of(() -> proxyCreator.create(baseHandler, null, getHolder()));
-            }
-            return readOnlyHandler.cast();
-        }
-        LazyOptional<HANDLER> cachedCapability = handlers.get(side);
-        if (cachedCapability == null || !cachedCapability.isPresent()) {
-            handlers.put(side, cachedCapability = LazyOptional.of(() -> proxyCreator.create(baseHandler, side, getHolder())));
-        }
-        return cachedCapability.cast();
-    }
-
-    @Override
-    public void invalidate(Capability<?> capability, @Nullable Direction side) {
-        if (side == null) {
-            invalidateReadOnly();
-        } else {
-            invalidate(handlers.get(side));
-        }
-    }
-
-    @Override
-    public void invalidateAll() {
-        invalidateReadOnly();
-        handlers.values().forEach(this::invalidate);
-    }
-
-    private void invalidateReadOnly() {
-        if (readOnlyHandler != null && readOnlyHandler.isPresent()) {
-            readOnlyHandler.invalidate();
-            readOnlyHandler = null;
-        }
-    }
-
-    protected void invalidate(@Nullable LazyOptional<?> cachedCapability) {
-        if (cachedCapability != null && cachedCapability.isPresent()) {
-            cachedCapability.invalidate();
-        }
-    }
+//    public @Nullable HANDLER resolve(@Nullable Direction side) {
+//        if (side == null) {
+//            if (readOnlyHandler == null) {
+//                readOnlyHandler = proxyCreator.create(baseHandler, null, getHolder());
+//            }
+//            return readOnlyHandler;
+//        }
+//        HANDLER cachedCapability = handlers.get(side);
+//        if (cachedCapability == null) {
+//            handlers.put(side, cachedCapability = proxyCreator.create(baseHandler, side, getHolder()));
+//        }
+//        return cachedCapability;
+//    }
 
     @FunctionalInterface
-    public interface ProxyCreator<HANDLER, SIDED_HANDLER extends HANDLER> {
+    public interface ProxyCreator<HANDLER, SIDED_HANDLER> {
 
         HANDLER create(SIDED_HANDLER handler, @Nullable Direction side, @Nullable IHolder holder);
     }
 
     @FunctionalInterface
-    public interface BasicProxyCreator<HANDLER, SIDED_HANDLER extends HANDLER> extends ProxyCreator<HANDLER, SIDED_HANDLER> {
+    public interface BasicProxyCreator<HANDLER, SIDED_HANDLER> extends ProxyCreator<HANDLER, SIDED_HANDLER> {
 
         HANDLER create(SIDED_HANDLER handler, @Nullable Direction side);
 

@@ -34,12 +34,12 @@ public interface IIngredientCreator<TYPE, STACK, INGREDIENT extends InputIngredi
     INGREDIENT from(TYPE instance, int amount);
 
     /**
-     * Creates an Ingredient that matches a given tag and amount.
+     * Creates an Ingredient that matches a given tagSupplier and amount.
      *
      * @param tag    Tag to match.
      * @param amount Amount needed.
      *
-     * @throws NullPointerException     if the given tag is null.
+     * @throws NullPointerException     if the given tagSupplier is null.
      * @throws IllegalArgumentException if the given amount smaller than one.
      */
     INGREDIENT from(TagKey<TYPE> tag, int amount);

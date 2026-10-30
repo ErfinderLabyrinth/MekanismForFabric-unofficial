@@ -1,18 +1,23 @@
 package mekanism.common.network.to_server;
 
-import javax.annotation.Nullable;
+import mekanism.api.MekanismAPI;
 import mekanism.common.content.filter.BaseFilter;
 import mekanism.common.content.filter.IFilter;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.tile.interfaces.ITileFilterHolder;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
+
+import javax.annotation.Nullable;
 
 public class PacketEditFilter<FILTER extends IFilter<FILTER>> implements IMekanismPacket {
+    public static final PacketType<PacketEditFilter<?>> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "edit_filter"), PacketEditFilter::decode);
 
     private static final PacketEditFilter<?> ERROR = new PacketEditFilter<>(BlockPos.ZERO, null, null);
 
@@ -28,8 +33,7 @@ public class PacketEditFilter<FILTER extends IFilter<FILTER>> implements IMekani
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        Player player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player == null || filter == null) {
             return;
         }
@@ -63,5 +67,10 @@ public class PacketEditFilter<FILTER extends IFilter<FILTER>> implements IMekani
             }
         }
         return new PacketEditFilter<>(pos, filter, (FILTER) edited);
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 }

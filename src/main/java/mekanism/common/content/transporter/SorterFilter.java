@@ -1,6 +1,5 @@
 package mekanism.common.content.transporter;
 
-import java.util.Objects;
 import mekanism.api.NBTConstants;
 import mekanism.api.text.EnumColor;
 import mekanism.common.content.filter.BaseFilter;
@@ -15,6 +14,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.block.entity.BlockEntity;
+
+import java.util.Objects;
 
 public abstract class SorterFilter<FILTER extends SorterFilter<FILTER>> extends BaseFilter<FILTER> {
 
@@ -46,9 +47,9 @@ public abstract class SorterFilter<FILTER extends SorterFilter<FILTER>> extends 
 
     public TransitRequest mapInventory(BlockEntity tile, Direction side, boolean singleItem) {
         if (sizeMode && !singleItem) {
-            return TransitRequest.definedItem(tile, side, min, max, getFinder());
+            return TransitRequest.definedItem(tile.getLevel(), tile.getBlockPos(), side, min, max, getFinder());
         }
-        return TransitRequest.definedItem(tile, side, singleItem ? 1 : 64, getFinder());
+        return TransitRequest.definedItem(tile.getLevel(), tile.getBlockPos(), side, singleItem ? 1 : 64, getFinder());
     }
 
     @Override

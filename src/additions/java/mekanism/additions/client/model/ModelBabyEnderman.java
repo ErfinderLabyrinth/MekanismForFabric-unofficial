@@ -1,10 +1,11 @@
 package mekanism.additions.client.model;
 
-import java.util.List;
 import mekanism.additions.common.entity.baby.EntityBabyEnderman;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.model.geom.ModelPart;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ModelBabyEnderman extends EndermanModel<EntityBabyEnderman> {
 

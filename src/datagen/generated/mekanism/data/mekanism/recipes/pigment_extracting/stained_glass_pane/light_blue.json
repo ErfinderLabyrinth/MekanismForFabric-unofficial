@@ -2,7 +2,7 @@
   "type": "mekanism:pigment_extracting",
   "input": {
     "ingredient": {
-      "tag": "forge:glass_panes/light_blue"
+      "item": "minecraft:light_blue_stained_glass_pane"
     }
   },
   "output": {

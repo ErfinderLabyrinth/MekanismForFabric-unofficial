@@ -14,9 +14,7 @@
           "name": "mekanism:teleporter_frame"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/teleporter_frame"
+  ]
 }

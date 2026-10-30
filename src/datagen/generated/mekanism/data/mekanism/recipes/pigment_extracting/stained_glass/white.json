@@ -2,7 +2,7 @@
   "type": "mekanism:pigment_extracting",
   "input": {
     "ingredient": {
-      "tag": "forge:glass/white"
+      "item": "minecraft:white_stained_glass"
     }
   },
   "output": {

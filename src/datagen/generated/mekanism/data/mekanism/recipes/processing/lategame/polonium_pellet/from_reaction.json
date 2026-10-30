@@ -3,7 +3,7 @@
   "duration": 100,
   "fluidInput": {
     "amount": 1000,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "gasInput": {
     "amount": 1000,
@@ -15,7 +15,7 @@
   },
   "itemInput": {
     "ingredient": {
-      "tag": "forge:dusts/fluorite"
+      "tag": "c:fluorite_dusts"
     }
   },
   "itemOutput": {

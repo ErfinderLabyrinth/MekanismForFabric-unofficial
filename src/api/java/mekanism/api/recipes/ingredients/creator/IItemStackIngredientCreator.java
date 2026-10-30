@@ -3,12 +3,12 @@ package mekanism.api.recipes.ingredients.creator;
 import java.util.Objects;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.recipes.ingredients.ItemStackIngredient;
+import net.fabricmc.fabric.impl.recipe.ingredient.builtin.NbtIngredient;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.StrictNBTIngredient;
 
 @NothingNullByDefault
 public interface IItemStackIngredientCreator extends IIngredientCreator<Item, ItemStack, ItemStackIngredient> {
@@ -36,7 +36,7 @@ public interface IItemStackIngredientCreator extends IIngredientCreator<Item, It
         stack = stack.copy();
         //Support NBT that is on the stack in case it matters
         // Note: Only bother making it an NBT ingredient if the stack has NBT, otherwise there is no point in doing the extra checks
-        Ingredient ingredient = stack.hasTag() ? StrictNBTIngredient.of(stack) : Ingredient.of(stack);
+        Ingredient ingredient = stack.hasTag() ? new NbtIngredient(Ingredient.of(stack), stack.getTag(), true).toVanilla() : Ingredient.of(stack);
         return from(ingredient, amount);
     }
 
@@ -77,7 +77,7 @@ public interface IItemStackIngredientCreator extends IIngredientCreator<Item, It
     }
 
     /**
-     * Creates an Item Stack Ingredient that matches a given Item tag.
+     * Creates an Item Stack Ingredient that matches a given Item tagSupplier.
      *
      * @param tag Tag to match.
      */
@@ -87,7 +87,7 @@ public interface IItemStackIngredientCreator extends IIngredientCreator<Item, It
 
     @Override
     default ItemStackIngredient from(TagKey<Item> tag, int amount) {
-        Objects.requireNonNull(tag, "ItemStackIngredients cannot be created from a null tag.");
+        Objects.requireNonNull(tag, "ItemStackIngredients cannot be created from a null tagSupplier.");
         return from(Ingredient.of(tag), amount);
     }
 

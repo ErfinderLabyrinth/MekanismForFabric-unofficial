@@ -1,10 +1,11 @@
 {
+  "replace": false,
   "values": [
-    "#forge:tools/swords/bronze",
-    "#forge:tools/swords/lapis_lazuli",
-    "#forge:tools/swords/osmium",
-    "#forge:tools/swords/refined_glowstone",
-    "#forge:tools/swords/refined_obsidian",
-    "#forge:tools/swords/steel"
+    "#c:bronze_swords",
+    "#c:lapis_lazuli_swords",
+    "#c:osmium_swords",
+    "#c:refined_glowstone_swords",
+    "#c:refined_obsidian_swords",
+    "#c:steel_swords"
   ]
 }

@@ -1,35 +1,28 @@
 package mekanism.common.capabilities.merged;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-import mekanism.api.NBTConstants;
+import mekanism.api.NBTSerializable;
 import mekanism.api.annotations.ParametersAreNotNullByDefault;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.infuse.IInfusionTank;
 import mekanism.api.chemical.merged.MergedChemicalTank;
 import mekanism.api.chemical.pigment.IPigmentTank;
 import mekanism.api.chemical.slurry.ISlurryTank;
-import mekanism.common.capabilities.Capabilities;
-import mekanism.common.capabilities.ItemCapabilityWrapper.ItemCapability;
 import mekanism.common.capabilities.chemical.dynamic.DynamicChemicalHandler.DynamicGasHandler;
 import mekanism.common.capabilities.chemical.dynamic.DynamicChemicalHandler.DynamicInfusionHandler;
 import mekanism.common.capabilities.chemical.dynamic.DynamicChemicalHandler.DynamicPigmentHandler;
 import mekanism.common.capabilities.chemical.dynamic.DynamicChemicalHandler.DynamicSlurryHandler;
-import mekanism.common.capabilities.resolver.BasicCapabilityResolver;
-import mekanism.common.capabilities.resolver.ICapabilityResolver;
-import mekanism.common.util.ItemDataUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.INBTSerializable;
+
+import java.util.List;
 
 /**
  * @apiNote Make sure to set the merged tank, and dynamic handlers
  */
 @ParametersAreNotNullByDefault
 @MethodsReturnNonnullByDefault
-public abstract class MergedTankContentsHandler<MERGED extends MergedChemicalTank> extends ItemCapability {
+public abstract class MergedTankContentsHandler<MERGED extends MergedChemicalTank> implements Storage<ItemVariant>, IMergedHandler {
 
     protected MERGED mergedTank;
     protected DynamicGasHandler gasHandler;
@@ -42,36 +35,49 @@ public abstract class MergedTankContentsHandler<MERGED extends MergedChemicalTan
     protected List<IInfusionTank> infusionTanks;
     protected List<IGasTank> gasTanks;
 
+//    @Override
+//    protected void init() {
+//        super.init();
+//        this.gasTanks = Collections.singletonList(mergedTank.getGasTank());
+//        this.infusionTanks = Collections.singletonList(mergedTank.getInfusionTank());
+//        this.pigmentTanks = Collections.singletonList(mergedTank.getPigmentTank());
+//        this.slurryTanks = Collections.singletonList(mergedTank.getSlurryTank());
+//    }
+//
+//    @Override
+//    protected void load() {
+//        super.load();
+//        ItemStack stack = getStack();
+//        if (!stack.isEmpty()) {
+//            ItemDataUtils.readContainers(stack, NBTConstants.GAS_TANKS, gasTanks);
+//            ItemDataUtils.readContainers(stack, NBTConstants.INFUSION_TANKS, infusionTanks);
+//            ItemDataUtils.readContainers(stack, NBTConstants.PIGMENT_TANKS, pigmentTanks);
+//            ItemDataUtils.readContainers(stack, NBTConstants.SLURRY_TANKS, slurryTanks);
+//        }
+//    }
+
+    protected void onContentsChanged(String key, List<? extends NBTSerializable> containers) {
+        //ItemDataUtils.writeContainers(getStack(), key, containers);
+    }
+
+
     @Override
-    protected void init() {
-        super.init();
-        this.gasTanks = Collections.singletonList(mergedTank.getGasTank());
-        this.infusionTanks = Collections.singletonList(mergedTank.getInfusionTank());
-        this.pigmentTanks = Collections.singletonList(mergedTank.getPigmentTank());
-        this.slurryTanks = Collections.singletonList(mergedTank.getSlurryTank());
+    public DynamicGasHandler getGasHandler() {
+        return gasHandler;
     }
 
     @Override
-    protected void load() {
-        super.load();
-        ItemStack stack = getStack();
-        if (!stack.isEmpty()) {
-            ItemDataUtils.readContainers(stack, NBTConstants.GAS_TANKS, gasTanks);
-            ItemDataUtils.readContainers(stack, NBTConstants.INFUSION_TANKS, infusionTanks);
-            ItemDataUtils.readContainers(stack, NBTConstants.PIGMENT_TANKS, pigmentTanks);
-            ItemDataUtils.readContainers(stack, NBTConstants.SLURRY_TANKS, slurryTanks);
-        }
-    }
-
-    protected void onContentsChanged(String key, List<? extends INBTSerializable<CompoundTag>> containers) {
-        ItemDataUtils.writeContainers(getStack(), key, containers);
+    public DynamicInfusionHandler getInfusionHandler() {
+        return infusionHandler;
     }
 
     @Override
-    protected void gatherCapabilityResolvers(Consumer<ICapabilityResolver> consumer) {
-        consumer.accept(BasicCapabilityResolver.constant(Capabilities.GAS_HANDLER, gasHandler));
-        consumer.accept(BasicCapabilityResolver.constant(Capabilities.INFUSION_HANDLER, infusionHandler));
-        consumer.accept(BasicCapabilityResolver.constant(Capabilities.PIGMENT_HANDLER, pigmentHandler));
-        consumer.accept(BasicCapabilityResolver.constant(Capabilities.SLURRY_HANDLER, slurryHandler));
+    public DynamicPigmentHandler getPigmentHandler() {
+        return pigmentHandler;
+    }
+
+    @Override
+    public DynamicSlurryHandler getSlurryHandler() {
+        return slurryHandler;
     }
 }

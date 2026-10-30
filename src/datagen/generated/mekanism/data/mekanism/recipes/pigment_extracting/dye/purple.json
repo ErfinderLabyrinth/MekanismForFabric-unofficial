@@ -2,7 +2,7 @@
   "type": "mekanism:pigment_extracting",
   "input": {
     "ingredient": {
-      "tag": "forge:dyes/purple"
+      "tag": "c:purple_dyes"
     }
   },
   "output": {

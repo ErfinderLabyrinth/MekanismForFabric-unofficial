@@ -1,7 +1,6 @@
 package mekanism.client.gui.element.window.filter;
 
-import java.util.Collections;
-import java.util.List;
+import mekanism.api.FluidStack;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.functions.CharPredicate;
 import mekanism.api.text.ILangEntry;
@@ -20,9 +19,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 public abstract class GuiModIDFilter<FILTER extends IModIDFilter<FILTER>, TILE extends TileEntityMekanism & ITileFilterHolder<? super FILTER>>
       extends GuiTextFilter<FILTER, TILE> {
@@ -137,7 +138,7 @@ public abstract class GuiModIDFilter<FILTER extends IModIDFilter<FILTER>, TILE e
             success = true;
         }
         if (click) {
-            playClickSound(SoundEvents.UI_BUTTON_CLICK);
+            playClickSound(SoundEvents.UI_BUTTON_CLICK::value);
         }
         return success;
     }

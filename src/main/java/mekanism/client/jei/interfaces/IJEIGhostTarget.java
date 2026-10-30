@@ -1,9 +1,10 @@
 package mekanism.client.jei.interfaces;
 
-import java.util.function.Consumer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 public interface IJEIGhostTarget {
 

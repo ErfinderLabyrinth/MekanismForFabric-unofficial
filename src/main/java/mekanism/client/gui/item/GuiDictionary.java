@@ -1,6 +1,5 @@
 package mekanism.client.gui.item;
 
-import java.util.Set;
 import mekanism.api.text.ILangEntry;
 import mekanism.client.gui.GuiMekanism;
 import mekanism.client.gui.element.GuiDropdown;
@@ -19,7 +18,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-//TODO: Eventually it would be nice that when a tag is selected in the GUI that it shows everything else that is in that tag
+import java.util.Set;
+
+//TODO: Eventually it would be nice that when a tagSupplier is selected in the GUI that it shows everything else that is in that tagSupplier
 public class GuiDictionary extends GuiMekanism<DictionaryContainer> {
 
     private GuiTextScrollList scrollList;
@@ -68,7 +69,7 @@ public class GuiDictionary extends GuiMekanism<DictionaryContainer> {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && hasShiftDown() && !target.hasTarget()) {
-            Slot slot = getSlotUnderMouse();
+            Slot slot = hoveredSlot;
             if (slot != null) {
                 ItemStack stack = slot.getItem();
                 if (!stack.isEmpty()) {

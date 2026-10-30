@@ -1,20 +1,30 @@
 package mekanism.additions.client;
 
 import io.netty.channel.local.LocalAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import mekanism.additions.client.model.AdditionsModelLoadingPlugin;
+import mekanism.additions.client.network.AdditionsClientPacketHandler;
 import mekanism.additions.client.voice.VoiceClient;
 import mekanism.additions.common.config.MekanismAdditionsConfig;
 import mekanism.common.Mekanism;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 
-public class AdditionsClient {
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
-    private AdditionsClient() {
-    }
-
+public class AdditionsClient implements ClientModInitializer {
     private static VoiceClient voiceClient;
+    private static final AdditionsClientPacketHandler clientPacketHandler = new AdditionsClientPacketHandler();
+
+    @Override
+    public void onInitializeClient() {
+        ModelLoadingPlugin.register(new AdditionsModelLoadingPlugin());
+        MekanismAdditionsConfig.registerClientConfigs();
+        AdditionsClientRegistration.init();
+        clientPacketHandler.initialize();
+    }
 
     public static void reset() {
         if (voiceClient != null) {
@@ -24,7 +34,7 @@ public class AdditionsClient {
     }
 
     public static void launch() {
-        if (MekanismAdditionsConfig.additions.voiceServerEnabled.get()) {
+        if (MekanismAdditionsConfig.additions.voiceServerEnabled) {
             ClientPacketListener connection = Minecraft.getInstance().getConnection();
             SocketAddress address = connection == null ? null : connection.getConnection().getRemoteAddress();
             //local connection

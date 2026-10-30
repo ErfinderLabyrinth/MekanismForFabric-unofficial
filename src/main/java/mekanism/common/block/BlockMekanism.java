@@ -1,28 +1,21 @@
 package mekanism.common.block;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
 import mekanism.api.chemical.ChemicalTankBuilder;
 import mekanism.api.chemical.gas.IGasTank;
 import mekanism.api.chemical.gas.attribute.GasAttributes;
 import mekanism.api.radiation.IRadiationManager;
+import mekanism.api.security.IItemOwnerObjectGetter;
+import mekanism.api.security.IOwnerObject;
+import mekanism.api.security.ISecurityObject;
 import mekanism.api.security.ISecurityUtils;
-import mekanism.client.render.RenderPropertiesProvider;
 import mekanism.common.Mekanism;
-import mekanism.common.block.attribute.Attribute;
-import mekanism.common.block.attribute.AttributeGui;
-import mekanism.common.block.attribute.AttributeHasBounding;
-import mekanism.common.block.attribute.AttributeMultiblock;
-import mekanism.common.block.attribute.AttributeStateFacing;
+import mekanism.common.block.attribute.*;
 import mekanism.common.block.attribute.Attributes.AttributeComparator;
 import mekanism.common.block.interfaces.IHasTileEntity;
 import mekanism.common.block.states.BlockStateHelper;
 import mekanism.common.block.states.IStateFluidLoggable;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.item.interfaces.IItemSustainedInventory;
 import mekanism.common.lib.multiblock.MultiblockData;
 import mekanism.common.lib.radiation.Meltdown.MeltdownExplosion;
@@ -38,11 +31,7 @@ import mekanism.common.tile.interfaces.IRedstoneControl.RedstoneControl;
 import mekanism.common.tile.interfaces.ISideConfiguration;
 import mekanism.common.tile.interfaces.ISustainedData;
 import mekanism.common.tile.interfaces.ITileRadioactive;
-import mekanism.common.util.EnumUtils;
-import mekanism.common.util.ItemDataUtils;
-import mekanism.common.util.MekanismUtils;
-import mekanism.common.util.NBTUtils;
-import mekanism.common.util.WorldUtils;
+import mekanism.common.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -62,47 +51,51 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
-import net.minecraftforge.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 public abstract class BlockMekanism extends Block {
+    @Override
+    public RenderShape getRenderShape(BlockState blockState) {
+        return super.getRenderShape(blockState);
+    }
 
     protected BlockMekanism(BlockBehaviour.Properties properties) {
         super(BlockStateHelper.applyLightLevelAdjustments(properties));
         registerDefaultState(BlockStateHelper.getDefaultState(stateDefinition.any()));
     }
 
-    @Override
-    public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
-        consumer.accept(RenderPropertiesProvider.particles());
-    }
+//    @Override
+//    public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
+//        consumer.accept(RenderPropertiesProvider.particles());
+//    }
 
-    @Nullable
-    @Override
-    public PushReaction getPistonPushReaction(@NotNull BlockState state) {
-        if (state.hasBlockEntity()) {
-            //Protect against mods like Quark that allow blocks with TEs to be moved
-            //TODO: Eventually it would be nice to go through this and maybe even allow some TEs to be moved if they don't strongly
-            // care about the world, but for now it is safer to just block them from being moved
-            return PushReaction.BLOCK;
-        }
-        return super.getPistonPushReaction(state);
-    }
+//    @Nullable
+//    @Override
+//    public PushReaction getPistonPushReaction(@NotNull BlockState state) {
+//        if (state.hasBlockEntity()) {
+//            //Protect against mods like Quark that allow blocks with TEs to be moved
+//            //TODO: Eventually it would be nice to go through this and maybe even allow some TEs to be moved if they don't strongly
+//            // care about the world, but for now it is safer to just block them from being moved
+//            return PushReaction.BLOCK;
+//        }
+//        return super.getPistonPushReaction(state);
+//    }
 
-    @NotNull
     @Override
-    public ItemStack getCloneItemStack(@NotNull BlockState state, HitResult target, @NotNull BlockGetter world, @NotNull BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockGetter world, BlockPos pos, BlockState blockState) {
         ItemStack itemStack = new ItemStack(this);
         TileEntityMekanism tile = WorldUtils.getTileEntity(TileEntityMekanism.class, world, pos);
         if (tile == null) {
@@ -111,38 +104,49 @@ public abstract class BlockMekanism extends Block {
         //TODO: Some of the data doesn't get properly "picked", because there are cases such as before opening the GUI where
         // the server doesn't bother syncing the data to the client. For example with what frequencies there are
         Item item = itemStack.getItem();
-        Lazy<CompoundTag> lazyDataMap = Lazy.of(() -> ItemDataUtils.getDataMap(itemStack));
+        CompoundTag dataMap = ItemDataUtils.getDataMap(itemStack);
         if (tile.getFrequencyComponent().hasCustomFrequencies()) {
-            tile.getFrequencyComponent().write(lazyDataMap.get());
+            tile.getFrequencyComponent().write(dataMap);
         }
         if (tile.hasSecurity()) {
-            itemStack.getCapability(Capabilities.OWNER_OBJECT).ifPresent(ownerObject -> {
+            IOwnerObject ownerObject;
+            if (itemStack.getItem() instanceof IItemOwnerObjectGetter ownerObjectGetter && (ownerObject = ownerObjectGetter.getOwnerObject(itemStack)) != null) {
                 ownerObject.setOwnerUUID(tile.getOwnerUUID());
-                itemStack.getCapability(Capabilities.SECURITY_OBJECT).ifPresent(securityObject -> securityObject.setSecurityMode(tile.getSecurityMode()));
-            });
+                if (itemStack.getItem() instanceof ISecurityObject securityObject) {
+                    securityObject.setSecurityMode(tile.getSecurityMode());
+                }
+            }
         }
         if (tile.supportsUpgrades()) {
-            tile.getComponent().write(lazyDataMap.get());
+            tile.getComponent().write(dataMap);
         }
         if (tile instanceof ISideConfiguration config) {
-            CompoundTag dataMap = lazyDataMap.get();
             config.getConfig().write(dataMap);
             config.getEjector().write(dataMap);
         }
         if (tile instanceof ISustainedData sustainedData) {
-            sustainedData.writeSustainedData(lazyDataMap.get());
+            sustainedData.writeSustainedData(dataMap);
         }
         if (tile.supportsRedstone()) {
-            NBTUtils.writeEnum(lazyDataMap.get(), NBTConstants.CONTROL_TYPE, tile.getControlType());
+            NBTUtils.writeEnum(dataMap, NBTConstants.CONTROL_TYPE, tile.getControlType());
         }
         for (SubstanceType type : EnumUtils.SUBSTANCES) {
             if (tile.handles(type)) {
-                lazyDataMap.get().put(type.getContainerTag(), DataHandlerUtils.writeContainers(type.getContainers(tile)));
+                if (type == SubstanceType.ENERGY) {
+                    if (!type.getContainers(tile).isEmpty()) {
+                        dataMap.put(type.getContainerTag(), type.getContainers(tile).get(0).serializeNBT());
+                    }
+                }else {
+                    dataMap.put(type.getContainerTag(), DataHandlerUtils.writeContainers(type.getContainers(tile)));
+                }
             }
         }
-        if (item instanceof IItemSustainedInventory sustainedInventory && tile.persistInventory() && tile.getSlots() > 0) {
+        if (item instanceof IItemSustainedInventory sustainedInventory && tile.persistInventory() && tile.getItemManager().canHandle() && tile.getItemManager().getHolder().getAll().size() > 0) {
             sustainedInventory.setSustainedInventory(tile.getSustainedInventory(), itemStack);
         }
+        CompoundTag nbt = new CompoundTag();
+        nbt.put(NBTConstants.MEK_DATA, dataMap);
+        itemStack.setTag(nbt);
         return itemStack;
     }
 
@@ -156,7 +160,7 @@ public abstract class BlockMekanism extends Block {
             BlockEntity tile = hasTileEntity.createDummyBlockEntity(state);
             if (tile instanceof TileEntityMekanism mekTile) {
                 //Skip tiles that have no tanks and skip chemical creative tanks
-                if (!mekTile.getGasTanks(null).isEmpty() && (!(mekTile instanceof TileEntityChemicalTank chemicalTank) ||
+                if (!mekTile.getGasStorage(null).iterator().hasNext() && (!(mekTile instanceof TileEntityChemicalTank chemicalTank) ||
                                                              chemicalTank.getTier() != ChemicalTankTier.CREATIVE)) {
                     for (ItemStack drop : drops) {
                         ListTag gasTankList = ItemDataUtils.getList(drop, NBTConstants.GAS_TANKS);
@@ -286,7 +290,9 @@ public abstract class BlockMekanism extends Block {
             tile.getFrequencyComponent().read(dataMap);
         }
         if (tile.hasSecurity()) {
-            stack.getCapability(Capabilities.SECURITY_OBJECT).ifPresent(security -> tile.setSecurityMode(security.getSecurityMode()));
+            if (stack.getItem() instanceof IItemOwnerObjectGetter ownerObjectGetter && ownerObjectGetter.getOwnerObject(stack) instanceof ISecurityObject security) {
+                tile.setSecurityMode(security.getSecurityMode());
+            }
             UUID ownerUUID = ISecurityUtils.INSTANCE.getOwnerUUID(stack);
             if (ownerUUID != null) {
                 tile.setOwnerUUID(ownerUUID);
@@ -294,7 +300,7 @@ public abstract class BlockMekanism extends Block {
                 tile.setOwnerUUID(placer.getUUID());
                 if (!world.isClientSide) {
                     //If the machine doesn't already have an owner, make sure we portray this
-                    Mekanism.packetHandler().sendToAll(new PacketSecurityUpdate(placer.getUUID()));
+                    Mekanism.packetHandler().sendToAll(new PacketSecurityUpdate(placer.getUUID()), world.getServer());
                 }
             }
         }
@@ -309,11 +315,17 @@ public abstract class BlockMekanism extends Block {
         }
         for (SubstanceType type : EnumUtils.SUBSTANCES) {
             if (type.canHandle(tile)) {
-                DataHandlerUtils.readContainers(type.getContainers(tile), dataMap.getList(type.getContainerTag(), Tag.TAG_COMPOUND));
+                if (type == SubstanceType.ENERGY) { // Energy dont have a list, only one energy Storage
+                    if (!type.getContainers(tile).isEmpty()) {
+                        type.getContainers(tile).get(0).deserializeNBT(dataMap.getCompound(type.getContainerTag()));
+                    }
+                }else {
+                    DataHandlerUtils.readContainers(type.getContainers(tile), dataMap.getList(type.getContainerTag(), Tag.TAG_COMPOUND));
+                }
             }
         }
         if (tile instanceof ISustainedData sustainedData && stack.hasTag()) {
-            //TODO - 1.18: do we want to be checking it has a tag or not so that we can set things to stuff
+            //TODO - 1.18: do we want to be checking it has a tagSupplier or not so that we can set things to stuff
             sustainedData.readSustainedData(dataMap);
         }
         if (tile.supportsRedstone()) {
@@ -325,23 +337,23 @@ public abstract class BlockMekanism extends Block {
     }
 
     @Override
-    public void onBlockExploded(BlockState state, Level world, BlockPos pos, Explosion explosion) {
-        if (!world.isClientSide) {
-            AttributeMultiblock multiblockAttribute = Attribute.get(state, AttributeMultiblock.class);
+    public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
+        if (!level.isClientSide) {
+            AttributeMultiblock multiblockAttribute = Attribute.get(level.getBlockState(blockPos), AttributeMultiblock.class);
             if (multiblockAttribute != null && explosion instanceof MeltdownExplosion meltdown) {
-                MultiblockData multiblock = multiblockAttribute.getMultiblock(world, pos, meltdown.getMultiblockID());
+                MultiblockData multiblock = multiblockAttribute.getMultiblock(level, blockPos, meltdown.getMultiblockID());
                 if (multiblock != null) {
-                    multiblock.meltdownHappened(world);
+                    multiblock.meltdownHappened(level);
                 }
             }
         }
-        super.onBlockExploded(state, world, pos, explosion);
+        super.wasExploded(level, blockPos, explosion);
     }
 
-    @Override
-    public BlockState rotate(BlockState state, LevelAccessor world, BlockPos pos, Rotation rotation) {
-        return AttributeStateFacing.rotate(state, world, pos, rotation);
-    }
+//    @Override
+//    public BlockState rotate(BlockState state, LevelAccessor world, BlockPos pos, Rotation rotation) {
+//        return AttributeStateFacing.rotate(state, world, pos, rotation);
+//    }
 
     @NotNull
     @Override
@@ -431,8 +443,13 @@ public abstract class BlockMekanism extends Block {
         }
     }
 
-    protected InteractionResult genericClientActivated(@NotNull Player player, @NotNull InteractionHand hand) {
-        if (Attribute.has(this, AttributeGui.class) || MekanismUtils.canUseAsWrench(player.getItemInHand(hand))) {
+    protected InteractionResult genericClientActivated(@NotNull Player player, @NotNull InteractionHand hand, BlockEntity blockEntity) {
+        if (Attribute.has(this, AttributeGui.class)) {
+            return InteractionResult.SUCCESS;
+        } else if (MekanismUtils.canUseAsWrench(player.getItemInHand(hand))) {
+            if (blockEntity instanceof ITileRadioactive tileRadioactive && tileRadioactive.getRadiationScale() > 0) {
+                return InteractionResult.FAIL;
+            }
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;

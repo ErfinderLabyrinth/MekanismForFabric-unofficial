@@ -1,28 +1,24 @@
 package mekanism.common.recipe.upgrade;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import mekanism.api.Action;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.NBTConstants;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.energy.IMekanismStrictEnergyHandler;
-import mekanism.api.energy.IStrictEnergyHandler;
-import mekanism.api.math.FloatingLong;
-import mekanism.common.capabilities.Capabilities;
 import mekanism.common.capabilities.energy.BasicEnergyContainer;
+import mekanism.common.inventory.SimpleSingleStackStorage;
 import mekanism.common.tile.base.SubstanceType;
 import mekanism.common.tile.base.TileEntityMekanism;
-import mekanism.common.util.ItemDataUtils;
-import net.minecraft.core.Direction;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @NothingNullByDefault
 public class EnergyRecipeData implements RecipeUpgradeData<EnergyRecipeData> {
@@ -33,7 +29,7 @@ public class EnergyRecipeData implements RecipeUpgradeData<EnergyRecipeData> {
         int count = DataHandlerUtils.getMaxId(containers, NBTConstants.CONTAINER);
         energyContainers = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
-            energyContainers.add(BasicEnergyContainer.create(FloatingLong.MAX_VALUE, null));
+            energyContainers.add(BasicEnergyContainer.create(Long.MAX_VALUE, null));
         }
         DataHandlerUtils.readContainers(energyContainers, containers);
     }
@@ -51,59 +47,70 @@ public class EnergyRecipeData implements RecipeUpgradeData<EnergyRecipeData> {
     }
 
     @Override
-    public boolean applyToStack(ItemStack stack) {
+    public ItemStack applyToStack(ItemStack stack) {
         if (energyContainers.isEmpty()) {
-            return true;
+            return stack;
         }
         Item item = stack.getItem();
-        Optional<IStrictEnergyHandler> capability = stack.getCapability(Capabilities.STRICT_ENERGY).resolve();
-        List<IEnergyContainer> energyContainers = new ArrayList<>();
-        if (capability.isPresent()) {
-            IStrictEnergyHandler energyHandler = capability.get();
-            for (int container = 0; container < energyHandler.getEnergyContainerCount(); container++) {
-                energyContainers.add(BasicEnergyContainer.create(energyHandler.getMaxEnergy(container), null));
-            }
+        SimpleSingleStackStorage storage = new SimpleSingleStackStorage(stack);
+        EnergyStorage energyStorage = ContainerItemContext.ofSingleSlot(storage).find(EnergyStorage.ITEM);
+//        List<IEnergyContainer> energyContainers = new ArrayList<>();
+        TileEntityMekanism tile = null;
+        if (energyStorage != null) {
+            //energyContainers.add(BasicEnergyContainer.create(energyHandler.getMaxEnergy(container), null));
         } else if (item instanceof BlockItem blockItem) {
-            TileEntityMekanism tile = getTileFromBlock(blockItem.getBlock());
+            tile = getTileFromBlock(blockItem.getBlock());
             if (tile == null || !tile.handles(SubstanceType.ENERGY)) {
                 //Something went wrong
-                return false;
+                return null;
             }
-            for (int container = 0; container < tile.getEnergyContainerCount(); container++) {
-                energyContainers.add(BasicEnergyContainer.create(tile.getMaxEnergy(container), null));
-            }
+            energyStorage = tile.getEnergyManager().getContainer(null);
+//            for (int container = 0; container < tile.getEnergyContainerCount(); container++) {
+//                energyContainers.add(BasicEnergyContainer.create(tile.getMaxEnergy(container), null));
+//            }
         } else {
-            return false;
+            return null;
         }
         if (energyContainers.isEmpty()) {
             //We don't actually have any tanks in the output
-            return true;
+            return storage.getStack();
         }
-        IMekanismStrictEnergyHandler outputHandler = new IMekanismStrictEnergyHandler() {
-            @NotNull
-            @Override
-            public List<IEnergyContainer> getEnergyContainers(@Nullable Direction side) {
-                return energyContainers;
-            }
-
-            @Override
-            public void onContentsChanged() {
-            }
-        };
+//        IMekanismStrictEnergyHandler outputHandler = new IMekanismStrictEnergyHandler() {
+//            @NotNull
+//            @Override
+//            public List<IEnergyContainer> getEnergyContainer(@Nullable Direction side) {
+//                return energyContainers;
+//            }
+//
+//            @Override
+//            public void onContentsChanged() {
+//            }
+//        };
         boolean hasData = false;
         for (IEnergyContainer energyContainer : this.energyContainers) {
             if (!energyContainer.isEmpty()) {
                 hasData = true;
-                if (!outputHandler.insertEnergy(energyContainer.getEnergy(), Action.EXECUTE).isZero()) {
-                    //If we have a remainder, stop trying to insert as our upgraded item's buffer is just full
-                    break;
+                try(Transaction t=Transaction.openOuter()) {
+                    if (energyStorage.insert(energyContainer.getEnergy(), t) != energyContainer.getEnergy()) {
+                        //If we have a remainder, stop trying to insert as our upgraded item's buffer is just full
+                        t.commit();
+                        break;
+                    }
+                    t.commit();
                 }
             }
         }
-        if (hasData) {
-            //We managed to transfer it all into valid slots, so save it to the stack
-            ItemDataUtils.writeContainers(stack, NBTConstants.ENERGY_CONTAINERS, energyContainers);
+
+        if (tile != null) {
+            ItemStack stack1 = storage.getStack();
+            tile.saveToItem(stack1);
+            return stack1;
         }
-        return true;
+
+//        if (hasData) {
+//            //We managed to transfer it all into valid slots, so save it to the stack
+//            ItemDataUtils.writeContainers(stack, NBTConstants.ENERGY_CONTAINERS, energyContainers);
+//        }
+        return storage.getStack();
     }
 }

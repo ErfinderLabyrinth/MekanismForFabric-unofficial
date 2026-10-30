@@ -1,6 +1,5 @@
 package mekanism.common.content.network.distribution;
 
-import java.util.Collection;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.ChemicalType;
@@ -10,6 +9,8 @@ import mekanism.common.lib.distribution.SplitInfo;
 import mekanism.common.lib.distribution.Target;
 import mekanism.common.util.ChemicalUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
 
 public class BoxedChemicalTransmitterSaveTarget<CHEMICAL extends Chemical<CHEMICAL>, STACK extends ChemicalStack<CHEMICAL>>
       extends Target<BoxedChemicalTransmitterSaveTarget<CHEMICAL, STACK>.SaveHandler, Long, @NotNull STACK> {

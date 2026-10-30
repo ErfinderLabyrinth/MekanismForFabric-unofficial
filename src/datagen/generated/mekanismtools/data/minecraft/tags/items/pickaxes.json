@@ -1,10 +1,11 @@
 {
+  "replace": false,
   "values": [
-    "#forge:tools/pickaxes/bronze",
-    "#forge:tools/pickaxes/lapis_lazuli",
-    "#forge:tools/pickaxes/osmium",
-    "#forge:tools/pickaxes/refined_glowstone",
-    "#forge:tools/pickaxes/refined_obsidian",
-    "#forge:tools/pickaxes/steel"
+    "#c:bronze_pickaxes",
+    "#c:lapis_lazuli_pickaxes",
+    "#c:osmium_pickaxes",
+    "#c:refined_glowstone_pickaxes",
+    "#c:refined_obsidian_pickaxes",
+    "#c:steel_pickaxes"
   ]
 }

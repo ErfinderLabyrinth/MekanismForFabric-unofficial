@@ -1,27 +1,31 @@
 package mekanism.common.network.to_server;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Stream;
 import mekanism.api.MekanismAPI;
 import mekanism.api.robit.RobitSkin;
 import mekanism.api.security.ISecurityUtils;
 import mekanism.api.text.TextComponentUtil;
 import mekanism.common.entity.EntityRobit;
 import mekanism.common.entity.RobitPrideSkinData;
-import mekanism.common.network.BasePacketHandler;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.registries.MekanismRobitSkins;
+import mekanism.common.util.NetworkUtil;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Stream;
+
 public class PacketRobit implements IMekanismPacket {
+    public static final PacketType<PacketRobit> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "robit"), PacketRobit::decode);
 
     private static final Map<String, List<ResourceKey<RobitSkin>>> EASTER_EGGS = Map.of(
           "sara", getPrideSkins(RobitPrideSkinData.TRANS, RobitPrideSkinData.LESBIAN)
@@ -60,8 +64,7 @@ public class PacketRobit implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        Player player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player != null) {
             EntityRobit robit = (EntityRobit) player.level().getEntity(entityId);
             if (robit != null && ISecurityUtils.INSTANCE.canAccess(player, robit)) {
@@ -110,11 +113,16 @@ public class PacketRobit implements IMekanismPacket {
         String name = null;
         ResourceKey<RobitSkin> skin = null;
         if (activeType == RobitPacketType.NAME) {
-            name = BasePacketHandler.readString(buffer).trim();
+            name = NetworkUtil.readString(buffer).trim();
         } else if (activeType == RobitPacketType.SKIN) {
             skin = buffer.readResourceKey(MekanismAPI.ROBIT_SKIN_REGISTRY_NAME);
         }
         return new PacketRobit(activeType, entityId, name, skin);
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 
     public enum RobitPacketType {

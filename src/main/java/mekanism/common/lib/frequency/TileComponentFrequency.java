@@ -1,10 +1,5 @@
 package mekanism.common.lib.frequency;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import mekanism.api.NBTConstants;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.sync.SyncableFrequency;
@@ -18,6 +13,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 public class TileComponentFrequency implements ITileComponent {
 
@@ -48,7 +45,6 @@ public class TileComponentFrequency implements ITileComponent {
             updateFrequency(entry.getKey(), entry.getValue());
         }
         if (needsNotify) {
-            tile.invalidateCachedCapabilities();
             WorldUtils.notifyLoadedNeighborsOfTileChange(tile.getLevel(), tile.getBlockPos());
             needsNotify = false;
         }
@@ -109,7 +105,7 @@ public class TileComponentFrequency implements ITileComponent {
 
     private <FREQ extends Frequency> void setFrequencyFromData(FrequencyType<FREQ> type, FrequencyIdentity data, @NotNull UUID player, FrequencyData frequencyData) {
         Frequency oldFrequency = frequencyData.selectedFrequency;
-        FrequencyManager<FREQ> manager = type.getManager(data, player);
+        FrequencyManager<FREQ> manager = type.getManager(data, player, tile.getLevel().getServer());
         FREQ freq = manager.getOrCreateFrequency(data, player);
         if (!freq.equals(oldFrequency)) {
             //If the frequency being set isn't the existing frequency, then deactivate the old one
@@ -122,7 +118,7 @@ public class TileComponentFrequency implements ITileComponent {
     }
 
     public void removeFrequencyFromData(FrequencyType<?> type, FrequencyIdentity data, UUID player) {
-        FrequencyManager<?> manager = type.getManager(data, player);
+        FrequencyManager<?> manager = type.getManager(data, player, tile.getLevel().getServer());
         if (manager != null && manager.remove(data.key(), player)) {
             setNeedsNotify(supportedFrequencies.get(type));
         }
@@ -132,7 +128,7 @@ public class TileComponentFrequency implements ITileComponent {
         if (frequencyData.selectedFrequency != null) {
             if (frequencyData.selectedFrequency.isValid()) {
                 if (frequencyData.selectedFrequency.isRemoved()) {
-                    FrequencyManager<FREQ> manager = type.getFrequencyManager((FREQ) frequencyData.selectedFrequency);
+                    FrequencyManager<FREQ> manager = type.getFrequencyManager((FREQ) frequencyData.selectedFrequency, tile.getLevel().getServer());
                     if (manager != null) {
                         manager.deactivate(frequencyData.selectedFrequency, tile);
                     }
@@ -142,7 +138,7 @@ public class TileComponentFrequency implements ITileComponent {
                 //Note: We don't need to update the frequency for this block as in cases when it isn't invalid we do it immediately
             } else {
                 FREQ frequency = (FREQ) frequencyData.selectedFrequency;
-                FrequencyManager<FREQ> manager = type.getFrequencyManager(frequency);
+                FrequencyManager<FREQ> manager = type.getFrequencyManager(frequency, tile.getLevel().getServer());
                 if (manager == null) {
                     frequencyData.clearFrequency();
                 } else {
@@ -162,7 +158,7 @@ public class TileComponentFrequency implements ITileComponent {
 
     private <FREQ extends Frequency> void deactivate(FrequencyType<FREQ> type, FrequencyData frequencyData) {
         if (frequencyData.selectedFrequency != null) {
-            FrequencyManager<FREQ> manager = type.getFrequencyManager((FREQ) frequencyData.selectedFrequency);
+            FrequencyManager<FREQ> manager = type.getFrequencyManager((FREQ) frequencyData.selectedFrequency, tile.getLevel().getServer());
             if (manager != null) {
                 manager.deactivate(frequencyData.selectedFrequency, tile);
             }
@@ -274,7 +270,7 @@ public class TileComponentFrequency implements ITileComponent {
             //Note: We take advantage of the fact that containers are one to one even on the server, and sync
             // the private frequencies of the player who opened the container rather than the private
             // frequencies of the owner of the tile
-            container.track(SyncableFrequencyList.create(() -> type.getManagerWrapper().getPrivateManager(container.getPlayerUUID()).getFrequencies(),
+            container.track(SyncableFrequencyList.create(() -> type.getManagerWrapper().getPrivateManager(container.getPlayerUUID(), tile.getLevel().getServer()).getFrequencies(),
                   value -> privateCache.put(type, value)));
         }
     }

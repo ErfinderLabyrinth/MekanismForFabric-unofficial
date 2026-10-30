@@ -1,7 +1,5 @@
 package mekanism.additions.common.recipe;
 
-import java.util.Map;
-import java.util.function.Consumer;
 import mekanism.additions.common.MekanismAdditions;
 import mekanism.additions.common.registries.AdditionsBlocks;
 import mekanism.api.chemical.pigment.Pigment;
@@ -15,6 +13,9 @@ import mekanism.common.recipe.impl.PigmentExtractingRecipeProvider;
 import mekanism.common.registration.impl.PigmentRegistryObject;
 import mekanism.common.registries.MekanismPigments;
 import net.minecraft.data.recipes.FinishedRecipe;
+
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class PigmentExtractingPlasticRecipeProvider implements ISubRecipeProvider {
 

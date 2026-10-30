@@ -1,11 +1,12 @@
 package mekanism.api.robit;
 
 import com.mojang.serialization.Codec;
-import java.util.List;
-import java.util.Objects;
 import mekanism.api.annotations.NothingNullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Prefab of a robit skin that is always unlocked.

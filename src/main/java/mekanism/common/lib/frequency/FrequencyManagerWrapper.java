@@ -1,9 +1,11 @@
 package mekanism.common.lib.frequency;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import mekanism.common.Mekanism;
+import net.minecraft.server.MinecraftServer;
+
 import java.util.Map;
 import java.util.UUID;
-import mekanism.common.Mekanism;
 
 public class FrequencyManagerWrapper<FREQ extends Frequency> {
 
@@ -37,7 +39,7 @@ public class FrequencyManagerWrapper<FREQ extends Frequency> {
         return publicManager;
     }
 
-    public FrequencyManager<FREQ> getPrivateManager(UUID ownerUUID) {
+    public FrequencyManager<FREQ> getPrivateManager(UUID ownerUUID, MinecraftServer server) {
         if (!type.supportsPrivate()) {
             Mekanism.logger.error("Attempted to access private frequency manager of type {}. This shouldn't happen!", frequencyType.getName());
             return null;
@@ -48,7 +50,7 @@ public class FrequencyManagerWrapper<FREQ extends Frequency> {
 
         return privateManagers.computeIfAbsent(ownerUUID, owner -> {
             FrequencyManager<FREQ> manager = new FrequencyManager<>(frequencyType, owner);
-            manager.createOrLoad();
+            manager.createOrLoad(server);
             return manager;
         });
     }

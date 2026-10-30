@@ -3,6 +3,7 @@ package mekanism.common.recipe.serializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import mekanism.api.FluidStack;
 import mekanism.api.JsonConstants;
 import mekanism.api.SerializerHelper;
 import mekanism.api.chemical.gas.GasStack;
@@ -15,7 +16,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 public class RotaryRecipeSerializer<RECIPE extends RotaryRecipe> implements RecipeSerializer<RECIPE> {
@@ -80,7 +80,7 @@ public class RotaryRecipeSerializer<RECIPE extends RotaryRecipe> implements Reci
             boolean hasGasToFluid = buffer.readBoolean();
             if (hasGasToFluid) {
                 gasInputIngredient = IngredientCreatorAccess.gas().read(buffer);
-                fluidOutput = FluidStack.readFromPacket(buffer);
+                fluidOutput = FluidStack.readFromBuffer(buffer);
             }
             if (hasFluidToGas && hasGasToFluid) {
                 return this.factory.create(recipeId, fluidInputIngredient, gasInputIngredient, gasOutput, fluidOutput);

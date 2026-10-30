@@ -22,9 +22,7 @@
           "name": "mekanism:elite_bin"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/elite_bin"
+  ]
 }

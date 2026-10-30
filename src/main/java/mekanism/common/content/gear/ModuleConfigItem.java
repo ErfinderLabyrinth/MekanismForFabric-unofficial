@@ -1,7 +1,5 @@
 package mekanism.common.content.gear;
 
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
 import mekanism.api.gear.config.IModuleConfigItem;
 import mekanism.api.gear.config.ModuleBooleanData;
 import mekanism.api.gear.config.ModuleConfigData;
@@ -11,6 +9,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 public class ModuleConfigItem<TYPE> implements IModuleConfigItem<TYPE> {
 

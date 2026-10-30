@@ -1,23 +1,23 @@
 package mekanism.common.network.to_server;
 
+import mekanism.api.MekanismAPI;
 import mekanism.api.security.ISecurityUtils;
-import mekanism.common.lib.frequency.Frequency;
+import mekanism.common.lib.frequency.*;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
-import mekanism.common.lib.frequency.FrequencyManager;
-import mekanism.common.lib.frequency.FrequencyType;
-import mekanism.common.lib.frequency.IFrequencyHandler;
-import mekanism.common.lib.frequency.IFrequencyItem;
 import mekanism.common.network.IMekanismPacket;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
 
 public class PacketGuiSetFrequency<FREQ extends Frequency> implements IMekanismPacket {
+    public static final PacketType<PacketGuiSetFrequency> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "gui_set_frequency"), PacketGuiSetFrequency::decode);
 
     private final FrequencyType<FREQ> type;
     private final FrequencyUpdate updateType;
@@ -42,8 +42,7 @@ public class PacketGuiSetFrequency<FREQ extends Frequency> implements IMekanismP
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
-        ServerPlayer player = context.getSender();
+    public void handle(Player player, PacketSender responseSender) {
         if (player == null) {
             return;
         }
@@ -59,7 +58,7 @@ public class PacketGuiSetFrequency<FREQ extends Frequency> implements IMekanismP
         } else {
             ItemStack stack = player.getItemInHand(currentHand);
             if (ISecurityUtils.INSTANCE.canAccess(player, stack) && stack.getItem() instanceof IFrequencyItem item) {
-                FrequencyManager<FREQ> manager = type.getManager(data, player.getUUID());
+                FrequencyManager<FREQ> manager = type.getManager(data, player.getUUID(), player.getServer());
                 if (updateType == FrequencyUpdate.SET_ITEM) {
                     //Note: We don't bother validating if the frequency is public or not here, as if it isn't then
                     // a new private frequency will just be created for the player who sent a packet they shouldn't
@@ -97,6 +96,11 @@ public class PacketGuiSetFrequency<FREQ extends Frequency> implements IMekanismP
         BlockPos pos = updateType.isTile() ? buffer.readBlockPos() : null;
         InteractionHand hand = updateType.isTile() ? null : buffer.readEnum(InteractionHand.class);
         return new PacketGuiSetFrequency<>(updateType, type, data, pos, hand);
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 
     public enum FrequencyUpdate {

@@ -3,7 +3,6 @@ package mekanism.api.security;
 import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  * checking if the provider exposes a security capability.
  * @since 10.2.1
  */
-@AutoRegisterCapability
+//@AutoRegisterCapability //TODO
 public interface IOwnerObject {
 
     /**

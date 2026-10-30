@@ -82,7 +82,7 @@ public class LogisticalTransporter extends LogisticalTransporterBase implements 
     }
 
     @Override
-    protected void readFromNBT(CompoundTag nbtTags) {
+    public void readFromNBT(CompoundTag nbtTags) {
         super.readFromNBT(nbtTags);
         NBTUtils.setEnumIfPresent(nbtTags, NBTConstants.COLOR, TransporterUtils::readColor, this::setColor);
     }

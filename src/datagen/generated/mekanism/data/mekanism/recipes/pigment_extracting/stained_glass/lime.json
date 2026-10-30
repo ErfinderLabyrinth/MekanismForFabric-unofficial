@@ -2,7 +2,7 @@
   "type": "mekanism:pigment_extracting",
   "input": {
     "ingredient": {
-      "tag": "forge:glass/lime"
+      "item": "minecraft:lime_stained_glass"
     }
   },
   "output": {

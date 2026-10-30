@@ -1,19 +1,23 @@
 package mekanism.common.inventory.container.tile;
 
-import java.util.List;
 import mekanism.api.inventory.IInventorySlot;
+import mekanism.api.security.ISecurityObject;
 import mekanism.common.inventory.container.IEmptyContainer;
 import mekanism.common.inventory.container.MekanismContainer;
 import mekanism.common.inventory.container.slot.VirtualInventoryContainerSlot;
 import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import mekanism.common.tile.base.TileEntityMekanism;
 import mekanism.common.util.WorldUtils;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class MekanismTileContainer<TILE extends TileEntityMekanism> extends MekanismContainer {
 
@@ -39,7 +43,7 @@ public class MekanismTileContainer<TILE extends TileEntityMekanism> extends Meka
 
     @Nullable
     @Override
-    public ICapabilityProvider getSecurityObject() {
+    public ISecurityObject getSecurityObject() {
         return tile;
     }
 
@@ -75,7 +79,7 @@ public class MekanismTileContainer<TILE extends TileEntityMekanism> extends Meka
         }
         if (tile.hasInventory()) {
             //Get all the inventory slots the tile has
-            List<IInventorySlot> inventorySlots = tile.getInventorySlots(null);
+            List<IInventorySlot> inventorySlots = tile.getItemManager().canHandle() ? tile.getItemManager().getHolder().getAll() : List.of();
             for (IInventorySlot inventorySlot : inventorySlots) {
                 Slot containerSlot = inventorySlot.createContainerSlot();
                 if (containerSlot != null) {

@@ -1,6 +1,7 @@
 package mekanism.generators.client.gui;
 
 import mekanism.api.text.EnumColor;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.GuiMekanismTile;
 import mekanism.client.gui.element.GuiElementHolder;
 import mekanism.client.gui.element.scroll.GuiScrollBar;
@@ -38,7 +39,7 @@ public class GuiFissionReactorLogicAdapter extends GuiMekanismTile<TileEntityFis
                 if (type == null) {
                     return;
                 }
-                MekanismGenerators.packetHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.LOGIC_TYPE, tile, type.ordinal()));
+                MekanismClient.clientPacketHandler().sendToServer(new PacketGeneratorsGuiInteract(GeneratorsGuiInteraction.LOGIC_TYPE, tile, type.ordinal()));
             }));
         }
     }

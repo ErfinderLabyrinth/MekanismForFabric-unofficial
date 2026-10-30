@@ -1,11 +1,9 @@
 package mekanism.client.gui.element.custom;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import mekanism.api.text.APILang;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
+import mekanism.client.MekanismClient;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
 import mekanism.client.gui.element.button.ColorButton;
@@ -18,15 +16,10 @@ import mekanism.client.gui.element.text.BackgroundType;
 import mekanism.client.gui.element.text.GuiTextField;
 import mekanism.client.gui.element.window.GuiConfirmationDialog;
 import mekanism.client.gui.element.window.GuiConfirmationDialog.DialogType;
-import mekanism.common.Mekanism;
 import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.item.FrequencyItemContainer;
-import mekanism.common.lib.frequency.Frequency;
+import mekanism.common.lib.frequency.*;
 import mekanism.common.lib.frequency.Frequency.FrequencyIdentity;
-import mekanism.common.lib.frequency.FrequencyManager;
-import mekanism.common.lib.frequency.FrequencyType;
-import mekanism.common.lib.frequency.IColorableFrequency;
-import mekanism.common.lib.frequency.IFrequencyHandler;
 import mekanism.common.network.to_server.PacketGuiSetFrequency;
 import mekanism.common.network.to_server.PacketGuiSetFrequency.FrequencyUpdate;
 import mekanism.common.network.to_server.PacketGuiSetFrequencyColor;
@@ -37,6 +30,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class GuiFrequencySelector<FREQ extends Frequency> extends GuiElement {
 
@@ -230,7 +227,7 @@ public class GuiFrequencySelector<FREQ extends Frequency> extends GuiElement {
         default void sendColorUpdate(boolean next) {
             FREQ freq = getFrequency();
             if (freq != null) {
-                Mekanism.packetHandler().sendToServer(PacketGuiSetFrequencyColor.create(freq, next));
+                MekanismClient.clientPacketHandler().sendToServer(PacketGuiSetFrequencyColor.create(freq, next));
             }
         }
     }
@@ -241,12 +238,12 @@ public class GuiFrequencySelector<FREQ extends Frequency> extends GuiElement {
 
         @Override
         default void sendSetFrequency(FrequencyIdentity identity) {
-            Mekanism.packetHandler().sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.SET_TILE, getFrequencyType(), identity, getTileEntity().getBlockPos()));
+            MekanismClient.clientPacketHandler().sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.SET_TILE, getFrequencyType(), identity, getTileEntity().getBlockPos()));
         }
 
         @Override
         default void sendRemoveFrequency(FrequencyIdentity identity) {
-            Mekanism.packetHandler().sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.REMOVE_TILE, getFrequencyType(), identity, getTileEntity().getBlockPos()));
+            MekanismClient.clientPacketHandler().sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.REMOVE_TILE, getFrequencyType(), identity, getTileEntity().getBlockPos()));
         }
 
         @Override
@@ -271,12 +268,12 @@ public class GuiFrequencySelector<FREQ extends Frequency> extends GuiElement {
 
         @Override
         default void sendSetFrequency(FrequencyIdentity identity) {
-            Mekanism.packetHandler().sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.SET_ITEM, getFrequencyType(), identity, getFrequencyContainer().getHand()));
+            MekanismClient.clientPacketHandler().sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.SET_ITEM, getFrequencyType(), identity, getFrequencyContainer().getHand()));
         }
 
         @Override
         default void sendRemoveFrequency(FrequencyIdentity identity) {
-            Mekanism.packetHandler().sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.REMOVE_ITEM, getFrequencyType(), identity, getFrequencyContainer().getHand()));
+            MekanismClient.clientPacketHandler().sendToServer(PacketGuiSetFrequency.create(FrequencyUpdate.REMOVE_ITEM, getFrequencyType(), identity, getFrequencyContainer().getHand()));
         }
 
         @Override

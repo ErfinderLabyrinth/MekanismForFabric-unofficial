@@ -1,16 +1,19 @@
 package mekanism.common.capabilities.holder.slot;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.capabilities.holder.ConfigHolder;
 import mekanism.common.lib.transmitter.TransmissionType;
 import mekanism.common.tile.component.TileComponentConfig;
 import mekanism.common.tile.component.config.slot.InventorySlotInfo;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.function.Supplier;
 
 public class ConfigInventorySlotHolder extends ConfigHolder<IInventorySlot> implements IInventorySlotHolder {
 
@@ -27,9 +30,8 @@ public class ConfigInventorySlotHolder extends ConfigHolder<IInventorySlot> impl
         return TransmissionType.ITEM;
     }
 
-    @NotNull
     @Override
-    public List<IInventorySlot> getInventorySlots(@Nullable Direction direction) {
-        return getSlots(direction, slotInfo -> slotInfo instanceof InventorySlotInfo info ? info.getSlots() : Collections.emptyList());
+    public @NotNull Storage<ItemVariant> getInventorySlots(@Nullable Direction direction) {
+        return new CombinedStorage<>(getSlots(direction, slotInfo -> slotInfo instanceof InventorySlotInfo info ? info.getSlots() : Collections.emptyList()));
     }
 }

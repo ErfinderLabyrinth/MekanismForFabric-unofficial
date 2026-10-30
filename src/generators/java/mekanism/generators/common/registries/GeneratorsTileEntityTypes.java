@@ -65,4 +65,8 @@ public class GeneratorsTileEntityTypes {
     public static final TileEntityTypeRegistryObject<TileEntityTurbineRotor> TURBINE_ROTOR = TILE_ENTITY_TYPES.register(GeneratorsBlocks.TURBINE_ROTOR, TileEntityTurbineRotor::new, TileEntityMekanism::tickServer, TileEntityMekanism::tickClient);
     public static final TileEntityTypeRegistryObject<TileEntityTurbineValve> TURBINE_VALVE = TILE_ENTITY_TYPES.register(GeneratorsBlocks.TURBINE_VALVE, TileEntityTurbineValve::new, TileEntityMekanism::tickServer, TileEntityMekanism::tickClient);
     public static final TileEntityTypeRegistryObject<TileEntityTurbineVent> TURBINE_VENT = TILE_ENTITY_TYPES.register(GeneratorsBlocks.TURBINE_VENT, TileEntityTurbineVent::new, TileEntityMekanism::tickServer, TileEntityMekanism::tickClient);
+
+    public static void register() {
+
+    }
 }

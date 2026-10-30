@@ -6,7 +6,7 @@
       "item": "mekanism:hdpe_sheet"
     },
     "D": {
-      "tag": "forge:dyes/yellow"
+      "tag": "c:yellow_dyes"
     }
   },
   "pattern": [

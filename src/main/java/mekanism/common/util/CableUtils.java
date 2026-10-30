@@ -1,15 +1,14 @@
 package mekanism.common.util;
 
-import java.util.EnumSet;
-import java.util.Set;
-import mekanism.api.Action;
-import mekanism.api.AutomationType;
 import mekanism.api.energy.IEnergyContainer;
-import mekanism.api.math.FloatingLong;
 import mekanism.common.content.network.distribution.EnergyAcceptorTarget;
-import mekanism.common.integration.energy.EnergyCompatUtils;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import team.reborn.energy.api.EnergyStorage;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 public final class CableUtils {
 
@@ -24,9 +23,17 @@ public final class CableUtils {
         emit(outputSides, energyContainer, from, energyContainer.getMaxEnergy());
     }
 
-    public static void emit(Set<Direction> outputSides, IEnergyContainer energyContainer, BlockEntity from, FloatingLong maxOutput) {
-        if (!energyContainer.isEmpty() && !maxOutput.isZero()) {
-            energyContainer.extract(emit(outputSides, energyContainer.extract(maxOutput, Action.SIMULATE, AutomationType.INTERNAL), from), Action.EXECUTE, AutomationType.INTERNAL);
+    public static void emit(Set<Direction> outputSides, IEnergyContainer energyContainer, BlockEntity from, long maxOutput) {
+        if (!energyContainer.isEmpty() && maxOutput != 0) {
+            long simulatedExtract;
+            try(Transaction t=Transaction.openOuter()) {
+                simulatedExtract = energyContainer.extract(maxOutput, t);
+            }
+            long amountExtract = emit(outputSides, simulatedExtract, from);
+            try(Transaction t=Transaction.openOuter()) {
+                energyContainer.extract(amountExtract, t);
+                t.commit();
+            }
         }
     }
 
@@ -39,18 +46,21 @@ public final class CableUtils {
      *
      * @return the amount of energy emitted
      */
-    public static FloatingLong emit(Set<Direction> sides, FloatingLong energyToSend, BlockEntity from) {
-        if (energyToSend.isZero() || sides.isEmpty()) {
-            return FloatingLong.ZERO;
+    public static long emit(Set<Direction> sides, Long energyToSend, BlockEntity from) {
+        if (energyToSend == 0 || sides.isEmpty()) {
+            return 0;
         }
         EnergyAcceptorTarget target = new EnergyAcceptorTarget(6);
-        EmitUtils.forEachSide(from.getLevel(), from.getBlockPos(), sides, (acceptor, side) -> {
+        EmitUtils.forEachSide(from.getLevel(), from.getBlockPos(), sides, (level, pos, side) -> {
             //Insert to access side and collect the cap if it is present
-            EnergyCompatUtils.getLazyStrictEnergyHandler(acceptor, side.getOpposite()).ifPresent(target::addHandler);
+            EnergyStorage energyHandler = EnergyStorage.SIDED.find(level, pos, side.getOpposite());
+            if (energyHandler != null) {
+                target.addHandler(energyHandler);
+            }
         });
         if (target.getHandlerCount() > 0) {
             return EmitUtils.sendToAcceptors(target, energyToSend);
         }
-        return FloatingLong.ZERO;
+        return 0;
     }
 }

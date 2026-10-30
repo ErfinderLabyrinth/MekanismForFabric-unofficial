@@ -1,13 +1,14 @@
 package mekanism.common.capabilities.holder.slot;
 
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import mekanism.api.RelativeSide;
 import mekanism.api.inventory.IInventorySlot;
 import mekanism.common.tile.component.TileComponentConfig;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class InventorySlotHelper {
 

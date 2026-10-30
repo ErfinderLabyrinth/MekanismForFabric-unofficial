@@ -2,7 +2,7 @@
   "type": "mekanism:oxidizing",
   "input": {
     "ingredient": {
-      "tag": "forge:pellets/antimatter"
+      "tag": "c:antimatter_pellets"
     }
   },
   "output": {

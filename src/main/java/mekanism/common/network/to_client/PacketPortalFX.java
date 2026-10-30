@@ -1,15 +1,20 @@
 package mekanism.common.network.to_client;
 
+import mekanism.api.MekanismAPI;
 import mekanism.common.network.IMekanismPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 public class PacketPortalFX implements IMekanismPacket {
+    public static final PacketType<PacketPortalFX> TYPE = PacketType.create(new ResourceLocation(MekanismAPI.MEKANISM_MODID, "portal_fx"), PacketPortalFX::decode);
 
     private final BlockPos pos;
     private final Direction direction;
@@ -24,7 +29,7 @@ public class PacketPortalFX implements IMekanismPacket {
     }
 
     @Override
-    public void handle(NetworkEvent.Context context) {
+    public void handle(Player player, PacketSender responseSender) {
         ClientLevel world = Minecraft.getInstance().level;
         if (world != null) {
             BlockPos secondPos = pos.relative(direction);
@@ -45,5 +50,10 @@ public class PacketPortalFX implements IMekanismPacket {
 
     public static PacketPortalFX decode(FriendlyByteBuf buffer) {
         return new PacketPortalFX(buffer.readBlockPos(), buffer.readEnum(Direction.class));
+    }
+
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
     }
 }

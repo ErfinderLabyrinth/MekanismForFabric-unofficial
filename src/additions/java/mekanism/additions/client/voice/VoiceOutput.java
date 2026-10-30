@@ -1,10 +1,11 @@
 package mekanism.additions.client.voice;
 
-import java.io.EOFException;
+import mekanism.common.Mekanism;
+
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
-import mekanism.common.Mekanism;
+import java.io.EOFException;
 
 public class VoiceOutput extends Thread {
 

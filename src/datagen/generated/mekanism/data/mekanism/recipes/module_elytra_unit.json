@@ -5,10 +5,10 @@
       "item": "mekanism:hdpe_elytra"
     },
     "A": {
-      "tag": "forge:alloys/elite"
+      "tag": "c:elite_alloys"
     },
     "H": {
-      "tag": "forge:pellets/polonium"
+      "tag": "c:polonium_pellets"
     },
     "N": {
       "item": "mekanism:pellet_antimatter"

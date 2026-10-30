@@ -19,7 +19,7 @@ public class BlockPlasticRoad extends BlockPlastic {
         double boost = 1.6;
         Vec3 motion = entity.getDeltaMovement();
         double a = Math.atan2(motion.x(), motion.z());
-        float slipperiness = state.getFriction(world, pos, entity);
+        float slipperiness = state.getBlock().getFriction();
         motion = motion.add(Math.sin(a) * boost * slipperiness, 0, Math.cos(a) * boost * slipperiness);
         entity.setDeltaMovement(motion);
     }

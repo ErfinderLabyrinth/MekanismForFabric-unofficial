@@ -1,12 +1,6 @@
 package mekanism.client.gui.element.scroll;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.GuiElement;
@@ -28,6 +22,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class GuiSlotScroll extends GuiElement implements IJEIIngredientHelper {
 

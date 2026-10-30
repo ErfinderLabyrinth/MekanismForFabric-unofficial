@@ -1,10 +1,11 @@
 package mekanism.client.render.lib;
 
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 public class QuadUtils {
 

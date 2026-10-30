@@ -5,14 +5,17 @@ import com.mojang.math.Axis;
 import mekanism.client.model.ModelArmoredJetpack;
 import mekanism.client.model.ModelJetpack;
 import mekanism.client.render.item.MekanismISTER;
+import mekanism.common.Mekanism;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class RenderJetpack extends MekanismISTER {
-
+    public static final ResourceLocation ID = new ResourceLocation(Mekanism.MODID, "jetpack");
+    public static final ResourceLocation ID_ARMORED = new ResourceLocation(Mekanism.MODID, "jetpack_armored");
     public static final RenderJetpack RENDERER = new RenderJetpack(false);
     public static final RenderJetpack ARMORED_RENDERER = new RenderJetpack(true);
 
@@ -33,12 +36,17 @@ public class RenderJetpack extends MekanismISTER {
     }
 
     @Override
-    public void renderByItem(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight) {
+    public void render(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
+                       int light, int overlayLight) {
         matrix.pushPose();
         matrix.translate(0.5, 0.5, 0.5);
         matrix.mulPose(Axis.ZP.rotationDegrees(180));
         jetpack.render(matrix, renderer, light, overlayLight, stack.hasFoil());
         matrix.popPose();
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return armored ? ID_ARMORED : ID;
     }
 }

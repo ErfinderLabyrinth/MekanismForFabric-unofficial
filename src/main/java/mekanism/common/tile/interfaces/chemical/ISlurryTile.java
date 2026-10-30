@@ -1,17 +1,18 @@
 package mekanism.common.tile.interfaces.chemical;
 
-import java.util.List;
 import mekanism.api.IContentsListener;
 import mekanism.api.chemical.slurry.ISlurryTank;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
-import mekanism.common.capabilities.chemical.dynamic.DynamicChemicalHandler.DynamicSlurryHandler;
 import mekanism.common.capabilities.chemical.dynamic.ISlurryTracker;
 import mekanism.common.capabilities.holder.chemical.IChemicalTankHolder;
 import mekanism.common.capabilities.resolver.manager.ChemicalHandlerManager.SlurryHandlerManager;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 @MethodsReturnNonnullByDefault
 public interface ISlurryTile extends ISlurryTracker {
@@ -22,7 +23,7 @@ public interface ISlurryTile extends ISlurryTracker {
      * @apiNote This should not be overridden, or directly called except for initial creation
      */
     default SlurryHandlerManager getInitialSlurryManager(IContentsListener listener) {
-        return new SlurryHandlerManager(getInitialSlurryTanks(listener), new DynamicSlurryHandler(this::getSlurryTanks, this::extractSlurryCheck, this::insertSlurryCheck, listener));
+        return new SlurryHandlerManager(getInitialSlurryTanks(listener));
     }
 
     /**
@@ -44,8 +45,16 @@ public interface ISlurryTile extends ISlurryTracker {
      * @apiNote This should not be overridden
      */
     @Override
-    default List<ISlurryTank> getSlurryTanks(@Nullable Direction side) {
+    default Storage<Slurry> getSlurryStorage(@Nullable Direction side) {
         return getSlurryManager().getContainers(side);
+    }
+
+    @Override
+    default List<ISlurryTank> getSlurryTanks() {
+        if (getSlurryManager().canHandle()) {
+            return getSlurryManager().getHolder().getAll();
+        }
+        return List.of();
     }
 
     default boolean extractSlurryCheck(int tank, @Nullable Direction side) {

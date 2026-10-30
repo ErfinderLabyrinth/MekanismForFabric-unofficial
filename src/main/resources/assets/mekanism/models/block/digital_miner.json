@@ -1,6 +1,5 @@
 {
 	"credit": "Made with love by CyanideX using Blockbench",
-	"render_type": "minecraft:cutout",
 	"gui_light": "side",
 	"textures": {
 		"1": "mekanism:block/models/digital_miner_elements1",
@@ -712,7 +711,7 @@
 			"faces": {
 				"west": {"uv": [8, 8, 16, 16], "texture": "#4"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -724,7 +723,7 @@
 			"faces": {
 				"east": {"uv": [8, 8, 16, 16], "texture": "#4"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -736,7 +735,7 @@
 			"faces": {
 				"down": {"uv": [8, 8, 16, 16], "texture": "#4", "cullface": "down"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -748,7 +747,7 @@
 			"faces": {
 				"south": {"uv": [0, 0, 8, 8], "texture": "#4"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}
@@ -760,7 +759,7 @@
 			"faces": {
 				"up": {"uv": [0, 0, 8, 8], "texture": "#4"}
 			},
-			"forge_data": {
+			"mekanism:data": {
 				"block_light": 15,
 				"sky_light": 15
 			}

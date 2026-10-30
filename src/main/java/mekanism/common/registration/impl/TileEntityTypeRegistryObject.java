@@ -4,7 +4,6 @@ import mekanism.common.registration.WrappedRegistryObject;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
 public class TileEntityTypeRegistryObject<BE extends BlockEntity> extends WrappedRegistryObject<BlockEntityType<BE>> {
@@ -14,13 +13,13 @@ public class TileEntityTypeRegistryObject<BE extends BlockEntity> extends Wrappe
     @Nullable
     private BlockEntityTicker<BE> serverTicker;
 
-    public TileEntityTypeRegistryObject(RegistryObject<BlockEntityType<BE>> registryObject) {
-        super(registryObject);
+    public TileEntityTypeRegistryObject(BlockEntityType<BE> object) {
+        super(object);
     }
 
     //Internal use only, overwrite the registry object
-    TileEntityTypeRegistryObject<BE> setRegistryObject(RegistryObject<BlockEntityType<BE>> registryObject) {
-        this.registryObject = registryObject;
+    TileEntityTypeRegistryObject<BE> setRegistryObject(BlockEntityType<BE> object) {
+        this.object = object;
         return this;
     }
 

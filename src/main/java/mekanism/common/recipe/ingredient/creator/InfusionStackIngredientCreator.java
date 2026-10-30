@@ -1,7 +1,5 @@
 package mekanism.common.recipe.ingredient.creator;
 
-import java.util.Objects;
-import java.util.stream.Stream;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.ChemicalTags;
 import mekanism.api.chemical.infuse.InfuseType;
@@ -13,6 +11,9 @@ import mekanism.common.recipe.ingredient.chemical.ChemicalIngredientInfo;
 import mekanism.common.recipe.ingredient.chemical.SingleChemicalStackIngredient;
 import mekanism.common.recipe.ingredient.chemical.TaggedChemicalStackIngredient;
 import net.minecraft.tags.TagKey;
+
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @NothingNullByDefault
 public class InfusionStackIngredientCreator extends ChemicalStackIngredientCreator<InfuseType, InfusionStack, InfusionStackIngredient> {
@@ -38,7 +39,7 @@ public class InfusionStackIngredientCreator extends ChemicalStackIngredientCreat
 
     @Override
     public InfusionStackIngredient from(TagKey<InfuseType> tag, long amount) {
-        Objects.requireNonNull(tag, "InfusionStackIngredients cannot be created from a null tag.");
+        Objects.requireNonNull(tag, "InfusionStackIngredients cannot be created from a null tagSupplier.");
         assertPositiveAmount(amount);
         return new TaggedInfusionStackIngredient(tag, amount);
     }

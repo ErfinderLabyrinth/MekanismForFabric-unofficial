@@ -3,13 +3,14 @@ package mekanism.api.recipes;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import mekanism.api.FluidStack;
 import mekanism.api.annotations.NothingNullByDefault;
 import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.recipes.ingredients.ChemicalStackIngredient.GasStackIngredient;
 import mekanism.api.recipes.ingredients.FluidStackIngredient;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
 
 /**
@@ -275,7 +276,7 @@ public abstract class RotaryRecipe extends MekanismRecipe {
         buffer.writeBoolean(hasGasToFluid);
         if (hasGasToFluid) {
             gasInput.write(buffer);
-            fluidOutput.writeToPacket(buffer);
+            fluidOutput.writeToBuffer(buffer);
         }
     }
 }

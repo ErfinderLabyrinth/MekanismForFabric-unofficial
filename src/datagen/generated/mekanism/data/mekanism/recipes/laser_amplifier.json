@@ -2,13 +2,13 @@
   "type": "mekanism:mek_data",
   "key": {
     "#": {
-      "tag": "forge:gems/diamond"
+      "tag": "c:diamonds"
     },
     "E": {
       "item": "mekanism:basic_energy_cube"
     },
     "S": {
-      "tag": "forge:ingots/steel"
+      "tag": "c:steel_ingots"
     }
   },
   "pattern": [

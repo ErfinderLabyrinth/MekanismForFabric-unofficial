@@ -2,9 +2,9 @@ package mekanism.generators.client.render.item;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import java.util.List;
 import mekanism.client.render.item.MekanismISTER;
 import mekanism.generators.client.model.ModelWindGenerator;
+import mekanism.generators.common.MekanismGenerators;
 import mekanism.generators.common.config.MekanismGeneratorsConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -13,6 +13,8 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class RenderWindGeneratorItem extends MekanismISTER {
 
@@ -27,13 +29,13 @@ public class RenderWindGeneratorItem extends MekanismISTER {
     }
 
     @Override
-    public void renderByItem(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
-          int light, int overlayLight) {
+    public void render(@NotNull ItemStack stack, @NotNull ItemDisplayContext displayContext, @NotNull PoseStack matrix, @NotNull MultiBufferSource renderer,
+                       int light, int overlayLight) {
         float renderPartialTicks = Minecraft.getInstance().getFrameTime();
         if (lastTicksUpdated != renderPartialTicks) {
             //Only update the angle if we are in a world and that world is not blacklisted
             if (Minecraft.getInstance().level != null) {
-                List<ResourceLocation> blacklistedDimensions = MekanismGeneratorsConfig.generators.windGenerationDimBlacklist.get();
+                List<ResourceLocation> blacklistedDimensions = MekanismGeneratorsConfig.generators.windGenerationDimBlacklist;
                 if (blacklistedDimensions.isEmpty() || !blacklistedDimensions.contains(Minecraft.getInstance().level.dimension().location())) {
                     angle = (angle + 2) % 360;
                 }
@@ -45,5 +47,10 @@ public class RenderWindGeneratorItem extends MekanismISTER {
         matrix.mulPose(Axis.ZP.rotationDegrees(180));
         windGenerator.render(matrix, renderer, angle, light, overlayLight, stack.hasFoil());
         matrix.popPose();
+    }
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return new ResourceLocation(MekanismGenerators.MODID, "render_wind_generator");
     }
 }

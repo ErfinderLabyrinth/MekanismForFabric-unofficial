@@ -1,8 +1,5 @@
 package mekanism.client.jei;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 import mekanism.api.providers.IItemProvider;
 import mekanism.api.recipes.ItemStackToFluidRecipe;
 import mekanism.api.recipes.MekanismRecipe;
@@ -17,10 +14,14 @@ import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 public class RecipeRegistryHelper {
 
@@ -53,12 +54,12 @@ public class RecipeRegistryHelper {
 
     public static void registerNutritionalLiquifier(IRecipeRegistration registry) {
         List<ItemStackToFluidRecipe> list = new ArrayList<>();
-        for (Item item : ForgeRegistries.ITEMS.getValues()) {
+        for (Item item : BuiltInRegistries.ITEM) {
             if (item.isEdible()) {
                 ItemStack stack = new ItemStack(item);
                 //TODO: If any mods adds presets to the creative menu we may want to consider gathering all
                 // deduplicating and then add recipes for them in JEI
-                FoodProperties food = stack.getFoodProperties(null);
+                FoodProperties food = stack.getItem().getFoodProperties();
                 //Only display consuming foods that provide healing as otherwise no paste will be made
                 if (food != null && food.getNutrition() > 0) {
                     list.add(new NutritionalLiquifierIRecipe(item, IngredientCreatorAccess.item().from(stack),

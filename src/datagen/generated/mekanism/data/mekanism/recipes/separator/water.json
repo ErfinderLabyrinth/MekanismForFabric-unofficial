@@ -2,7 +2,7 @@
   "type": "mekanism:separating",
   "input": {
     "amount": 2,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "leftGasOutput": {
     "amount": 2,

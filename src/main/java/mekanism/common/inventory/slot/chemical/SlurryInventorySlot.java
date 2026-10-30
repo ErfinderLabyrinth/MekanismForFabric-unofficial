@@ -1,27 +1,28 @@
 package mekanism.common.inventory.slot.chemical;
 
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 import mekanism.api.IContentsListener;
 import mekanism.api.annotations.NothingNullByDefault;
-import mekanism.api.chemical.IChemicalHandler;
-import mekanism.api.chemical.slurry.ISlurryHandler;
 import mekanism.api.chemical.slurry.ISlurryTank;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.common.capabilities.Capabilities;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
 @NothingNullByDefault
 public class SlurryInventorySlot extends ChemicalInventorySlot<Slurry, SlurryStack> {
 
     @Nullable
-    public static ISlurryHandler getCapability(ItemStack stack) {
-        return getCapability(stack, Capabilities.SLURRY_HANDLER);
+    public static Storage<Slurry> getCapability(ContainerItemContext stack) {
+        return stack.find(Capabilities.SLURRY_HANDLER_ITEM);
     }
 
     /**
@@ -32,7 +33,7 @@ public class SlurryInventorySlot extends ChemicalInventorySlot<Slurry, SlurrySta
     public static SlurryInventorySlot drain(ISlurryTank slurryTank, @Nullable IContentsListener listener, int x, int y) {
         Objects.requireNonNull(slurryTank, "Slurry tank cannot be null");
         Predicate<@NotNull ItemStack> insertPredicate = getDrainInsertPredicate(slurryTank, SlurryInventorySlot::getCapability);
-        return new SlurryInventorySlot(slurryTank, insertPredicate.negate(), insertPredicate, stack -> stack.getCapability(Capabilities.SLURRY_HANDLER).isPresent(),
+        return new SlurryInventorySlot(slurryTank, insertPredicate.negate(), insertPredicate, stack -> ContainerItemContext.withConstant(stack).find(Capabilities.SLURRY_HANDLER_ITEM) != null,
               listener, x, y);
     }
 
@@ -49,7 +50,7 @@ public class SlurryInventorySlot extends ChemicalInventorySlot<Slurry, SlurrySta
 
     @Nullable
     @Override
-    protected IChemicalHandler<Slurry, SlurryStack> getCapability() {
-        return getCapability(current);
+    protected Storage<Slurry> getCapability() {
+        return getCapability(ContainerItemContext.ofSingleSlot(current));
     }
 }

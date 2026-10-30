@@ -5,7 +5,6 @@ import mekanism.common.registration.impl.ContainerTypeRegistryObject;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +32,7 @@ public abstract class MekanismEntityContainer<ENTITY extends Entity> extends Mek
 
     @Nullable
     @Override
-    public ICapabilityProvider getSecurityObject() {
+    public Object getSecurityObject() {
         return entity;
     }
 }

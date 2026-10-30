@@ -2,9 +2,10 @@ package mekanism.common.util.text;
 
 import it.unimi.dsi.fastutil.chars.CharOpenHashSet;
 import it.unimi.dsi.fastutil.chars.CharSet;
-import java.util.Arrays;
 import mekanism.api.functions.CharPredicate;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Arrays;
 
 public class InputValidator {
 

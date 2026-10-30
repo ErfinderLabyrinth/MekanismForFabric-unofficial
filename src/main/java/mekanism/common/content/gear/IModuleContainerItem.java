@@ -1,13 +1,7 @@
 package mekanism.common.content.gear;
 
-import java.util.ArrayList;
-import java.util.List;
 import mekanism.api.NBTConstants;
-import mekanism.api.gear.ICustomModule;
-import mekanism.api.gear.IHUDElement;
-import mekanism.api.gear.IModule;
-import mekanism.api.gear.IModuleHelper;
-import mekanism.api.gear.ModuleData;
+import mekanism.api.gear.*;
 import mekanism.api.providers.IModuleDataProvider;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.TextComponentUtil;
@@ -21,6 +15,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public interface IModuleContainerItem extends IItemHUDProvider {
 

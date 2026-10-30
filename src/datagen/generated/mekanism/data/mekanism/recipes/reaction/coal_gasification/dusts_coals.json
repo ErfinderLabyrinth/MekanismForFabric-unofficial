@@ -3,7 +3,7 @@
   "duration": 100,
   "fluidInput": {
     "amount": 100,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "gasInput": {
     "amount": 100,
@@ -14,14 +14,17 @@
     "gas": "mekanism:hydrogen"
   },
   "itemInput": {
-    "ingredient": [
-      {
-        "tag": "forge:dusts/coal"
-      },
-      {
-        "tag": "forge:dusts/charcoal"
-      }
-    ]
+    "ingredient": {
+      "fabric:type": "fabric:any",
+      "ingredients": [
+        {
+          "tag": "c:coal_dusts"
+        },
+        {
+          "tag": "c:charcoal_dusts"
+        }
+      ]
+    }
   },
   "itemOutput": {
     "item": "mekanism:dust_sulfur"

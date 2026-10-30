@@ -14,10 +14,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.level.chunk.LevelChunk;
+//import net.minecraftforge.common.MinecraftForge;
+//import net.minecraftforge.event.level.ChunkEvent;
+//import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class ChunkCommand {
 
@@ -27,7 +29,6 @@ public class ChunkCommand {
     private static final LongSet chunkWatchers = new LongOpenHashSet();
 
     static ArgumentBuilder<CommandSourceStack, ?> register() {
-        MinecraftForge.EVENT_BUS.register(ChunkCommand.class);
         return Commands.literal("chunk")
               .requires(MekanismPermissions.COMMAND_CHUNK)
               .then(WatchCommand.register())
@@ -112,24 +113,22 @@ public class ChunkCommand {
         }
     }
 
-    @SubscribeEvent
-    public static void onChunkLoad(ChunkEvent.Load event) {
-        handleChunkEvent(event, MekanismLang.COMMAND_CHUNK_LOADED);
+    public static void onChunkLoad(ServerLevel world, LevelChunk chunk) {
+        handleChunkEvent(world, chunk, MekanismLang.COMMAND_CHUNK_LOADED);
     }
 
-    @SubscribeEvent
-    public static void onChunkUnload(ChunkEvent.Unload event) {
-        handleChunkEvent(event, MekanismLang.COMMAND_CHUNK_UNLOADED);
+    public static void onChunkUnload(ServerLevel world, LevelChunk chunk) {
+        handleChunkEvent(world, chunk, MekanismLang.COMMAND_CHUNK_UNLOADED);
     }
 
-    private static void handleChunkEvent(ChunkEvent event, ILangEntry direction) {
-        if (event.getLevel() == null || event.getLevel().isClientSide()) {
+    private static void handleChunkEvent(ServerLevel world, LevelChunk chunk, ILangEntry direction) {
+        if (chunk.getLevel().isClientSide()) {
             return;
         }
-        ChunkPos pos = event.getChunk().getPos();
+        ChunkPos pos = chunk.getPos();
         if (chunkWatchers.contains(pos.toLong())) {
             Component message = direction.translateColored(EnumColor.GRAY, EnumColor.INDIGO, getPosition(pos));
-            event.getLevel().players().forEach(player -> player.sendSystemMessage(message));
+            chunk.getLevel().players().forEach(player -> player.sendSystemMessage(message));
         }
     }
 

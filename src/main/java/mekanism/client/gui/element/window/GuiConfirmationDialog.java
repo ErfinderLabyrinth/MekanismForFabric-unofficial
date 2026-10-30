@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.window;
 
-import java.util.function.Supplier;
 import mekanism.api.text.EnumColor;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.client.gui.element.button.TranslationButton;
@@ -8,6 +7,8 @@ import mekanism.common.MekanismLang;
 import mekanism.common.inventory.container.SelectedWindowData.WindowType;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+
+import java.util.function.Supplier;
 
 public class GuiConfirmationDialog extends GuiWindow {
 

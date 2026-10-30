@@ -1,6 +1,5 @@
 package mekanism.common.util.text;
 
-import java.util.UUID;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.IHasTextComponent;
 import mekanism.api.text.TextComponentUtil;
@@ -9,9 +8,10 @@ import mekanism.common.MekanismLang;
 import mekanism.common.util.MekanismUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.fml.util.thread.EffectiveSide;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 public class OwnerDisplay implements IHasTextComponent {
 
@@ -74,8 +74,8 @@ public class OwnerDisplay implements IHasTextComponent {
         //Allows for the name to be overridden by a passed value
         if (ownerName != null) {
             return ownerName;
-        } else if (player != null && !player.level().isClientSide || player == null && EffectiveSide.get().isServer()) {
-            return MekanismUtils.getLastKnownUsername(ownerUUID);
+        } else if (player != null && !player.level().isClientSide) {
+            return MekanismUtils.getLastKnownUsername(ownerUUID, player.getServer());
         }
         String name = MekanismClient.clientUUIDMap.get(ownerUUID);
         if (name == null && player != null) {

@@ -3,14 +3,6 @@ package mekanism.client.model.energycube;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.BiPredicate;
 import mekanism.api.RelativeSide;
 import mekanism.client.model.baked.ExtensionBakedModel.QuadsKey;
 import mekanism.client.model.energycube.EnergyCubeGeometry.FaceData;
@@ -18,24 +10,33 @@ import mekanism.client.render.lib.QuadTransformation;
 import mekanism.common.tile.TileEntityEnergyCube;
 import mekanism.common.tile.TileEntityEnergyCube.CubeSideState;
 import mekanism.common.util.EnumUtils;
+import net.fabricmc.fabric.api.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.Util;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.ChunkRenderTypeSet;
-import net.minecraftforge.client.RenderTypeGroup;
-import net.minecraftforge.client.model.IDynamicBakedModel;
-import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class EnergyCubeBakedModel implements IDynamicBakedModel {
+import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
+
+public class EnergyCubeBakedModel implements BakedModel {
 
     private static final CubeSideState[] INACTIVE = Util.make(new CubeSideState[EnumUtils.DIRECTIONS.length], sideStates -> Arrays.fill(sideStates, CubeSideState.INACTIVE));
     private static final QuadTransformation LED_TRANSFORMS = QuadTransformation.list(QuadTransformation.fullbright, QuadTransformation.uvShift(-2, 0));
@@ -54,9 +55,9 @@ public class EnergyCubeBakedModel implements IDynamicBakedModel {
     private final Map<RelativeSide, FaceData> activeLEDs;
     private final Map<RelativeSide, FaceData> ports;
     private final Map<RelativeSide, FaceData> activePorts;
-    private final ChunkRenderTypeSet blockRenderTypes;
-    private final List<RenderType> itemRenderTypes;
-    private final List<RenderType> fabulousItemRenderTypes;
+//    private final ChunkRenderTypeSet blockRenderTypes;
+//    private final List<RenderType> itemRenderTypes;
+//    private final List<RenderType> fabulousItemRenderTypes;
     private final boolean isAmbientOcclusion;
     private final boolean usesBlockLight;
     private final boolean isGui3d;
@@ -65,7 +66,7 @@ public class EnergyCubeBakedModel implements IDynamicBakedModel {
     private final ItemTransforms transforms;
 
     EnergyCubeBakedModel(boolean useAmbientOcclusion, boolean usesBlockLight, boolean isGui3d, ItemTransforms transforms, ItemOverrides overrides,
-          TextureAtlasSprite particle, FaceData frame, Map<RelativeSide, FaceData> leds, Map<RelativeSide, FaceData> ports, RenderTypeGroup renderTypes) {
+          TextureAtlasSprite particle, FaceData frame, Map<RelativeSide, FaceData> leds, Map<RelativeSide, FaceData> ports) {
         this.isAmbientOcclusion = useAmbientOcclusion;
         this.usesBlockLight = usesBlockLight;
         this.isGui3d = isGui3d;
@@ -85,29 +86,26 @@ public class EnergyCubeBakedModel implements IDynamicBakedModel {
         for (Map.Entry<RelativeSide, FaceData> entry : this.ports.entrySet()) {
             activePorts.put(entry.getKey(), entry.getValue().transform(QuadTransformation.filtered_fullbright));
         }
-        if (renderTypes.isEmpty()) {
-            this.blockRenderTypes = null;
-            this.itemRenderTypes = null;
-            this.fabulousItemRenderTypes = null;
-        } else {
-            this.blockRenderTypes = ChunkRenderTypeSet.of(renderTypes.block());
-            this.itemRenderTypes = Collections.singletonList(renderTypes.entity());
-            this.fabulousItemRenderTypes = Collections.singletonList(renderTypes.entityFabulous());
-        }
+//        if (renderTypes.isEmpty()) {
+////            this.blockRenderTypes = null;
+//            this.itemRenderTypes = null;
+//            this.fabulousItemRenderTypes = null;
+//        } else {
+////            this.blockRenderTypes = ChunkRenderTypeSet.of(renderTypes.block());
+//            this.itemRenderTypes = Collections.singletonList(renderTypes.entity());
+//            this.fabulousItemRenderTypes = Collections.singletonList(renderTypes.entityFabulous());
+//        }
     }
 
     @NotNull
-    @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData data,
-          @Nullable RenderType renderType) {
-        CubeSideState[] sideStates = data.get(TileEntityEnergyCube.SIDE_STATE_PROPERTY);
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, CubeSideState[] sideStates) {
         if (sideStates == null || sideStates.length != EnumUtils.SIDES.length) {
             //If there is no side data then treat everything as inactive
             sideStates = INACTIVE;
         }
         //Note: We intentionally ignore the state and use null here to minimize cache size as it doesn't actually matter
         // or get used for energy cube models
-        QuadsKey<CubeSideState[]> key = new QuadsKey<>(null, side, rand, renderType, frame.getFaces(side));
+        QuadsKey<CubeSideState[]> key = new QuadsKey<>(null, side, rand, null, frame.getFaces(side));
         key.data(sideStates, Arrays.hashCode(sideStates), DATA_EQUALITY_CHECK);
         return cache.getUnchecked(key);
     }
@@ -131,6 +129,11 @@ public class EnergyCubeBakedModel implements IDynamicBakedModel {
             }
         }
         return quads;
+    }
+
+    @Override
+    public List<BakedQuad> getQuads(@Nullable BlockState blockState, @Nullable Direction direction, RandomSource randomSource) {
+        return List.of();
     }
 
     @Override
@@ -174,22 +177,58 @@ public class EnergyCubeBakedModel implements IDynamicBakedModel {
         return transforms;
     }
 
-    @NotNull
+//    @NotNull
+//    @Override
+//    public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data) {
+//        return blockRenderTypes == null ? IDynamicBakedModel.super.getRenderTypes(state, rand, data) : blockRenderTypes;
+//    }
+//
+//    @NotNull
+//    @Override
+//    public List<RenderType> getRenderTypes(@NotNull ItemStack stack, boolean fabulous) {
+//        if (fabulous) {
+//            if (fabulousItemRenderTypes != null) {
+//                return fabulousItemRenderTypes;
+//            }
+//        } else if (itemRenderTypes != null) {
+//            return itemRenderTypes;
+//        }
+//        return IDynamicBakedModel.super.getRenderTypes(stack, fabulous);
+//    }
+
+
     @Override
-    public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data) {
-        return blockRenderTypes == null ? IDynamicBakedModel.super.getRenderTypes(state, rand, data) : blockRenderTypes;
+    public boolean isVanillaAdapter() {
+        return false;
     }
 
-    @NotNull
     @Override
-    public List<RenderType> getRenderTypes(@NotNull ItemStack stack, boolean fabulous) {
-        if (fabulous) {
-            if (fabulousItemRenderTypes != null) {
-                return fabulousItemRenderTypes;
-            }
-        } else if (itemRenderTypes != null) {
-            return itemRenderTypes;
-        }
-        return IDynamicBakedModel.super.getRenderTypes(stack, fabulous);
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
+        BlockEntity blockEntity = blockView.getBlockEntity(pos);
+        if(!(blockEntity instanceof TileEntityEnergyCube tileEntityEnergyCube)) return;
+
+        TileEntityEnergyCube.CubeSideState[] sideStates = tileEntityEnergyCube.getSideStates();
+
+        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
+        QuadEmitter emitter = context.getEmitter();
+        final RenderMaterial defaultMaterial = useAmbientOcclusion() ? renderer.materialFinder().find() : renderer.materialFinder().ambientOcclusion(TriState.FALSE).find();
+
+		for (int i = 0; i <= ModelHelper.NULL_FACE_ID; i++) {
+			final Direction cullFace = ModelHelper.faceFromIndex(i);
+
+			if (!context.hasTransform() && context.isFaceCulled(cullFace)) {
+				// Skip entire quad list if possible.
+				continue;
+			}
+
+			final List<BakedQuad> quads = getQuads(state, cullFace, randomSupplier.get(), sideStates);
+			final int count = quads.size();
+
+			for (int j = 0; j < count; j++) {
+				final BakedQuad q = quads.get(j);
+				emitter.fromVanilla(q, defaultMaterial, cullFace);
+				emitter.emit();
+			}
+		}
     }
 }

@@ -3,7 +3,7 @@
   "category": "building",
   "key": {
     "#": {
-      "type": "forge:difference",
+      "fabric:type": "fabric:difference",
       "base": {
         "tag": "mekanismadditions:plastic_blocks/plastic"
       },
@@ -12,7 +12,7 @@
       }
     },
     "D": {
-      "tag": "forge:dyes/lime"
+      "tag": "c:lime_dyes"
     }
   },
   "pattern": [

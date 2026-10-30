@@ -1,6 +1,5 @@
 package mekanism.client.gui.element.button;
 
-import java.util.function.BooleanSupplier;
 import mekanism.client.gui.IGuiWrapper;
 import mekanism.common.registries.MekanismSounds;
 import mekanism.common.util.MekanismUtils;
@@ -10,6 +9,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BooleanSupplier;
 
 public class RadioButton extends MekanismButton {
 

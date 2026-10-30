@@ -7,10 +7,14 @@
   },
   "itemInput": {
     "ingredient": {
-      "type": "forge:nbt",
-      "count": 1,
-      "item": "minecraft:diamond_sword",
-      "nbt": "{Damage:0}"
+      "fabric:type": "fabric:nbt",
+      "base": {
+        "item": "minecraft:diamond_sword"
+      },
+      "nbt": {
+        "Damage": 0
+      },
+      "strict": true
     }
   },
   "output": {

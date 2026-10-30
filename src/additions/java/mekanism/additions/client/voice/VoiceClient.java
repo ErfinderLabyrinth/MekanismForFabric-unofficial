@@ -1,14 +1,15 @@
 package mekanism.additions.client.voice;
 
+import mekanism.additions.common.config.MekanismAdditionsConfig;
+import mekanism.common.Mekanism;
+
+import javax.sound.sampled.AudioFormat;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
-import javax.sound.sampled.AudioFormat;
-import mekanism.additions.common.config.MekanismAdditionsConfig;
-import mekanism.common.Mekanism;
 
 public class VoiceClient extends Thread {
 
@@ -30,7 +31,7 @@ public class VoiceClient extends Thread {
         Mekanism.logger.info("VoiceServer: Starting client connection...");
 
         try {
-            socket = new Socket(ip, MekanismAdditionsConfig.additions.voicePort.get());
+            socket = new Socket(ip, MekanismAdditionsConfig.additions.voicePort);
             running = true;
 
             input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));

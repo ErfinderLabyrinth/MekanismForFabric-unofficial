@@ -1,5 +1,7 @@
 {
-  "parent": "forge:item/bucket",
-  "fluid": "mekanism:ethene",
-  "loader": "forge:fluid_container"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:item/bucket",
+    "layer1": "mekanism:item/bucket_overlay"
+  }
 }

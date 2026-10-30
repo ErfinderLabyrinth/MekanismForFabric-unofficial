@@ -1,8 +1,6 @@
 package mekanism.client.gui.element.window;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import mekanism.api.text.EnumColor;
 import mekanism.api.text.ILangEntry;
 import mekanism.client.gui.GuiUtils;
@@ -30,6 +28,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class GuiColorWindow extends GuiWindow {
 

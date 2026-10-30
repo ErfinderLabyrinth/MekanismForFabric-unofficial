@@ -3,7 +3,7 @@
   "duration": 15,
   "fluidInput": {
     "amount": 10,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "gasInput": {
     "amount": 10,
@@ -16,7 +16,7 @@
   "itemInput": {
     "amount": 3,
     "ingredient": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:wooden_rods"
     }
   }
 }

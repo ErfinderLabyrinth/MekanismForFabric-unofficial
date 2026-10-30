@@ -1,29 +1,23 @@
 package mekanism.common.registration;
 
 import mekanism.api.annotations.NothingNullByDefault;
-import net.minecraftforge.registries.RegistryObject;
 
 @NothingNullByDefault
-public class DoubleWrappedRegistryObject<PRIMARY, SECONDARY> implements INamedEntry {
+public class DoubleWrappedRegistryObject<PRIMARY, SECONDARY> {
 
-    protected final RegistryObject<PRIMARY> primaryRO;
-    protected final RegistryObject<SECONDARY> secondaryRO;
+    protected final PRIMARY primary;
+    protected final SECONDARY secondary;
 
-    public DoubleWrappedRegistryObject(RegistryObject<PRIMARY> primaryRO, RegistryObject<SECONDARY> secondaryRO) {
-        this.primaryRO = primaryRO;
-        this.secondaryRO = secondaryRO;
+    public DoubleWrappedRegistryObject(PRIMARY primary, SECONDARY secondary) {
+        this.primary = primary;
+        this.secondary = secondary;
     }
 
     public PRIMARY getPrimary() {
-        return primaryRO.get();
+        return primary;
     }
 
     public SECONDARY getSecondary() {
-        return secondaryRO.get();
-    }
-
-    @Override
-    public String getInternalRegistryName() {
-        return primaryRO.getId().getPath();
+        return secondary;
     }
 }

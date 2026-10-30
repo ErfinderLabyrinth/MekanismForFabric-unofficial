@@ -6,7 +6,7 @@
       "item": "mekanism:hdpe_sheet"
     },
     "D": {
-      "tag": "forge:dyes/orange"
+      "tag": "c:orange_dyes"
     }
   },
   "pattern": [

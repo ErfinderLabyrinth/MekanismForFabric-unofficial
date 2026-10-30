@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "key": {
     "#": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:wooden_rods"
     },
     "A": {
       "tag": "mekanism:alloys/infused"
@@ -11,7 +11,7 @@
       "item": "mekanism:energy_tablet"
     },
     "I": {
-      "tag": "forge:gems/lapis"
+      "tag": "c:lapis"
     }
   },
   "pattern": [

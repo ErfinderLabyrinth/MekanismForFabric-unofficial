@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "#c:osmium_ingots",
+    "#c:tin_ingots",
+    "#c:lead_ingots",
+    "#c:uranium_ingots",
+    "#c:bronze_ingots",
+    "#c:refined_glowstone_ingots",
+    "#c:refined_obsidian_ingots",
+    "#c:steel_ingots"
+  ]
+}

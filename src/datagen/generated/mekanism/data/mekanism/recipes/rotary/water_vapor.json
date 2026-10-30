@@ -2,7 +2,7 @@
   "type": "mekanism:rotary",
   "fluidInput": {
     "amount": 1,
-    "tag": "minecraft:water"
+    "tagSupplier": "minecraft:water"
   },
   "fluidOutput": {
     "amount": 1,

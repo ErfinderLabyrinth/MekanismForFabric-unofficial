@@ -41,9 +41,7 @@
           "name": "mekanism:fuelwood_heater"
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "mekanism:blocks/fuelwood_heater"
+  ]
 }

@@ -1,21 +1,3 @@
 {
-	"textures": {
-		"1": "mekanismadditions:entity/balloon_string",
-		"all": "mekanismadditions:entity/balloon"
-	},
-	"loader": "forge:separate_transforms",
-	"base": {
-		"parent": "mekanismadditions:item/balloon_latched"
-	},
-	"perspectives": {
-		"gui": {
-			"parent": "mekanismadditions:item/balloon_gui"
-		},
-		"ground": {
-			"parent": "mekanismadditions:item/balloon_fixed"
-		},
-		"fixed": {
-			"parent": "mekanismadditions:item/balloon_fixed"
-		}
-	}
+	"parent": "mekanismadditions:item/balloon_latched"
 }

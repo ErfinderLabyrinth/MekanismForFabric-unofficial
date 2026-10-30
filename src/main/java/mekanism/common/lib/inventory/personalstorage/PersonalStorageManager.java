@@ -1,13 +1,5 @@
 package mekanism.common.lib.inventory.personalstorage;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 import mekanism.api.AutomationType;
 import mekanism.api.DataHandlerUtils;
 import mekanism.api.IContentsListener;
@@ -22,10 +14,15 @@ import mekanism.common.util.SecurityUtils;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.util.thread.EffectiveSide;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNotNullByDefault
@@ -33,11 +30,8 @@ public class PersonalStorageManager {
 
     private static final Map<UUID, PersonalStorageData> STORAGE_BY_PLAYER_UUID = new HashMap<>();
 
-    private static Optional<PersonalStorageData> forOwner(UUID playerUUID) {
-        if (EffectiveSide.get().isClient()) {
-            return Optional.empty();
-        }
-        return Optional.of(STORAGE_BY_PLAYER_UUID.computeIfAbsent(playerUUID, uuid -> MekanismSavedData.createSavedData(PersonalStorageData::new, "personal_storage" + File.separator + uuid)));
+    private static Optional<PersonalStorageData> forOwner(UUID playerUUID, MinecraftServer server) {
+        return Optional.of(STORAGE_BY_PLAYER_UUID.computeIfAbsent(playerUUID, uuid -> MekanismSavedData.createSavedData(PersonalStorageData::new, "personal_storage" + File.separator + uuid, server)));
     }
 
     /**
@@ -47,19 +41,19 @@ public class PersonalStorageManager {
      *
      * @return the existing or new inventory
      */
-    public static Optional<AbstractPersonalStorageItemInventory> getInventoryFor(ItemStack stack) {
+    public static Optional<AbstractPersonalStorageItemInventory> getInventoryFor(ItemStack stack, MinecraftServer server) {
         UUID owner = SecurityUtils.get().getOwnerUUID(stack);
         if (owner == null) {
             Mekanism.logger.error("Storage inventory asked for but stack has no owner! {}", stack, new Exception());
             return Optional.empty();
         }
         UUID invId = getInventoryId(stack);
-        return forOwner(owner).map(data -> {
+        return forOwner(owner, server).map(data -> {
             AbstractPersonalStorageItemInventory storageItemInventory = data.getOrAddInventory(invId);
             //TODO - After 1.20: Remove legacy loading
             ListTag legacyData = ItemDataUtils.getList(stack, NBTConstants.ITEMS);
             if (!legacyData.isEmpty()) {
-                DataHandlerUtils.readContainers(storageItemInventory.getInventorySlots(null), legacyData);
+                DataHandlerUtils.readContainers(storageItemInventory.getSlots(), legacyData);
                 ItemDataUtils.removeData(stack, NBTConstants.ITEMS);
             }
 
@@ -67,40 +61,40 @@ public class PersonalStorageManager {
         });
     }
 
-    public static boolean createInventoryFor(ItemStack stack, List<IInventorySlot> contents) {
+    public static boolean createInventoryFor(ItemStack stack, List<IInventorySlot> contents, MinecraftServer server) {
         UUID owner = SecurityUtils.get().getOwnerUUID(stack);
         if (owner == null || contents.size() != 54) {
             //No owner or wrong number of slots, something went wrong
             return false;
         }
         //Get a new inventory id
-        forOwner(owner).ifPresent(inv -> inv.addInventory(getInventoryId(stack), contents));
+        forOwner(owner, server).ifPresent(inv -> inv.addInventory(getInventoryId(stack), contents));
         return true;
     }
 
     /**
      * Only call on the server
      * <p>
-     * Version of {@link #getInventoryFor(ItemStack)} which will NOT create an inventory if none exists already. The stack will only be modified if it contained a legacy
+     * Version of {@link #getInventoryFor(ItemStack, MinecraftServer)} which will NOT create an inventory if none exists already. The stack will only be modified if it contained a legacy
      * inventory
      *
      * @param stack Personal storage ItemStack
      *
      * @return the existing or converted inventory, or an empty optional if none exists in saved data nor legacy data
      */
-    public static Optional<AbstractPersonalStorageItemInventory> getInventoryIfPresent(ItemStack stack) {
+    public static Optional<AbstractPersonalStorageItemInventory> getInventoryIfPresent(ItemStack stack, MinecraftServer server) {
         UUID owner = SecurityUtils.get().getOwnerUUID(stack);
         UUID invId = getInventoryIdNullable(stack);
         //TODO - After 1.20: Remove legacy loading
         boolean hasLegacyData = ItemDataUtils.hasData(stack, NBTConstants.ITEMS, Tag.TAG_LIST);
-        return owner != null && (invId != null || hasLegacyData) ? getInventoryFor(stack) : Optional.empty();
+        return owner != null && (invId != null || hasLegacyData) ? getInventoryFor(stack, server) : Optional.empty();
     }
 
-    public static void deleteInventory(ItemStack stack) {
+    public static void deleteInventory(ItemStack stack, MinecraftServer server) {
         UUID owner = SecurityUtils.get().getOwnerUUID(stack);
         UUID invId = getInventoryIdNullable(stack);
         if (owner != null && invId != null) {
-            forOwner(owner).ifPresent(handler -> handler.removeInventory(invId));
+            forOwner(owner, server).ifPresent(handler -> handler.removeInventory(invId));
         }
     }
 
